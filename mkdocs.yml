@@ -1,0 +1,6 @@
+site_name: PMCOL Teaching Tool
+theme: readthedocs
+
+nav:
+    - Home: index.md
+  
