@@ -1,6 +1,9 @@
 site_name: PMCOL Teaching Tool
-theme: readthedocs
+theme:
+  name: material
 
 nav:
-    - Home: index.md
-  
+  - Project Requirements: index.md
+  - Software Design: design.md
+  - Project Management: project-management.md
+  - Teamwork: teamwork.md
