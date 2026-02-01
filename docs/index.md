@@ -39,7 +39,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.02 – Login via UAlberta Authentication (Must Have)
 
-**As a** instructor, **I want** to be able to login via UAlberta authentication, **so that** I can access my materials and have instructor privileges.
+**As an** instructor, **I want** to be able to login via UAlberta authentication, **so that** I can access my materials and have instructor privileges.
 
 **Points assigned:** 3
 
@@ -53,7 +53,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.03 – Logout Securely (Must Have)
 
-**As a** instructor, **I want** to be able to logout securely, **so that** I can protect my account when finished.
+**As an** instructor, **I want** to be able to logout securely, **so that** I can protect my account when finished.
 
 **Points assigned:** 2
 
@@ -69,7 +69,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.04 – View Only Own Past Lessons (Could Have)
 
-**As a** instructor, **I want** only I to be able to view my past lessons and details, **so that** my lessons remain private.
+**As an** instructor, **I want** only I to be able to view my past lessons and details, **so that** my lessons remain private.
 
 **Points assigned:** 3
 
@@ -85,7 +85,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.05 – Create New Lesson (Must Have)
 
-**As a** instructor, **I want** to be able to create a new lesson, **so that** I can prepare content for a lecture.
+**As an** instructor, **I want** to be able to create a new lesson, **so that** I can prepare content for a lecture.
 
 **Points assigned:** 3
 
@@ -101,7 +101,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.06 – Start a Lesson (Must Have)
 
-**As a** instructor, **I want** to be able to start a lesson, **so that** students can join and I can begin teaching.
+**As an** instructor, **I want** to be able to start a lesson, **so that** students can join and I can begin teaching.
 
 **Points assigned:** 3
 
@@ -117,7 +117,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.07 – Cancel a Lesson (Won't Have)
 
-**As a** instructor, **I want** to be able to cancel a lesson, **so that** I can abort lesson creation if needed.
+**As an** instructor, **I want** to be able to cancel a lesson, **so that** I can abort lesson creation if needed.
 
 **Points assigned:** 3
 
@@ -128,11 +128,10 @@ The primary quality goals of the system are convenience, accuracy, and security,
 2. GIVEN an instructor WHEN they cancel lesson creation THEN they are returned to the appropriate page
 
 3. GIVEN an instructor WHEN they cancel a lesson THEN any uploaded files for that lesson are discarded
-**Note:** We don't need cancel creation. Just delete the lesson or something.
 
 #### US 1.08 – Delete Past Lesson (Should Have)
 
-**As a** instructor, **I want** to be able to delete a past lesson, **so that** I can remove outdated or incorrect lessons.
+**As an** instructor, **I want** to be able to delete a past lesson, **so that** I can remove outdated or incorrect lessons.
 
 **Points assigned:** 3
 
@@ -148,13 +147,13 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.09 – End/Leave a Lesson (Must Have)
 
-**As a** instructor, **I want** to be able to end/leave a lesson, **so that** the lesson is closed.
+**As an** instructor, **I want** to be able to end/leave a lesson, **so that** the lesson is closed.
 
 **Points assigned:** 3
 
 **Acceptance Tests:**
 
-1. GIVEN an instructor with active lesson WHEN they click "end/leave Lesson" THEN the lesson status changes to inactive
+1. GIVEN an instructor with active lesson WHEN they click "End/Leave Lesson" THEN the lesson status changes to inactive
 
 2. GIVEN an instructor WHEN they end/leave a lesson THEN students cannot submit new responses
 
@@ -166,7 +165,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.10 – Automatic Lesson Save on End (Must Have)
 
-**As a** instructor, **I want** the lesson to be saved automatically when I end it, **so that** transcripts, prompts, and responses are preserved.
+**As an** instructor, **I want** the lesson to be saved automatically when I end it, **so that** transcripts, prompts, and responses are preserved.
 
 **Points assigned:** 5
 
@@ -184,7 +183,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.11 – Resume Unfinished Lesson (Could Have)
 
-**As a** instructor, **I want** to be able to resume a previously unfinished lesson, **so that** I can continue where I left off.
+**As an** instructor, **I want** to be able to resume a previously unfinished lesson, **so that** I can continue where I left off.
 
 **Points assigned:** 3
 
@@ -200,7 +199,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.12 – Reconnect After Connection Failure (Must Have)
 
-**As a** instructor, **I want** to be able to reconnect if my connection fails, **so that** I can continue my lesson where I left off.
+**As an** instructor, **I want** to be able to reconnect if my connection fails, **so that** I can continue my lesson where I left off.
 
 **Points assigned:** 5
 
@@ -216,7 +215,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.13 – Automatic Data Saving at Regular Intervals (Must Have)
 
-**As a** instructor, **I want** to have my lesson data automatically saved at regular intervals, **so that** progress is not lost if something goes wrong.
+**As an** instructor, **I want** to have my lesson data automatically saved at regular intervals, **so that** progress is not lost if something goes wrong.
 
 **Points assigned:** 5
 
@@ -232,7 +231,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.14 – View Past Lessons and Details (Must Have)
 
-**As a** instructor, **I want** to be able to view past lessons and its details, **so that** I can review transcripts, prompts, and responses.
+**As an** instructor, **I want** to be able to view past lessons and its details, **so that** I can review transcripts, prompts, and responses.
 
 **Points assigned:** 3
 
@@ -250,7 +249,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.15 – Helpful Error Messages (Should Have)
 
-**As a** instructor, **I want** to see helpful error messages when something goes wrong, **so that** I can troubleshoot issues.
+**As an** instructor, **I want** to see helpful error messages when something goes wrong, **so that** I can troubleshoot issues.
 
 **Points assigned:** 2
 
@@ -266,7 +265,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.49 – Add Course to Courselist (Must Have)
 
-**As a** instructor, **I want** to be able to add a course which contains all lessons specific to that course to the courselist, **so that** I can organize my lessons by course.
+**As an** instructor, **I want** to be able to add a course which contains all lessons specific to that course to the courselist, **so that** I can organize my lessons by course.
 
 **Points assigned:** 2
 
@@ -282,7 +281,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.50 – Delete Course from Courselist (Must Have)
 
-**As a** instructor, **I want** to be able to delete a course which contains all the lessons specific to that course to the courselist, **so that** I can remove courses I no longer need.
+**As an** instructor, **I want** to be able to delete a course which contains all the lessons specific to that course to the courselist, **so that** I can remove courses I no longer need.
 
 **Points assigned:** 2
 
@@ -296,21 +295,27 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 ### Content Upload & Audio Capture
 
-#### US 1.16 – Upload Files  (PDF, PPTX) (Must Have) [5 pts]
-**As an** instructor  
-**I want** to be able to upload files (PDF, PPTX)  
-**So that** I can provide sources for discussion prompts
+#### US 1.16 – Upload Files (PDF, PPTX) (Must Have)
+
+**As an** instructor, **I want** to be able to upload files (PDF, PPTX), **so that** I can provide sources for discussion prompts.
+
+**Points assigned:** 5
 
 **Acceptance Tests:**
-- GIVEN an instructor WHEN they upload a PDF file within size limit THEN the file is accepted and appears in the uploaded files list
-- GIVEN an instructor WHEN they upload a PPTX file within size limit THEN the file is accepted and appears in the uploaded files list
-- GIVEN an instructor WHEN they attempt to upload an unsupported file type (e.g., .docx, .txt) THEN upload fails with error message "Unsupported file type. Please upload PDF or PPTX"
-- GIVEN an instructor WHEN they upload files THEN they can see a list of all uploaded files with names and types
-- GIVEN an instructor WHEN they upload multiple files THEN the system accepts up to 5 files per lesson
+
+1. GIVEN an instructor WHEN they upload a PDF file within size limit THEN the file is accepted and appears in the uploaded files list
+
+2. GIVEN an instructor WHEN they upload a PPTX file within size limit THEN the file is accepted and appears in the uploaded files list
+
+3. GIVEN an instructor WHEN they attempt to upload an unsupported file type (e.g., .docx, .txt) THEN upload fails with error message "Unsupported file type. Please upload PDF or PPTX"
+
+4. GIVEN an instructor WHEN they upload files THEN they can see a list of all uploaded files with names and types
+
+5. GIVEN an instructor WHEN they upload a file THEN the system accepts only 1 file per lesson
 
 #### US 1.17 – Activate/Deactivate STT Transcript Capture (Must Have)
 
-**As a** instructor, **I want** to be able to activate and deactivate STT transcript capture, **so that** I can control when my spoken content is recorded.
+**As an** instructor, **I want** to be able to activate and deactivate STT transcript capture, **so that** I can control when my spoken content is recorded.
 
 **Points assigned:** 5
 
@@ -330,7 +335,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.18 – Trigger AI Prompt Generation (Must Have)
 
-**As a** instructor, **I want** to be able to trigger AI prompt generation, **so that** the system creates discussion questions based on my content.
+**As an** instructor, **I want** to be able to trigger AI prompt generation, **so that** the system creates discussion questions based on my content.
 
 **Points assigned:** 5
 
@@ -346,7 +351,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.19 – Review and Select AI Generated Prompts (Must Have)
 
-**As a** instructor, **I want** to be able to review and select AI generated prompts, **so that** I can choose the most appropriate discussion question.
+**As an** instructor, **I want** to be able to review and select AI generated prompts, **so that** I can choose the most appropriate discussion question.
 
 **Points assigned:** 3
 
@@ -362,7 +367,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.20 – Edit AI-Generated Prompts (Could Have)
 
-**As a** instructor, **I want** to be able to edit AI-generated prompts before publishing, **so that** I can refine the wording.
+**As an** instructor, **I want** to be able to edit AI-generated prompts before publishing, **so that** I can refine the wording.
 
 **Points assigned:** 3
 
@@ -378,7 +383,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.21 – Manually Enter Prompt (Should Have)
 
-**As a** instructor, **I want** the option to manually enter a prompt, **so that** I can continue the discussion even if AI fails.
+**As an** instructor, **I want** the option to manually enter a prompt, **so that** I can continue the discussion even if AI fails.
 
 **Points assigned:** 3
 
@@ -394,7 +399,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.22 – Set AI Prompt Generation Preferences (Should Have)
 
-**As a** instructor, **I want** to be able to set preferences for how AI generates prompts, **so that** prompts align with my teaching style.
+**As an** instructor, **I want** to be able to set preferences for how AI generates prompts, **so that** prompts align with my teaching style.
 
 **Points assigned:** 5
 
@@ -408,7 +413,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.23 – Generate Multiple Choice, Short Answer, and Long Answer Prompts (Must Have)
 
-**As a** instructor, **I want** to be able to generate multiple choice, short answer, and long answer type discussion prompts, **so that** I can vary discussion formats.
+**As an** instructor, **I want** to be able to generate multiple choice, short answer, and long answer type discussion prompts, **so that** I can vary discussion formats.
 
 **Points assigned:** 3
 
@@ -424,7 +429,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.24 – Regenerate AI Prompts (Must Have)
 
-**As a** instructor, **I want** to be able to regenerate AI prompts if I'm not satisfied, **so that** I can get alternative suggestions.
+**As an** instructor, **I want** to be able to regenerate AI prompts if I'm not satisfied, **so that** I can get alternative suggestions.
 
 **Points assigned:** 2
 
@@ -440,7 +445,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.25 – Create Multiple Discussions Within One Lesson (Must Have)
 
-**As a** instructor, **I want** to be able to create multiple discussions within one lesson, **so that** I can facilitate ongoing engagement throughout my lecture.
+**As an** instructor, **I want** to be able to create multiple discussions within one lesson, **so that** I can facilitate ongoing engagement throughout my lecture.
 
 **Points assigned:** 3
 
@@ -451,11 +456,10 @@ The primary quality goals of the system are convenience, accuracy, and security,
 2. GIVEN an instructor WHEN they create multiple discussions THEN each discussion is tracked separately
 
 3. GIVEN an instructor WHEN they view lesson data THEN they see all discussions that occurred during the lesson
-**Note:** Multiple discussions → multiple discussions and questions | or discussions can also mean questions
 
 #### US 1.26 – Private Discussion Prompts per Lesson (Should Have)
 
-**As a** instructor, **I want** only students in my lesson to be able to see my discussion prompts, **so that** discussions remain private to my lesson.
+**As an** instructor, **I want** only students in my lesson to be able to see my discussion prompts, **so that** discussions remain private to my lesson.
 
 **Points assigned:** 2
 
@@ -467,19 +471,23 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 3. GIVEN an instructor WHEN they publish a prompt THEN it is not visible to students in other instructors' lessons
 
-#### US 1.27 – Display Discussion Prompt  (Must Have) [1 pt]
-**As an** instructor  
-**I want** to be able to display the discussion prompt  
-**So that** students can see the question
+#### US 1.27 – Display Discussion Prompt (Must Have)
+
+**As an** instructor, **I want** to be able to display the discussion prompt, **so that** students can see the question.
+
+**Points assigned:** 1
 
 **Acceptance Tests:**
-- GIVEN an instructor with selected/created prompt WHEN they click "Publish" or "Display" THEN the prompt is sent to all connected students
-- GIVEN an instructor WHEN they display a prompt THEN students see it on their devices within 2 seconds
-- GIVEN an instructor WHEN they display a prompt THEN it appears in the lesson's discussion history
+
+1. GIVEN an instructor with selected/created prompt WHEN they click "Publish" or "Display" THEN the prompt is sent to all connected students
+
+2. GIVEN an instructor WHEN they display a prompt THEN students see it on their devices within 2 seconds
+
+3. GIVEN an instructor WHEN they display a prompt THEN it appears in the lesson's discussion history
 
 #### US 1.28 – Start and Close Discussions (Must Have)
 
-**As a** instructor, **I want** to start and close discussions within a lesson, **so that** I can control when students can respond.
+**As an** instructor, **I want** to start and close discussions within a lesson, **so that** I can control when students can respond.
 
 **Points assigned:** 3
 
@@ -495,7 +503,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.29 – Set Time Limit for Response Window (Should Have)
 
-**As a** instructor, **I want** to set a time limit for a response window, **so that** I can control how long students have to submit their answers.
+**As an** instructor, **I want** to set a time limit for a response window, **so that** I can control how long students have to submit their answers.
 
 **Points assigned:** 3
 
@@ -511,7 +519,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.30 – Configure Single or Multiple Responses (Could Have)
 
-**As a** instructor, **I want** to configure whether students can submit one or multiple responses per discussion, **so that** I can control participation based on the type of question.
+**As an** instructor, **I want** to configure whether students can submit one or multiple responses per discussion, **so that** I can control participation based on the type of question.
 
 **Points assigned:** 2
 
@@ -523,19 +531,23 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 3. GIVEN an instructor WHEN they select "Multiple Responses" THEN students can submit multiple responses to that discussion
 
-#### US 1.31 – Display PIN Code  (Must Have) [1 pt]
-**As an** instructor  
-**I want** to display a PIN code for students to join the lesson  
-**So that** students can access my session
+#### US 1.31 – Display PIN Code (Must Have)
+
+**As an** instructor, **I want** to display a PIN code for students to join the lesson, **so that** students can access my session.
+
+**Points assigned:** 1
 
 **Acceptance Tests:**
-- GIVEN an instructor WHEN they start a lesson THEN a unique PIN code is generated
-- GIVEN an instructor WHEN the lesson is active THEN the PIN code is displayed prominently on their screen
-- GIVEN an instructor WHEN they end the lesson THEN the PIN code is invalidated and cannot be used to join
+
+1. GIVEN an instructor WHEN they start a lesson THEN a unique PIN code is generated
+
+2. GIVEN an instructor WHEN the lesson is active THEN the PIN code is displayed prominently on their screen
+
+3. GIVEN an instructor WHEN they end the lesson THEN the PIN code is invalidated and cannot be used to join
 
 #### US 1.32 – Display QR Code (Must Have)
 
-**As a** instructor, **I want** to display a QR code for students to join the lesson, **so that** students can quickly join by scanning.
+**As an** instructor, **I want** to display a QR code for students to join the lesson, **so that** students can quickly join by scanning.
 
 **Points assigned:** 3
 
@@ -549,7 +561,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.33 – See Student Count (Won't Have)
 
-**As a** instructor, **I want** to be able to see how many students have joined, **so that** I can gauge attendance.
+**As an** instructor, **I want** to be able to see how many students have joined, **so that** I can gauge attendance.
 
 **Points assigned:** 2
 
@@ -565,7 +577,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.34 – See Anonymous Student Responses in Real-Time (Must Have)
 
-**As a** instructor, **I want** to be able to see anonymous student responses in real-time, **so that** I can monitor engagement and understanding.
+**As an** instructor, **I want** to be able to see anonymous student responses in real-time, **so that** I can monitor engagement and understanding.
 
 **Points assigned:** 3
 
@@ -577,31 +589,37 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 3. GIVEN an instructor WHEN multiple students submit THEN all responses appear in the list as they are submitted
 
-#### US 1.35 – Hide Inappropriate Responses  (Could Have) [1 pt]
-**As an** instructor  
-**I want** to be able to hide inappropriate responses  
-**So that** I can moderate discussion content
+#### US 1.35 – Hide Inappropriate Responses (Could Have)
+
+**As an** instructor, **I want** to be able to hide inappropriate responses, **so that** I can moderate discussion content.
+
+**Points assigned:** 1
 
 **Acceptance Tests:**
-- GIVEN an instructor viewing responses WHEN they select a response and click "Hide" THEN that response is removed from the visible list
-- GIVEN an instructor WHEN they hide a response THEN it is no longer visible to them or to students (if responses are shared)
-- GIVEN an instructor WHEN they hide a response THEN the action is logged but the original response data is preserved
 
-**Note:** Could → Won't?
+1. GIVEN an instructor viewing responses WHEN they select a response and click "Hide" THEN that response is removed from the visible list
 
-#### US 1.36 – Highlight Specific Response  (Should Have) [1 pt]
-**As an** instructor  
-**I want** to be able to highlight a specific response  
-**So that** I can emphasize answers during class discussion
+2. GIVEN an instructor WHEN they hide a response THEN it is no longer visible to them or to students (if responses are shared)
+
+3. GIVEN an instructor WHEN they hide a response THEN the action is logged but the original response data is preserved
+
+#### US 1.36 – Highlight Specific Response (Should Have)
+
+**As an** instructor, **I want** to be able to highlight a specific response, **so that** I can emphasize answers during class discussion.
+
+**Points assigned:** 1
 
 **Acceptance Tests:**
-- GIVEN an instructor viewing responses WHEN they select a response and click "Highlight" THEN that response is visually emphasized
-- GIVEN an instructor WHEN they highlight a response THEN it remains highlighted until they remove the highlight or close the discussion
-- GIVEN an instructor WHEN they highlight a response THEN they can highlight additional responses or remove existing highlights
+
+1. GIVEN an instructor viewing responses WHEN they select a response and click "Highlight" THEN that response is visually emphasized
+
+2. GIVEN an instructor WHEN they highlight a response THEN it remains highlighted until they remove the highlight or close the discussion
+
+3. GIVEN an instructor WHEN they highlight a response THEN they can highlight additional responses or remove existing highlights
 
 #### US 1.37 – Scroll Through Student Responses (Should Have)
 
-**As a** instructor, **I want** to be able to scroll through student responses, **so that** I can review all submissions.
+**As an** instructor, **I want** to be able to scroll through student responses, **so that** I can review all submissions.
 
 **Points assigned:** 3
 
@@ -615,7 +633,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.38 – View Responses as Word Cloud (Could Have)
 
-**As a** instructor, **I want** to be able to choose to view responses as a word cloud format, **so that** I can visualize common themes at a glance.
+**As an** instructor, **I want** to be able to choose to view responses as a word cloud format, **so that** I can visualize common themes at a glance.
 
 **Points assigned:** 5
 
@@ -629,7 +647,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.39 – View Responses in List Format (Should Have)
 
-**As a** instructor, **I want** to be able to choose to view responses in a list format, **so that** I can read them sequentially.
+**As an** instructor, **I want** to be able to choose to view responses in a list format, **so that** I can read them sequentially.
 
 **Points assigned:** 3
 
@@ -643,7 +661,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.40 – See Student Response Metrics (Should Have)
 
-**As a** instructor, **I want** to be able to see metrics of student responses, **so that** I can view engagement rate and participation statistics.
+**As an** instructor, **I want** to be able to see metrics of student responses, **so that** I can view engagement rate and participation statistics.
 
 **Points assigned:** 5
 
@@ -654,11 +672,10 @@ The primary quality goals of the system are convenience, accuracy, and security,
 2. GIVEN an instructor WHEN they view metrics THEN they see average response time and submission patterns
 
 3. GIVEN an instructor WHEN they view metrics THEN they see response length distribution
-**Note:** Won't → Should?
 
 #### US 1.41 – Export Responses as File (Should Have)
 
-**As a** instructor, **I want** to be able to export responses as a file, **so that** I can access and analyze them outside of the platform.
+**As an** instructor, **I want** to be able to export responses as a file, **so that** I can access and analyze them outside of the platform.
 
 **Points assigned:** 2
 
@@ -672,7 +689,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.42 – Export AI Prompts and Responses (Should Have)
 
-**As a** instructor, **I want** to be able to export AI generated prompts and its responses as a file, **so that** I can access and analyze them outside of the platform.
+**As an** instructor, **I want** to be able to export AI generated prompts and its responses as a file, **so that** I can access and analyze them outside of the platform.
 
 **Points assigned:** 2
 
@@ -686,7 +703,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.43 – Export Lesson Statistics (Should Have)
 
-**As a** instructor, **I want** to be able to export appropriate lesson statistics, **so that** I can access and analyze them outside of the platform.
+**As an** instructor, **I want** to be able to export appropriate lesson statistics, **so that** I can access and analyze them outside of the platform.
 
 **Points assigned:** 2
 
@@ -697,11 +714,10 @@ The primary quality goals of the system are convenience, accuracy, and security,
 2. GIVEN an instructor WHEN they export statistics THEN the file includes participation metrics, response counts, and timing data
 
 3. GIVEN an instructor WHEN they export statistics THEN the file downloads in their chosen format
-**Note:** Must → Should
 
 #### US 1.44 – See Multiple Choice Question Metrics (Could Have)
 
-**As a** instructor, **I want** to be able to see multiple choice question metrics, **so that** I can view statistics like answer distribution and correctness rates.
+**As an** instructor, **I want** to be able to see multiple choice question metrics, **so that** I can view statistics like answer distribution and correctness rates.
 
 **Points assigned:** 3
 
@@ -712,11 +728,10 @@ The primary quality goals of the system are convenience, accuracy, and security,
 2. GIVEN an instructor WHEN they view MC metrics THEN they see percentage distribution of answers
 
 3. GIVEN an instructor WHEN they view MC metrics THEN they see which option was marked as correct and the overall correctness rate
-**Note:** Subset of 1.40
 
 #### US 1.45 – Customized UI Graphics (Won't Have)
 
-**As a** instructor, **I want** to see customized graphics in the UI for instructors, **so that** the interface is visually appealing.
+**As an** instructor, **I want** to see customized graphics in the UI for instructors, **so that** the interface is visually appealing.
 
 **Points assigned:** 3
 
@@ -730,7 +745,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.46 – Fine-Tune AI with Trigger Words (Won't Have)
 
-**As a** instructor, **I want** to be able to fine-tune the AI prompt using trigger words, **so that** I can control prompt generation more precisely.
+**As an** instructor, **I want** to be able to fine-tune the AI prompt using trigger words, **so that** I can control prompt generation more precisely.
 
 **Points assigned:** 3
 
@@ -740,7 +755,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.47 – Save and Export Student Chat Responses (Won't Have)
 
-**As a** instructor, **I want** to be able to save and export student chat responses, **so that** I can review them later.
+**As an** instructor, **I want** to be able to save and export student chat responses, **so that** I can review them later.
 
 **Points assigned:** 3
 
@@ -750,13 +765,13 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 #### US 1.48 – Upload Multiple Files (Won't Have)
 
-**As a** instructor, **I want** to be able to upload multiple files to support discussion prompt generation, **so that** I can provide comprehensive source material.
+**As an** instructor, **I want** to be able to upload multiple files to support discussion prompt generation, **so that** I can provide comprehensive source material.
 
 **Points assigned:** 3
 
 **Acceptance Tests:**
 
-1. Already covered
+1. Out of scope - only single file upload supported
 
 ### Student Access
 
@@ -788,26 +803,35 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 3. GIVEN a student WHEN they use mobile THEN all features (joining, responding, viewing prompts) work with touch input
 
-#### US 2.03 – Complete Anonymity  (Must Have) [1 pt]
-**As a** student  
-**I want** to be completely anonymous  
-**So that** I can share honest responses without fear of judgment
+#### US 2.03 – Complete Anonymity (Must Have)
+
+**As a** student, **I want** to be completely anonymous, **so that** I can share honest responses without fear of judgment.
+
+**Points assigned:** 1
 
 **Acceptance Tests:**
-- GIVEN a student WHEN they join a lesson THEN they are not required to provide name, email, or any identifying information
-- GIVEN a student WHEN they submit responses THEN the responses contain no identifiable data
-- GIVEN a student WHEN instructor views responses THEN the instructor cannot trace responses back to individual students
-- GIVEN a student WHEN lesson data is exported THEN the export contains no student identifiers
 
-#### US 2.04 – See Only Own Lesson Prompts  (Must Have) [1 pt]
-**As a** student  
-**I want** to be able to only see the prompts for the lesson I am in  
-**So that** I'm not confused by other lessons
+1. GIVEN a student WHEN they join a lesson THEN they are not required to provide name, email, or any identifying information
+
+2. GIVEN a student WHEN they submit responses THEN the responses contain no identifiable data
+
+3. GIVEN a student WHEN instructor views responses THEN the instructor cannot trace responses back to individual students
+
+4. GIVEN a student WHEN lesson data is exported THEN the export contains no student identifiers
+
+#### US 2.04 – See Only Own Lesson Prompts (Must Have)
+
+**As a** student, **I want** to be able to only see the prompts for the lesson I am in, **so that** I'm not confused by other lessons.
+
+**Points assigned:** 1
 
 **Acceptance Tests:**
-- GIVEN a student WHEN they join a lesson using PIN/QR code THEN they see only prompts for that specific lesson
-- GIVEN a student WHEN instructor publishes a prompt THEN they see only that lesson's prompt, not prompts from other active lessons
-- GIVEN a student WHEN they rejoin the same lesson THEN they see the current active prompt for that lesson
+
+1. GIVEN a student WHEN they join a lesson using PIN/QR code THEN they see only prompts for that specific lesson
+
+2. GIVEN a student WHEN instructor publishes a prompt THEN they see only that lesson's prompt, not prompts from other active lessons
+
+3. GIVEN a student WHEN they rejoin the same lesson THEN they see the current active prompt for that lesson
 
 #### US 2.05 – Scan QR Code to Join (Must Have)
 
@@ -869,35 +893,47 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 4. GIVEN a student WHEN they attempt to submit without selecting THEN submission is blocked with message "Please select an answer"
 
-#### US 2.09 – See Discussion Prompt on Device  (Must Have) [1 pt]
-**As a** student  
-**I want** to be able to see the discussion prompt on my device  
-**So that** I know what to respond to
+#### US 2.09 – See Discussion Prompt on Device (Must Have)
+
+**As a** student, **I want** to be able to see the discussion prompt on my device, **so that** I know what to respond to.
+
+**Points assigned:** 1
 
 **Acceptance Tests:**
-- GIVEN a student WHEN instructor publishes a prompt THEN the prompt appears on their device within 2 seconds
-- GIVEN a student WHEN they view the prompt THEN it is clearly visible and readable
-- GIVEN a student WHEN instructor publishes new prompt THEN the previous prompt is replaced with the new one
 
-#### US 2.10 – See Multiple Choice Correctness  (Must Have) [1 pt]
-**As a** student  
-**I want** to see if I got multiple choice questions correct  
-**So that** I can receive immediate feedback on my understanding
+1. GIVEN a student WHEN instructor publishes a prompt THEN the prompt appears on their device within 2 seconds
 
-**Acceptance Tests:**
-- GIVEN a student WHEN they submit multiple choice answer and feedback is enabled THEN they see whether their answer was correct or incorrect
-- GIVEN a student WHEN answer is correct THEN they see confirmation message indicating correctness
-- GIVEN a student WHEN answer is incorrect THEN they see the correct answer displayed
+2. GIVEN a student WHEN they view the prompt THEN it is clearly visible and readable
 
-#### US 2.11 – See Time Remaining for Prompt  (Should Have) [1 pt]
-**As a** student  
-**I want** to be able to see how much time a prompt has left to be answered  
-**So that** I can pace my response appropriately
+3. GIVEN a student WHEN instructor publishes new prompt THEN the previous prompt is replaced with the new one
+
+#### US 2.10 – See Multiple Choice Correctness (Must Have)
+
+**As a** student, **I want** to see if I got multiple choice questions correct, **so that** I can receive immediate feedback on my understanding.
+
+**Points assigned:** 1
 
 **Acceptance Tests:**
-- GIVEN a student WHEN instructor sets time limit for discussion THEN they see a countdown timer
-- GIVEN a student WHEN timer is active THEN it updates in real-time
-- GIVEN a student WHEN time expires THEN they see message indicating time is up and cannot submit response
+
+1. GIVEN a student WHEN they submit multiple choice answer and feedback is enabled THEN they see whether their answer was correct or incorrect
+
+2. GIVEN a student WHEN answer is correct THEN they see confirmation message indicating correctness
+
+3. GIVEN a student WHEN answer is incorrect THEN they see the correct answer displayed
+
+#### US 2.11 – See Time Remaining for Prompt (Should Have)
+
+**As a** student, **I want** to be able to see how much time a prompt has left to be answered, **so that** I can pace my response appropriately.
+
+**Points assigned:** 1
+
+**Acceptance Tests:**
+
+1. GIVEN a student WHEN instructor sets time limit for discussion THEN they see a countdown timer
+
+2. GIVEN a student WHEN timer is active THEN it updates in real-time
+
+3. GIVEN a student WHEN time expires THEN they see message indicating time is up and cannot submit response
 
 #### US 2.18 – Submit Chat Responses to Others (Won't Have)
 
@@ -911,15 +947,19 @@ The primary quality goals of the system are convenience, accuracy, and security,
 
 ### Student Session Management
 
-#### US 2.12 – Notification When Lesson Ends  (Should Have) [1 pt]
-**As a** student  
-**I want** to be notified when the lesson has ended  
-**So that** I know the lesson is complete and I can close the application
+#### US 2.12 – Notification When Lesson Ends (Should Have)
+
+**As a** student, **I want** to be notified when the lesson has ended, **so that** I know the lesson is complete and I can close the application.
+
+**Points assigned:** 1
 
 **Acceptance Tests:**
-- GIVEN a student WHEN instructor ends the lesson THEN they see notification "Lesson has ended"
-- GIVEN a student WHEN lesson ends THEN they cannot submit new responses
-- GIVEN a student WHEN lesson ends THEN they see an appropriate end-of-lesson message and screen
+
+1. GIVEN a student WHEN instructor ends the lesson THEN they see notification "Lesson has ended"
+
+2. GIVEN a student WHEN lesson ends THEN they cannot submit new responses
+
+3. GIVEN a student WHEN lesson ends THEN they see an appropriate end-of-lesson message and screen
 
 #### US 2.13 – Leave a Lesson (Should Have)
 
@@ -932,7 +972,6 @@ The primary quality goals of the system are convenience, accuracy, and security,
 1. GIVEN a student in active lesson WHEN they click "Leave Lesson" THEN they are disconnected from the lesson
 
 2. GIVEN a student WHEN they leave THEN they are removed from the student count
-**Note:** Should → Won't?
 
 #### US 2.14 – Rejoin a Lesson (Must Have)
 
@@ -949,45 +988,52 @@ The primary quality goals of the system are convenience, accuracy, and security,
 3. GIVEN a student disconnected during a discussion WHEN they rejoin THEN they can submit responses to the current discussion
 
 4. GIVEN a student WHEN they attempt to rejoin ended lesson THEN they see error message "This lesson has ended"
-**Note:** Should → Won't?
 
-#### US 2.15 – See Lesson and Discussion Status  (Should Have) [1 pt]
-**As a** student  
-**I want** to be able to see the status of the lesson and discussion  
-**So that** I know what actions I can take
+#### US 2.15 – See Lesson and Discussion Status (Should Have)
 
-**Acceptance Tests:**
-- GIVEN a student WHEN discussion is open for responses THEN they see indicator showing discussion is open
-- GIVEN a student WHEN discussion is closed THEN they see indicator showing discussion is closed
-- GIVEN a student WHEN they view status THEN it updates in real-time as instructor changes discussion state
+**As a** student, **I want** to be able to see the status of the lesson and discussion, **so that** I know what actions I can take.
 
-**Note:** Could → Won't?
-
-#### US 2.16 – Helpful Error Messages for Students  (Could Have) [1 pt]
-**As a** student  
-**I want** to be able to see helpful error messages when something goes wrong  
-**So that** I know how to resolve issues
+**Points assigned:** 1
 
 **Acceptance Tests:**
-- GIVEN a student WHEN they enter invalid PIN THEN they see clear error message with guidance
-- GIVEN a student WHEN they experience connection issue THEN they see error message "Connection lost. Attempting to reconnect..."
-- GIVEN a student WHEN response submission fails THEN they see error message "Submission failed. Please try again"
 
-**Note:** Already taken care of in 1.16
+1. GIVEN a student WHEN discussion is open for responses THEN they see indicator showing discussion is open
 
-#### US 2.17 – Confirmation Message on Response Submission  (Could Have) [1 pt]
-**As a** student  
-**I want** to be able to see a confirmation message that I submitted my response  
-**So that** I know my answer was received
+2. GIVEN a student WHEN discussion is closed THEN they see indicator showing discussion is closed
+
+3. GIVEN a student WHEN they view status THEN it updates in real-time as instructor changes discussion state
+
+#### US 2.16 – Helpful Error Messages for Students (Could Have)
+
+**As a** student, **I want** to be able to see helpful error messages when something goes wrong, **so that** I know how to resolve issues.
+
+**Points assigned:** 1
 
 **Acceptance Tests:**
-- GIVEN a student WHEN they submit a response THEN they see confirmation message immediately
-- GIVEN a student WHEN they see confirmation THEN the message is clear and noticeable
-- GIVEN a student WHEN they submit THEN the submit button is disabled to prevent duplicate submissions
-- GIVEN a student WHEN they submit THEN the confirmation message disappears after a brief moment
+
+1. GIVEN a student WHEN they enter invalid PIN THEN they see clear error message with guidance
+
+2. GIVEN a student WHEN they experience connection issue THEN they see error message "Connection lost. Attempting to reconnect..."
+
+3. GIVEN a student WHEN response submission fails THEN they see error message "Submission failed. Please try again"
+
+#### US 2.17 – Confirmation Message on Response Submission (Could Have)
+
+**As a** student, **I want** to be able to see a confirmation message that I submitted my response, **so that** I know my answer was received.
+
+**Points assigned:** 1
+
+**Acceptance Tests:**
+
+1. GIVEN a student WHEN they submit a response THEN they see confirmation message immediately
+
+2. GIVEN a student WHEN they see confirmation THEN the message is clear and noticeable
+
+3. GIVEN a student WHEN they submit THEN the submit button is disabled to prevent duplicate submissions
+
+4. GIVEN a student WHEN they submit THEN the confirmation message disappears after a brief moment
 
 ## MoSCoW
-
 ### Must Have (35 stories - 51.5%)
 - US 1.01 – Create Account
 - US 1.02 – Login via UAlberta Authentication
@@ -999,7 +1045,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 - US 1.12 – Reconnect After Connection Failure
 - US 1.13 – Automatic Data Saving at Regular Intervals
 - US 1.14 – View Past Lessons and Details
-- US 1.16 – Upload Files  (PDF, PPTX)
+- US 1.16 – Upload Files (PDF, PPTX)
 - US 1.17 – Activate/Deactivate STT Transcript Capture
 - US 1.18 – Trigger AI Prompt Generation
 - US 1.19 – Review and Select AI Generated Prompts
@@ -1025,7 +1071,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 - US 2.10 – See Multiple Choice Correctness
 - US 2.14 – Rejoin a Lesson
 
-### Should Have  (17 stories - 25.0%)
+### Should Have (17 stories - 25.0%)
 - US 1.08 – Delete Past Lesson
 - US 1.15 – Helpful Error Messages
 - US 1.21 – Manually Enter Prompt
@@ -1044,7 +1090,7 @@ The primary quality goals of the system are convenience, accuracy, and security,
 - US 2.13 – Leave a Lesson
 - US 2.15 – See Lesson and Discussion Status
 
-### Could Have  (9 stories - 13.2%)
+### Could Have (9 stories - 13.2%)
 - US 1.04 – View Only Own Past Lessons
 - US 1.11 – Resume Unfinished Lesson
 - US 1.20 – Edit AI-Generated Prompts
@@ -1055,14 +1101,14 @@ The primary quality goals of the system are convenience, accuracy, and security,
 - US 2.16 – Helpful Error Messages for Students
 - US 2.17 – Confirmation Message on Response Submission
 
-### Won't Have  (7 stories - 10.3%)
+### Won't Have (7 stories - 10.3%)
 - US 1.07 – Cancel a Lesson
 - US 1.33 – See Student Count
 - US 1.45 – Customized UI Graphics
 - US 1.46 – Fine-Tune AI with Trigger Words
 - US 1.47 – Save and Export Student Chat Responses
 - US 1.48 – Upload Multiple Files
-- US 2.18 – Subm
+- US 2.18 – Submit Chat Responses to Others
 
 ## Similar Products
 - **Kahoot** -Interactive quiz platform with real-time student responses, Uses game-based approach with PIN codes for session joining, Provides instant feedback and analytics
