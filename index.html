@@ -1,0 +1,3746 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+        <link rel="next" href="design/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>PMCOL Teaching Tool</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#project-requirements" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="PMCOL Teaching Tool" class="md-header__button md-logo" aria-label="PMCOL Teaching Tool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PMCOL Teaching Tool
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Project Requirements
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="PMCOL Teaching Tool" class="md-nav__button md-logo" aria-label="PMCOL Teaching Tool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PMCOL Teaching Tool
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Requirements
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-glossary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project Glossary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-stories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Stories
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="User Stories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#account-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Account Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Account Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-101-create-account-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.01 – Create Account (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-102-login-via-ualberta-authentication-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.02 – Login via UAlberta Authentication (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-103-logout-securely-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.03 – Logout Securely (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-104-view-only-own-past-lessons-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.04 – View Only Own Past Lessons (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lesson-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lesson Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lesson Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-105-create-new-lesson-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.05 – Create New Lesson (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-106-start-a-lesson-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.06 – Start a Lesson (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-107-cancel-a-lesson-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.07 – Cancel a Lesson (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-108-delete-past-lesson-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.08 – Delete Past Lesson (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-109-endleave-a-lesson-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.09 – End/Leave a Lesson (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-110-automatic-lesson-save-on-end-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.10 – Automatic Lesson Save on End (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-111-resume-unfinished-lesson-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.11 – Resume Unfinished Lesson (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-112-reconnect-after-connection-failure-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.12 – Reconnect After Connection Failure (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-113-automatic-data-saving-at-regular-intervals-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.13 – Automatic Data Saving at Regular Intervals (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-114-view-past-lessons-and-details-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.14 – View Past Lessons and Details (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-115-helpful-error-messages-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.15 – Helpful Error Messages (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-149-add-course-to-courselist-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.49 – Add Course to Courselist (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-150-delete-course-from-courselist-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.50 – Delete Course from Courselist (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#content-upload-audio-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Content Upload &amp; Audio Capture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Content Upload &amp; Audio Capture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-116-upload-files-pdf-pptx-must-have-5-pts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.16 – Upload Files (PDF, PPTX) (Must Have) [5 pts]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-117-activatedeactivate-stt-transcript-capture-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.17 – Activate/Deactivate STT Transcript Capture (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai-prompt-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI Prompt Generation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AI Prompt Generation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-118-trigger-ai-prompt-generation-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.18 – Trigger AI Prompt Generation (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-119-review-and-select-ai-generated-prompts-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.19 – Review and Select AI Generated Prompts (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-120-edit-ai-generated-prompts-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.20 – Edit AI-Generated Prompts (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-121-manually-enter-prompt-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.21 – Manually Enter Prompt (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-122-set-ai-prompt-generation-preferences-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.22 – Set AI Prompt Generation Preferences (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-123-generate-multiple-choice-short-answer-and-long-answer-prompts-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.23 – Generate Multiple Choice, Short Answer, and Long Answer Prompts (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-124-regenerate-ai-prompts-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.24 – Regenerate AI Prompts (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#discussion-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discussion Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Discussion Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-125-create-multiple-discussions-within-one-lesson-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.25 – Create Multiple Discussions Within One Lesson (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-126-private-discussion-prompts-per-lesson-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.26 – Private Discussion Prompts per Lesson (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-127-display-discussion-prompt-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.27 – Display Discussion Prompt (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-128-start-and-close-discussions-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.28 – Start and Close Discussions (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-129-set-time-limit-for-response-window-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.29 – Set Time Limit for Response Window (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-130-configure-single-or-multiple-responses-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.30 – Configure Single or Multiple Responses (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-131-display-pin-code-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.31 – Display PIN Code (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-132-display-qr-code-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.32 – Display QR Code (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-133-see-student-count-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.33 – See Student Count (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-viewing-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Response Viewing &amp; Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Response Viewing &amp; Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-134-see-anonymous-student-responses-in-real-time-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.34 – See Anonymous Student Responses in Real-Time (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-135-hide-inappropriate-responses-could-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.35 – Hide Inappropriate Responses (Could Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-136-highlight-specific-response-should-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.36 – Highlight Specific Response (Should Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-137-scroll-through-student-responses-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.37 – Scroll Through Student Responses (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-138-view-responses-as-word-cloud-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.38 – View Responses as Word Cloud (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-139-view-responses-in-list-format-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.39 – View Responses in List Format (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-140-see-student-response-metrics-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.40 – See Student Response Metrics (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-141-export-responses-as-file-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.41 – Export Responses as File (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-142-export-ai-prompts-and-responses-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.42 – Export AI Prompts and Responses (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-143-export-lesson-statistics-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.43 – Export Lesson Statistics (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-144-see-multiple-choice-question-metrics-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.44 – See Multiple Choice Question Metrics (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-145-customized-ui-graphics-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.45 – Customized UI Graphics (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-146-fine-tune-ai-with-trigger-words-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.46 – Fine-Tune AI with Trigger Words (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-147-save-and-export-student-chat-responses-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.47 – Save and Export Student Chat Responses (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-148-upload-multiple-files-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.48 – Upload Multiple Files (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#student-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Student Access
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Student Access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-201-access-website-on-desktop-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.01 – Access Website on Desktop (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-202-access-website-on-mobile-device-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.02 – Access Website on Mobile Device (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-203-complete-anonymity-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.03 – Complete Anonymity (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-204-see-only-own-lesson-prompts-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.04 – See Only Own Lesson Prompts (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-205-scan-qr-code-to-join-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.05 – Scan QR Code to Join (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-206-input-pin-code-to-join-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.06 – Input PIN Code to Join (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#student-participation-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Student Participation &amp; Responses
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Student Participation &amp; Responses">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-207-submit-responses-to-discussion-prompts-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.07 – Submit Responses to Discussion Prompts (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-208-select-option-for-multiple-choice-questions-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.08 – Select Option for Multiple Choice Questions (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-209-see-discussion-prompt-on-device-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.09 – See Discussion Prompt on Device (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-210-see-multiple-choice-correctness-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.10 – See Multiple Choice Correctness (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-211-see-time-remaining-for-prompt-should-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.11 – See Time Remaining for Prompt (Should Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-218-submit-chat-responses-to-others-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.18 – Submit Chat Responses to Others (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#student-session-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Student Session Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Student Session Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-212-notification-when-lesson-ends-should-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.12 – Notification When Lesson Ends (Should Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-213-leave-a-lesson-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.13 – Leave a Lesson (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-214-rejoin-a-lesson-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.14 – Rejoin a Lesson (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-215-see-lesson-and-discussion-status-should-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.15 – See Lesson and Discussion Status (Should Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-216-helpful-error-messages-for-students-could-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.16 – Helpful Error Messages for Students (Could Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-217-confirmation-message-on-response-submission-could-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.17 – Confirmation Message on Response Submission (Could Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#moscow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MoSCoW
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MoSCoW">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#must-have-35-stories-515" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Must Have (35 stories - 51.5%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#should-have-17-stories-250" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Should Have (17 stories - 25.0%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#could-have-9-stories-132" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Could Have (9 stories - 13.2%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wont-have-7-stories-103" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Won't Have (7 stories - 10.3%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#similar-products" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Similar Products
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-source-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open-source Projects
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Resources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frontend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frontend
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="project-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="teamwork/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Teamwork
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="meetings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meetings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-glossary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project Glossary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-stories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Stories
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="User Stories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#account-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Account Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Account Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-101-create-account-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.01 – Create Account (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-102-login-via-ualberta-authentication-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.02 – Login via UAlberta Authentication (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-103-logout-securely-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.03 – Logout Securely (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-104-view-only-own-past-lessons-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.04 – View Only Own Past Lessons (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lesson-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lesson Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lesson Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-105-create-new-lesson-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.05 – Create New Lesson (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-106-start-a-lesson-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.06 – Start a Lesson (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-107-cancel-a-lesson-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.07 – Cancel a Lesson (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-108-delete-past-lesson-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.08 – Delete Past Lesson (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-109-endleave-a-lesson-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.09 – End/Leave a Lesson (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-110-automatic-lesson-save-on-end-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.10 – Automatic Lesson Save on End (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-111-resume-unfinished-lesson-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.11 – Resume Unfinished Lesson (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-112-reconnect-after-connection-failure-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.12 – Reconnect After Connection Failure (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-113-automatic-data-saving-at-regular-intervals-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.13 – Automatic Data Saving at Regular Intervals (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-114-view-past-lessons-and-details-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.14 – View Past Lessons and Details (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-115-helpful-error-messages-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.15 – Helpful Error Messages (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-149-add-course-to-courselist-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.49 – Add Course to Courselist (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-150-delete-course-from-courselist-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.50 – Delete Course from Courselist (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#content-upload-audio-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Content Upload &amp; Audio Capture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Content Upload &amp; Audio Capture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-116-upload-files-pdf-pptx-must-have-5-pts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.16 – Upload Files (PDF, PPTX) (Must Have) [5 pts]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-117-activatedeactivate-stt-transcript-capture-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.17 – Activate/Deactivate STT Transcript Capture (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai-prompt-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI Prompt Generation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AI Prompt Generation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-118-trigger-ai-prompt-generation-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.18 – Trigger AI Prompt Generation (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-119-review-and-select-ai-generated-prompts-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.19 – Review and Select AI Generated Prompts (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-120-edit-ai-generated-prompts-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.20 – Edit AI-Generated Prompts (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-121-manually-enter-prompt-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.21 – Manually Enter Prompt (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-122-set-ai-prompt-generation-preferences-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.22 – Set AI Prompt Generation Preferences (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-123-generate-multiple-choice-short-answer-and-long-answer-prompts-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.23 – Generate Multiple Choice, Short Answer, and Long Answer Prompts (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-124-regenerate-ai-prompts-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.24 – Regenerate AI Prompts (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#discussion-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discussion Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Discussion Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-125-create-multiple-discussions-within-one-lesson-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.25 – Create Multiple Discussions Within One Lesson (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-126-private-discussion-prompts-per-lesson-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.26 – Private Discussion Prompts per Lesson (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-127-display-discussion-prompt-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.27 – Display Discussion Prompt (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-128-start-and-close-discussions-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.28 – Start and Close Discussions (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-129-set-time-limit-for-response-window-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.29 – Set Time Limit for Response Window (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-130-configure-single-or-multiple-responses-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.30 – Configure Single or Multiple Responses (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-131-display-pin-code-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.31 – Display PIN Code (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-132-display-qr-code-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.32 – Display QR Code (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-133-see-student-count-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.33 – See Student Count (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-viewing-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Response Viewing &amp; Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Response Viewing &amp; Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-134-see-anonymous-student-responses-in-real-time-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.34 – See Anonymous Student Responses in Real-Time (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-135-hide-inappropriate-responses-could-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.35 – Hide Inappropriate Responses (Could Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-136-highlight-specific-response-should-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.36 – Highlight Specific Response (Should Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-137-scroll-through-student-responses-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.37 – Scroll Through Student Responses (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-138-view-responses-as-word-cloud-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.38 – View Responses as Word Cloud (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-139-view-responses-in-list-format-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.39 – View Responses in List Format (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-140-see-student-response-metrics-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.40 – See Student Response Metrics (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-141-export-responses-as-file-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.41 – Export Responses as File (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-142-export-ai-prompts-and-responses-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.42 – Export AI Prompts and Responses (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-143-export-lesson-statistics-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.43 – Export Lesson Statistics (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-144-see-multiple-choice-question-metrics-could-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.44 – See Multiple Choice Question Metrics (Could Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-145-customized-ui-graphics-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.45 – Customized UI Graphics (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-146-fine-tune-ai-with-trigger-words-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.46 – Fine-Tune AI with Trigger Words (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-147-save-and-export-student-chat-responses-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.47 – Save and Export Student Chat Responses (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-148-upload-multiple-files-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 1.48 – Upload Multiple Files (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#student-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Student Access
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Student Access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-201-access-website-on-desktop-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.01 – Access Website on Desktop (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-202-access-website-on-mobile-device-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.02 – Access Website on Mobile Device (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-203-complete-anonymity-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.03 – Complete Anonymity (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-204-see-only-own-lesson-prompts-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.04 – See Only Own Lesson Prompts (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-205-scan-qr-code-to-join-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.05 – Scan QR Code to Join (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-206-input-pin-code-to-join-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.06 – Input PIN Code to Join (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#student-participation-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Student Participation &amp; Responses
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Student Participation &amp; Responses">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-207-submit-responses-to-discussion-prompts-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.07 – Submit Responses to Discussion Prompts (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-208-select-option-for-multiple-choice-questions-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.08 – Select Option for Multiple Choice Questions (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-209-see-discussion-prompt-on-device-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.09 – See Discussion Prompt on Device (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-210-see-multiple-choice-correctness-must-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.10 – See Multiple Choice Correctness (Must Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-211-see-time-remaining-for-prompt-should-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.11 – See Time Remaining for Prompt (Should Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-218-submit-chat-responses-to-others-wont-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.18 – Submit Chat Responses to Others (Won't Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#student-session-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Student Session Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Student Session Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us-212-notification-when-lesson-ends-should-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.12 – Notification When Lesson Ends (Should Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-213-leave-a-lesson-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.13 – Leave a Lesson (Should Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-214-rejoin-a-lesson-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.14 – Rejoin a Lesson (Must Have)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-215-see-lesson-and-discussion-status-should-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.15 – See Lesson and Discussion Status (Should Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-216-helpful-error-messages-for-students-could-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.16 – Helpful Error Messages for Students (Could Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us-217-confirmation-message-on-response-submission-could-have-1-pt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US 2.17 – Confirmation Message on Response Submission (Could Have) [1 pt]
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#moscow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MoSCoW
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MoSCoW">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#must-have-35-stories-515" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Must Have (35 stories - 51.5%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#should-have-17-stories-250" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Should Have (17 stories - 25.0%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#could-have-9-stories-132" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Could Have (9 stories - 13.2%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wont-have-7-stories-103" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Won't Have (7 stories - 10.3%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#similar-products" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Similar Products
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-source-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open-source Projects
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Resources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frontend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frontend
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="project-requirements">Project Requirements</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This project aims to develop a real-time, AI-assisted classroom discussion tool designed for discussion-based university lectures in the Department of Pharmacology. The system combines live speech-to-text transcription ("hearing"), presentation content analysis ("seeing"), and AI-driven prompt generation to support interactive, anonymous student participation during lectures.</p>
+<p>Instructors use the platform to create and manage lessons, generate discussion prompts from live lecture content, and collect anonymous student responses via QR code or PIN-based access. Students participate through a lightweight web interface without requiring authentication, ensuring privacy and ease of access. After each session, the system automatically aggregates prompts, responses, transcripts, and analytics for instructor review and export.</p>
+<p>The primary quality goals of the system are convenience, accuracy, and security, ensuring minimal disruption during live lectures while maintaining reliable AI output and protecting user data.</p>
+<h2 id="project-glossary">Project Glossary</h2>
+<ul>
+<li><strong>Lesson</strong> – A single lecture session created and managed by an instructor.</li>
+<li><strong>Discussion Prompt</strong> – A question generated by AI or manually created by an instructor to initiate student discussion.</li>
+<li><strong>Session</strong> – A live instance of a lesson during which students can join and participate.</li>
+<li><strong>STT (Speech-to-Text)</strong> – Real-time transcription of instructor audio during a lecture.</li>
+<li><strong>QR Code / PIN</strong> – Mechanisms used by students to join a live lesson.</li>
+<li><strong>Anonymous Response</strong> – A student submission that is not linked to any identifiable user data.</li>
+<li><strong>Prompt State</strong> – The current lifecycle state of a discussion (e.g., open or closed).</li>
+<li><strong>Context Builder</strong> – A system layer that controls what lecture content is sent to the AI to reduce hallucinations and cost.</li>
+</ul>
+<h2 id="user-stories">User Stories</h2>
+<h3 id="account-management">Account Management</h3>
+<h4 id="us-101-create-account-must-have">US 1.01 – Create Account  (Must Have)</h4>
+<p><strong>As an</strong> instructor, <strong>I want</strong> to be able to create an account on the platform, <strong>so that</strong> I can access the system and manage my teaching materials.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor without an account WHEN they click "Sign in with Google" and select their UAlberta email THEN they are redirected to UAlberta SSO login</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they complete UAlberta SSO authentication successfully THEN their account is automatically created and they are logged into the system</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they attempt to sign in with a non-UAlberta Google account THEN authentication is blocked with error message "Please use your UAlberta email"</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they sign in with UAlberta email for the first time THEN they are directed to the instructor dashboard</p>
+</li>
+</ol>
+<h4 id="us-102-login-via-ualberta-authentication-must-have">US 1.02 – Login via UAlberta Authentication (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to login via UAlberta authentication, <strong>so that</strong> I can access my materials and have instructor privileges.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with existing account WHEN they click "Sign in with Google" and authenticate via UAlberta SSO THEN they successfully login and access the instructor dashboard</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they fail UAlberta SSO authentication THEN login fails and they see error message "Authentication failed"</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they close and reopen the application within session timeout THEN they remain logged in without re-authenticating</p>
+</li>
+</ol>
+<h4 id="us-103-logout-securely-must-have">US 1.03 – Logout Securely (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to logout securely, <strong>so that</strong> I can protect my account when finished.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN a logged-in instructor WHEN they click "Logout" from the profile page THEN they are logged out and session is terminated</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they logout THEN they are redirected to the login page</p>
+</li>
+<li>
+<p>GIVEN a logged-out instructor WHEN they attempt to access protected pages via URL THEN they are redirected to login page</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they logout THEN all session data is cleared from the browser</p>
+</li>
+</ol>
+<h4 id="us-104-view-only-own-past-lessons-could-have">US 1.04 – View Only Own Past Lessons (Could Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> only I to be able to view my past lessons and details, <strong>so that</strong> my lessons remain private.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they access their dashboard THEN they see only their own past lessons, not other instructors' lessons</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they attempt to access another instructor's lesson via direct URL THEN access is denied with 403 Forbidden error</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view lesson details THEN only data from their own lessons is displayed</p>
+</li>
+</ol>
+<h3 id="lesson-management">Lesson Management</h3>
+<h4 id="us-105-create-new-lesson-must-have">US 1.05 – Create New Lesson (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to create a new lesson, <strong>so that</strong> I can prepare content for a lecture.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they click "Create Lesson" and provide a title THEN a new lesson is created with inactive status</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they create a lesson without providing a title THEN the system generates a default title with current date/time</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they create a new lesson THEN it appears in their lesson list</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they create a lesson without uploading files THEN the lesson is still created successfully</p>
+</li>
+</ol>
+<h4 id="us-106-start-a-lesson-must-have">US 1.06 – Start a Lesson (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to start a lesson, <strong>so that</strong> students can join and I can begin teaching.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with a created lesson WHEN they click "Start Lesson" THEN the lesson status changes to active</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they start a lesson THEN a unique PIN code is generated and displayed</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they start a lesson THEN a unique QR code is generated and displayed</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN the lesson is active THEN students can join using the PIN or QR code</p>
+</li>
+</ol>
+<h4 id="us-107-cancel-a-lesson-wont-have">US 1.07 – Cancel a Lesson (Won't Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to cancel a lesson, <strong>so that</strong> I can abort lesson creation if needed.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor creating a lesson WHEN they click "Cancel" THEN the lesson is not saved to their lesson list</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they cancel lesson creation THEN they are returned to the appropriate page</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they cancel a lesson THEN any uploaded files for that lesson are discarded
+<strong>Note:</strong> We don't need cancel creation. Just delete the lesson or something.</p>
+</li>
+</ol>
+<h4 id="us-108-delete-past-lesson-should-have">US 1.08 – Delete Past Lesson (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to delete a past lesson, <strong>so that</strong> I can remove outdated or incorrect lessons.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they select a past lesson and click "Delete" THEN a confirmation dialog appears</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they confirm deletion THEN the lesson is permanently removed from the system</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they delete a lesson THEN it no longer appears in their lesson list</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they delete a lesson THEN all associated data (prompts, responses, transcripts, files) is permanently deleted</p>
+</li>
+</ol>
+<h4 id="us-109-endleave-a-lesson-must-have">US 1.09 – End/Leave a Lesson (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to end/leave a lesson, <strong>so that</strong> the lesson is closed.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with active lesson WHEN they click "end/leave Lesson" THEN the lesson status changes to inactive</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they end/leave a lesson THEN students cannot submit new responses</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they end/leave a lesson THEN students are notified that the lesson has ended</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they end/leave a lesson THEN all lesson data (prompts, responses, transcripts) is saved automatically</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they end/leave a lesson THEN files, prompts, questions, and analytics are ready for export</p>
+</li>
+</ol>
+<h4 id="us-110-automatic-lesson-save-on-end-must-have">US 1.10 – Automatic Lesson Save on End (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> the lesson to be saved automatically when I end it, <strong>so that</strong> transcripts, prompts, and responses are preserved.</p>
+<p><strong>Points assigned:</strong> 5</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they end a lesson THEN all lesson data is automatically saved without manual action required</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they end a lesson THEN all discussion prompts with timestamps are preserved</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they end a lesson THEN all student responses with submission times are preserved</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they end a lesson and STT was used THEN all transcripts are preserved</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they access a saved lesson THEN they can view all preserved data</p>
+</li>
+</ol>
+<h4 id="us-111-resume-unfinished-lesson-could-have">US 1.11 – Resume Unfinished Lesson (Could Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to resume a previously unfinished lesson, <strong>so that</strong> I can continue where I left off.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they view their dashboard THEN they can see a list of unfinished lessons separate from finished lessons</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they select an unfinished lesson and click "Resume" THEN the lesson opens with all previous data intact</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they resume a lesson THEN previously uploaded files are available</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they resume a lesson THEN previously created discussions are available</p>
+</li>
+</ol>
+<h4 id="us-112-reconnect-after-connection-failure-must-have">US 1.12 – Reconnect After Connection Failure (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to reconnect if my connection fails, <strong>so that</strong> I can continue my lesson where I left off.</p>
+<p><strong>Points assigned:</strong> 5</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with active lesson WHEN connection is lost THEN they can click "Reconnect" to rejoin</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they reconnect to active lesson THEN the lesson state (current discussion, student count) is preserved</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they reconnect THEN student responses submitted during disconnection are visible</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they reconnect THEN they see a message confirming successful reconnection</p>
+</li>
+</ol>
+<h4 id="us-113-automatic-data-saving-at-regular-intervals-must-have">US 1.13 – Automatic Data Saving at Regular Intervals (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to have my lesson data automatically saved at regular intervals, <strong>so that</strong> progress is not lost if something goes wrong.</p>
+<p><strong>Points assigned:</strong> 5</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with active lesson WHEN they are teaching THEN lesson data is automatically saved at regular intervals</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN connection is lost THEN discussion prompts created before disconnection are preserved</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN connection is lost THEN student responses submitted before disconnection are preserved</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they reconnect after unexpected disconnection THEN auto-saved data is recoverable</p>
+</li>
+</ol>
+<h4 id="us-114-view-past-lessons-and-details-must-have">US 1.14 – View Past Lessons and Details (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to view past lessons and its details, <strong>so that</strong> I can review transcripts, prompts, and responses.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they access their dashboard THEN they see a list of all past lessons</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they select a past lesson THEN they can view the lesson details page</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN viewing past lesson details THEN they see all discussion prompts that were published</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN viewing past lesson details THEN they see all student responses organized by prompt</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN viewing past lesson details and STT was used THEN they see all transcripts</p>
+</li>
+</ol>
+<h4 id="us-115-helpful-error-messages-should-have">US 1.15 – Helpful Error Messages (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to see helpful error messages when something goes wrong, <strong>so that</strong> I can troubleshoot issues.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN file upload fails THEN they see a clear error message indicating the failure reason</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN AI prompt generation fails THEN they see error message "Prompt generation failed. Please try again or enter manually"</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN connection is lost THEN they see error message "Connection lost. Attempting to reconnect..."</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN an error occurs THEN the error message is displayed prominently and clearly</p>
+</li>
+</ol>
+<h4 id="us-149-add-course-to-courselist-must-have">US 1.49 – Add Course to Courselist (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to add a course which contains all lessons specific to that course to the courselist, <strong>so that</strong> I can organize my lessons by course.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they click "Create Course" THEN they can enter a course name and optional description</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they create a course THEN it appears in their courses list</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they create or edit a lesson THEN they can assign it to an existing course</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view a course THEN they see all lessons assigned to that course</p>
+</li>
+</ol>
+<h4 id="us-150-delete-course-from-courselist-must-have">US 1.50 – Delete Course from Courselist (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to delete a course which contains all the lessons specific to that course to the courselist, <strong>so that</strong> I can remove courses I no longer need.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they select a course and click "Delete" THEN a confirmation dialog appears warning about lesson deletion</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they confirm course deletion THEN the course and all its lessons are permanently removed</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they confirm course deletion THEN all files and metadata associated with lessons in that course are permanently deleted</p>
+</li>
+</ol>
+<h3 id="content-upload-audio-capture">Content Upload &amp; Audio Capture</h3>
+<h4 id="us-116-upload-files-pdf-pptx-must-have-5-pts">US 1.16 – Upload Files  (PDF, PPTX) (Must Have) [5 pts]</h4>
+<p><strong>As an</strong> instructor<br />
+<strong>I want</strong> to be able to upload files (PDF, PPTX)<br />
+<strong>So that</strong> I can provide sources for discussion prompts</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN an instructor WHEN they upload a PDF file within size limit THEN the file is accepted and appears in the uploaded files list
+- GIVEN an instructor WHEN they upload a PPTX file within size limit THEN the file is accepted and appears in the uploaded files list
+- GIVEN an instructor WHEN they attempt to upload an unsupported file type (e.g., .docx, .txt) THEN upload fails with error message "Unsupported file type. Please upload PDF or PPTX"
+- GIVEN an instructor WHEN they upload files THEN they can see a list of all uploaded files with names and types
+- GIVEN an instructor WHEN they upload multiple files THEN the system accepts up to 5 files per lesson</p>
+<h4 id="us-117-activatedeactivate-stt-transcript-capture-must-have">US 1.17 – Activate/Deactivate STT Transcript Capture (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to activate and deactivate STT transcript capture, <strong>so that</strong> I can control when my spoken content is recorded.</p>
+<p><strong>Points assigned:</strong> 5</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with active lesson WHEN they click "Start Recording" THEN the recording period begins and STT transcript capture activates</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN recording period is active THEN their speech is transcribed in real-time</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they click "Stop Recording" THEN the recording period ends and STT transcript capture deactivates</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they stop recording THEN the transcript is sent to AI for prompt generation</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN recording period is active THEN they can toggle STT on and off multiple times during the lesson</p>
+</li>
+</ol>
+<h3 id="ai-prompt-generation">AI Prompt Generation</h3>
+<h4 id="us-118-trigger-ai-prompt-generation-must-have">US 1.18 – Trigger AI Prompt Generation (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to trigger AI prompt generation, <strong>so that</strong> the system creates discussion questions based on my content.</p>
+<p><strong>Points assigned:</strong> 5</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with uploaded files WHEN they click "Generate Prompts" THEN AI processes the files and generates discussion prompts</p>
+</li>
+<li>
+<p>GIVEN an instructor with completed transcript WHEN recording period ends THEN AI automatically generates prompts from the transcript and files</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN AI is generating prompts THEN they see a loading indicator</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN AI completes generation THEN at least 3 discussion prompts are displayed</p>
+</li>
+</ol>
+<h4 id="us-119-review-and-select-ai-generated-prompts-must-have">US 1.19 – Review and Select AI Generated Prompts (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to review and select AI generated prompts, <strong>so that</strong> I can choose the most appropriate discussion question.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN AI generates prompts THEN all generated prompts are displayed for review</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view generated prompts THEN they can select one prompt from the options</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they select a prompt THEN it is highlighted or visually marked</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they select a prompt THEN they can change their selection before publishing</p>
+</li>
+</ol>
+<h4 id="us-120-edit-ai-generated-prompts-could-have">US 1.20 – Edit AI-Generated Prompts (Could Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to edit AI-generated prompts before publishing, <strong>so that</strong> I can refine the wording.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with selected AI prompt WHEN they click "Edit" THEN the prompt text becomes editable</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they modify the prompt text THEN the changes are saved</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they edit a prompt THEN they can see both original and edited versions</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they edit a prompt THEN they can revert to the original AI-generated text</p>
+</li>
+</ol>
+<h4 id="us-121-manually-enter-prompt-should-have">US 1.21 – Manually Enter Prompt (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> the option to manually enter a prompt, <strong>so that</strong> I can continue the discussion even if AI fails.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they click "Create Custom Prompt" THEN a text input field appears for manual entry</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they manually enter a prompt THEN it functions the same as AI-generated prompts</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they create a manual prompt THEN they can publish it without triggering AI generation</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN AI generation fails THEN they see option to manually enter a prompt</p>
+</li>
+</ol>
+<h4 id="us-122-set-ai-prompt-generation-preferences-should-have">US 1.22 – Set AI Prompt Generation Preferences (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to set preferences for how AI generates prompts, <strong>so that</strong> prompts align with my teaching style.</p>
+<p><strong>Points assigned:</strong> 5</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they access AI settings THEN they can configure prompt generation preferences</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they set preferences THEN AI uses these preferences in future prompt generations</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they change preferences THEN the new settings are saved and applied to subsequent generations</p>
+</li>
+</ol>
+<h4 id="us-123-generate-multiple-choice-short-answer-and-long-answer-prompts-must-have">US 1.23 – Generate Multiple Choice, Short Answer, and Long Answer Prompts (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to generate multiple choice, short answer, and long answer type discussion prompts, <strong>so that</strong> I can vary discussion formats.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they trigger AI generation THEN they can specify prompt type (multiple choice, short answer, or long answer)</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they select multiple choice format THEN AI generates a question with answer options</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they select short answer or long answer format THEN AI generates an open-ended question</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they manually create a prompt THEN they can choose between multiple choice, short answer, or long answer formats</p>
+</li>
+</ol>
+<h4 id="us-124-regenerate-ai-prompts-must-have">US 1.24 – Regenerate AI Prompts (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to regenerate AI prompts if I'm not satisfied, <strong>so that</strong> I can get alternative suggestions.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with AI-generated prompts WHEN they click "Regenerate" THEN AI generates a new set of prompts</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they regenerate prompts THEN the previous prompts are replaced with new ones</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they regenerate THEN they see a loading indicator while AI generates new prompts</p>
+</li>
+</ol>
+<h3 id="discussion-management">Discussion Management</h3>
+<h4 id="us-125-create-multiple-discussions-within-one-lesson-must-have">US 1.25 – Create Multiple Discussions Within One Lesson (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to create multiple discussions within one lesson, <strong>so that</strong> I can facilitate ongoing engagement throughout my lecture.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with active lesson WHEN they publish a discussion prompt THEN they can create additional discussions in the same lesson</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they create multiple discussions THEN each discussion is tracked separately</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view lesson data THEN they see all discussions that occurred during the lesson
+<strong>Note:</strong> Multiple discussions → multiple discussions and questions | or discussions can also mean questions</p>
+</li>
+</ol>
+<h4 id="us-126-private-discussion-prompts-per-lesson-should-have">US 1.26 – Private Discussion Prompts per Lesson (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> only students in my lesson to be able to see my discussion prompts, <strong>so that</strong> discussions remain private to my lesson.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with active lesson WHEN they publish a discussion prompt THEN only students who joined via that lesson's PIN/QR code can see the prompt</p>
+</li>
+<li>
+<p>GIVEN students in different lessons WHEN an instructor publishes a prompt THEN students only see prompts from their own lesson</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they publish a prompt THEN it is not visible to students in other instructors' lessons</p>
+</li>
+</ol>
+<h4 id="us-127-display-discussion-prompt-must-have-1-pt">US 1.27 – Display Discussion Prompt  (Must Have) [1 pt]</h4>
+<p><strong>As an</strong> instructor<br />
+<strong>I want</strong> to be able to display the discussion prompt<br />
+<strong>So that</strong> students can see the question</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN an instructor with selected/created prompt WHEN they click "Publish" or "Display" THEN the prompt is sent to all connected students
+- GIVEN an instructor WHEN they display a prompt THEN students see it on their devices within 2 seconds
+- GIVEN an instructor WHEN they display a prompt THEN it appears in the lesson's discussion history</p>
+<h4 id="us-128-start-and-close-discussions-must-have">US 1.28 – Start and Close Discussions (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to start and close discussions within a lesson, <strong>so that</strong> I can control when students can respond.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they publish a discussion prompt THEN the response window opens and students can submit responses</p>
+</li>
+<li>
+<p>GIVEN an instructor with open discussion WHEN they click "Close Discussion" THEN the response window closes and students can no longer submit</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they close a discussion THEN students see a message indicating the discussion is closed</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they close a discussion THEN they can start a new discussion</p>
+</li>
+</ol>
+<h4 id="us-129-set-time-limit-for-response-window-should-have">US 1.29 – Set Time Limit for Response Window (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to set a time limit for a response window, <strong>so that</strong> I can control how long students have to submit their answers.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor creating a discussion WHEN they enable time limit THEN they can specify duration in minutes and seconds</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they set a time limit THEN students see a countdown timer on their devices</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN the time limit expires THEN the response window automatically closes and students cannot submit</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they publish discussion without time limit THEN students can respond until instructor manually closes the discussion</p>
+</li>
+</ol>
+<h4 id="us-130-configure-single-or-multiple-responses-could-have">US 1.30 – Configure Single or Multiple Responses (Could Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to configure whether students can submit one or multiple responses per discussion, <strong>so that</strong> I can control participation based on the type of question.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor creating a discussion WHEN they configure response settings THEN they can choose "Single Response" or "Multiple Responses"</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they select "Single Response" THEN each student can only submit one response to that discussion</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they select "Multiple Responses" THEN students can submit multiple responses to that discussion</p>
+</li>
+</ol>
+<h4 id="us-131-display-pin-code-must-have-1-pt">US 1.31 – Display PIN Code  (Must Have) [1 pt]</h4>
+<p><strong>As an</strong> instructor<br />
+<strong>I want</strong> to display a PIN code for students to join the lesson<br />
+<strong>So that</strong> students can access my session</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN an instructor WHEN they start a lesson THEN a unique PIN code is generated
+- GIVEN an instructor WHEN the lesson is active THEN the PIN code is displayed prominently on their screen
+- GIVEN an instructor WHEN they end the lesson THEN the PIN code is invalidated and cannot be used to join</p>
+<h4 id="us-132-display-qr-code-must-have">US 1.32 – Display QR Code (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to display a QR code for students to join the lesson, <strong>so that</strong> students can quickly join by scanning.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they start a lesson THEN a unique QR code is generated</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN the lesson is active THEN the QR code is displayed on their screen for students to scan</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they end the lesson THEN the QR code is invalidated and cannot be used to join</p>
+</li>
+</ol>
+<h4 id="us-133-see-student-count-wont-have">US 1.33 – See Student Count (Won't Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to see how many students have joined, <strong>so that</strong> I can gauge attendance.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with active lesson WHEN students join THEN the student count updates in real-time</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view their lesson dashboard THEN they see the number of currently connected students</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN a student leaves THEN the student count decrements</p>
+</li>
+</ol>
+<h3 id="response-viewing-management">Response Viewing &amp; Management</h3>
+<h4 id="us-134-see-anonymous-student-responses-in-real-time-must-have">US 1.34 – See Anonymous Student Responses in Real-Time (Must Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to see anonymous student responses in real-time, <strong>so that</strong> I can monitor engagement and understanding.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with open discussion WHEN students submit responses THEN the responses appear in real-time without manual refresh</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view responses THEN each response is displayed anonymously without student identifiers</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN multiple students submit THEN all responses appear in the list as they are submitted</p>
+</li>
+</ol>
+<h4 id="us-135-hide-inappropriate-responses-could-have-1-pt">US 1.35 – Hide Inappropriate Responses  (Could Have) [1 pt]</h4>
+<p><strong>As an</strong> instructor<br />
+<strong>I want</strong> to be able to hide inappropriate responses<br />
+<strong>So that</strong> I can moderate discussion content</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN an instructor viewing responses WHEN they select a response and click "Hide" THEN that response is removed from the visible list
+- GIVEN an instructor WHEN they hide a response THEN it is no longer visible to them or to students (if responses are shared)
+- GIVEN an instructor WHEN they hide a response THEN the action is logged but the original response data is preserved</p>
+<p><strong>Note:</strong> Could → Won't?</p>
+<h4 id="us-136-highlight-specific-response-should-have-1-pt">US 1.36 – Highlight Specific Response  (Should Have) [1 pt]</h4>
+<p><strong>As an</strong> instructor<br />
+<strong>I want</strong> to be able to highlight a specific response<br />
+<strong>So that</strong> I can emphasize answers during class discussion</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN an instructor viewing responses WHEN they select a response and click "Highlight" THEN that response is visually emphasized
+- GIVEN an instructor WHEN they highlight a response THEN it remains highlighted until they remove the highlight or close the discussion
+- GIVEN an instructor WHEN they highlight a response THEN they can highlight additional responses or remove existing highlights</p>
+<h4 id="us-137-scroll-through-student-responses-should-have">US 1.37 – Scroll Through Student Responses (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to scroll through student responses, <strong>so that</strong> I can review all submissions.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN students submit responses THEN all responses are displayed in a scrollable list</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN there are many responses THEN they can scroll to view all submissions</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they scroll through responses THEN each response remains readable and properly formatted</p>
+</li>
+</ol>
+<h4 id="us-138-view-responses-as-word-cloud-could-have">US 1.38 – View Responses as Word Cloud (Could Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to choose to view responses as a word cloud format, <strong>so that</strong> I can visualize common themes at a glance.</p>
+<p><strong>Points assigned:</strong> 5</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor viewing responses WHEN they select "Word Cloud" view THEN responses are displayed as a word cloud showing common terms</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view word cloud THEN more frequently used words appear larger</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they switch to word cloud view THEN they can switch back to list view</p>
+</li>
+</ol>
+<h4 id="us-139-view-responses-in-list-format-should-have">US 1.39 – View Responses in List Format (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to choose to view responses in a list format, <strong>so that</strong> I can read them sequentially.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor viewing responses WHEN they select "List" view THEN all responses are displayed in a sequential list</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view list format THEN each response is displayed with timestamp</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they are in list view THEN they can switch to other view formats (e.g., word cloud)</p>
+</li>
+</ol>
+<h4 id="us-140-see-student-response-metrics-should-have">US 1.40 – See Student Response Metrics (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to see metrics of student responses, <strong>so that</strong> I can view engagement rate and participation statistics.</p>
+<p><strong>Points assigned:</strong> 5</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with closed discussion WHEN they view analytics THEN they see participation rate (responses submitted / students connected)</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view metrics THEN they see average response time and submission patterns</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view metrics THEN they see response length distribution
+<strong>Note:</strong> Won't → Should?</p>
+</li>
+</ol>
+<h4 id="us-141-export-responses-as-file-should-have">US 1.41 – Export Responses as File (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to export responses as a file, <strong>so that</strong> I can access and analyze them outside of the platform.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with lesson data WHEN they click "Export Responses" THEN they can choose export format (CSV, PDF, or JSON)</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they export as CSV THEN the file contains all responses with timestamps in structured format</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they export THEN the file downloads immediately to their device</p>
+</li>
+</ol>
+<h4 id="us-142-export-ai-prompts-and-responses-should-have">US 1.42 – Export AI Prompts and Responses (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to export AI generated prompts and its responses as a file, <strong>so that</strong> I can access and analyze them outside of the platform.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with lesson data WHEN they click "Export Prompts and Responses" THEN they can choose export format</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they export THEN the file contains all prompts with their associated responses</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they export THEN the file includes timestamps for prompts and responses</p>
+</li>
+</ol>
+<h4 id="us-143-export-lesson-statistics-should-have">US 1.43 – Export Lesson Statistics (Should Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to export appropriate lesson statistics, <strong>so that</strong> I can access and analyze them outside of the platform.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with completed lesson WHEN they click "Export Statistics" THEN they can choose what statistics to include</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they export statistics THEN the file includes participation metrics, response counts, and timing data</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they export statistics THEN the file downloads in their chosen format
+<strong>Note:</strong> Must → Should</p>
+</li>
+</ol>
+<h4 id="us-144-see-multiple-choice-question-metrics-could-have">US 1.44 – See Multiple Choice Question Metrics (Could Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to see multiple choice question metrics, <strong>so that</strong> I can view statistics like answer distribution and correctness rates.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor with multiple choice discussion WHEN they view results THEN they see how many students selected each option</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view MC metrics THEN they see percentage distribution of answers</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they view MC metrics THEN they see which option was marked as correct and the overall correctness rate
+<strong>Note:</strong> Subset of 1.40</p>
+</li>
+</ol>
+<h4 id="us-145-customized-ui-graphics-wont-have">US 1.45 – Customized UI Graphics (Won't Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to see customized graphics in the UI for instructors, <strong>so that</strong> the interface is visually appealing.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN an instructor WHEN they login THEN they see instructor-specific UI graphics and branding</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they use desktop THEN graphics display correctly at desktop resolutions</p>
+</li>
+<li>
+<p>GIVEN an instructor WHEN they use mobile devices THEN graphics are responsive and display correctly</p>
+</li>
+</ol>
+<h4 id="us-146-fine-tune-ai-with-trigger-words-wont-have">US 1.46 – Fine-Tune AI with Trigger Words (Won't Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to fine-tune the AI prompt using trigger words, <strong>so that</strong> I can control prompt generation more precisely.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>Out of scope</li>
+</ol>
+<h4 id="us-147-save-and-export-student-chat-responses-wont-have">US 1.47 – Save and Export Student Chat Responses (Won't Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to save and export student chat responses, <strong>so that</strong> I can review them later.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>Already covered</li>
+</ol>
+<h4 id="us-148-upload-multiple-files-wont-have">US 1.48 – Upload Multiple Files (Won't Have)</h4>
+<p><strong>As a</strong> instructor, <strong>I want</strong> to be able to upload multiple files to support discussion prompt generation, <strong>so that</strong> I can provide comprehensive source material.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>Already covered</li>
+</ol>
+<h3 id="student-access">Student Access</h3>
+<h4 id="us-201-access-website-on-desktop-must-have">US 2.01 – Access Website on Desktop (Must Have)</h4>
+<p><strong>As a</strong> student, <strong>I want</strong> to be able to access the website on desktop, <strong>so that</strong> I can participate from my computer or laptop.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN a student WHEN they access the website URL on desktop browsers (Chrome, Firefox, Safari) THEN the page loads successfully</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they view the website on desktop THEN all interface elements display correctly</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they use desktop THEN all features (joining, responding, viewing prompts) work correctly</p>
+</li>
+</ol>
+<h4 id="us-202-access-website-on-mobile-device-must-have">US 2.02 – Access Website on Mobile Device (Must Have)</h4>
+<p><strong>As a</strong> student, <strong>I want</strong> to be able to access the website on mobile device, <strong>so that</strong> I can participate from my phone or tablet.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN a student WHEN they access the website URL on mobile browsers THEN the page loads successfully</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they view the website on mobile THEN the interface is responsive and fits the screen</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they use mobile THEN all features (joining, responding, viewing prompts) work with touch input</p>
+</li>
+</ol>
+<h4 id="us-203-complete-anonymity-must-have-1-pt">US 2.03 – Complete Anonymity  (Must Have) [1 pt]</h4>
+<p><strong>As a</strong> student<br />
+<strong>I want</strong> to be completely anonymous<br />
+<strong>So that</strong> I can share honest responses without fear of judgment</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN a student WHEN they join a lesson THEN they are not required to provide name, email, or any identifying information
+- GIVEN a student WHEN they submit responses THEN the responses contain no identifiable data
+- GIVEN a student WHEN instructor views responses THEN the instructor cannot trace responses back to individual students
+- GIVEN a student WHEN lesson data is exported THEN the export contains no student identifiers</p>
+<h4 id="us-204-see-only-own-lesson-prompts-must-have-1-pt">US 2.04 – See Only Own Lesson Prompts  (Must Have) [1 pt]</h4>
+<p><strong>As a</strong> student<br />
+<strong>I want</strong> to be able to only see the prompts for the lesson I am in<br />
+<strong>So that</strong> I'm not confused by other lessons</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN a student WHEN they join a lesson using PIN/QR code THEN they see only prompts for that specific lesson
+- GIVEN a student WHEN instructor publishes a prompt THEN they see only that lesson's prompt, not prompts from other active lessons
+- GIVEN a student WHEN they rejoin the same lesson THEN they see the current active prompt for that lesson</p>
+<h4 id="us-205-scan-qr-code-to-join-must-have">US 2.05 – Scan QR Code to Join (Must Have)</h4>
+<p><strong>As a</strong> student, <strong>I want</strong> to be able to scan a QR code and join the lesson, <strong>so that</strong> I can quickly join using my device's native camera.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN a student WHEN they scan QR code with mobile device camera THEN they are directed to the lesson join page</p>
+</li>
+<li>
+<p>GIVEN a student WHEN QR code is valid and lesson is active THEN they successfully join the lesson</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they scan invalid or expired QR code THEN they see error message "Invalid or expired QR code"</p>
+</li>
+</ol>
+<h4 id="us-206-input-pin-code-to-join-must-have">US 2.06 – Input PIN Code to Join (Must Have)</h4>
+<p><strong>As a</strong> student, <strong>I want</strong> to be able to input a PIN code and join the lesson, <strong>so that</strong> I can access the lesson without scanning.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN a student WHEN they enter correct PIN code THEN they successfully join the lesson</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they enter incorrect PIN THEN they see error message "Invalid PIN. Please try again"</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they enter expired PIN (lesson ended) THEN they see error message "This lesson has ended"</p>
+</li>
+</ol>
+<h3 id="student-participation-responses">Student Participation &amp; Responses</h3>
+<h4 id="us-207-submit-responses-to-discussion-prompts-must-have">US 2.07 – Submit Responses to Discussion Prompts (Must Have)</h4>
+<p><strong>As a</strong> student, <strong>I want</strong> to be able to submit responses to discussion prompts, <strong>so that</strong> I can participate in class discussions.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN a student with open discussion WHEN they type a response and click "Submit" THEN the response is sent to the instructor</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they submit a response THEN they see confirmation message "Response submitted"</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they attempt to submit empty response THEN submission is blocked with message "Please enter a response"</p>
+</li>
+</ol>
+<h4 id="us-208-select-option-for-multiple-choice-questions-must-have">US 2.08 – Select Option for Multiple Choice Questions (Must Have)</h4>
+<p><strong>As a</strong> student, <strong>I want</strong> to be able to select an option for multiple choice questions, <strong>so that</strong> I can answer quiz-style prompts.</p>
+<p><strong>Points assigned:</strong> 2</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN a student WHEN instructor publishes multiple choice question THEN they see all answer options</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they select an option THEN it is visually highlighted</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they click "Submit" with selection THEN their answer is sent to the instructor</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they attempt to submit without selecting THEN submission is blocked with message "Please select an answer"</p>
+</li>
+</ol>
+<h4 id="us-209-see-discussion-prompt-on-device-must-have-1-pt">US 2.09 – See Discussion Prompt on Device  (Must Have) [1 pt]</h4>
+<p><strong>As a</strong> student<br />
+<strong>I want</strong> to be able to see the discussion prompt on my device<br />
+<strong>So that</strong> I know what to respond to</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN a student WHEN instructor publishes a prompt THEN the prompt appears on their device within 2 seconds
+- GIVEN a student WHEN they view the prompt THEN it is clearly visible and readable
+- GIVEN a student WHEN instructor publishes new prompt THEN the previous prompt is replaced with the new one</p>
+<h4 id="us-210-see-multiple-choice-correctness-must-have-1-pt">US 2.10 – See Multiple Choice Correctness  (Must Have) [1 pt]</h4>
+<p><strong>As a</strong> student<br />
+<strong>I want</strong> to see if I got multiple choice questions correct<br />
+<strong>So that</strong> I can receive immediate feedback on my understanding</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN a student WHEN they submit multiple choice answer and feedback is enabled THEN they see whether their answer was correct or incorrect
+- GIVEN a student WHEN answer is correct THEN they see confirmation message indicating correctness
+- GIVEN a student WHEN answer is incorrect THEN they see the correct answer displayed</p>
+<h4 id="us-211-see-time-remaining-for-prompt-should-have-1-pt">US 2.11 – See Time Remaining for Prompt  (Should Have) [1 pt]</h4>
+<p><strong>As a</strong> student<br />
+<strong>I want</strong> to be able to see how much time a prompt has left to be answered<br />
+<strong>So that</strong> I can pace my response appropriately</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN a student WHEN instructor sets time limit for discussion THEN they see a countdown timer
+- GIVEN a student WHEN timer is active THEN it updates in real-time
+- GIVEN a student WHEN time expires THEN they see message indicating time is up and cannot submit response</p>
+<h4 id="us-218-submit-chat-responses-to-others-wont-have">US 2.18 – Submit Chat Responses to Others (Won't Have)</h4>
+<p><strong>As a</strong> student, <strong>I want</strong> to be able to submit chat responses to other students and the instructor during discussions, <strong>so that</strong> I can engage in peer-to-peer discussion.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>Out of scope</li>
+</ol>
+<h3 id="student-session-management">Student Session Management</h3>
+<h4 id="us-212-notification-when-lesson-ends-should-have-1-pt">US 2.12 – Notification When Lesson Ends  (Should Have) [1 pt]</h4>
+<p><strong>As a</strong> student<br />
+<strong>I want</strong> to be notified when the lesson has ended<br />
+<strong>So that</strong> I know the lesson is complete and I can close the application</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN a student WHEN instructor ends the lesson THEN they see notification "Lesson has ended"
+- GIVEN a student WHEN lesson ends THEN they cannot submit new responses
+- GIVEN a student WHEN lesson ends THEN they see an appropriate end-of-lesson message and screen</p>
+<h4 id="us-213-leave-a-lesson-should-have">US 2.13 – Leave a Lesson (Should Have)</h4>
+<p><strong>As a</strong> student, <strong>I want</strong> to be able to leave a lesson, <strong>so that</strong> I can exit if needed.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN a student in active lesson WHEN they click "Leave Lesson" THEN they are disconnected from the lesson</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they leave THEN they are removed from the student count
+<strong>Note:</strong> Should → Won't?</p>
+</li>
+</ol>
+<h4 id="us-214-rejoin-a-lesson-must-have">US 2.14 – Rejoin a Lesson (Must Have)</h4>
+<p><strong>As a</strong> student, <strong>I want</strong> to be able to rejoin a lesson, <strong>so that</strong> I can reconnect if I was disconnected or left temporarily.</p>
+<p><strong>Points assigned:</strong> 3</p>
+<p><strong>Acceptance Tests:</strong></p>
+<ol>
+<li>
+<p>GIVEN a student WHEN they rejoin using same PIN/QR code and lesson is still active THEN they reconnect to the lesson</p>
+</li>
+<li>
+<p>GIVEN a student disconnected during a discussion WHEN they rejoin THEN they see the current active prompt</p>
+</li>
+<li>
+<p>GIVEN a student disconnected during a discussion WHEN they rejoin THEN they can submit responses to the current discussion</p>
+</li>
+<li>
+<p>GIVEN a student WHEN they attempt to rejoin ended lesson THEN they see error message "This lesson has ended"
+<strong>Note:</strong> Should → Won't?</p>
+</li>
+</ol>
+<h4 id="us-215-see-lesson-and-discussion-status-should-have-1-pt">US 2.15 – See Lesson and Discussion Status  (Should Have) [1 pt]</h4>
+<p><strong>As a</strong> student<br />
+<strong>I want</strong> to be able to see the status of the lesson and discussion<br />
+<strong>So that</strong> I know what actions I can take</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN a student WHEN discussion is open for responses THEN they see indicator showing discussion is open
+- GIVEN a student WHEN discussion is closed THEN they see indicator showing discussion is closed
+- GIVEN a student WHEN they view status THEN it updates in real-time as instructor changes discussion state</p>
+<p><strong>Note:</strong> Could → Won't?</p>
+<h4 id="us-216-helpful-error-messages-for-students-could-have-1-pt">US 2.16 – Helpful Error Messages for Students  (Could Have) [1 pt]</h4>
+<p><strong>As a</strong> student<br />
+<strong>I want</strong> to be able to see helpful error messages when something goes wrong<br />
+<strong>So that</strong> I know how to resolve issues</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN a student WHEN they enter invalid PIN THEN they see clear error message with guidance
+- GIVEN a student WHEN they experience connection issue THEN they see error message "Connection lost. Attempting to reconnect..."
+- GIVEN a student WHEN response submission fails THEN they see error message "Submission failed. Please try again"</p>
+<p><strong>Note:</strong> Already taken care of in 1.16</p>
+<h4 id="us-217-confirmation-message-on-response-submission-could-have-1-pt">US 2.17 – Confirmation Message on Response Submission  (Could Have) [1 pt]</h4>
+<p><strong>As a</strong> student<br />
+<strong>I want</strong> to be able to see a confirmation message that I submitted my response<br />
+<strong>So that</strong> I know my answer was received</p>
+<p><strong>Acceptance Tests:</strong>
+- GIVEN a student WHEN they submit a response THEN they see confirmation message immediately
+- GIVEN a student WHEN they see confirmation THEN the message is clear and noticeable
+- GIVEN a student WHEN they submit THEN the submit button is disabled to prevent duplicate submissions
+- GIVEN a student WHEN they submit THEN the confirmation message disappears after a brief moment</p>
+<h2 id="moscow">MoSCoW</h2>
+<h3 id="must-have-35-stories-515">Must Have (35 stories - 51.5%)</h3>
+<ul>
+<li>US 1.01 – Create Account</li>
+<li>US 1.02 – Login via UAlberta Authentication</li>
+<li>US 1.03 – Logout Securely</li>
+<li>US 1.05 – Create New Lesson</li>
+<li>US 1.06 – Start a Lesson</li>
+<li>US 1.09 – End/Leave a Lesson</li>
+<li>US 1.10 – Automatic Lesson Save on End</li>
+<li>US 1.12 – Reconnect After Connection Failure</li>
+<li>US 1.13 – Automatic Data Saving at Regular Intervals</li>
+<li>US 1.14 – View Past Lessons and Details</li>
+<li>US 1.16 – Upload Files  (PDF, PPTX)</li>
+<li>US 1.17 – Activate/Deactivate STT Transcript Capture</li>
+<li>US 1.18 – Trigger AI Prompt Generation</li>
+<li>US 1.19 – Review and Select AI Generated Prompts</li>
+<li>US 1.23 – Generate Multiple Choice, Short Answer, and Long Answer Prompts</li>
+<li>US 1.24 – Regenerate AI Prompts</li>
+<li>US 1.25 – Create Multiple Discussions Within One Lesson</li>
+<li>US 1.27 – Display Discussion Prompt</li>
+<li>US 1.28 – Start and Close Discussions</li>
+<li>US 1.31 – Display PIN Code</li>
+<li>US 1.32 – Display QR Code</li>
+<li>US 1.34 – See Anonymous Student Responses in Real-Time</li>
+<li>US 1.49 – Add Course to Courselist</li>
+<li>US 1.50 – Delete Course from Courselist</li>
+<li>US 2.01 – Access Website on Desktop</li>
+<li>US 2.02 – Access Website on Mobile Device</li>
+<li>US 2.03 – Complete Anonymity</li>
+<li>US 2.04 – See Only Own Lesson Prompts</li>
+<li>US 2.05 – Scan QR Code to Join</li>
+<li>US 2.06 – Input PIN Code to Join</li>
+<li>US 2.07 – Submit Responses to Discussion Prompts</li>
+<li>US 2.08 – Select Option for Multiple Choice Questions</li>
+<li>US 2.09 – See Discussion Prompt on Device</li>
+<li>US 2.10 – See Multiple Choice Correctness</li>
+<li>US 2.14 – Rejoin a Lesson</li>
+</ul>
+<h3 id="should-have-17-stories-250">Should Have  (17 stories - 25.0%)</h3>
+<ul>
+<li>US 1.08 – Delete Past Lesson</li>
+<li>US 1.15 – Helpful Error Messages</li>
+<li>US 1.21 – Manually Enter Prompt</li>
+<li>US 1.22 – Set AI Prompt Generation Preferences</li>
+<li>US 1.26 – Private Discussion Prompts per Lesson</li>
+<li>US 1.29 – Set Time Limit for Response Window</li>
+<li>US 1.36 – Highlight Specific Response</li>
+<li>US 1.37 – Scroll Through Student Responses</li>
+<li>US 1.39 – View Responses in List Format</li>
+<li>US 1.40 – See Student Response Metrics</li>
+<li>US 1.41 – Export Responses as File</li>
+<li>US 1.42 – Export AI Prompts and Responses</li>
+<li>US 1.43 – Export Lesson Statistics</li>
+<li>US 2.11 – See Time Remaining for Prompt</li>
+<li>US 2.12 – Notification When Lesson Ends</li>
+<li>US 2.13 – Leave a Lesson</li>
+<li>US 2.15 – See Lesson and Discussion Status</li>
+</ul>
+<h3 id="could-have-9-stories-132">Could Have  (9 stories - 13.2%)</h3>
+<ul>
+<li>US 1.04 – View Only Own Past Lessons</li>
+<li>US 1.11 – Resume Unfinished Lesson</li>
+<li>US 1.20 – Edit AI-Generated Prompts</li>
+<li>US 1.30 – Configure Single or Multiple Responses</li>
+<li>US 1.35 – Hide Inappropriate Responses</li>
+<li>US 1.38 – View Responses as Word Cloud</li>
+<li>US 1.44 – See Multiple Choice Question Metrics</li>
+<li>US 2.16 – Helpful Error Messages for Students</li>
+<li>US 2.17 – Confirmation Message on Response Submission</li>
+</ul>
+<h3 id="wont-have-7-stories-103">Won't Have  (7 stories - 10.3%)</h3>
+<ul>
+<li>US 1.07 – Cancel a Lesson</li>
+<li>US 1.33 – See Student Count</li>
+<li>US 1.45 – Customized UI Graphics</li>
+<li>US 1.46 – Fine-Tune AI with Trigger Words</li>
+<li>US 1.47 – Save and Export Student Chat Responses</li>
+<li>US 1.48 – Upload Multiple Files</li>
+<li>US 2.18 – Subm</li>
+</ul>
+<h2 id="similar-products">Similar Products</h2>
+<ul>
+<li>
+<p><strong>Kahoot</strong> -Interactive quiz platform with real-time student responses, Uses game-based approach with PIN codes for session joining, Provides instant feedback and analytics</p>
+</li>
+<li>
+<p><strong>Jackbox Games</strong> - Room-based multiplayer system with PIN/QR code access, Real-time player synchronization, Host and player interfaces</p>
+</li>
+<li>
+<p><strong>Notebook LM</strong> - AI-powered content ingestion and analysis, Source parsing and preparation layer, Generates insights from uploaded materials</p>
+</li>
+<li>
+<p><strong>Cluely</strong> - Educational discussion platform, Real-time classroom engagement tools</p>
+</li>
+</ul>
+<h2 id="open-source-projects">Open-source Projects</h2>
+<p>To be determined based on technology stack requirements.</p>
+<h2 id="technical-resources">Technical Resources</h2>
+<h3 id="backend">Backend</h3>
+<ul>
+<li><strong>Next.js</strong> - Full-stack React framework</li>
+<li><strong>Supabase</strong> - Database and authentication</li>
+<li><strong>OpenAI API</strong> - AI prompt generation</li>
+<li><strong>Speech-to-Text Service</strong> - Real-time transcription</li>
+<li><strong>WebSockets</strong> - Real-time communication</li>
+</ul>
+<h3 id="frontend">Frontend</h3>
+<ul>
+<li><strong>React.js</strong> - UI framework</li>
+<li><strong>Mobile-responsive design</strong> - Support for desktop and mobile devices</li>
+<li><strong>QR Code generation library</strong></li>
+<li><strong>Real-time updates via WebSockets</strong></li>
+</ul>
+<h3 id="deployment">Deployment</h3>
+<ul>
+<li><strong>Docker</strong> - Containerization</li>
+<li><strong>Cybera</strong> - Cloud hosting</li>
+<li><strong>CI/CD Pipeline</strong> - Automated deployment</li>
+<li><strong>UAlberta SSO Integration</strong> - Authentication service</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": [], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
