@@ -20,15 +20,17 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["jest", "@testing-library/jest-dom"]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
+    "tests/**/*",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "jest.config.js"  ],
   "exclude": ["node_modules"]
 }
