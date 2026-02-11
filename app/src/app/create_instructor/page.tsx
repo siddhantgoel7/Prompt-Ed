@@ -47,7 +47,7 @@ export default function CreateInstructor() {
     }
 
     // Replace with sign up API call logic here
-    const {  data: _data, error } = await signUpWithEmail(
+    const { error } = await signUpWithEmail(
       formData.email,
       formData.password,
       formData.fullName

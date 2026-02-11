@@ -29,7 +29,7 @@ export default function Login() {
     setLoading(true);
 
     // Replace with sign in API call logic here
-    const { data, error } = await signInWithEmail(
+    const { error } = await signInWithEmail(
       formData.email,
       formData.password
     );

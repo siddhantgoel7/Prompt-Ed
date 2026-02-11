@@ -17,7 +17,6 @@ export default function LessonsPage({
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string>('');
   
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
@@ -42,7 +41,6 @@ export default function LessonsPage({
         return;
       }
       
-      setUserId(user.id);
 
       // Fetch course details
       const { data: courseData, error: courseError } = await supabase

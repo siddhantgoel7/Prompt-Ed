@@ -4,7 +4,6 @@
 import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { useMemo } from "react";
 import type { Lesson } from '@/types/lesson';
 
 export default function SessionPage({ 
@@ -16,7 +15,6 @@ export default function SessionPage({
   const router = useRouter();
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedAnswer, setSelectedAnswer] = useState<string>('The World Wide Web Consortium');
   const [barHeights] = useState(() =>
     Array.from({ length: 40 }, () => Math.random() * 100)
   );
