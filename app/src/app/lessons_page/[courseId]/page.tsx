@@ -40,7 +40,6 @@ export default function LessonsPage({
         router.push('/');
         return;
       }
-      
 
       // Fetch course details
       const { data: courseData, error: courseError } = await supabase

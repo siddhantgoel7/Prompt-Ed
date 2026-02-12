@@ -8,6 +8,8 @@ export default function Home() {
   const router = useRouter();
   const [code, setCode] = useState('');
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [joining, setJoining] = useState(false);
 
   // Replace with auth check logic here
   useEffect(() => {
@@ -34,8 +36,41 @@ export default function Home() {
   };
 
   // Handle join button click
-  const handleJoin = () => {
-    // Replace with join event logic here
+  const handleJoin = async () => {
+    setError(null);
+    setJoining(true);
+
+    // Validate PIN format (US 2.06)
+    if (!/^\d{6}$/.test(code)) {
+      setError('PIN must be 6 digits');
+      setJoining(false);
+      return;
+    }
+
+    const supabase = createClient();
+
+    // Find lesson by PIN code
+    const { data: lesson, error: lookupError } = await supabase
+      .from('lessons')
+      .select('id, status')
+      .eq('pin_code', code)
+      .eq('status', 'active')
+      .single();
+
+    if (lookupError || !lesson) {
+      setError('Invalid PIN. Please try again'); // US 2.06 AT2
+      setJoining(false);
+      return;
+    }
+
+    if (lesson.status === 'ended') {
+      setError('This lesson has ended'); // US 2.06 AT3
+      setJoining(false);
+      return;
+    }
+
+    // Redirect to student session
+    router.push(`/student/${lesson.id}`);
   };
 
   // Handle sign up button click
@@ -58,7 +93,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
       <header className="flex justify-between items-center p-6">
         <h1 className="text-xl font-semibold">PMCOL Teaching Tool</h1>
@@ -89,12 +124,17 @@ export default function Home() {
           placeholder="Enter code"
           className="w-full max-w-md px-4 py-3 border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
-        
-        <button 
+
+        {error && (
+          <p className="mt-2 text-red-600 text-sm">{error}</p>
+        )}
+
+        <button
           onClick={handleJoin}
-          className="mt-6 px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800"
+          disabled={joining}
+          className="mt-6 px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 disabled:opacity-50"
         >
-          Join
+          {joining ? 'Joining...' : 'Join'}
         </button>
       </main>
     </div>

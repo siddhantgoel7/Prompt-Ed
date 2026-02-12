@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Legacy Socket.IO server (not used, replaced by Supabase Realtime):
+    "server.js",
   ]),
 ]);
 

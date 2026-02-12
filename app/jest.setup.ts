@@ -25,3 +25,71 @@ jest.mock('next/navigation', () => ({
     return new URLSearchParams()
   },
 }))
+
+/**
+ * Creates a mock Supabase Realtime channel for testing.
+ *
+ * Features:
+ * - Stores event listeners in a subscriptions map
+ * - Provides _trigger() method to simulate incoming broadcasts
+ * - Tracks subscription status (SUBSCRIBED/CLOSED)
+ * - Supports multiple listeners per event type
+ *
+ * Usage in tests:
+ * const mockChannel = createMockRealtimeChannel();
+ * mockChannel._trigger('discussion:published', { discussion: mockDiscussion });
+ */
+export function createMockRealtimeChannel() {
+  const subscriptions: Record<string, Array<(payload: unknown) => void>> = {};
+  let subscribeCallback: ((status: string) => void) | null = null;
+
+  return {
+    subscribe: jest.fn((callback?: (status: string) => void) => {
+      subscribeCallback = callback || null;
+      // Simulate async subscription with 'SUBSCRIBED' status
+      setTimeout(() => {
+        if (subscribeCallback) subscribeCallback('SUBSCRIBED');
+      }, 0);
+      return undefined;
+    }),
+    unsubscribe: jest.fn(() => {
+      if (subscribeCallback) subscribeCallback('CLOSED');
+    }),
+    on: jest.fn((type: string, selector: { event: string }, callback: (payload: unknown) => void) => {
+      const eventKey = selector.event;
+      if (!subscriptions[eventKey]) {
+        subscriptions[eventKey] = [];
+      }
+      subscriptions[eventKey].push(callback);
+      return {
+        unsubscribe: jest.fn(() => {
+          const index = subscriptions[eventKey]?.indexOf(callback);
+          if (index !== undefined && index > -1) {
+            subscriptions[eventKey].splice(index, 1);
+          }
+        })
+      };
+    }),
+    send: jest.fn().mockResolvedValue(1), // Returns acknowledgment status code
+    off: jest.fn(),
+    /**
+     * Test utility to trigger a broadcast event.
+     * Simulates Supabase Realtime's double-wrapping of payloads.
+     *
+     * @param event - Event name (e.g., 'discussion:published')
+     * @param payload - Event payload data
+     */
+    _trigger: (event: string, payload: unknown) => {
+      if (subscriptions[event]) {
+        subscriptions[event].forEach(cb => {
+          // Simulate Supabase's payload wrapping structure
+          cb({ payload });
+        });
+      }
+    },
+    /**
+     * Test utility to get all subscribed events.
+     */
+    _getSubscriptions: () => subscriptions
+  };
+}
