@@ -9,6 +9,7 @@ import type { Lesson } from '@/types/lesson';
 import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
 
+type DiscussionWithResponses = Discussion & { responses: Response[] };
 /**
  * Discussion History Component
  * Displays a list of all discussions for the current lesson with metadata.
@@ -137,6 +138,12 @@ export default function SessionPage({
   const [loading, setLoading] = useState(true);
   // eslint-disable-next-line react-hooks/purity
   const barHeights = Array.from({ length: 40 }, () => Math.random() * 100);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [lessonDiscussions, setLessonDiscussions] = useState<DiscussionWithResponses[]>([]);
+  const [activatingLesson, setActivatingLesson] = useState(false);
+  const [exportingData, setExportingData] = useState(false);
+
 
   /**
    * State Management for Discussion System
@@ -227,6 +234,10 @@ export default function SessionPage({
     }
   }, [lessonId]);
 
+  const [selectedAnswer, setSelectedAnswer] = useState<string>('The World Wide Web Consortium');
+  const [endingLesson, setEndingLesson] = useState(false);
+  const [endError, setEndError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchLesson = async () => {
       const supabase = createClient();
@@ -275,6 +286,28 @@ export default function SessionPage({
         setLesson(updatedLesson);
       } else {
         setLesson(lessonData);
+        if (lessonData.status === 'ended') {
+          setHistoryLoading(true);
+
+          const { data: discussionsData, error: discussionsError } = await supabase
+            .from('discussions')
+            .select(`
+              id, lesson_id, prompt_text, prompt_type, status, created_at, published_at, closed_at, display_order,
+              responses ( id, discussion_id, response_text, created_at )
+            `)
+            .eq('lesson_id', lessonId)
+            .order('display_order', { ascending: true });
+
+          if (discussionsError) {
+            setHistoryError('Failed to load discussions/responses.');
+            setLessonDiscussions([]);
+          } else {
+            setLessonDiscussions((discussionsData || []) as DiscussionWithResponses[]);
+          }
+
+          setHistoryLoading(false);
+        }
+
       }
 
       // Fetch existing discussions
@@ -346,6 +379,8 @@ export default function SessionPage({
     if (data) setResponses(data);
   };
 
+  
+
   /**
    * Publishes a new discussion prompt to all connected students in real-time.
    *
@@ -362,7 +397,7 @@ export default function SessionPage({
    * Related User Stories: US 1.25, US 1.27, US 1.28
    */
   const handlePublishDiscussion = async () => {
-    if (!promptInput.trim()) return;
+    if (!promptInput.trim()) return; 
 
     console.log('Publishing discussion with prompt:', promptInput);
     const supabase = createClient();
@@ -459,11 +494,146 @@ export default function SessionPage({
     await fetchDiscussions();
   };
 
-  const handleEnd = () => {
-    if (lesson) {
-      router.push(`/lessons_page/${lesson.course_id}`);
+  const handleEnd = async () => {
+  if (!lesson) return;
+
+  setEndingLesson(true);
+  setEndError(null);
+
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from('lessons')
+    .update({
+      status: 'ended',
+      ended_at: new Date().toISOString(),
+    })
+    .eq('id', lesson.id);
+
+  if (error) {
+    console.error('Error ending lesson:', error);
+    setEndError('Failed to end lesson. Please try again.');
+    setEndingLesson(false);
+    return;
+  }
+  if (channel) {
+    await channel.send({
+      type: 'broadcast',
+      event: 'lesson:ended',
+      payload: {
+        lessonId: lesson.id,
+        endedAt: new Date().toISOString(),
+        message: 'Lesson has ended',
+      },
+    });
+  }
+
+
+  router.push(`/lessons_page/${lesson.course_id}`);
+};
+
+const handleActivate = async () => {
+  if (!lesson) return;
+
+  setActivatingLesson(true);
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from('lessons')
+    .update({
+      status: 'active',
+      started_at: new Date().toISOString(),
+      ended_at: null,
+    })
+    .eq('id', lesson.id);
+
+  if (error) {
+    setEndError('Failed to activate lesson. Please try again.');
+    setActivatingLesson(false);
+    return;
+  }
+
+  setLesson((prev) =>
+    prev ? { ...prev, status: 'active', started_at: new Date().toISOString(), ended_at: null } : prev
+  );
+  setActivatingLesson(false);
+};
+
+const handleExportLessonData = async () => {
+  if (!lesson) return;
+
+  setExportingData(true);
+  try {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('discussions')
+      .select(`
+        prompt_text,
+        created_at,
+        responses ( response_text, created_at )
+      `)
+      .eq('lesson_id', lesson.id)
+      .order('display_order', { ascending: true });
+
+    if (error) {
+      setEndError('Failed to export lesson data.');
+      return;
     }
-  };
+
+    const lines: string[] = [];
+    lines.push(lesson.title);
+    lines.push(`Exported: ${new Date().toLocaleString()}`);
+    lines.push('');
+
+    lines.push('DISCUSSIONS AND RESPONSES');
+    lines.push('-------------------------');
+
+    (data ?? []).forEach((d, index) => {
+      lines.push('');
+      lines.push(`Discussion ${index + 1}`);
+      lines.push(`Prompt: ${d.prompt_text}`);
+      lines.push(`Time: ${new Date(d.created_at).toLocaleString()}`);
+      lines.push('Responses:');
+
+      const responses = d.responses ?? [];
+      if (responses.length === 0) {
+        lines.push('  - No responses');
+      } else {
+        responses.forEach((r, rIndex) => {
+          lines.push(`  ${rIndex + 1}. ${r.response_text}`);
+          lines.push(`     ${new Date(r.created_at).toLocaleString()}`);
+        });
+      }
+    });
+
+    lines.push('');
+    lines.push('TRANSCRIPT');
+    lines.push('----------');
+    lines.push('No transcripts used.');
+
+    lines.push('');
+    lines.push('LECTURE MATERIAL');
+    lines.push('----------------');
+    lines.push('No lecture material uploaded.');
+
+    const textContent = lines.join('\n');
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeTitle = lesson.title.replace(/[^a-z0-9-_]/gi, '_').toLowerCase();
+    a.href = url;
+    a.download = `${safeTitle || 'lesson'}_export.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } finally {
+    setExportingData(false);
+  }
+};
+
 
   if (loading) {
     return (
@@ -477,6 +647,76 @@ export default function SessionPage({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-500">Lesson not found</p>
+      </div>
+    );
+  }
+  if (lesson?.status === 'ended') {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <header className="border-b border-gray-300 px-6 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-semibold">{lesson.title}</h1>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportLessonData}
+              disabled={exportingData}
+              className="px-6 py-2 bg-black text-white rounded-full font-semibold disabled:opacity-50"
+            >
+              {exportingData ? 'Exporting...' : 'Export Txt'}
+            </button>
+            <button
+              onClick={handleActivate}
+              disabled={activatingLesson}
+              className="px-6 py-2 bg-green-600 text-white rounded-full font-semibold disabled:opacity-50"
+            >
+              {activatingLesson ? 'Activating...' : 'Activate'}
+            </button>
+          </div>
+        </header>
+
+        <main className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-88px)]">
+        {/* Left: full-height discussions/responses */}
+        <section className="border border-gray-200 rounded-lg p-4 h-full overflow-y-auto">
+          <h2 className="text-lg font-semibold mb-3">Discussions and Responses</h2>
+
+          {historyLoading && <p className="text-gray-500">Loading lesson history...</p>}
+          {historyError && <p className="text-red-600 text-sm">{historyError}</p>}
+
+          {!historyLoading && !historyError && lessonDiscussions.map((d) => (
+            <div key={d.id} className="border border-gray-200 rounded-lg p-4 mb-3">
+              <p className="font-semibold">{d.prompt_text}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Prompt time: {new Date(d.created_at).toLocaleString()}
+              </p>
+
+              <div className="mt-3 space-y-2">
+                {(d.responses || []).map((r) => (
+                  <div key={r.id} className="bg-gray-50 rounded p-2">
+                    <p className="text-sm">{r.response_text}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Response time: {new Date(r.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {/* Right: stacked panels */}
+        <div className="grid grid-rows-2 gap-6 h-full">
+          <section className="border border-gray-200 rounded-lg p-4 overflow-y-auto">
+            <h2 className="text-lg font-semibold mb-3">Transcript</h2>
+            <p className="text-sm text-gray-500">No transcripts used.</p>
+          </section>
+
+          <section className="border border-gray-200 rounded-lg p-4 overflow-y-auto">
+            <h2 className="text-lg font-semibold mb-3">Lecture Material</h2>
+            <p className="text-sm text-gray-500">No lecture material uploaded.</p>
+          </section>
+        </div>
+      </main>
+
+
       </div>
     );
   }
@@ -502,15 +742,18 @@ export default function SessionPage({
           </button>
           <button
             onClick={handleEnd}
+            disabled={endingLesson}
             className="px-6 py-2 bg-red-600 text-white rounded-full font-semibold hover:bg-red-700"
           >
-            End
+            {endingLesson ? 'Ending...' : 'End'}
           </button>
           <button className="px-6 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800">
             Settings
           </button>
         </div>
       </header>
+      {endError && <p className="text-sm text-red-600">{endError}</p>}
+
 
       {/* Main Content */}
       <div className="flex-1 flex">
@@ -754,6 +997,7 @@ export default function SessionPage({
               </div>
             </div>
           </div>
+          
         </div>
 
         {/* Right Sidebar - Question & Timer */}

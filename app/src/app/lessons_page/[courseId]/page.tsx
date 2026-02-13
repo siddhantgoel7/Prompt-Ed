@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { Lesson, CreateLessonInput } from '@/types/lesson';
 import type { Course } from '@/types/course';
+import type { Discussion } from '@/types/discussion';
+import type { Response } from '@/types/response';
+
 
 export default function LessonsPage({ 
   params 
@@ -28,6 +31,15 @@ export default function LessonsPage({
   const [addingLesson, setAddingLesson] = useState(false);
   const [deletingLesson, setDeletingLesson] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  type DiscussionWithResponses = Discussion & { responses: Response[] };
+
+  const [showEndedModal, setShowEndedModal] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [lessonDiscussions, setLessonDiscussions] = useState<DiscussionWithResponses[]>([]);
+  const [activatingLesson, setActivatingLesson] = useState(false);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -117,6 +129,7 @@ export default function LessonsPage({
         {
           title: newLesson.title,
           course_id: courseId,
+          pin_code: Math.random().toString(36).substring(2, 8).toUpperCase(),
         },
       ])
       .select();
@@ -175,9 +188,54 @@ export default function LessonsPage({
 
 // Update the handleAccessLesson function in app/lessons_page/[courseId]/page.tsx
 
-const handleAccessLesson = (lessonId: string) => {
-  router.push(`/session/${lessonId}`);
+const handleAccessLesson = async (lesson: Lesson) => {
+  // const supabase = createClient();
+
+  // const { error } = await supabase
+  //   .from('lessons')
+  //   .update({
+  //     status: 'active',
+  //     started_at: new Date().toISOString(),
+  //     ended_at: null,
+  //   })
+  //   .eq('id', lesson.id);
+
+  // if (error) {
+  //   console.error('Error activating lesson:', error);
+  //   return;
+  // }
+
+
+
+  // setLessons((prev) =>
+  //   prev.map((l) =>
+  //     l.id === lesson.id
+  //       ? { ...l, status: 'active', started_at: new Date().toISOString(), ended_at: null }
+  //       : l
+  //   )
+  // );
+
+  router.push(`/session/${lesson.id}`);
 };
+
+
+const normalizeStatus = (status: Lesson['status']) => {
+  if (status === 'draft') return 'inactive';
+  return status;
+};
+
+const getStatusBadgeClass = (status: Lesson['status']) => {
+  const normalized = normalizeStatus(status);
+
+  if (normalized === 'active') {
+    return 'bg-green-100 text-green-800';
+  }
+  if (normalized === 'ended') {
+    return 'bg-red-100 text-red-800';
+  }
+  return 'bg-gray-100 text-gray-700';
+};
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -241,7 +299,7 @@ const handleAccessLesson = (lessonId: string) => {
           {lessons.map((lesson) => (
             <div
               key={lesson.id}
-              onClick={() => handleAccessLesson(lesson.id)}
+              onClick={() => handleAccessLesson(lesson)}
               className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col cursor-pointer hover:shadow-md transition-shadow h-32 relative group"
             >
               {/* Delete Button - top right corner */}
@@ -267,6 +325,11 @@ const handleAccessLesson = (lessonId: string) => {
 
               {/* Lesson Info */}
               <div className="flex-1 flex flex-col justify-center">
+                <span
+                  className={`inline-flex w-fit mb-2 px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusBadgeClass(lesson.status)}`}
+                >
+                  {normalizeStatus(lesson.status)}
+                </span>
                 <h3 className="text-lg font-bold mb-1">{lesson.title}</h3>
                 <p className="text-xs text-gray-500">
                   Date: {new Date(lesson.date_created).toLocaleDateString('en-US', {

@@ -10,6 +10,9 @@ export default function Home() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  
+
 
   // Replace with auth check logic here
   useEffect(() => {
@@ -33,6 +36,7 @@ export default function Home() {
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Replace with input handling logic here
     setCode(e.target.value);
+    if (joinError) setJoinError(null);
   };
 
   // Handle join button click
@@ -136,6 +140,7 @@ export default function Home() {
         >
           {joining ? 'Joining...' : 'Join'}
         </button>
+        {joinError && <p className="mt-3 text-sm text-red-600">{joinError}</p>}
       </main>
     </div>
   );

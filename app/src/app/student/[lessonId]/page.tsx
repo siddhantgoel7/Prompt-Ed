@@ -21,6 +21,9 @@ export default function StudentSessionPage({
   const [responseText, setResponseText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [lessonEnded, setLessonEnded] = useState(false);
+  const [lessonEndedMessage, setLessonEndedMessage] = useState<string | null>(null);
+
 
   // Verify lesson is active and fetch current active discussion
   useEffect(() => {
@@ -66,6 +69,19 @@ export default function StudentSessionPage({
     }
 
     console.log('Student: Setting up broadcast listeners');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const lessonEndedSubscription = (channel as any).on(
+      'broadcast',
+      { event: 'lesson:ended' },
+      (payload: { payload?: { message?: string }; message?: string }) => {
+        const message = payload.payload?.message || payload.message || 'Lesson has ended';
+        setLessonEnded(true);
+        setLessonEndedMessage(message);
+        setActiveDiscussion(null);
+        setSubmitted(false);
+      }
+    );
+
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const discussionSubscription = (channel as any).on(
@@ -83,6 +99,7 @@ export default function StudentSessionPage({
           console.log('Active discussion set');
         }
       }
+      
     );
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,11 +124,14 @@ export default function StudentSessionPage({
       console.log('Student: Cleaning up broadcast listeners');
       discussionSubscription.unsubscribe();
       closureSubscription.unsubscribe();
+      lessonEndedSubscription.unsubscribe();
     };
   }, [channel]);
 
   // Submit response
   const handleSubmitResponse = async () => {
+    if (lessonEnded) return;
+
     if (!activeDiscussion || !responseText.trim()) return;
 
     console.log('Student submitting response:', responseText);
@@ -156,8 +176,12 @@ export default function StudentSessionPage({
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-lg shadow-md p-8">
         <h1 className="text-2xl font-bold mb-6 text-center">{lesson?.title}</h1>
-
-        {activeDiscussion && activeDiscussion.status === 'active' ? (
+        {lessonEnded ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center mb-6">
+            <p className="text-red-700 font-semibold">{lessonEndedMessage || 'Lesson has ended'}</p>
+          </div>
+         
+        ) : activeDiscussion && activeDiscussion.status === 'active' ? (
           <div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
               <h2 className="text-lg font-semibold mb-2">Discussion Prompt:</h2>
@@ -175,7 +199,7 @@ export default function StudentSessionPage({
                 />
                 <button
                   onClick={handleSubmitResponse}
-                  disabled={submitting || !responseText.trim()}
+                  disabled={lessonEnded || submitting || !responseText.trim()}
                   className="w-full px-6 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 disabled:opacity-50"
                 >
                   {submitting ? 'Submitting...' : 'Submit Response'}
@@ -189,7 +213,7 @@ export default function StudentSessionPage({
           </div>
         ) : activeDiscussion && activeDiscussion.status === 'closed' ? (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-            <p className="text-gray-600">This discussion has been closed.</p>
+            <p className="text-gray-600">Waiting for instructor to publish a discussion..</p>
           </div>
         ) : (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">

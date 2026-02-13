@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import SessionPage from '@/app/session/[lessonId]/page';
 import { createClient } from '@/lib/supabase/client';
 import { useRealtime } from '@/lib/realtime/useRealtime';
@@ -409,6 +409,68 @@ describe('SessionPage - Real-time Integration Tests', () => {
         expect(mockSupabase.from).toHaveBeenCalledWith('lessons');
       });
     });
+    it('should update lesson status to ended when End button is clicked', async () => {
+      const lessonsUpdateEqMock = jest.fn().mockResolvedValue({ error: null });
+
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: { id: 'user-123' } },
+        error: null
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'lessons') {
+          return {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({
+                  data: {
+                    id: 'lesson-456',
+                    course_id: 'course-123',
+                    status: 'active',
+                    pin_code: '123456',
+                    courses: { instructor_id: 'user-123' }
+                  },
+                  error: null
+                })
+              })
+            }),
+            update: jest.fn().mockReturnValue({
+              eq: lessonsUpdateEqMock
+            })
+          };
+        }
+
+        if (table === 'discussions') {
+          return {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                order: jest.fn().mockResolvedValue({
+                  data: [],
+                  error: null
+                })
+              })
+            })
+          };
+        }
+
+        return {};
+      });
+
+
+      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /End/i })).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /End/i }));
+
+      await waitFor(() => {
+        expect(mockSupabase.from).toHaveBeenCalledWith('lessons');
+        expect(lessonsUpdateEqMock).toHaveBeenCalledWith('id', 'lesson-456');
+        expect(mockPush).toHaveBeenCalledWith('/lessons_page/course-123');
+      });
+    });
   });
 
   describe('Broadcast Functionality', () => {
@@ -511,4 +573,184 @@ describe('SessionPage - Real-time Integration Tests', () => {
       expect(useRealtime).toHaveBeenCalledWith('lesson-456', 'instructor');
     });
   });
+  describe('Export Feature', () => {
+    it('should export lesson data as a .txt file when Export Txt is clicked', async () => {
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: { id: 'user-123' } },
+        error: null
+      });
+
+      const mockCreateObjectURL = jest.fn(() => 'blob:mock-url');
+      const mockRevokeObjectURL = jest.fn();
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+      URL.createObjectURL = mockCreateObjectURL;
+      URL.revokeObjectURL = mockRevokeObjectURL;
+
+      const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'lessons') {
+          return {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({
+                  data: {
+                    id: 'lesson-456',
+                    course_id: 'course-123',
+                    title: 'Econ 101',
+                    status: 'ended',
+                    pin_code: '123456',
+                    courses: { instructor_id: 'user-123' }
+                  },
+                  error: null
+                })
+              })
+            }),
+            update: jest.fn().mockReturnValue({
+              eq: jest.fn().mockResolvedValue({ error: null })
+            })
+          };
+        }
+
+        if (table === 'discussions') {
+          return {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                order: jest.fn().mockResolvedValue({
+                  data: [
+                    {
+                      id: 'disc-1',
+                      lesson_id: 'lesson-456',
+                      prompt_text: 'What is 2+2?',
+                      prompt_type: 'short_answer',
+                      status: 'closed',
+                      created_at: '2026-02-11T18:15:44.000Z',
+                      published_at: '2026-02-11T18:15:44.000Z',
+                      closed_at: '2026-02-11T18:16:44.000Z',
+                      display_order: 0,
+                      responses: [
+                        { id: 'resp-1', discussion_id: 'disc-1', response_text: '4', created_at: '2026-02-11T18:16:10.000Z' }
+                      ]
+                    }
+                  ],
+                  error: null
+                })
+              })
+            })
+          };
+        }
+
+        return {};
+      });
+
+      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+
+      screen.debug();
+      const exportBtn = await screen.findByRole('button', { name: /Export Txt/i });
+
+      fireEvent.click(exportBtn);
+
+      await waitFor(() => {
+        expect(mockCreateObjectURL).toHaveBeenCalled();
+        expect(clickSpy).toHaveBeenCalled();
+        expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+      });
+
+      clickSpy.mockRestore();
+      URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
+
+    });
+  });
+  describe('Saved Lesson View', () => {
+    it('should display preserved discussions and responses when instructor accesses a saved lesson', async () => {
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: { id: 'user-123' } },
+        error: null
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'lessons') {
+          return {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({
+                  data: {
+                    id: 'lesson-456',
+                    course_id: 'course-123',
+                    title: 'Saved Lesson',
+                    status: 'ended',
+                    pin_code: '123456',
+                    courses: { instructor_id: 'user-123' }
+                  },
+                  error: null
+                })
+              })
+            })
+          };
+        }
+
+        if (table === 'discussions') {
+          return {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                order: jest.fn().mockResolvedValue({
+                  data: [
+                    {
+                      id: 'disc-1',
+                      lesson_id: 'lesson-456',
+                      prompt_text: 'What is 2+2?',
+                      prompt_type: 'short_answer',
+                      status: 'closed',
+                      created_at: '2026-02-11T18:15:44.000Z',
+                      published_at: '2026-02-11T18:15:44.000Z',
+                      closed_at: '2026-02-11T18:16:44.000Z',
+                      display_order: 0,
+                      responses: [
+                        {
+                          id: 'resp-1',
+                          discussion_id: 'disc-1',
+                          response_text: '4',
+                          created_at: '2026-02-11T18:16:10.000Z'
+                        },
+                        {
+                          id: 'resp-2',
+                          discussion_id: 'disc-1',
+                          response_text: '5',
+                          created_at: '2026-02-11T18:17:10.000Z'
+                        }
+                      ]
+                    }
+                  ],
+                  error: null
+                })
+              })
+            })
+          };
+        }
+
+        return {};
+      });
+
+      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+
+      // Saved lesson header
+      expect(await screen.findByText('Saved Lesson')).toBeInTheDocument();
+
+      // Preserved discussion prompt
+      expect(await screen.findByText('What is 2+2?')).toBeInTheDocument();
+
+      // Preserved responses
+      expect(screen.getByText('4')).toBeInTheDocument();
+      expect(screen.getByText('5')).toBeInTheDocument();
+
+      // Timestamp labels present in saved-data view
+      expect(screen.getByText(/Prompt time:/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Response time:/i).length).toBeGreaterThan(0);
+    });
+  });
+
+
 });
