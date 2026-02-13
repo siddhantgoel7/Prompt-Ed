@@ -5,6 +5,7 @@ import { use, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useRealtime } from '@/lib/realtime/useRealtime';
+import DisplayCodeState from './display_code';
 import type { Lesson } from '@/types/lesson';
 import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
@@ -136,6 +137,8 @@ export default function SessionPage({
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
+  // const [displayState, setDisplayState] = useState('display_code_component');
+  const [displayState, setDisplayState] = useState(false);
   // eslint-disable-next-line react-hooks/purity
   const barHeights = Array.from({ length: 40 }, () => Math.random() * 100);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -494,6 +497,12 @@ export default function SessionPage({
     await fetchDiscussions();
   };
 
+  const handleDisplay = () => {
+    if (lesson) {
+      setDisplayState(prev => !prev);
+    }
+  }
+
   const handleEnd = async () => {
   if (!lesson) return;
 
@@ -737,7 +746,7 @@ const handleExportLessonData = async () => {
           </div>
 
           {/* Action Buttons */}
-          <button className="px-6 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800">
+          <button onClick={handleDisplay} className="px-6 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800">
             Display
           </button>
           <button
@@ -755,6 +764,9 @@ const handleExportLessonData = async () => {
       {endError && <p className="text-sm text-red-600">{endError}</p>}
 
 
+
+      {/* displaody code page */}
+      <DisplayCodeState code={lesson.pin_code} state={displayState}/>
       {/* Main Content */}
       <div className="flex-1 flex">
         {/* Left Sidebar - Tabbed Interface */}
