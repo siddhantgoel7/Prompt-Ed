@@ -22,7 +22,7 @@ interface MockSupabaseClient {
   auth: MockSupabaseAuth
 }
 
-describe('API: /api/auth/callback Logic', () => {
+describe('API: /api/auth/callback Logic [US 1.01][US 1.02]', () => {
   let mockSupabase: MockSupabaseClient
 
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe('API: /api/auth/callback Logic', () => {
     jest.clearAllMocks()
   })
 
-  it('should exchange code for session successfully', async () => {
+  it('[US 1.01][AT2] should exchange code for session successfully', async () => {
     const validCode = 'validcode'
 
     mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({
@@ -55,7 +55,7 @@ describe('API: /api/auth/callback Logic', () => {
     expect(data.session.access_token).toBe('token')
   })
 
-  it('should handle error when code exchange fails', async () => {
+  it('[US 1.01][AT3] should handle error when code exchange fails', async () => {
     const invalidCode = 'invalidcode'
 
     mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({
@@ -71,7 +71,7 @@ describe('API: /api/auth/callback Logic', () => {
     expect(data).toBeNull()
   })
 
-  it('should handle missing code parameter gracefully', async () => {
+  it('[US 1.01][AT3] should handle missing code parameter gracefully', async () => {
     const code = null
 
     // Simulate the route checking for code

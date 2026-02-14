@@ -13,7 +13,7 @@ jest.mock('@/lib/supabase/client', () => ({
   createClient: () => mockCreateClient()
 }));
 
-describe('useRealtime Hook', () => {
+describe('useRealtime Hook [US 1.34][US 2.06]', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

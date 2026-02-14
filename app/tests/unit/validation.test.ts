@@ -1,5 +1,5 @@
-describe('Validation Logic', () => {
-  describe('Email Validation', () => {
+describe('Validation Logic [US 1.01][US 1.49]', () => {
+  describe('Email Validation [US 1.01]', () => {
     it('should accept valid email', () => {
       const validEmail = 'test@ualberta.ca'
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -19,7 +19,7 @@ describe('Validation Logic', () => {
     })
   })
 
-  describe('Password Validation', () => {
+  describe('Password Validation [US 1.01]', () => {
     it('should accept password with 8+ characters', () => {
       const validPassword = 'password123'
       expect(validPassword.length >= 8).toBe(true)
@@ -36,7 +36,7 @@ describe('Validation Logic', () => {
     })
   })
 
-  describe('Course Title Validation', () => {
+  describe('Course Title Validation [US 1.49]', () => {
     it('should accept non-empty course title', () => {
       const validTitle = 'PMCOL 400 Lec A1'
       expect(validTitle.trim().length > 0).toBe(true)

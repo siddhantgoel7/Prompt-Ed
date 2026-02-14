@@ -18,7 +18,7 @@ interface MockSupabaseClient {
   auth: MockSupabaseAuth
 }
 
-describe('Auth Helpers', () => {
+describe('Auth Helpers [US 1.01][US 1.02][US 1.03]', () => {
   let mockSupabase: MockSupabaseClient
 
   beforeEach(() => {
@@ -38,8 +38,8 @@ describe('Auth Helpers', () => {
     jest.clearAllMocks()
   })
 
-  describe('signUpWithEmail', () => {
-    it('should call Supabase signUp with correct parameters', async () => {
+  describe('signUpWithEmail [US 1.01]', () => {
+    it('[US 1.01][AT1] should call Supabase signUp with correct parameters', async () => {
       const { signUpWithEmail } = await import('@/lib/supabase/auth')
 
       mockSupabase.auth.signUp.mockResolvedValue({
@@ -61,7 +61,7 @@ describe('Auth Helpers', () => {
       expect(result.error).toBeNull()
     })
 
-    it('should return error when signup fails', async () => {
+    it('[US 1.01][AT3] should return error when signup fails', async () => {
       const { signUpWithEmail } = await import('@/lib/supabase/auth')
 
       mockSupabase.auth.signUp.mockResolvedValue({
@@ -76,8 +76,8 @@ describe('Auth Helpers', () => {
     })
   })
 
-  describe('signInWithEmail', () => {
-    it('should call Supabase signInWithPassword with correct parameters', async () => {
+  describe('signInWithEmail [US 1.02]', () => {
+    it('[US 1.02][AT1] should call Supabase signInWithPassword with correct parameters', async () => {
       const { signInWithEmail } = await import('@/lib/supabase/auth')
 
       mockSupabase.auth.signInWithPassword.mockResolvedValue({
@@ -93,7 +93,7 @@ describe('Auth Helpers', () => {
       })
     })
 
-    it('should return error when credentials are wrong', async () => {
+    it('[US 1.02][AT2] should return error when credentials are wrong', async () => {
       const { signInWithEmail } = await import('@/lib/supabase/auth')
 
       mockSupabase.auth.signInWithPassword.mockResolvedValue({
@@ -107,8 +107,8 @@ describe('Auth Helpers', () => {
     })
   })
 
-  describe('signOut', () => {
-    it('should call Supabase signOut', async () => {
+  describe('signOut [US 1.03]', () => {
+    it('[US 1.03][AT1] should call Supabase signOut', async () => {
       const { signOut } = await import('@/lib/supabase/auth')
 
       mockSupabase.auth.signOut.mockResolvedValue({ error: null })

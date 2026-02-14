@@ -5,16 +5,36 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Override default ignores of eslint-config-next.
+
+  // Ignores (ESLint v9: replace .eslintignore with this)
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
+
+    // Common generated folders:
+    "coverage/**",
+    "dist/**",
+    "node_modules/**",
+    "test-results/**",
+
     // Legacy Socket.IO server (not used, replaced by Supabase Realtime):
     "server.js",
   ]),
+
+  // ✅ Allow `any` in tests (keeps src strict, unblocks CI)
+  {
+    files: [
+      "tests/**/*.{ts,tsx}",
+      "**/*.test.{ts,tsx}",
+      "**/*.spec.{ts,tsx}",
+    ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

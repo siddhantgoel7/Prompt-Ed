@@ -1,9 +1,10 @@
 // tests/components/lessons_page.test.tsx
+import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
-import LessonsPage from '@/app/lessons_page/[courseId]/page';
+
+import { LessonsPage } from '@/components/instructor/LessonsPage';
 import { createClient } from '@/lib/supabase/client';
-import '@testing-library/jest-dom';
 
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({
@@ -15,23 +16,11 @@ jest.mock('@/lib/supabase/client', () => ({
   createClient: jest.fn(),
 }));
 
-// Mock React.use for params
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  use: jest.fn((promise) => {
-    if (promise && typeof promise.then === 'function') {
-      throw promise;
-    }
-    return promise;
-  }),
-}));
-
 // Suppress console.error for expected errors in tests
 const originalConsoleError = console.error;
 beforeAll(() => {
   console.error = jest.fn();
 });
-
 afterAll(() => {
   console.error = originalConsoleError;
 });
@@ -79,19 +68,72 @@ describe('LessonsPage', () => {
     },
   ];
 
-  const mockParams = { courseId: 'course-123' };
+  const courseId = 'course-123';
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
     (createClient as jest.Mock).mockReturnValue(mockSupabase);
-    
-    // Mock React.use to return params directly
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const React = require('react');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    React.use.mockImplementation((value: any) => value);
   });
+
+  function mockHappyPath() {
+    mockSupabase.auth.getUser.mockResolvedValue({
+      data: { user: mockUser },
+      error: null,
+    });
+
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === 'courses') {
+        return {
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({
+                  data: mockCourse,
+                  error: null,
+                }),
+              }),
+            }),
+          }),
+        };
+      }
+
+      if (table === 'lessons') {
+        return {
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              order: jest.fn().mockResolvedValue({
+                data: mockLessons,
+                error: null,
+              }),
+            }),
+          }),
+          insert: jest.fn().mockReturnValue({
+            select: jest.fn().mockResolvedValue({
+              data: [
+                {
+                  id: 'lesson-3',
+                  course_id: 'course-123',
+                  title: 'New Lesson',
+                  date_created: '2024-02-09T00:00:00Z',
+                  created_at: '2024-02-09T00:00:00Z',
+                },
+              ],
+              error: null,
+            }),
+          }),
+          delete: jest.fn().mockReturnValue({
+            eq: jest.fn().mockResolvedValue({
+              data: null,
+              error: null,
+            }),
+          }),
+        };
+      }
+
+      return {};
+    });
+  }
 
   describe('Authentication and Authorization', () => {
     it('should redirect to home if user is not authenticated', async () => {
@@ -100,7 +142,7 @@ describe('LessonsPage', () => {
         error: new Error('Not authenticated'),
       });
 
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
         expect(mockRouter.push).toHaveBeenCalledWith('/');
@@ -126,7 +168,7 @@ describe('LessonsPage', () => {
         }),
       });
 
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
         expect(mockRouter.push).toHaveBeenCalledWith('/');
@@ -135,7 +177,7 @@ describe('LessonsPage', () => {
 
     it('should redirect to home if user is not the course owner', async () => {
       const differentUser = { ...mockUser, id: 'different-user-id' };
-      
+
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: differentUser },
         error: null,
@@ -154,7 +196,7 @@ describe('LessonsPage', () => {
         }),
       });
 
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
         expect(mockRouter.push).toHaveBeenCalledWith('/');
@@ -162,41 +204,9 @@ describe('LessonsPage', () => {
     });
 
     it('should allow access if user is the course owner', async () => {
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      });
+      mockHappyPath();
 
-      mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'courses') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({
-                    data: mockCourse,
-                    error: null,
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === 'lessons') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                order: jest.fn().mockResolvedValue({
-                  data: mockLessons,
-                  error: null,
-                }),
-              }),
-            }),
-          };
-        }
-      });
-
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
         expect(screen.getByText(mockCourse.title)).toBeInTheDocument();
@@ -206,6 +216,43 @@ describe('LessonsPage', () => {
 
   describe('Page Rendering', () => {
     beforeEach(() => {
+      mockHappyPath();
+    });
+
+    it('should display loading state initially', () => {
+      // Make getUser never resolve to keep it in loading state
+      mockSupabase.auth.getUser.mockImplementation(() => new Promise(() => {}));
+
+      render(<LessonsPage courseId={courseId} />);
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
+    });
+
+    it('should display course title', async () => {
+      render(<LessonsPage courseId={courseId} />);
+
+      await waitFor(() => {
+        expect(screen.getByText(mockCourse.title)).toBeInTheDocument();
+      });
+    });
+
+    it('should display all lessons', async () => {
+      render(<LessonsPage courseId={courseId} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Introduction to Pharmacology')).toBeInTheDocument();
+        expect(screen.getByText('Drug Metabolism')).toBeInTheDocument();
+      });
+    });
+
+    it('should display "Start a New Lesson" card', async () => {
+      render(<LessonsPage courseId={courseId} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Start a New Lesson')).toBeInTheDocument();
+      });
+    });
+
+    it('should display empty state when no lessons exist', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: mockUser },
         error: null,
@@ -226,67 +273,7 @@ describe('LessonsPage', () => {
             }),
           };
         }
-        if (table === 'lessons') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                order: jest.fn().mockResolvedValue({
-                  data: mockLessons,
-                  error: null,
-                }),
-              }),
-            }),
-          };
-        }
-      });
-    });
 
-    it('should display loading state initially', () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
-    });
-
-    it('should display course title', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
-
-      await waitFor(() => {
-        expect(screen.getByText(mockCourse.title)).toBeInTheDocument();
-      });
-    });
-
-    it('should display all lessons', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Introduction to Pharmacology')).toBeInTheDocument();
-        expect(screen.getByText('Drug Metabolism')).toBeInTheDocument();
-      });
-    });
-
-    it('should display "Start a New Lesson" card', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Start a New Lesson')).toBeInTheDocument();
-      });
-    });
-
-    it('should display empty state when no lessons exist', async () => {
-      mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'courses') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({
-                    data: mockCourse,
-                    error: null,
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
         if (table === 'lessons') {
           return {
             select: jest.fn().mockReturnValue({
@@ -299,9 +286,11 @@ describe('LessonsPage', () => {
             }),
           };
         }
+
+        return {};
       });
 
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
         expect(screen.getByText(/No lessons yet/i)).toBeInTheDocument();
@@ -309,7 +298,7 @@ describe('LessonsPage', () => {
     });
 
     it('should display Back button', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /Back/i })).toBeInTheDocument();
@@ -319,43 +308,11 @@ describe('LessonsPage', () => {
 
   describe('Navigation', () => {
     beforeEach(() => {
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      });
-
-      mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'courses') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({
-                    data: mockCourse,
-                    error: null,
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === 'lessons') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                order: jest.fn().mockResolvedValue({
-                  data: mockLessons,
-                  error: null,
-                }),
-              }),
-            }),
-          };
-        }
-      });
+      mockHappyPath();
     });
 
     it('should navigate back to dashboard when Back button is clicked', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
         const backButton = screen.getByRole('button', { name: /Back/i });
@@ -365,24 +322,94 @@ describe('LessonsPage', () => {
     });
 
     it('should navigate to session page when lesson card is clicked', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
-      await waitFor(async () => {
+      await waitFor(() => {
         const lessonTitle = screen.getByText('Introduction to Pharmacology');
         const lessonCard = lessonTitle.closest('div[class*="cursor-pointer"]');
-        
-        if (lessonCard) {
-          fireEvent.click(lessonCard);
-          await waitFor(() => {
-            expect(mockRouter.push).toHaveBeenCalledWith('/session/lesson-1');
-          });
-        }
+        expect(lessonCard).toBeTruthy();
+        if (lessonCard) fireEvent.click(lessonCard);
+      });
+
+      await waitFor(() => {
+        expect(mockRouter.push).toHaveBeenCalledWith('/session/lesson-1');
       });
     });
   });
 
   describe('Create Lesson', () => {
     beforeEach(() => {
+      mockHappyPath();
+    });
+
+    it('should open modal when "Start a New Lesson" is clicked', async () => {
+      render(<LessonsPage courseId={courseId} />);
+
+      await waitFor(() => {
+        fireEvent.click(screen.getByText('Start a New Lesson'));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(/Intro to Pharmacology/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should close modal when Cancel button is clicked', async () => {
+      render(<LessonsPage courseId={courseId} />);
+
+      await waitFor(() => {
+        fireEvent.click(screen.getByText('Start a New Lesson'));
+      });
+
+      await waitFor(() => {
+        fireEvent.click(screen.getByRole('button', { name: /Cancel/i }));
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByPlaceholderText(/Intro to Pharmacology/i)).not.toBeInTheDocument();
+      });
+    });
+
+    it('should show error when trying to create lesson without title', async () => {
+      render(<LessonsPage courseId={courseId} />);
+
+      await waitFor(() => {
+        fireEvent.click(screen.getByText('Start a New Lesson'));
+      });
+
+      await waitFor(() => {
+        const input = screen.getByPlaceholderText(/Intro to Pharmacology/i) as HTMLInputElement;
+        input.removeAttribute('required');
+        fireEvent.change(input, { target: { value: '' } });
+        fireEvent.click(screen.getByRole('button', { name: /Create Lesson/i }));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Lesson title is required')).toBeInTheDocument();
+      });
+    });
+
+    it('should create new lesson successfully', async () => {
+      render(<LessonsPage courseId={courseId} />);
+
+      await waitFor(() => {
+        fireEvent.click(screen.getByText('Start a New Lesson'));
+      });
+
+      await waitFor(() => {
+        fireEvent.change(screen.getByPlaceholderText(/Intro to Pharmacology/i), {
+          target: { value: 'New Lesson' },
+        });
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Create Lesson/i }));
+
+      await waitFor(() => {
+        expect(mockSupabase.from).toHaveBeenCalledWith('lessons');
+      });
+    });
+
+    it('should display error message if lesson creation fails', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: mockUser },
         error: null,
@@ -403,127 +430,7 @@ describe('LessonsPage', () => {
             }),
           };
         }
-        if (table === 'lessons') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                order: jest.fn().mockResolvedValue({
-                  data: mockLessons,
-                  error: null,
-                }),
-              }),
-            }),
-            insert: jest.fn().mockReturnValue({
-              select: jest.fn().mockResolvedValue({
-                data: [{
-                  id: 'lesson-3',
-                  course_id: 'course-123',
-                  title: 'New Lesson',
-                  date_created: '2024-02-09T00:00:00Z',
-                  created_at: '2024-02-09T00:00:00Z',
-                }],
-                error: null,
-              }),
-            }),
-          };
-        }
-      });
-    });
 
-    it('should open modal when "Start a New Lesson" is clicked', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
-
-      await waitFor(() => {
-        const createButtons = screen.getAllByText('Start a New Lesson');
-        fireEvent.click(createButtons[0]);
-      });
-
-      // Wait for modal to appear by checking for the input field
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(/Intro to Pharmacology/i)).toBeInTheDocument();
-      });
-    });
-
-    it('should close modal when Cancel button is clicked', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
-
-      await waitFor(() => {
-        const createButtons = screen.getAllByText('Start a New Lesson');
-        fireEvent.click(createButtons[0]);
-      });
-
-      await waitFor(() => {
-        const cancelButton = screen.getByRole('button', { name: /Cancel/i });
-        fireEvent.click(cancelButton);
-      });
-
-      await waitFor(() => {
-        expect(screen.queryByPlaceholderText(/Intro to Pharmacology/i)).not.toBeInTheDocument();
-      });
-    });
-
-    it('should show error when trying to create lesson without title', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
-
-      await waitFor(() => {
-        const createButtons = screen.getAllByText('Start a New Lesson');
-        fireEvent.click(createButtons[0]);
-      });
-
-      await waitFor(() => {
-        const input = screen.getByPlaceholderText(/Intro to Pharmacology/i) as HTMLInputElement;
-        // Remove the required attribute to bypass HTML5 validation
-        input.removeAttribute('required');
-        
-        // Ensure input is empty
-        fireEvent.change(input, { target: { value: '' } });
-        
-        const submitButton = screen.getByRole('button', { name: /Create Lesson/i });
-        fireEvent.click(submitButton);
-      });
-
-      await waitFor(() => {
-        expect(screen.getByText('Lesson title is required')).toBeInTheDocument();
-      });
-    });
-
-    it('should create new lesson successfully', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
-
-      await waitFor(() => {
-        const createButtons = screen.getAllByText('Start a New Lesson');
-        fireEvent.click(createButtons[0]);
-      });
-
-      await waitFor(() => {
-        const input = screen.getByPlaceholderText(/Intro to Pharmacology/i);
-        fireEvent.change(input, { target: { value: 'New Lesson' } });
-      });
-
-      const submitButton = screen.getByRole('button', { name: /Create Lesson/i });
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockSupabase.from).toHaveBeenCalledWith('lessons');
-      });
-    });
-
-    it('should display error message if lesson creation fails', async () => {
-      mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'courses') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({
-                    data: mockCourse,
-                    error: null,
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
         if (table === 'lessons') {
           return {
             select: jest.fn().mockReturnValue({
@@ -542,22 +449,23 @@ describe('LessonsPage', () => {
             }),
           };
         }
+
+        return {};
       });
 
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
-        const createButtons = screen.getAllByText('Start a New Lesson');
-        fireEvent.click(createButtons[0]);
+        fireEvent.click(screen.getByText('Start a New Lesson'));
       });
 
       await waitFor(() => {
-        const input = screen.getByPlaceholderText(/Intro to Pharmacology/i);
-        fireEvent.change(input, { target: { value: 'New Lesson' } });
+        fireEvent.change(screen.getByPlaceholderText(/Intro to Pharmacology/i), {
+          target: { value: 'New Lesson' },
+        });
       });
 
-      const submitButton = screen.getByRole('button', { name: /Create Lesson/i });
-      fireEvent.click(submitButton);
+      fireEvent.click(screen.getByRole('button', { name: /Create Lesson/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/Failed to add lesson/i)).toBeInTheDocument();
@@ -567,49 +475,11 @@ describe('LessonsPage', () => {
 
   describe('Delete Lesson', () => {
     beforeEach(() => {
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      });
-
-      mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'courses') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({
-                    data: mockCourse,
-                    error: null,
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === 'lessons') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                order: jest.fn().mockResolvedValue({
-                  data: mockLessons,
-                  error: null,
-                }),
-              }),
-            }),
-            delete: jest.fn().mockReturnValue({
-              eq: jest.fn().mockResolvedValue({
-                data: null,
-                error: null,
-              }),
-            }),
-          };
-        }
-      });
+      mockHappyPath();
     });
 
     it('should show delete confirmation modal when delete button is clicked', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
         const deleteButtons = screen.getAllByTitle('Delete lesson');
@@ -622,7 +492,7 @@ describe('LessonsPage', () => {
     });
 
     it('should close delete modal when Cancel is clicked', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
         const deleteButtons = screen.getAllByTitle('Delete lesson');
@@ -641,7 +511,7 @@ describe('LessonsPage', () => {
     });
 
     it('should delete lesson when confirmed', async () => {
-      render(<LessonsPage params={Promise.resolve(mockParams)} />);
+      render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
         const deleteButtons = screen.getAllByTitle('Delete lesson');

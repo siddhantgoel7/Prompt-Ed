@@ -19,7 +19,7 @@ interface MockSupabaseClient extends MockQueryBuilder {
   }
 }
 
-describe('Courses API Operations', () => {
+describe('Courses API Operations [US 1.49][US 1.50]', () => {
   let mockSupabase: MockSupabaseClient
 
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe('Courses API Operations', () => {
   })
 
   describe('Fetch Courses', () => {
-    it('should fetch courses for authenticated user', async () => {
+    it('[US 1.49][AT2] should fetch courses for authenticated user', async () => {
       const mockCourses = [
         { id: '1', title: 'PMCOL 400', instructor_id: 'user-123', date_created: '2024-01-01' },
         { id: '2', title: 'PMCOL 401', instructor_id: 'user-123', date_created: '2024-01-02' },
@@ -71,7 +71,7 @@ describe('Courses API Operations', () => {
       expect(mockSupabase.from).toHaveBeenCalledWith('courses')
     })
 
-    it('should return empty array when user has no courses', async () => {
+    it('[US 1.49][AT2] should return empty array when user has no courses', async () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
@@ -95,7 +95,7 @@ describe('Courses API Operations', () => {
   })
 
   describe('Create Course', () => {
-    it('should create course successfully', async () => {
+    it('[US 1.49][AT1] should create course successfully', async () => {
       const newCourse = {
         title: 'PMCOL 400 Lec A1',
         instructor_id: 'user-123',
@@ -118,7 +118,7 @@ describe('Courses API Operations', () => {
       expect(error).toBeNull()
     })
 
-    it('should fail when title is missing', async () => {
+    it('[US 1.49][AT1] should fail when title is missing', async () => {
       mockSupabase.from.mockReturnValue({
         insert: jest.fn().mockReturnValue({
           select: jest.fn().mockResolvedValue({
@@ -140,7 +140,7 @@ describe('Courses API Operations', () => {
   })
 
   describe('Delete Course', () => {
-    it('should delete course successfully', async () => {
+    it('[US 1.50][AT2] should delete course successfully', async () => {
       mockSupabase.from.mockReturnValue({
         delete: jest.fn().mockReturnValue({
           eq: jest.fn().mockResolvedValue({
@@ -157,7 +157,7 @@ describe('Courses API Operations', () => {
       expect(mockSupabase.from).toHaveBeenCalledWith('courses')
     })
 
-    it('should fail when course does not exist', async () => {
+    it('[US 1.50][AT2] should fail when course does not exist', async () => {
       mockSupabase.from.mockReturnValue({
         delete: jest.fn().mockReturnValue({
           eq: jest.fn().mockResolvedValue({

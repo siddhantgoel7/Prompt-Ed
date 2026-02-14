@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
-import SessionPage from '@/app/session/[lessonId]/page';
+import { SessionPage } from '@/components/instructor/SessionPage';
 import { createClient } from '@/lib/supabase/client';
 import { useRealtime } from '@/lib/realtime/useRealtime';
 import { createMockRealtimeChannel } from '../../jest.setup';
@@ -11,17 +11,6 @@ import {
 
 jest.mock('@/lib/supabase/client');
 jest.mock('@/lib/realtime/useRealtime');
-
-// Mock React.use for params
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  use: jest.fn((promise) => {
-    if (promise && typeof promise.then === 'function') {
-      throw promise;
-    }
-    return promise;
-  }),
-}));
 
 // Mock Next.js useRouter
 const mockPush = jest.fn();
@@ -47,14 +36,10 @@ afterAll(() => {
 describe('SessionPage - Real-time Integration Tests', () => {
   let mockSupabase: ReturnType<typeof createClient>;
   let mockChannel: ReturnType<typeof createMockRealtimeChannel>;
-  const mockUse = jest.requireMock('react').use;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockPush.mockClear();
-
-    // Mock the params to return lesson ID
-    mockUse.mockReturnValue({ lessonId: 'lesson-456' });
 
     // Create mock channel
     mockChannel = createMockRealtimeChannel();
@@ -114,7 +99,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
         }
       });
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
       // Verify useRealtime was called with correct parameters
       expect(useRealtime).toHaveBeenCalledWith('lesson-456', 'instructor');
@@ -126,7 +111,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
         error: { message: 'Not authenticated' }
       });
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith('/');
@@ -158,7 +143,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
         }
       });
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith('/');
@@ -205,7 +190,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
         }
       });
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
       await waitFor(() => {
         const subscriptions = mockChannel._getSubscriptions();
@@ -251,7 +236,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
         }
       });
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
       await waitFor(() => {
         const subscriptions = mockChannel._getSubscriptions();
@@ -332,7 +317,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
         }
       });
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
       await waitFor(() => {
         expect(mockSupabase.from).toHaveBeenCalledWith('discussions');
@@ -403,7 +388,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
         }
       });
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
       await waitFor(() => {
         expect(mockSupabase.from).toHaveBeenCalledWith('lessons');
@@ -449,6 +434,11 @@ describe('SessionPage - Real-time Integration Tests', () => {
                   error: null
                 })
               })
+            }),
+            update: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                eq: jest.fn().mockResolvedValue({ error: null })
+              })
             })
           };
         }
@@ -457,7 +447,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
       });
 
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /End/i })).toBeInTheDocument();
@@ -512,7 +502,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
         }
       });
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
       await waitFor(() => {
         expect(useRealtime).toHaveBeenCalled();
@@ -567,7 +557,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
         }
       });
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
       // Component should handle null channel gracefully
       expect(useRealtime).toHaveBeenCalledWith('lesson-456', 'instructor');
@@ -645,9 +635,8 @@ describe('SessionPage - Real-time Integration Tests', () => {
         return {};
       });
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
-      screen.debug();
       const exportBtn = await screen.findByRole('button', { name: /Export Txt/i });
 
       fireEvent.click(exportBtn);
@@ -734,7 +723,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
         return {};
       });
 
-      render(<SessionPage params={Promise.resolve({ lessonId: 'lesson-456' })} />);
+      render(<SessionPage lessonId="lesson-456" />);
 
       // Saved lesson header
       expect(await screen.findByText('Saved Lesson')).toBeInTheDocument();
