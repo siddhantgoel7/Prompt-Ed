@@ -12,12 +12,20 @@ import {
 jest.mock('@/lib/supabase/client');
 jest.mock('@/lib/realtime/useRealtime');
 
-// Mock Next.js useRouter
 const mockPush = jest.fn();
+
+// Combine all next/navigation mocks into one object
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useParams: () => ({
+    lessonId: 'lesson-456', // Match the ID used in your render calls
+  }),
+  useRouter: () => ({
+    push: mockPush,
+    replace: jest.fn(),
+    back: jest.fn(),
+  }),
   usePathname: () => '/',
-  useSearchParams: () => new URLSearchParams()
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 // Suppress console logs/errors for cleaner test output
@@ -34,8 +42,8 @@ afterAll(() => {
 });
 
 describe('SessionPage - Real-time Integration Tests', () => {
-  let mockSupabase: ReturnType<typeof createClient>;
-  let mockChannel: ReturnType<typeof createMockRealtimeChannel>;
+  let mockSupabase: any;
+  let mockChannel: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -258,8 +266,8 @@ describe('SessionPage - Real-time Integration Tests', () => {
       const flatPayload = { response: mockResponse };
 
       // Simulate the extraction logic used in the component
-      const extractNested = nestedPayload.payload?.response || nestedPayload.response;
-      const extractFlat = flatPayload.payload?.response || flatPayload.response;
+      const extractNested = (nestedPayload as any).payload?.response || (nestedPayload as any).response;
+      const extractFlat = (flatPayload as any).payload?.response || flatPayload.response;
 
       expect(extractNested).toEqual(mockResponse);
       expect(extractFlat).toEqual(mockResponse);

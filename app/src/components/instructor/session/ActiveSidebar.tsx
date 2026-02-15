@@ -7,6 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 function formatTime(timestamp: string) {
   const date = new Date(timestamp);
@@ -39,6 +41,9 @@ function DiscussionHistory({
   discussions: DiscussionWithResponseCount[];
   activeDiscussionId: string | null;
 }) {
+  const params = useParams();
+  const lessonId = params.lessonId as string;
+  
   if (discussions.length === 0) {
     return (
       <div className="text-center py-8">
@@ -54,45 +59,50 @@ function DiscussionHistory({
         const isActive = d.id === activeDiscussionId;
 
         return (
-          <Card
-            key={d.id}
-            className={[
-              'cursor-pointer transition-colors',
-              isActive ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'
-            ].join(' ')}
+          <Link 
+            key={d.id} 
+            href={`/session/${lessonId}/discussion/${d.id}`}
+            className="block" // Ensures the link behaves like a block element
           >
-            <CardContent className="p-3">
-              <div className="flex items-start justify-between mb-2">
-                <span className="text-xs font-semibold text-muted-foreground">#{index + 1}</span>
+            <Card
+              className={[
+                'cursor-pointer transition-colors',
+                isActive ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'
+              ].join(' ')}
+            >
+              <CardContent className="p-3">
+                <div className="flex items-start justify-between mb-2">
+                  <span className="text-xs font-semibold text-muted-foreground">#{index + 1}</span>
 
-                {d.status === 'active' ? (
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    Active
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary" className="bg-muted text-muted-foreground">
-                    Closed
-                  </Badge>
-                )}
-              </div>
+                  {d.status === 'active' ? (
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      Active
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                      Closed
+                    </Badge>
+                  )}
+                </div>
 
-              <p className="text-sm text-foreground/90 mb-2 leading-relaxed">
-                {truncateText(d.prompt_text)}
-              </p>
+                <p className="text-sm text-foreground/90 mb-2 leading-relaxed">
+                  {truncateText(d.prompt_text)}
+                </p>
 
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="font-medium">{d.response_count}</span>
-                <span>{d.response_count === 1 ? 'response' : 'responses'}</span>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="font-medium">{d.response_count}</span>
+                  <span>{d.response_count === 1 ? 'response' : 'responses'}</span>
 
-                {d.published_at ? (
-                  <>
-                    <span>•</span>
-                    <span>{formatTime(d.published_at)}</span>
-                  </>
-                ) : null}
-              </div>
-            </CardContent>
-          </Card>
+                  {d.published_at ? (
+                    <>
+                      <span>•</span>
+                      <span>{formatTime(d.published_at)}</span>
+                    </>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         );
       })}
     </div>
@@ -126,7 +136,10 @@ export function ActiveSidebar({
 
           <TabsContent value="discussions" className="mt-4">
             <ScrollArea className="h-[calc(100vh-170px)] pr-2">
-              <DiscussionHistory discussions={discussions} activeDiscussionId={activeDiscussionId} />
+              <DiscussionHistory 
+                discussions={discussions} 
+                activeDiscussionId={activeDiscussionId}
+              />
             </ScrollArea>
           </TabsContent>
 

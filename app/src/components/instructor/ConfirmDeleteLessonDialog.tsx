@@ -2,7 +2,7 @@
 
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 export function ConfirmDeleteLessonDialog({
   open,
@@ -24,6 +24,9 @@ export function ConfirmDeleteLessonDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Lesson?</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete the lesson.
+          </DialogDescription>
         </DialogHeader>
 
         <p className="text-gray-600">
