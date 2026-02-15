@@ -7,6 +7,8 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('Student Join Flow', () => {
   test.describe.configure({ mode: 'serial' });
+  
+  // 22.1
   test('[US 2.06] success: valid PIN joins lesson', async ({ page }) => {
     await page.goto('/');
 
@@ -19,6 +21,7 @@ test.describe('Student Join Flow', () => {
     await expect(page).toHaveURL(/\/student\//, { timeout: 30000 });
   });
 
+  // 22.2
   test('[US 2.06] failure: invalid PIN shows error', async ({ page }) => {
     await page.goto('/');
     const pinInput = page.getByLabel('PIN code');
@@ -32,6 +35,7 @@ test.describe('Student Join Flow', () => {
     await expect(page.getByText('Invalid PIN. Please try again.')).toBeVisible({ timeout: 10000 });
   });
 
+  // 22.3
   test('[US 2.06] failure: empty PIN shows validation hint', async ({ page }) => {
     await page.goto('/');
 
@@ -42,6 +46,7 @@ test.describe('Student Join Flow', () => {
     await expect(page.getByText('PIN is 6 digits.')).toBeVisible();
   });
 
+  // 22.4
   test('[US 2.06] failure: non-numeric PIN rejected', async ({ page }) => {
     await page.goto('/');
 
@@ -58,6 +63,7 @@ test.describe('Student Join Flow', () => {
     await expect(page.getByText('PIN is 6 digits.')).toBeVisible();
   });
 
+  // 22.5
   test('[US 2.06] failure: too short PIN rejected', async ({ page }) => {
     await page.goto('/');
 
@@ -70,6 +76,7 @@ test.describe('Student Join Flow', () => {
     await expect(page.getByText('Enter exactly 6 digits.')).toBeVisible();
   });
 
+  // 22.6
   test('[US 2.06] success: 6-digit PIN enables join button', async ({ page }) => {
     await page.goto('/');
 

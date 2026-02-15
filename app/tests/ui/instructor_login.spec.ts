@@ -11,6 +11,7 @@ test.describe('Instructor Login and Signup', () => {
       await page.goto('/login_instructor');
     });
 
+    // 20.1
     test('[US 1.01] success: login page renders with email and password fields', async ({ page }) => {
       // CardTitle is a <div>, so use getByText
       await expect(page.getByText('Welcome back')).toBeVisible();
@@ -30,10 +31,12 @@ test.describe('Instructor Login and Signup', () => {
       await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible();
     });
 
+    // 20.2
     test('[US 1.01] success: login page has Google OAuth button', async ({ page }) => {
       await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
     });
 
+    // 20.3
     test('[US 1.01] failure: submitting empty form shows validation', async ({ page }) => {
       await page.getByRole('button', { name: 'Sign In' }).click();
 
@@ -43,6 +46,7 @@ test.describe('Instructor Login and Signup', () => {
       expect(isInvalid).toBe(true);
     });
 
+    // 20.4
     test('[US 1.01] failure: invalid credentials show error message', async ({ page }) => {
       await page.getByLabel('Email').fill('invalid@example.com');
       await page.getByLabel('Password').fill('wrongpassword');
@@ -53,6 +57,7 @@ test.describe('Instructor Login and Signup', () => {
       await expect(page.getByRole('alert')).toBeVisible({ timeout: 10000 });
     });
 
+    // 20.5
     test('[US 1.01] success: login page has link to signup page', async ({ page }) => {
       // "Sign Up" is a <button>, not <a>
       const signUpButton = page.getByRole('button', { name: 'Sign Up' });
@@ -68,6 +73,7 @@ test.describe('Instructor Login and Signup', () => {
       await page.goto('/create_instructor');
     });
 
+    // 20.6
     test('[US 1.02] success: signup page renders with all required fields', async ({ page }) => {
       await expect(page.getByText('Create your account')).toBeVisible();
       await expect(page.getByText('Sign up to start managing your courses')).toBeVisible();
@@ -95,6 +101,7 @@ test.describe('Instructor Login and Signup', () => {
       await expect(page.getByRole('button', { name: 'Sign Up' })).toBeVisible();
     });
 
+    // 20.7
     test('[US 1.02] failure: short password shows error', async ({ page }) => {
       await page.getByLabel('Full Name').fill('Test Instructor');
       await page.getByLabel('Email').fill('test@ualberta.ca');
@@ -108,6 +115,7 @@ test.describe('Instructor Login and Signup', () => {
       await expect(page.getByText('Password must be at least 8 characters')).toBeVisible({ timeout: 5000 });
     });
 
+    // 20.8
     test('[US 1.02] failure: unchecked terms shows error', async ({ page }) => {
       await page.getByLabel('Full Name').fill('Test Instructor');
       await page.getByLabel('Email').fill('test@ualberta.ca');
@@ -119,6 +127,7 @@ test.describe('Instructor Login and Signup', () => {
       await expect(page.getByText('You must agree to the Terms and Conditions')).toBeVisible({ timeout: 5000 });
     });
 
+    // 20.9
     test('[US 1.02] success: signup page has link to login page', async ({ page }) => {
       // "Sign In" is a <button>, not <a>
       const signInButton = page.getByRole('button', { name: 'Sign In' });

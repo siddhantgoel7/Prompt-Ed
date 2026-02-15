@@ -86,6 +86,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
 }
 
 describe('SessionActiveView (Acceptance)', () => {
+  // 5.1
   it('[US 1.31][AT1][US 1.06][AT4] success: PIN is visible in active header', () => {
     const vm = makeVM({ lesson: { pin_code: '654321', title: 'Active Lesson' } as any });
     render(<SessionActiveView vm={vm} />);
@@ -94,6 +95,7 @@ describe('SessionActiveView (Acceptance)', () => {
     expect(screen.getByText(/PIN:\s*654321/i)).toBeInTheDocument();
   });
 
+  // 5.2
   it('[US 1.31][AT1] success: display overlay shows join code when displayState=true', () => {
     const vm = makeVM({ displayState: true, lesson: { pin_code: '999999' } as any });
     render(<SessionActiveView vm={vm} />);
@@ -102,6 +104,7 @@ describe('SessionActiveView (Acceptance)', () => {
     expect(screen.getByText(/CODE:\s*999999/i)).toBeInTheDocument();
   });
 
+  // 5.3
   it('[US 1.31][AT1] success: closing overlay calls handleDisplay (toggles off)', () => {
     const vm = makeVM({ displayState: true });
     render(<SessionActiveView vm={vm} />);
@@ -110,6 +113,7 @@ describe('SessionActiveView (Acceptance)', () => {
     expect(vm.handleDisplay).toHaveBeenCalled();
   });
 
+  // 5.4
   it('[US 1.09][AT1] success: clicking End calls vm.handleEnd', () => {
     const vm = makeVM();
     render(<SessionActiveView vm={vm} />);
@@ -118,6 +122,7 @@ describe('SessionActiveView (Acceptance)', () => {
     expect(vm.handleEnd).toHaveBeenCalled();
   });
 
+  // 5.5
   it('[US 1.21][AT1][US 1.28][AT1] success: prompt input updates via setPromptInput and publish calls handler', () => {
     const vm = makeVM();
     render(<SessionActiveView vm={vm} />);
@@ -129,6 +134,7 @@ describe('SessionActiveView (Acceptance)', () => {
     expect(vm.handlePublishDiscussion).toHaveBeenCalled();
   });
 
+  // 5.6
   it('[US 1.28][AT2] success: clicking Close calls handler', () => {
     const vm = makeVM();
     render(<SessionActiveView vm={vm} />);
@@ -137,6 +143,7 @@ describe('SessionActiveView (Acceptance)', () => {
     expect(vm.handleCloseDiscussion).toHaveBeenCalled();
   });
 
+  // 5.7
   it('[US 1.09][AT5] failure/signal: endError renders visibly', () => {
     const vm = makeVM({ endError: 'Failed to end lesson' });
     render(<SessionActiveView vm={vm} />);

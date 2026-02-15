@@ -109,6 +109,7 @@ function makeEndedVM(overrides: Partial<SessionVM> = {}): SessionVM {
 }
 
 describe('Multiple Discussions per Lesson (Acceptance) [US 1.25]', () => {
+  // 9.1
   it('[US 1.25][AT1] success: can publish additional discussion after first one', () => {
     // After a first discussion was published and closed, the instructor can publish again
     const vm = makeActiveVM({
@@ -133,6 +134,7 @@ describe('Multiple Discussions per Lesson (Acceptance) [US 1.25]', () => {
     expect(vm.handlePublishDiscussion).toHaveBeenCalled();
   });
 
+  // 9.2
   it('[US 1.25][AT2] success: each discussion tracked separately', () => {
     const vm = makeEndedVM({
       lessonDiscussions: [
@@ -166,6 +168,7 @@ describe('Multiple Discussions per Lesson (Acceptance) [US 1.25]', () => {
     expect(screen.getByText(/Answer to second/i)).toBeInTheDocument();
   });
 
+  // 9.3
   it('[US 1.25][AT3] success: all discussions visible in lesson data', () => {
     const vm = makeEndedVM({
       lessonDiscussions: [
@@ -201,6 +204,7 @@ describe('Multiple Discussions per Lesson (Acceptance) [US 1.25]', () => {
     expect(screen.getByText(/Discussions and Responses/i)).toBeInTheDocument();
   });
 
+  // 9.4
   it('[US 1.25][AT1] failure: cannot publish when a discussion is already active', () => {
     // When there is already an active discussion, publishing creates a new one
     // but the close button should be available first

@@ -101,6 +101,7 @@ function makeDashboard(overrides: any = {}) {
 }
 
 describe('InstructorDashboard (Acceptance)', () => {
+  // 4.1
   it('[US 2.01][AT1] success: dashboard renders on desktop (smoke)', () => {
     useInstructorDashboardMock.mockReturnValue(makeDashboard());
     render(<InstructorDashboard />);
@@ -109,6 +110,7 @@ describe('InstructorDashboard (Acceptance)', () => {
     expect(screen.getByText(/Courses/i)).toBeInTheDocument();
   });
 
+  // 4.2
   it('[US 1.49][AT1] success: clicking "Add Course" triggers openAdd', () => {
     const dash = makeDashboard();
     useInstructorDashboardMock.mockReturnValue(dash);
@@ -119,6 +121,7 @@ describe('InstructorDashboard (Acceptance)', () => {
     expect(dash.openAdd).toHaveBeenCalled();
   });
 
+  // 4.3
   it('[US 1.49][AT2] success: add course modal shows and submit calls submitAdd', () => {
     const dash = makeDashboard({
       modal: { type: 'add' },
@@ -134,6 +137,7 @@ describe('InstructorDashboard (Acceptance)', () => {
     expect(dash.submitAdd).toHaveBeenCalled();
   });
 
+  // 4.4
   it('[US 1.49][AT3] failure: invalid/missing fields shows error and does not add', () => {
     const dash = makeDashboard({
       modal: { type: 'add' },
@@ -148,9 +152,10 @@ describe('InstructorDashboard (Acceptance)', () => {
     // User tries to submit anyway
     fireEvent.click(screen.getByRole('button', { name: /Save Course/i }));
     expect(dash.submitAdd).toHaveBeenCalled(); // UI attempts submit
-    // Real “not added” behavior will be validated in hook/service unit tests + UI automation
+    // Real "not added" behavior will be validated in hook/service unit tests + UI automation
   });
 
+  // 4.5
   it('[US 1.50][AT1] success: delete confirmation dialog appears when delete opened', () => {
     const dash = makeDashboard({
       modal: { type: 'delete' },
@@ -161,6 +166,7 @@ describe('InstructorDashboard (Acceptance)', () => {
     expect(screen.getByText(/Delete Course\?/i)).toBeInTheDocument();
   });
 
+  // 4.6
   it('[US 1.50][AT2] success: confirming delete calls confirmDelete', () => {
     const dash = makeDashboard({
       modal: { type: 'delete' },
@@ -173,6 +179,7 @@ describe('InstructorDashboard (Acceptance)', () => {
     expect(dash.confirmDelete).toHaveBeenCalled();
   });
 
+  // 4.7
   it('[US 1.50][AT1] failure: cancel delete closes modal (calls closeModal)', () => {
     const dash = makeDashboard({
       modal: { type: 'delete' },
@@ -185,6 +192,7 @@ describe('InstructorDashboard (Acceptance)', () => {
     expect(dash.closeModal).toHaveBeenCalled();
   });
 
+  // 4.8
   it('[US 1.03][AT1] success: clicking Logout calls logout handler', () => {
     const dash = makeDashboard();
     useInstructorDashboardMock.mockReturnValue(dash);
@@ -195,6 +203,7 @@ describe('InstructorDashboard (Acceptance)', () => {
     expect(dash.logout).toHaveBeenCalled();
   });
 
+  // 4.9
   it('[US 1.04][AT1] success: instructor sees only their courses/lessons (UI shows provided list)', () => {
     const dash = makeDashboard({
       courses: [{ id: 'c1', title: 'Only My Course' }],

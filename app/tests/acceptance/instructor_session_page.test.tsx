@@ -1,4 +1,4 @@
-//[US 1.04] not authorized / not owner → “Not found” view (or redirect behavior if implemented there)
+//[US 1.04] not authorized / not owner → "Not found" view (or redirect behavior if implemented there)
 
 //[US 1.06, 1.31] active lesson → active view shows PIN
 
@@ -72,6 +72,7 @@ function makeVM(overrides: Partial<SessionVM>): SessionVM {
 }
 
 describe('Instructor Session Page (Acceptance)', () => {
+  // 7.1
   it('[US 1.04][AT2] failure: access denied shows not found', () => {
     useSessionPageMock.mockReturnValue(makeVM({ notFound: true }));
 
@@ -79,6 +80,7 @@ describe('Instructor Session Page (Acceptance)', () => {
     expect(screen.getByText(/Session not found/i)).toBeInTheDocument();
   });
 
+  // 7.2
   it('[US 1.06][AT1][US 1.31][AT1] success: active lesson shows PIN', () => {
     useSessionPageMock.mockReturnValue(
       makeVM({ lesson: { status: 'active', pin_code: '654321' } as any })
@@ -89,6 +91,7 @@ describe('Instructor Session Page (Acceptance)', () => {
     expect(screen.getByText(/PIN:\s*654321/i)).toBeInTheDocument();
   });
 
+  // 7.3
   it('[US 1.09][AT1] success: ended lesson shows ended view', () => {
     useSessionPageMock.mockReturnValue(
       makeVM({ lesson: { status: 'ended' } as any })
@@ -98,6 +101,7 @@ describe('Instructor Session Page (Acceptance)', () => {
     expect(screen.getByText(/Lesson ended view/i)).toBeInTheDocument();
   });
 
+  // 7.4
   it('[US 1.31][AT3] failure: ended lesson is not joinable (ended view shown)', () => {
     useSessionPageMock.mockReturnValue(
       makeVM({ lesson: { status: 'ended', pin_code: '123456' } as any })

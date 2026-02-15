@@ -4,7 +4,8 @@
  * These tests verify the OAuth callback flow works correctly.
  * We test the logic without actually importing the route handler
  * since Next.js Request/Response objects don't work in Jest.
- */
+ * tests [1.01 US] for proper set up of the account 
+*/
 
 import { createClient } from '@/lib/supabase/server'
 
@@ -38,6 +39,7 @@ describe('API: /api/auth/callback Logic [US 1.01][US 1.02]', () => {
     jest.clearAllMocks()
   })
 
+  // 13.1
   it('[US 1.01][AT2] should exchange code for session successfully', async () => {
     const validCode = 'validcode'
 
@@ -56,6 +58,7 @@ describe('API: /api/auth/callback Logic [US 1.01][US 1.02]', () => {
     const session = data.session!;
   })
 
+  // 13.2
   it('[US 1.01][AT3] should handle error when code exchange fails', async () => {
     const invalidCode = 'invalidcode'
 
@@ -72,6 +75,7 @@ describe('API: /api/auth/callback Logic [US 1.01][US 1.02]', () => {
     expect(data).toBeNull()
   })
 
+  // 13.3
   it('[US 1.01][AT3] should handle missing code parameter gracefully', async () => {
     const code = null
 

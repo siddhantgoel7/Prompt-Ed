@@ -1,3 +1,8 @@
+// 1.49 (Must) - Add course 
+// 1.50 (Must) - Delete course
+// Specifically the quaries that fetch the courses and
+// Edge cases for courses
+
 import { createClient } from '@/lib/supabase/client'
 
 // Mock Supabase client
@@ -42,6 +47,7 @@ describe('Courses API Operations [US 1.49][US 1.50]', () => {
   })
 
   describe('Fetch Courses', () => {
+    // 14.1
     it('[US 1.49][AT2] should fetch courses for authenticated user', async () => {
       const mockCourses = [
         { id: '1', title: 'PMCOL 400', instructor_id: 'user-123', date_created: '2024-01-01' },
@@ -71,6 +77,7 @@ describe('Courses API Operations [US 1.49][US 1.50]', () => {
       expect(mockSupabase.from).toHaveBeenCalledWith('courses')
     })
 
+    // 14.2
     it('[US 1.49][AT2] should return empty array when user has no courses', async () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
@@ -95,6 +102,7 @@ describe('Courses API Operations [US 1.49][US 1.50]', () => {
   })
 
   describe('Create Course', () => {
+    // 14.3
     it('[US 1.49][AT1] should create course successfully', async () => {
       const newCourse = {
         title: 'PMCOL 400 Lec A1',
@@ -118,6 +126,7 @@ describe('Courses API Operations [US 1.49][US 1.50]', () => {
       expect(error).toBeNull()
     })
 
+    // 14.4
     it('[US 1.49][AT1] should fail when title is missing', async () => {
       mockSupabase.from.mockReturnValue({
         insert: jest.fn().mockReturnValue({
@@ -140,6 +149,7 @@ describe('Courses API Operations [US 1.49][US 1.50]', () => {
   })
 
   describe('Delete Course', () => {
+    // 14.5
     it('[US 1.50][AT2] should delete course successfully', async () => {
       mockSupabase.from.mockReturnValue({
         delete: jest.fn().mockReturnValue({
@@ -157,6 +167,7 @@ describe('Courses API Operations [US 1.49][US 1.50]', () => {
       expect(mockSupabase.from).toHaveBeenCalledWith('courses')
     })
 
+    // 14.6
     it('[US 1.50][AT2] should fail when course does not exist', async () => {
       mockSupabase.from.mockReturnValue({
         delete: jest.fn().mockReturnValue({

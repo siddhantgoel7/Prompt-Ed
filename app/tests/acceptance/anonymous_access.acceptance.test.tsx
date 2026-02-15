@@ -58,6 +58,7 @@ function makeEndedVM(overrides: Partial<SessionVM> = {}): SessionVM {
 }
 
 describe('Anonymous Access (Acceptance) [US 2.03]', () => {
+  // 1.1
   it('[US 2.03][AT1] success: student joins without providing name, email, or ID', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: { title: 'Lesson' },
@@ -84,6 +85,7 @@ describe('Anonymous Access (Acceptance) [US 2.03]', () => {
     expect(screen.queryByLabelText(/student id/i)).not.toBeInTheDocument();
   });
 
+  // 1.2
   it('[US 2.03][AT2] success: response records contain no identifiable data', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: { title: 'Lesson' },
@@ -110,6 +112,7 @@ describe('Anonymous Access (Acceptance) [US 2.03]', () => {
     expect(body).not.toMatch(/student-id/i);
   });
 
+  // 1.3
   it('[US 2.03][AT3] success: instructor view has no student identifiers', () => {
     const vm = makeEndedVM({
       lessonDiscussions: [
@@ -139,6 +142,7 @@ describe('Anonymous Access (Acceptance) [US 2.03]', () => {
     expect(body).not.toMatch(/user-\d+/);
   });
 
+  // 1.4
   it('[US 2.03][AT1] failure: ended lesson still shows no identity fields', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: { title: 'Lesson' },

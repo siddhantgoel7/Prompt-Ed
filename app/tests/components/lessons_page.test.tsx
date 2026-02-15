@@ -136,6 +136,7 @@ describe('LessonsPage', () => {
   }
 
   describe('Authentication and Authorization', () => {
+    // 16.1
     it('should redirect to home if user is not authenticated', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: null },
@@ -149,6 +150,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.2
     it('should redirect to home if course does not exist', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: mockUser },
@@ -175,6 +177,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.3
     it('should redirect to home if user is not the course owner', async () => {
       const differentUser = { ...mockUser, id: 'different-user-id' };
 
@@ -203,6 +206,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.4
     it('should allow access if user is the course owner', async () => {
       mockHappyPath();
 
@@ -219,6 +223,7 @@ describe('LessonsPage', () => {
       mockHappyPath();
     });
 
+    // 16.5
     it('should display loading state initially', () => {
       // Make getUser never resolve to keep it in loading state
       mockSupabase.auth.getUser.mockImplementation(() => new Promise(() => {}));
@@ -227,6 +232,7 @@ describe('LessonsPage', () => {
       expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
 
+    // 16.6
     it('should display course title', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -235,6 +241,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.7
     it('should display all lessons', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -244,6 +251,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.8
     it('should display "Start a New Lesson" card', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -252,6 +260,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.9
     it('should display empty state when no lessons exist', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: mockUser },
@@ -297,6 +306,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.10
     it('should display Back button', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -311,6 +321,7 @@ describe('LessonsPage', () => {
       mockHappyPath();
     });
 
+    // 16.11
     it('should navigate back to dashboard when Back button is clicked', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -321,6 +332,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.12
     it('should navigate to session page when lesson card is clicked', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -342,6 +354,7 @@ describe('LessonsPage', () => {
       mockHappyPath();
     });
 
+    // 16.13
     it('should open modal when "Start a New Lesson" is clicked', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -354,6 +367,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.14
     it('should close modal when Cancel button is clicked', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -370,6 +384,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.15
     it('should show error when trying to create lesson without title', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -389,6 +404,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.16
     it('should create new lesson successfully', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -409,6 +425,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.17
     it('should display error message if lesson creation fails', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: mockUser },
@@ -478,6 +495,7 @@ describe('LessonsPage', () => {
       mockHappyPath();
     });
 
+    // 16.18
     it('should show delete confirmation modal when delete button is clicked', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -491,6 +509,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.19
     it('should close delete modal when Cancel is clicked', async () => {
       render(<LessonsPage courseId={courseId} />);
 
@@ -510,6 +529,7 @@ describe('LessonsPage', () => {
       });
     });
 
+    // 16.20
     it('should delete lesson when confirmed', async () => {
       render(<LessonsPage courseId={courseId} />);
 

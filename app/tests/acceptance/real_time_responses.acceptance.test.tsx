@@ -91,6 +91,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
 }
 
 describe('Real-time Responses (Acceptance) [US 1.34]', () => {
+  // 10.1
   it('[US 1.34][AT1] success: responses appear without refresh (via broadcast listener)', () => {
     // When responses array is updated (via broadcast callback in the hook),
     // the view re-renders with new responses without manual refresh
@@ -107,6 +108,7 @@ describe('Real-time Responses (Acceptance) [US 1.34]', () => {
     expect(screen.getByText(/Second answer/i)).toBeInTheDocument();
   });
 
+  // 10.2
   it('[US 1.34][AT2] success: responses displayed anonymously (no student identifiers)', () => {
     const vm = makeVM({
       responses: [
@@ -128,6 +130,7 @@ describe('Real-time Responses (Acceptance) [US 1.34]', () => {
     expect(container?.textContent).not.toMatch(/user-/);
   });
 
+  // 10.3
   it('[US 1.34][AT3] success: all responses appear in list', () => {
     const vm = makeVM({
       responses: [
@@ -144,6 +147,7 @@ describe('Real-time Responses (Acceptance) [US 1.34]', () => {
     expect(screen.getByText(/Response C/i)).toBeInTheDocument();
   });
 
+  // 10.4
   it('[US 1.34][AT1] success: preserved responses visible in ended view', () => {
     const vm = makeVM({
       lesson: { id: 'lesson-1', title: 'Ended', status: 'ended', course_id: 'c1', pin_code: '123456', created_at: new Date().toISOString() } as any,

@@ -24,6 +24,7 @@ describe('Auth (Acceptance) - LoginForm', () => {
     jest.clearAllMocks();
   });
 
+  // 2.1
   it('[US 1.02][AT1] success: email/password login redirects instructor to dashboard', async () => {
     (signInWithEmail as jest.Mock).mockResolvedValue({ error: null });
 
@@ -40,6 +41,7 @@ describe('Auth (Acceptance) - LoginForm', () => {
     });
   });
 
+  // 2.2
   it('[US 1.02][AT2] failure: invalid email/password shows error and remains logged out', async () => {
     (signInWithEmail as jest.Mock).mockResolvedValue({
       error: { message: 'Invalid login credentials' },
@@ -56,6 +58,7 @@ describe('Auth (Acceptance) - LoginForm', () => {
     expect(mockPush).not.toHaveBeenCalled();
   });
 
+  // 2.3
   it('[US 1.02][AT1] success: clicking "Continue with Google" triggers SSO handler', async () => {
     (signInWithGoogle as jest.Mock).mockResolvedValue({ error: null });
 
@@ -71,6 +74,7 @@ describe('Auth (Acceptance) - LoginForm', () => {
     expect(mockPush).not.toHaveBeenCalledWith('/instructor_dashboard');
   });
 
+  // 2.4
   it('[US 1.02][AT2] failure: Google SSO failure shows error and remains logged out', async () => {
     (signInWithGoogle as jest.Mock).mockResolvedValue({
       error: { message: 'SSO failed' },
@@ -84,6 +88,7 @@ describe('Auth (Acceptance) - LoginForm', () => {
     expect(mockPush).not.toHaveBeenCalled();
   });
 
+  // 2.5
   it('[US 1.01][AT1] success: clicking "Sign Up" navigates to account creation page', async () => {
     render(<LoginForm />);
 

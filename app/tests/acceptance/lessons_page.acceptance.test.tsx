@@ -91,6 +91,7 @@ function makeLessonsVM(overrides: any = {}) {
 }
 
 describe('LessonsPage (Acceptance)', () => {
+  // 8.1
   it('[US 2.01][AT1] success: lessons page renders on desktop (smoke)', () => {
     useLessonsPageMock.mockReturnValue(makeLessonsVM());
     render(<LessonsPage courseId="c1" />);
@@ -99,6 +100,7 @@ describe('LessonsPage (Acceptance)', () => {
     expect(screen.getByText(/Course Title/i)).toBeInTheDocument();
   });
 
+  // 8.2
   it('[US 1.05][AT1] success: clicking "Start a New Lesson" triggers openCreate', () => {
     const vm = makeLessonsVM();
     useLessonsPageMock.mockReturnValue(vm);
@@ -109,6 +111,7 @@ describe('LessonsPage (Acceptance)', () => {
     expect(vm.openCreate).toHaveBeenCalled();
   });
 
+  // 8.3
   it('[US 1.05][AT2] success: create dialog open and submit calls submitCreate', () => {
     const vm = makeLessonsVM({
       modal: { type: 'create' },
@@ -123,6 +126,7 @@ describe('LessonsPage (Acceptance)', () => {
     expect(vm.submitCreate).toHaveBeenCalled();
   });
 
+  // 8.4
   it('[US 1.05][AT2] failure: invalid create shows error', () => {
     const vm = makeLessonsVM({
       modal: { type: 'create' },
@@ -135,6 +139,7 @@ describe('LessonsPage (Acceptance)', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(/Lesson title is required/i);
   });
 
+  // 8.5
   it('[US 1.08][AT1] success: delete flow opens dialog when modal.type=delete', () => {
     const vm = makeLessonsVM({
       modal: { type: 'delete' },
@@ -145,6 +150,7 @@ describe('LessonsPage (Acceptance)', () => {
     expect(screen.getByText(/Delete Lesson\?/i)).toBeInTheDocument();
   });
 
+  // 8.6
   it('[US 1.08][AT2] success: confirming delete calls confirmDelete', () => {
     const vm = makeLessonsVM({
       modal: { type: 'delete' },
@@ -157,6 +163,7 @@ describe('LessonsPage (Acceptance)', () => {
     expect(vm.confirmDelete).toHaveBeenCalled();
   });
 
+  // 8.7
   it('[US 1.08][AT4] failure: cancel delete calls closeModal', () => {
     const vm = makeLessonsVM({
       modal: { type: 'delete' },
@@ -169,6 +176,7 @@ describe('LessonsPage (Acceptance)', () => {
     expect(vm.closeModal).toHaveBeenCalled();
   });
 
+  // 8.8
   it('[US 1.05][AT2] state: shows empty lessons message when lessons list is empty', () => {
     const vm = makeLessonsVM({ lessons: [] });
     useLessonsPageMock.mockReturnValue(vm);
@@ -179,6 +187,7 @@ describe('LessonsPage (Acceptance)', () => {
     ).toBeInTheDocument();
   });
 
+  // 8.9
   it('[US 1.04][AT2] failure: course not found blocks access', () => {
     useLessonsPageMock.mockReturnValue(makeLessonsVM({ course: null }));
 

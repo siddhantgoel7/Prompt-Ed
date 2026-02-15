@@ -69,6 +69,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
   });
 
   describe('Component Initialization', () => {
+    // 17.1
     it('should call useRealtime with correct lesson ID', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
@@ -113,6 +114,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
       expect(useRealtime).toHaveBeenCalledWith('lesson-456', 'instructor');
     });
 
+    // 17.2
     it('should redirect to home if user not authenticated', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: null },
@@ -126,6 +128,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
       });
     });
 
+    // 17.3
     it('should redirect if user does not own the lesson', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
@@ -160,6 +163,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
   });
 
   describe('Real-time Channel Integration', () => {
+    // 17.4
     it('should register response:new event listener on channel', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
@@ -206,6 +210,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
       });
     });
 
+    // 17.5
     it('should handle response:new broadcasts', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
@@ -260,6 +265,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
       );
     });
 
+    // 17.6
     it('should handle both nested and flat payload structures', () => {
       // Test the defensive payload extraction pattern
       const nestedPayload = { payload: { response: mockResponse } };
@@ -275,6 +281,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
   });
 
   describe('Database Integration', () => {
+    // 17.7
     it('should fetch discussions on mount', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
@@ -332,6 +339,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
       });
     });
 
+    // 17.8
     it('should initialize lesson with PIN if status is draft', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
@@ -402,6 +410,8 @@ describe('SessionPage - Real-time Integration Tests', () => {
         expect(mockSupabase.from).toHaveBeenCalledWith('lessons');
       });
     });
+
+    // 17.9
     it('should update lesson status to ended when End button is clicked', async () => {
       const lessonsUpdateEqMock = jest.fn().mockResolvedValue({ error: null });
 
@@ -472,6 +482,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
   });
 
   describe('Broadcast Functionality', () => {
+    // 17.10
     it('should have channel available for broadcasting', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
@@ -521,6 +532,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
       expect(typeof mockChannel.send).toBe('function');
     });
 
+    // 17.11
     it('should handle connection state changes', () => {
       // Test with disconnected state
       (useRealtime as jest.Mock).mockReturnValue({
@@ -571,7 +583,9 @@ describe('SessionPage - Real-time Integration Tests', () => {
       expect(useRealtime).toHaveBeenCalledWith('lesson-456', 'instructor');
     });
   });
+
   describe('Export Feature', () => {
+    // 17.12
     it('should export lesson data as a .txt file when Export Txt is clicked', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
@@ -661,7 +675,9 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
     });
   });
+
   describe('Saved Lesson View', () => {
+    // 17.13
     it('should display preserved discussions and responses when instructor accesses a saved lesson', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },

@@ -8,6 +8,7 @@ import type { Response } from '@/types/response';
  * reducing duplication and ensuring data structure validity.
  */
 
+// 18.1
 export const mockDiscussion: Discussion = {
   id: 'discussion-123',
   lesson_id: 'lesson-456',
@@ -20,6 +21,7 @@ export const mockDiscussion: Discussion = {
   display_order: 0
 };
 
+// 18.2
 export const mockClosedDiscussion: Discussion = {
   id: 'discussion-456',
   lesson_id: 'lesson-456',
@@ -32,6 +34,7 @@ export const mockClosedDiscussion: Discussion = {
   display_order: 0
 };
 
+// 18.3
 export const mockMultipleChoiceDiscussion: Discussion = {
   id: 'discussion-789',
   lesson_id: 'lesson-456',
@@ -44,6 +47,7 @@ export const mockMultipleChoiceDiscussion: Discussion = {
   display_order: 1
 };
 
+// 18.4
 export const mockResponse: Response = {
   id: 'response-789',
   discussion_id: 'discussion-123',
@@ -51,6 +55,7 @@ export const mockResponse: Response = {
   created_at: '2026-02-10T14:06:15Z'
 };
 
+// 18.5
 export const mockResponse2: Response = {
   id: 'response-790',
   discussion_id: 'discussion-123',
@@ -58,6 +63,7 @@ export const mockResponse2: Response = {
   created_at: '2026-02-10T14:06:45Z'
 };
 
+// 18.6
 export const mockResponse3: Response = {
   id: 'response-791',
   discussion_id: 'discussion-123',
@@ -65,16 +71,19 @@ export const mockResponse3: Response = {
   created_at: '2026-02-10T14:07:12Z'
 };
 
+// 18.7
 export const mockDiscussionWithCount: DiscussionWithResponseCount = {
   ...mockDiscussion,
   response_count: 5
 };
 
+// 18.8
 export const mockDiscussionWithZeroResponses: DiscussionWithResponseCount = {
   ...mockMultipleChoiceDiscussion,
   response_count: 0
 };
 
+// 18.9
 export const mockClosedDiscussionWithCount: DiscussionWithResponseCount = {
   ...mockClosedDiscussion,
   response_count: 12
@@ -87,6 +96,7 @@ export const mockClosedDiscussionWithCount: DiscussionWithResponseCount = {
  * @param count - Number of discussions to create
  * @returns Array of discussions with increasing display_order
  */
+// 18.10
 export function createMockDiscussions(count: number): Discussion[] {
   return Array.from({ length: count }, (_, index) => ({
     id: `discussion-${index}`,
@@ -108,6 +118,7 @@ export function createMockDiscussions(count: number): Discussion[] {
  * @param count - Number of responses to create
  * @returns Array of responses
  */
+// 18.11
 export function createMockResponses(discussionId: string, count: number): Response[] {
   return Array.from({ length: count }, (_, index) => ({
     id: `response-${index}`,
@@ -124,6 +135,7 @@ export function createMockResponses(discussionId: string, count: number): Respon
  * @param responseCount - Number of responses
  * @returns DiscussionWithResponseCount object
  */
+// 18.12
 export function withResponseCount(
   discussion: Discussion,
   responseCount: number

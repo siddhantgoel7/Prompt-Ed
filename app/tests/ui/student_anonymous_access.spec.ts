@@ -5,6 +5,7 @@ import { test, expect } from '@playwright/test';
  * Students should NOT require authentication to join lessons
  */
 test.describe('Student Anonymous Access', () => {
+  // 21.1
   test('[US 2.03] success: landing page has no login requirement for students', async ({ page }) => {
     await page.goto('/');
 
@@ -22,6 +23,7 @@ test.describe('Student Anonymous Access', () => {
     await expect(page.getByText('Enter the 6-digit PIN provided by your instructor.')).toBeVisible();
   });
 
+  // 21.2
   test('[US 2.03] success: no personal data fields on student join', async ({ page }) => {
     await page.goto('/');
 
@@ -40,6 +42,7 @@ test.describe('Student Anonymous Access', () => {
     await expect(passwordField).not.toBeVisible();
   });
 
+  // 21.3
   test('[US 2.03] success: student can reach session without authentication', async ({ page }) => {
     // Navigate directly to a student session URL (if lesson exists)
     // In a real scenario, we'd need a valid lesson ID, but we're testing the route is accessible

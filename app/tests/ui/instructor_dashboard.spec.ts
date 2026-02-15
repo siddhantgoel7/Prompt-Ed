@@ -10,6 +10,7 @@ import { test, expect } from '@playwright/test';
  * [US 1.50] Delete course flow.
  */
 test.describe('Instructor Dashboard (auth-gated)', () => {
+  // 19.1
   test('[US 1.49][US 1.03] unauthenticated user sees loading then redirects to home', async ({ page }) => {
     await page.goto('/instructor_dashboard');
 
@@ -22,6 +23,7 @@ test.describe('Instructor Dashboard (auth-gated)', () => {
     await expect(page.getByLabel('PIN code')).toBeVisible();
   });
 
+  // 19.2
   test('[US 1.05] unauthenticated user accessing lessons page redirects to home', async ({ page }) => {
     await page.goto('/lessons_page/some-course-id');
 

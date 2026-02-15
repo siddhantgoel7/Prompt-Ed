@@ -1,3 +1,8 @@
+//1.49 (Must) - Add course 
+//1.50 (Must) - Delete course
+// Specifically the ability to see your own courses and no one
+// elses, as well as the ability to delete and add courses
+
 import '@testing-library/jest-dom'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -47,6 +52,7 @@ describe('Dashboard Component', () => {
     ;(createClient as jest.Mock).mockReturnValue(mockSupabase)
   })
 
+  // 15.1
   it('should show loading state initially', () => {
     mockSupabase.auth.getUser.mockImplementation(
       () => new Promise(() => {}) // Never resolves - stays loading
@@ -56,6 +62,7 @@ describe('Dashboard Component', () => {
     expect(screen.getByText('Loading...')).toBeInTheDocument()
   })
 
+  // 15.2
   it('should redirect to home if user not authenticated', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({
       data: { user: null },
@@ -72,6 +79,7 @@ describe('Dashboard Component', () => {
     })
   })
 
+  // 15.3
   it('should display user name when authenticated', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({
       data: {
@@ -102,6 +110,7 @@ describe('Dashboard Component', () => {
     })
   })
 
+  // 15.4
   it('should display courses when loaded', async () => {
     const mockCourses = [
       { id: '1', title: 'PMCOL 400', date_created: '2024-01-01', instructor_id: 'user-123' },
@@ -134,6 +143,7 @@ describe('Dashboard Component', () => {
     })
   })
 
+  // 15.5
   it('should show "No courses" message when courses array is empty', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({
       data: {
@@ -160,6 +170,7 @@ describe('Dashboard Component', () => {
     })
   })
 
+  // 15.6
   it('should open modal when "Add a course" is clicked', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({
       data: {
@@ -193,6 +204,7 @@ describe('Dashboard Component', () => {
     })
   })
 
+  // 15.7
   it('should call signOut when logout button is clicked', async () => {
     (signOut as jest.Mock).mockResolvedValue({ error: null })
 

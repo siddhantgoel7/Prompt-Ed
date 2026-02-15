@@ -54,6 +54,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
 }
 
 describe('Auto-Save on End (Acceptance) [US 1.10]', () => {
+  // 3.1
   it('[US 1.10][AT1] success: ending lesson closes active discussions (status=closed, closed_at set)', () => {
     const closedAt = '2026-02-14T10:30:00Z';
     const vm = makeVM({
@@ -77,6 +78,7 @@ describe('Auto-Save on End (Acceptance) [US 1.10]', () => {
     expect(screen.getByText(/Discussions and Responses/i)).toBeInTheDocument();
   });
 
+  // 3.2
   it('[US 1.10][AT2] success: discussion prompts preserved with timestamps after end', () => {
     const vm = makeVM({
       lessonDiscussions: [
@@ -108,6 +110,7 @@ describe('Auto-Save on End (Acceptance) [US 1.10]', () => {
     expect(screen.getByText(/What are side effects\?/i)).toBeInTheDocument();
   });
 
+  // 3.3
   it('[US 1.10][AT3] success: responses preserved with submission times after end', () => {
     const vm = makeVM({
       lessonDiscussions: [
@@ -133,6 +136,7 @@ describe('Auto-Save on End (Acceptance) [US 1.10]', () => {
     expect(screen.getByText(/Four/i)).toBeInTheDocument();
   });
 
+  // 3.4
   it('[US 1.10][AT1] failure: no discussions shows empty history', () => {
     const vm = makeVM({ lessonDiscussions: [] });
 

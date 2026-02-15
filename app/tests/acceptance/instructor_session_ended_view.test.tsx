@@ -51,12 +51,14 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
 }
 
 describe('SessionEndedView (Acceptance)', () => {
+  // 6.1
   it('[US 1.09][AT1] success: ended header renders', () => {
     const vm = makeVM();
     render(<SessionEndedView vm={vm} />);
     expect(screen.getByText(/Ended Header:\s*Ended Lesson/i)).toBeInTheDocument();
   });
 
+  // 6.2
   it('[US 1.34][AT1] success: displays preserved discussions and responses in history', () => {
     const vm = makeVM({
       lessonDiscussions: [
@@ -79,6 +81,7 @@ describe('SessionEndedView (Acceptance)', () => {
     expect(screen.getByText(/Four/i)).toBeInTheDocument();
   });
 
+  // 6.3
   it('[US 1.09][AT5] failure: historyError is visible', () => {
     const vm = makeVM({ historyError: 'Failed to load history' });
     render(<SessionEndedView vm={vm} />);
@@ -86,6 +89,7 @@ describe('SessionEndedView (Acceptance)', () => {
     expect(screen.getByText(/Failed to load history/i)).toBeInTheDocument();
   });
 
+  // 6.4
   it('[US 1.09][AT5] state: shows loading message when historyLoading=true', () => {
     const vm = makeVM({ historyLoading: true });
     render(<SessionEndedView vm={vm} />);
@@ -93,6 +97,7 @@ describe('SessionEndedView (Acceptance)', () => {
     expect(screen.getByText(/Loading lesson history/i)).toBeInTheDocument();
   });
 
+  // 6.5
   it('[US 1.09][AT1] success: clicking Export calls vm.handleExportLessonData', () => {
     const vm = makeVM();
     render(<SessionEndedView vm={vm} />);
@@ -101,6 +106,7 @@ describe('SessionEndedView (Acceptance)', () => {
     expect(vm.handleExportLessonData).toHaveBeenCalled();
   });
 
+  // 6.6
   it('[US 1.06][AT3] success: clicking Activate calls vm.handleActivate', () => {
     const vm = makeVM();
     render(<SessionEndedView vm={vm} />);

@@ -15,6 +15,7 @@ test.describe('Student Submit Response', () => {
     await expect(page).toHaveURL(/\/student\//, { timeout: 30000 });
   });
 
+  // 24.1
   test('[US 2.09][US 2.07] prompt visible -> can submit response', async ({ page }) => {
     // Wait for either waiting card or response form
     const waiting = page.getByText('Waiting for the instructor to publish a discussion');
@@ -41,6 +42,7 @@ test.describe('Student Submit Response', () => {
     await expect(page.getByText('Response submitted')).toBeVisible({ timeout: 5000 });
   });
 
+  // 24.2
   test('[US 2.07] failure: blank response blocked', async ({ page }) => {
     const waiting = page.getByText('Waiting for the instructor to publish a discussion');
     const responseBox = page.getByPlaceholder('Type your response here...');
@@ -56,6 +58,7 @@ test.describe('Student Submit Response', () => {
     await expect(page.getByRole('button', { name: 'Submit response' })).toBeDisabled();
   });
 
+  // 24.3
   test('[US 2.07] failure: whitespace-only response should be blocked', async ({ page }) => {
     const waiting = page.getByText('Waiting for the instructor to publish a discussion');
     const responseBox = page.getByPlaceholder('Type your response here...');

@@ -18,6 +18,7 @@ describe('useRealtime Hook [US 1.34][US 2.06]', () => {
     jest.clearAllMocks();
   });
 
+  // 26.1
   it('should create channel with correct lesson ID', () => {
     const lessonId = 'lesson-123';
     renderHook(() => useRealtime(lessonId, 'instructor'));
@@ -32,6 +33,7 @@ describe('useRealtime Hook [US 1.34][US 2.06]', () => {
     );
   });
 
+  // 26.2
   it('should subscribe to channel and set isConnected to true', async () => {
     const lessonId = 'lesson-123';
     const { result } = renderHook(() => useRealtime(lessonId, 'instructor'));
@@ -47,6 +49,7 @@ describe('useRealtime Hook [US 1.34][US 2.06]', () => {
     expect(mockChannel.subscribe).toHaveBeenCalled();
   });
 
+  // 26.3
   it('should return channel reference after subscription', async () => {
     const lessonId = 'lesson-123';
     const { result } = renderHook(() => useRealtime(lessonId, 'instructor'));
@@ -59,6 +62,7 @@ describe('useRealtime Hook [US 1.34][US 2.06]', () => {
     expect(result.current.channel).toBe(mockChannel);
   });
 
+  // 26.4
   it('should unsubscribe on unmount', () => {
     const lessonId = 'lesson-123';
     const { unmount } = renderHook(() => useRealtime(lessonId, 'instructor'));
@@ -68,6 +72,7 @@ describe('useRealtime Hook [US 1.34][US 2.06]', () => {
     expect(mockChannel.unsubscribe).toHaveBeenCalled();
   });
 
+  // 26.5
   it('should handle connection status change to CLOSED', async () => {
     const lessonId = 'lesson-123';
     const { result } = renderHook(() => useRealtime(lessonId, 'instructor'));
@@ -87,6 +92,7 @@ describe('useRealtime Hook [US 1.34][US 2.06]', () => {
     });
   });
 
+  // 26.6
   it('should create new channel when lessonId changes', () => {
     const { rerender } = renderHook(
       ({ id }) => useRealtime(id, 'instructor'),
@@ -104,6 +110,7 @@ describe('useRealtime Hook [US 1.34][US 2.06]', () => {
     expect(mockChannel.unsubscribe).toHaveBeenCalled();
   });
 
+  // 26.7
   it('should not create channel if lessonId is empty', () => {
     const { result } = renderHook(() => useRealtime('', 'instructor'));
 
@@ -112,6 +119,7 @@ describe('useRealtime Hook [US 1.34][US 2.06]', () => {
     expect(mockChannel.subscribe).not.toHaveBeenCalled();
   });
 
+  // 26.8
   it('should work for both instructor and student roles', async () => {
     const lessonId = 'lesson-123';
 

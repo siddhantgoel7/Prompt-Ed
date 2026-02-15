@@ -1,3 +1,6 @@
+// Tests [1.01 US], specifically
+// it helps us authenticate.
+
 import { createClient } from '@/lib/supabase/client'
 
 // Mock Supabase client
@@ -39,6 +42,7 @@ describe('Auth Helpers [US 1.01][US 1.02][US 1.03]', () => {
   })
 
   describe('signUpWithEmail [US 1.01]', () => {
+    // 25.1
     it('[US 1.01][AT1] should call Supabase signUp with correct parameters', async () => {
       const { signUpWithEmail } = await import('@/lib/supabase/auth')
 
@@ -61,6 +65,7 @@ describe('Auth Helpers [US 1.01][US 1.02][US 1.03]', () => {
       expect(result.error).toBeNull()
     })
 
+    // 25.2
     it('[US 1.01][AT3] should return error when signup fails', async () => {
       const { signUpWithEmail } = await import('@/lib/supabase/auth')
 
@@ -77,6 +82,7 @@ describe('Auth Helpers [US 1.01][US 1.02][US 1.03]', () => {
   })
 
   describe('signInWithEmail [US 1.02]', () => {
+    // 25.3
     it('[US 1.02][AT1] should call Supabase signInWithPassword with correct parameters', async () => {
       const { signInWithEmail } = await import('@/lib/supabase/auth')
 
@@ -93,6 +99,7 @@ describe('Auth Helpers [US 1.01][US 1.02][US 1.03]', () => {
       })
     })
 
+    // 25.4
     it('[US 1.02][AT2] should return error when credentials are wrong', async () => {
       const { signInWithEmail } = await import('@/lib/supabase/auth')
 
@@ -108,6 +115,7 @@ describe('Auth Helpers [US 1.01][US 1.02][US 1.03]', () => {
   })
 
   describe('signOut [US 1.03]', () => {
+    // 25.5
     it('[US 1.03][AT1] should call Supabase signOut', async () => {
       const { signOut } = await import('@/lib/supabase/auth')
 

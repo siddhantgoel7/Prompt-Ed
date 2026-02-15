@@ -10,6 +10,7 @@ import { useStudentSession } from '@/hooks/useStudentSession';
 const useStudentSessionMock = useStudentSession as jest.Mock;
 
 describe('Student Session Page (Acceptance)', () => {
+  // 12.1
   it('[US 2.09][AT1] success: shows prompt when discussion active', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: { title: 'Lesson' },
@@ -29,6 +30,7 @@ describe('Student Session Page (Acceptance)', () => {
     expect(screen.getByText(/What is 2\+2\?/i)).toBeInTheDocument();
   });
 
+  // 12.2
   it('[US 2.07][AT4] success: shows confirmation after submission', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: { title: 'Lesson' },
@@ -48,6 +50,7 @@ describe('Student Session Page (Acceptance)', () => {
     expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
   });
 
+  // 12.3
   it('[US 1.09][AT3][US 2.03][AT4] failure: lesson ended shows ended message', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: { title: 'Lesson' },
@@ -68,7 +71,8 @@ describe('Student Session Page (Acceptance)', () => {
     expect(screen.getByText(/Lesson has ended/i)).toBeInTheDocument();
   });
 
-  it('[US 2.06][AT1] failure: disconnected shows “Connecting…” hint', () => {
+  // 12.4
+  it('[US 2.06][AT1] failure: disconnected shows "Connecting…" hint', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: { title: 'Lesson' },
       activeDiscussion: null,

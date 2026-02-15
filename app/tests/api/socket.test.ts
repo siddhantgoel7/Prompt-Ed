@@ -3,6 +3,7 @@
 import { GET } from '@/app/api/socket/route';
 
 describe('[API] GET /api/socket', () => {
+  //11.1
   it('returns placeholder message', async () => {
     const res = await GET();
     expect(res.status).toBe(200);

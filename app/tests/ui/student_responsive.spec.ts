@@ -5,6 +5,7 @@ import { test, expect } from '@playwright/test';
  * Students should be able to access the app on both desktop and mobile devices
  */
 test.describe('Student Responsive Design', () => {
+  // 23.1
   test('[US 2.01] success: landing page renders on desktop viewport', async ({ page }) => {
     // Set desktop viewport (1280x720)
     await page.setViewportSize({ width: 1280, height: 720 });
@@ -22,6 +23,7 @@ test.describe('Student Responsive Design', () => {
     await expect(page.getByText('Join a session')).toBeVisible();
   });
 
+  // 23.2
   test('[US 2.02] success: landing page renders on mobile viewport', async ({ page }) => {
     // Set mobile viewport (iPhone SE - 375x667)
     await page.setViewportSize({ width: 375, height: 667 });
@@ -44,6 +46,7 @@ test.describe('Student Responsive Design', () => {
     expect(bodyWidth).toBeLessThanOrEqual(viewportWidth);
   });
 
+  // 23.3
   test('[US 2.02] success: student session page renders on mobile viewport', async ({ page }) => {
     // Set mobile viewport (iPhone SE - 375x667)
     await page.setViewportSize({ width: 375, height: 667 });
