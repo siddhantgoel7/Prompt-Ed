@@ -8,3 +8,6 @@ nav:
   - Project Management: project-management.md
   - Teamwork: teamwork.md
   - Meetings: meetings.md
+  - API & Supabase: api.md
+  - Run Locally: run-local.md
+  - Interactions: interface-interactions.md

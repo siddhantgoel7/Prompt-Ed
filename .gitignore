@@ -25,5 +25,7 @@ yarn-error.log*
 next-env.d.ts
 
 # MkDocs
+site/
+.venv/
 venv
 site/
