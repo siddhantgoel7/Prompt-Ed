@@ -1,38 +1,240 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [sprint-2]
   push:
-    branches: [sprint-2]
+    branches: [sprint-2, main]
+  pull_request:
+    branches: [sprint-2, main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  setup:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    name: Install dependencies
     runs-on: self-hosted
-
     defaults:
       run:
         working-directory: app
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: app/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run lint
+  lint:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    name: Lint
+    runs-on: self-hosted
+    needs: setup
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
         run: npm run lint
 
-      - name: Run tests
+  typecheck:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    name: TypeScript typecheck
+    runs-on: self-hosted
+    needs: setup
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck (no emit)
+        run: npx tsc --noEmit
+
+  test-jest:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    name: Jest tests
+    runs-on: self-hosted
+    needs: setup
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Jest
         run: npm test
 
-      - name: Build Next.js app
+      - name: Upload coverage (if present)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jest-coverage
+          path: app/coverage
+          if-no-files-found: ignore
+
+  test-ui:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    name: Playwright UI tests
+    runs-on: self-hosted
+    needs: setup
+    defaults:
+      run:
+        working-directory: app
+    env:
+      CI: true
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Cache Playwright browsers
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package.json').devDependencies['@playwright/test']")" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --no-shell
+
+      - name: Build app (for UI tests)
+        run: npm run build
+
+      - name: Free port 3000 (self-hosted cleanup)
+        run: |
+          if command -v lsof >/dev/null 2>&1; then
+            lsof -ti:3000 | xargs -r kill -9 || true
+          elif command -v fuser >/dev/null 2>&1; then
+            fuser -k 3000/tcp || true
+          else
+            echo "Neither lsof nor fuser found; skipping port cleanup"
+          fi
+
+      - name: Start app in background
+        run: |
+          nohup npm run start -- -p 3000 > /tmp/next-start.log 2>&1 &
+          echo $! > /tmp/next-server.pid
+          echo "Started Next.js with PID $(cat /tmp/next-server.pid)"
+
+      - name: Wait for app to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:3000 > /dev/null; then
+              echo "Server is ready!"
+              exit 0
+            fi
+            echo "Waiting for server... ($i/30)"
+            sleep 2
+          done
+          echo "Server failed to start"
+          cat /tmp/next-start.log
+          exit 1
+
+      - name: Run Playwright (without webServer)
+        run: npm run test:ui -- --reporter=html
+        env:
+          PLAYWRIGHT_SKIP_WEBSERVER: true
+
+      - name: Stop Next.js server
+        if: always()
+        run: |
+          if [ -f /tmp/next-server.pid ]; then
+            kill $(cat /tmp/next-server.pid) || true
+            rm /tmp/next-server.pid
+          fi
+          # Additional cleanup
+          if command -v lsof >/dev/null 2>&1; then
+            lsof -ti:3000 | xargs -r kill -9 || true
+          fi
+
+      - name: Upload Playwright artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-artifacts
+          path: |
+            app/playwright-report
+            app/test-results
+          if-no-files-found: ignore
+
+      - name: Upload server log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: next-start-log
+          path: /tmp/next-start.log
+          if-no-files-found: ignore
+
+  build:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    name: Build (Next.js)
+    runs-on: self-hosted
+    needs: [lint, typecheck, test-jest, test-ui]
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
         run: npm run build

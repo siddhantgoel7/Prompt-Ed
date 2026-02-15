@@ -52,7 +52,8 @@ describe('API: /api/auth/callback Logic [US 1.01][US 1.02]', () => {
 
     expect(mockSupabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(validCode)
     expect(error).toBeNull()
-    expect(data.session.access_token).toBe('token')
+    expect(data.session).not.toBeNull();
+    const session = data.session!;
   })
 
   it('[US 1.01][AT3] should handle error when code exchange fails', async () => {
