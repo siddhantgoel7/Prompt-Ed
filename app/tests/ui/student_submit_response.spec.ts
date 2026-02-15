@@ -1,56 +1,75 @@
 import { test, expect } from '@playwright/test';
 
+/**
+ * UI Automation — Student Submit Response
+ * PIN 123456 is seeded by global-setup.ts with an active lesson + active discussion.
+ */
 test.describe('Student Submit Response', () => {
-  test('[US 2.09][US 2.07] prompt visible -> can submit response', async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    await page.getByLabel('PIN code').fill('123456');
+    await page.getByRole('button', { name: 'Join' }).click();
 
-    await page.getByPlaceholder(/enter pin/i).fill('123456');
-    await page.getByRole('button', { name: /join/i }).click();
+    // Should navigate to student session
+    await expect(page).toHaveURL(/\/student\//, { timeout: 10000 });
+  });
 
-    // We might land in waiting state if no active discussion exists.
-    const waiting = page.getByText(/wait for the next prompt|waiting/i);
-    const responseBox = page.getByPlaceholder(/type your response here/i);
+  test('[US 2.09][US 2.07] prompt visible -> can submit response', async ({ page }) => {
+    // Wait for either waiting card or response form
+    const waiting = page.getByText('Waiting for the instructor to publish a discussion');
+    const responseBox = page.getByPlaceholder('Type your response here...');
 
-    // Wait until either waiting OR response form appears
     await Promise.race([
       waiting.waitFor({ state: 'visible', timeout: 10000 }),
       responseBox.waitFor({ state: 'visible', timeout: 10000 }),
     ]);
 
-    // If waiting, assert waiting behavior and exit cleanly
+    // If waiting for discussion, skip gracefully
     if (await waiting.isVisible()) {
       await expect(waiting).toBeVisible();
       return;
     }
 
-    // Otherwise we have an active discussion: prompt + response form should be usable
+    // Active discussion: prompt visible + response form usable
     await expect(responseBox).toBeVisible();
 
     await responseBox.fill('My response from Playwright');
-    await page.getByRole('button', { name: /submit response/i }).click();
+    await page.getByRole('button', { name: 'Submit response' }).click();
 
-    // StudentSessionPage shows this after submit:
-    await expect(page.getByText(/response submitted/i)).toBeVisible();
+    // After submit, "Response submitted" alert appears
+    await expect(page.getByText('Response submitted')).toBeVisible({ timeout: 5000 });
   });
 
-  test('[US 2.07][AT2] blank response blocked (only when form is present)', async ({ page }) => {
-    await page.goto('/');
-
-    await page.getByPlaceholder(/enter pin/i).fill('123456');
-    await page.getByRole('button', { name: /join/i }).click();
-
-    const waiting = page.getByText(/wait for the next prompt|waiting/i);
-    const responseBox = page.getByPlaceholder(/type your response here/i);
+  test('[US 2.07] failure: blank response blocked', async ({ page }) => {
+    const waiting = page.getByText('Waiting for the instructor to publish a discussion');
+    const responseBox = page.getByPlaceholder('Type your response here...');
 
     await Promise.race([
       waiting.waitFor({ state: 'visible', timeout: 10000 }),
       responseBox.waitFor({ state: 'visible', timeout: 10000 }),
     ]);
 
-    // If no active discussion, the blank-submit test is not applicable
     test.skip(await waiting.isVisible(), 'No active discussion in this environment.');
 
     // Submit should be disabled when blank (disabled={!canSubmit})
-    await expect(page.getByRole('button', { name: /submit response/i })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Submit response' })).toBeDisabled();
+  });
+
+  test('[US 2.07] failure: whitespace-only response should be blocked', async ({ page }) => {
+    const waiting = page.getByText('Waiting for the instructor to publish a discussion');
+    const responseBox = page.getByPlaceholder('Type your response here...');
+
+    await Promise.race([
+      waiting.waitFor({ state: 'visible', timeout: 10000 }),
+      responseBox.waitFor({ state: 'visible', timeout: 10000 }),
+    ]);
+
+    test.skip(await waiting.isVisible(), 'No active discussion in this environment.');
+
+    // Fill with only whitespace
+    await responseBox.fill('   ');
+
+    // Submit button should be disabled for whitespace-only input
+    await expect(page.getByRole('button', { name: 'Submit response' })).toBeDisabled();
   });
 });
