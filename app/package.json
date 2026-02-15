@@ -11,9 +11,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:ui": "playwright test",
-    "test:ui:headed": "playwright test --headed",
-    "test:ui:debug": "playwright test --debug"
+    "test:ui": "playwright test --workers=1",
+    "test:ui:headed": "playwright test --headed --workers=1",
+    "test:ui:debug": "playwright test --debug --workers=1"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

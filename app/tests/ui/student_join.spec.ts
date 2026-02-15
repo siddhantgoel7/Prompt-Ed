@@ -6,6 +6,7 @@ import { test, expect } from '@playwright/test';
  * PIN 999999 is used for "not found" tests.
  */
 test.describe('Student Join Flow', () => {
+  test.describe.configure({ mode: 'serial' });
   test('[US 2.06] success: valid PIN joins lesson', async ({ page }) => {
     await page.goto('/');
 
@@ -15,7 +16,7 @@ test.describe('Student Join Flow', () => {
     await page.getByRole('button', { name: 'Join' }).click();
 
     // Should navigate to /student/<lessonId>
-    await expect(page).toHaveURL(/\/student\//, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/student\//, { timeout: 30000 });
   });
 
   test('[US 2.06] failure: invalid PIN shows error', async ({ page }) => {

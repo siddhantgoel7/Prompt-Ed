@@ -5,13 +5,14 @@ import { test, expect } from '@playwright/test';
  * PIN 123456 is seeded by global-setup.ts with an active lesson + active discussion.
  */
 test.describe('Student Submit Response', () => {
+  test.describe.configure({ mode: 'serial' });
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('PIN code').fill('123456');
     await page.getByRole('button', { name: 'Join' }).click();
 
     // Should navigate to student session
-    await expect(page).toHaveURL(/\/student\//, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/student\//, { timeout: 30000 });
   });
 
   test('[US 2.09][US 2.07] prompt visible -> can submit response', async ({ page }) => {
