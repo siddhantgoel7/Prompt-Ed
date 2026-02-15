@@ -60,6 +60,12 @@ Most tasks in this sprint are documentation and infrastructure related.
 
 Sprint 2 delivers the **walking skeleton** of the system with core lesson and discussion functionality.
 
+## Major Milestones:
+* Authentication and Role Selection: Basic account creation and distinct interfaces for teachers and students.
+* Lesson Lifecycle: Ability for teachers to create, start and end lessons as well as ability for students to join and participate.
+* Real-Time Infrastructure: Establish Socket connection for sending and receiving discussion prompts/responses in real time.
+* Course and Discussion Management: Basic CRUD for courses and discussion topics
+
 ### User Stories
 
 | **User Story** | **Description**                 | **Story Points** |
@@ -86,15 +92,15 @@ Sprint 2 delivers the **walking skeleton** of the system with core lesson and di
 | **Task**                        | **Related US** | **Assignee** | **Due Date** |
 | ------------------------------- | -------------- | ------------ | ------------ |
 | Backend project setup           | SETUP          | Team         | Feb 3        |
-| Database schema setup           | SETUP          | Backend      | Feb 4        |
-| Lesson creation API             | 1.05           | Backend      | Feb 6        |
-| Lesson start/end logic          | 1.06, 1.09     | Backend      | Feb 7        |
-| PIN/QR generation               | 1.06, 1.31     | Backend      | Feb 8        |
-| Student join flow               | 2.06           | Frontend     | Feb 9        |
-| Anonymous access handling       | 2.03           | Backend      | Feb 9        |
-| Discussion lifecycle            | 1.25, 1.28     | Backend      | Feb 10       |
-| Real-time responses (WebSocket) | 1.34           | Backend      | Feb 11       |
-| Discussion UI                   | 1.27           | Frontend     | Feb 12       |
+| Database schema setup           | SETUP          | Nikita/Kris/Muaadh      | Feb 4        |
+| Lesson creation API             | 1.05           | Nikita/Muaadh     | Feb 6        |
+| Lesson start/end logic          | 1.06, 1.09     | Nikita/Shabz      | Feb 7        |
+| PIN/QR generation               | 1.06, 1.31     | Tommy      | Feb 8        |
+| Student join flow               | 2.06           | Kris     | Feb 9        |
+| Anonymous access handling       | 2.03           | Kris      | Feb 9        |
+| Discussion lifecycle            | 1.25, 1.28     | Kris      | Feb 10       |
+| Real-time responses (WebSocket) | 1.34           | Kris/Aldo      | Feb 11       |
+| Discussion UI                   | 1.27           | Sid/Aldo     | Feb 12       |
 | End-to-end testing              | All            | Team         | Feb 14       |
 
 ---
@@ -104,6 +110,12 @@ Sprint 2 delivers the **walking skeleton** of the system with core lesson and di
 **Due:** March 8, 2026
 
 Sprint 3 delivers **AI integration** of the system with authentication upgrades, STT pipeline, and AI-powered prompt workflows.
+
+## Major Milestones:
+* Complete Auth: Upgrade from basic auth to UAlberta SSO.
+* Audio-to-Data Pipeline: Capture audio, transcribe it, and feed output to AI along with uploaded context.
+* AI Content Generation: System can generate, regenerate, and display prompts based on AI output.
+* More Question Types: Add support for multiple choice and varied answer formats with feedback.
 
 ### User Stories
 
@@ -131,17 +143,17 @@ Sprint 3 delivers **AI integration** of the system with authentication upgrades,
 
 | **Task**                                  | **Related US**   | **Assignee** | **Due Date** |
 | ----------------------------------------- | ---------------- | ------------ | ------------ |
-| UAlberta SSO integration                  | 1.02             | Nikita       | Mar 8        |
-| Private lesson access control             | 1.04, 1.26       | Muaadh       | Mar 8        |
-| Reconnection flow and session recovery    | 1.12             | Backend      | Mar 8        |
-| Periodic auto-save implementation         | 1.13             | Backend      | Mar 8        |
-| Past lesson details retrieval/UI          | 1.14             | Fullstack    | Mar 8        |
-| File upload pipeline                      | 1.16             | Backend      | Mar 8        |
-| STT capture pipeline                      | 1.17             | Backend      | Mar 8        |
-| AI prompt generation service              | 1.18, 1.24       | Backend      | Mar 8        |
-| Prompt review/selection UI                | 1.19             | Frontend     | Mar 8        |
-| MCQ + short/long answer support           | 1.23, 2.08, 2.10 | Frontend     | Mar 8        |
-| Lesson-isolation checks for student view  | 2.04, 1.26       | Backend      | Mar 8        |
+| UAlberta SSO integration                  | 1.02             | Nikita       | Mar 3        |
+| Private lesson access control             | 1.04, 1.26       | Muaadh       | Feb 28        |
+| Reconnection flow and session recovery    | 1.12             | Muaadh      | Feb 28        |
+| Periodic auto-save implementation         | 1.13             | Shabz      | Feb 28        |
+| Past lesson details retrieval/UI          | 1.14             | Muaadh    | Feb 25        |
+| File upload pipeline                      | 1.16             | Nikita/Muaadh      | Feb 25        |
+| STT capture pipeline                      | 1.17             | Aldo      | Mar 1        |
+| AI prompt generation service              | 1.18, 1.24       | Nikita/Kris/Sid      | Mar 1        |
+| Prompt review/selection UI                | 1.19             | Aldo/Sid     | Mar 3        |
+| MCQ + short/long answer support           | 1.23, 2.08, 2.10 | Tommy     | Mar 3        |
+| Lesson-isolation checks for student view  | 2.04, 1.26       | Shabz      | Mar 25        |
 | End-to-end testing for AI lesson workflow | All              | Team         | Mar 8        |
 
 ---
@@ -151,6 +163,12 @@ Sprint 3 delivers **AI integration** of the system with authentication upgrades,
 **Due:** March 22, 2026
 
 Sprint 4 delivers **data export, session history, and engagement metrics** with stronger classroom flow controls.
+
+## Major Milestones:
+* Data Export: Functionality to export responses, statistics, and prompts to CSV/PDF.
+* Classroom Flow Control: Implementation of Timers, Time Limits, and QR Code scanning for easy access.
+* Session Stability: Rejoin logic to handle connection drops and helpful error messages.
+* Performance Metrics: View of student engagement and participation stats.
 
 ### User Stories
 
@@ -200,6 +218,10 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 **Due:** March 31, 2026
 
 Sprint 5 delivers **polish and optional features**, leaving room to tie up loose ends and apply final touches.
+
+## Major Milestones:
+* Leave room for tying up loose ends
+* Final Touches
 
 ### User Stories
 
