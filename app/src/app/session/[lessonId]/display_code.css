@@ -1,0 +1,22 @@
+.display_code_component {
+    color: black;
+    font-family: inherit;
+    font-size: 10rem;
+    display: none;
+}
+
+.display_code_component.visible {
+    display: flex;
+    position: absolute;
+    bottom: 0;
+    width: 100vw;
+    height: 95vh;
+    background-color: white;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+h1.display_code_text {
+    text-align: center;
+}

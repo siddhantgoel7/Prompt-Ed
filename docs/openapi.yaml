@@ -1,0 +1,46 @@
+openapi: 3.0.3
+info:
+  title: PMCOL Teaching Tool API
+  version: 0.1.0
+  description: Minimal server endpoints; most data access happens directly from the browser via Supabase.
+servers:
+  - url: https://ualberta-cmput401.github.io/W26project-DeptofPharmacology
+    description: Deployed static site (API hosted with the app runtime)
+  - url: http://localhost:3000
+    description: Local dev server
+paths:
+  /api/auth/callback:
+    get:
+      summary: Exchange Supabase OAuth code for a session
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Authorization code from Supabase OAuth provider
+      responses:
+        "302":
+          description: Redirects to instructor dashboard on success
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Redirect target (e.g., /instructor_dashboard)
+        "302_error":
+          description: Redirects to /create_instructor?error=<message> when Supabase returns an error
+      security: []
+  /api/socket:
+    get:
+      summary: Placeholder endpoint for Socket.io
+      responses:
+        "200":
+          description: Indicates placeholder or connected state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+      security: []
