@@ -1,0 +1,3574 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../run-local/">
+      
+      
+        <link rel="next" href="../ci-cd/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Interactions - PMCOL Teaching Tool</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#interface-interactions-and-module-communication" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PMCOL Teaching Tool" class="md-header__button md-logo" aria-label="PMCOL Teaching Tool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PMCOL Teaching Tool
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Interactions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PMCOL Teaching Tool" class="md-nav__button md-logo" aria-label="PMCOL Teaching Tool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PMCOL Teaching Tool
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../project-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../teamwork/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Teamwork
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../meetings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meetings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Details
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Technical Details
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API & Supabase
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../run-local/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run Locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interactions
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interactions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#interface-interactions-and-module-communication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface Interactions and Module Communication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interface Interactions and Module Communication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Architecture Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interface-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface Categories
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interface Categories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-page-components-routing-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Page Components (Routing Layer)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-feature-components-business-logic-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Feature Components (Business Logic Layer)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-custom-hooks-state-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Custom Hooks (State Management)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-service-modules-data-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Service Modules (Data Layer)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-type-definitions-type-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Type Definitions (Type Safety)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detailed-interface-interactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detailed Interface Interactions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-authentication-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Authentication Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Authentication Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-involved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components Involved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interaction-flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-example-authentication-component-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Example: Authentication Component Interaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-instructor-dashboard-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Instructor Dashboard Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Instructor Dashboard Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-involved_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components Involved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interaction-flow-diagram_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-example-dashboard-component-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Example: Dashboard Component Interaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-lesson-session-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Lesson Session Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Lesson Session Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-involved_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components Involved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interaction-flow-diagram_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-example-session-component-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Example: Session Component Interaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-student-session-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Student Session Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Student Session Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-involved_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components Involved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interaction-flow-diagram_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-example-student-component-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Example: Student Component Interaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-real-time-communication-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Real-time Communication Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Real-time Communication Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-involved_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components Involved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-time-channel-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-time Channel Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-time-event-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-time Event Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-example-real-time-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Example: Real-time Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-data-flow-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Data Flow Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Data Flow Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pattern-1-crud-operations-courselesson-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 1: CRUD Operations (Course/Lesson Management)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-2-real-time-broadcasts-discussionresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 2: Real-time Broadcasts (Discussion/Response)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-3-anonymous-access-student-pin-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 3: Anonymous Access (Student PIN Entry)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-security-and-authorization-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Security and Authorization Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Security and Authorization Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rls-policy-enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RLS Policy Enforcement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authorization-check-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authorization Check Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-complete-user-flow-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Complete User Flow Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Complete User Flow Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-instructor-creates-and-runs-a-lesson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Instructor Creates and Runs a Lesson
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-student-joins-and-participates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Student Joins and Participates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-error-handling-and-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Error Handling and Edge Cases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Error Handling and Edge Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#network-disconnection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Disconnection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invalid-pin-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invalid PIN Entry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#closed-discussion-submission" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Closed Discussion Submission
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-module-dependency-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Module Dependency Graph
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Module Dependency Graph">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#interface-interactions-and-module-communication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface Interactions and Module Communication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interface Interactions and Module Communication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Architecture Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interface-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface Categories
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interface Categories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-page-components-routing-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Page Components (Routing Layer)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-feature-components-business-logic-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Feature Components (Business Logic Layer)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-custom-hooks-state-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Custom Hooks (State Management)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-service-modules-data-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Service Modules (Data Layer)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-type-definitions-type-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Type Definitions (Type Safety)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detailed-interface-interactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detailed Interface Interactions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-authentication-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Authentication Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Authentication Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-involved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components Involved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interaction-flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-example-authentication-component-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Example: Authentication Component Interaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-instructor-dashboard-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Instructor Dashboard Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Instructor Dashboard Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-involved_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components Involved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interaction-flow-diagram_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-example-dashboard-component-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Example: Dashboard Component Interaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-lesson-session-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Lesson Session Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Lesson Session Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-involved_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components Involved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interaction-flow-diagram_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-example-session-component-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Example: Session Component Interaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-student-session-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Student Session Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Student Session Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-involved_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components Involved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interaction-flow-diagram_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-example-student-component-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Example: Student Component Interaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-real-time-communication-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Real-time Communication Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Real-time Communication Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-involved_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components Involved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-time-channel-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-time Channel Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-time-event-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-time Event Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-example-real-time-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Example: Real-time Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-data-flow-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Data Flow Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Data Flow Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pattern-1-crud-operations-courselesson-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 1: CRUD Operations (Course/Lesson Management)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-2-real-time-broadcasts-discussionresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 2: Real-time Broadcasts (Discussion/Response)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-3-anonymous-access-student-pin-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 3: Anonymous Access (Student PIN Entry)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-security-and-authorization-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Security and Authorization Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Security and Authorization Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rls-policy-enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RLS Policy Enforcement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authorization-check-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authorization Check Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-complete-user-flow-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Complete User Flow Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Complete User Flow Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-instructor-creates-and-runs-a-lesson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Instructor Creates and Runs a Lesson
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-student-joins-and-participates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Student Joins and Participates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-error-handling-and-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Error Handling and Edge Cases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Error Handling and Edge Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#network-disconnection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Disconnection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invalid-pin-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invalid PIN Entry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#closed-discussion-submission" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Closed Discussion Submission
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-module-dependency-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Module Dependency Graph
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Module Dependency Graph">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+  <h1>Interactions</h1>
+
+<h2 id="interface-interactions-and-module-communication">Interface Interactions and Module Communication</h2>
+<p>This section provides detailed documentation of how all interfaces (APIs, modules, components, hooks, and services) interact with each other to deliver the complete functionality of the PMCOL Teaching Tool. Every interface is mapped to specific Sprint 2 user stories to ensure all planned functionalities are fully represented.</p>
+<hr />
+<h3 id="system-architecture-overview">System Architecture Overview</h3>
+<p>The application follows a <strong>layered architecture</strong> with clear separation of concerns:</p>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                        PRESENTATION LAYER                        │
+│  React Components (Pages, UI Components, Forms)                 │
+│  - Renders UI                                                    │
+│  - Handles user interactions                                     │
+│  - Delegates business logic to hooks                             │
+└─────────────────────────────────────────────────────────────────┘
+                             ↕
+┌─────────────────────────────────────────────────────────────────┐
+│                        STATE MANAGEMENT LAYER                    │
+│  Custom Hooks (useSessionPage, useInstructorDashboard, etc.)    │
+│  - Manages component state                                       │
+│  - Orchestrates service calls                                    │
+│  - Handles side effects (real-time, routing)                     │
+└─────────────────────────────────────────────────────────────────┘
+                             ↕
+┌─────────────────────────────────────────────────────────────────┐
+│                        SERVICE LAYER                             │
+│  Service Modules (courseService, lessonService, etc.)           │
+│  - Encapsulates business logic                                   │
+│  - Makes database calls via Supabase client                      │
+│  - Returns typed responses                                       │
+└─────────────────────────────────────────────────────────────────┘
+                             ↕
+┌─────────────────────────────────────────────────────────────────┐
+│                        DATA ACCESS LAYER                         │
+│  Supabase Clients (client.ts, server.ts, auth.ts)              │
+│  - Communicates with Supabase backend                            │
+│  - Handles authentication                                        │
+│  - Manages database connections                                  │
+└─────────────────────────────────────────────────────────────────┘
+                             ↕
+┌─────────────────────────────────────────────────────────────────┐
+│                     REAL-TIME COMMUNICATION LAYER                │
+│  Real-time Hooks (useRealtime, useSocket)                       │
+│  - Manages WebSocket connections                                 │
+│  - Broadcasts events                                             │
+│  - Listens for real-time updates                                 │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr />
+<h3 id="interface-categories">Interface Categories</h3>
+<h4 id="1-page-components-routing-layer">1. Page Components (Routing Layer)</h4>
+<p><strong>Location</strong>: <code>app/*/page.tsx</code></p>
+<p><strong>Purpose</strong>: Entry points for each route, handle Next.js routing, perform server-side data fetching</p>
+<p><strong>Interfaces</strong>:
+- <code>/page.tsx</code> → Home page (student PIN entry)
+- <code>/create_instructor/page.tsx</code> → Instructor signup
+- <code>/login_instructor/page.tsx</code> → Instructor login
+- <code>/instructor_dashboard/page.tsx</code> → Instructor course list
+- <code>/lessons_page/[courseId]/page.tsx</code> → Lessons list for a course
+- <code>/session/[lessonId]/page.tsx</code> → Lesson session view
+- <code>/session/[lessonId]/discussion/[discussionId]/page.tsx</code> → Discussion detail view
+- <code>/student/[lessonId]/page.tsx</code> → Student session view</p>
+<p><strong>User Stories Covered</strong>: All US (routing foundation)</p>
+<hr />
+<h4 id="2-feature-components-business-logic-layer">2. Feature Components (Business Logic Layer)</h4>
+<p><strong>Location</strong>: <code>components/instructor/</code>, <code>components/student/</code>, <code>components/auth/</code>, <code>components/shared/</code></p>
+<p><strong>Purpose</strong>: Implement specific features, manage local state, interact with hooks</p>
+<p><strong>Key Interfaces</strong>:
+- <strong>Authentication Components</strong>
+- <strong>Instructor Components</strong>
+- <strong>Student Components</strong>
+- <strong>Shared Components</strong></p>
+<hr />
+<h4 id="3-custom-hooks-state-management">3. Custom Hooks (State Management)</h4>
+<p><strong>Location</strong>: <code>hooks/</code></p>
+<p><strong>Purpose</strong>: Encapsulate state management, side effects, and business logic</p>
+<p><strong>Key Interfaces</strong>:
+- <code>useInstructorDashboard</code> - Course management
+- <code>useLessonsPage</code> - Lesson management
+- <code>useSessionPage</code> - Lesson session lifecycle
+- <code>useStudentSession</code> - Student session interaction
+- <code>useHomeJoin</code> - Student PIN entry
+- <code>useRealtime</code> - Real-time communication
+- <code>useSocket</code> - WebSocket connection</p>
+<hr />
+<h4 id="4-service-modules-data-layer">4. Service Modules (Data Layer)</h4>
+<p><strong>Location</strong>: <code>services/</code></p>
+<p><strong>Purpose</strong>: Abstract database operations, provide clean API for data access</p>
+<p><strong>Key Interfaces</strong>:
+- <code>courseService</code> - Course CRUD
+- <code>lessonService</code> - Lesson CRUD
+- <code>discussionService</code> - Discussion management
+- <code>responseService</code> - Response submission</p>
+<hr />
+<h4 id="5-type-definitions-type-safety">5. Type Definitions (Type Safety)</h4>
+<p><strong>Location</strong>: <code>types/</code></p>
+<p><strong>Purpose</strong>: Ensure type safety across all layers</p>
+<p><strong>Key Interfaces</strong>:
+- <code>instructor.ts</code> - Instructor types
+- <code>course.ts</code> - Course types
+- <code>lesson.ts</code> - Lesson types
+- <code>discussion.ts</code> - Discussion types
+- <code>response.ts</code> - Response types</p>
+<hr />
+<h3 id="detailed-interface-interactions">Detailed Interface Interactions</h3>
+<hr />
+<h2 id="1-authentication-flow">1. Authentication Flow</h2>
+<h3 id="components-involved">Components Involved</h3>
+<pre><code>AuthShell (UI Container)
+    ├─&gt; SignUpForm (Signup UI)
+    ├─&gt; LoginForm (Login UI)
+    ├─&gt; OAuthButton (OAuth UI)
+    └─&gt; EmailConfirmation (Confirmation UI)
+
+         ↓ calls
+
+lib/supabase/auth.ts (Auth Logic)
+    ├─&gt; signUpWithEmail()
+    ├─&gt; signInWithEmail()
+    ├─&gt; signInWithGoogle()
+    └─&gt; signOut()
+
+         ↓ uses
+
+lib/supabase/client.ts (Client Connection)
+    └─&gt; createClient()
+
+         ↓ communicates with
+
+Supabase Auth Backend
+</code></pre>
+<h3 id="interaction-flow-diagram">Interaction Flow Diagram</h3>
+<p><strong>US 1.01 - Create Account Flow</strong></p>
+<pre><code>┌──────────────┐      ┌─────────────┐      ┌──────────────┐      ┌──────────┐
+│ User enters  │──────&gt;│ SignUpForm  │──────&gt;│   auth.ts    │──────&gt;│ Supabase │
+│ credentials  │      │ (validates) │      │ signUpWith   │      │   Auth   │
+└──────────────┘      └─────────────┘      │   Email()    │      └──────────┘
+                              │             └──────────────┘            │
+                              │                                         │
+                              ↓                                         ↓
+                      ┌─────────────┐                           ┌──────────┐
+                      │   Email     │&lt;──────────────────────────│  Sends   │
+                      │Confirmation │                           │   Email  │
+                      │  Component  │                           └──────────┘
+                      └─────────────┘
+                              │
+                              ↓
+                      ┌─────────────┐
+                      │   Redirect  │
+                      │ to Login    │
+                      └─────────────┘
+</code></pre>
+<p><strong>US 1.02 - Login via SSO Flow</strong></p>
+<pre><code>┌──────────────┐      ┌─────────────┐      ┌──────────────┐
+│ User clicks  │──────&gt;│ LoginForm/  │──────&gt;│   auth.ts    │
+│ &quot;Sign in&quot;    │      │ OAuthButton │      │ signInWith   │
+└──────────────┘      └─────────────┘      │   Google()   │
+                                            └──────────────┘
+                                                    │
+                                                    ↓
+                                            ┌──────────────┐
+                                            │   Redirect   │
+                                            │ to Google    │
+                                            │    OAuth     │
+                                            └──────────────┘
+                                                    │
+                                                    ↓
+                                            ┌──────────────┐
+                                            │ /api/auth/   │
+                                            │  callback    │
+                                            │ (validates   │
+                                            │   domain)    │
+                                            └──────────────┘
+                                                    │
+                            ┌───────────────────────┴───────────────────┐
+                            ↓                                           ↓
+                    ┌──────────────┐                            ┌──────────────┐
+                    │  @ualberta   │                            │  Not UAlberta│
+                    │    Valid     │                            │    Invalid   │
+                    │   Redirect   │                            │  Sign Out +  │
+                    │ to Dashboard │                            │    Error     │
+                    └──────────────┘                            └──────────────┘
+</code></pre>
+<h3 id="code-example-authentication-component-interaction">Code Example: Authentication Component Interaction</h3>
+<pre><code class="language-typescript">// 1. SignUpForm Component (Presentation)
+export function SignUpForm() {
+  const [formData, setFormData] = useState&lt;SignUpFormData&gt;({...});
+
+  const handleSubmit = async (e: React.FormEvent) =&gt; {
+    e.preventDefault();
+
+    // Validation (US 1.01 - AT1)
+    if (!formData.agreeToTerms) {
+      setError('You must agree to the Terms and Conditions');
+      return;
+    }
+
+    // Call auth service (US 1.01 - AT2)
+    const { error } = await signUpWithEmail(
+      formData.email,
+      formData.password,
+      formData.fullName
+    );
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    // Show confirmation (US 1.01 - AT3)
+    setConfirmedEmail(formData.email);
+  };
+}
+
+// 2. Auth Service (Business Logic)
+export async function signUpWithEmail(
+  email: string,
+  password: string,
+  fullName: string
+) {
+  const supabase = createClient();
+
+  // US 1.01 - AT4: Create account with metadata
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name: fullName }
+    },
+  });
+
+  return { data, error };
+}
+
+// 3. Supabase Client (Data Access)
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+</code></pre>
+<hr />
+<h2 id="2-instructor-dashboard-flow">2. Instructor Dashboard Flow</h2>
+<h3 id="components-involved_1">Components Involved</h3>
+<pre><code>InstructorDashboard (Main View)
+    ├─&gt; InstructorDashboardHeader (Header UI)
+    ├─&gt; CoursesSection (Course List)
+    │   ├─&gt; CourseCard (Individual Course)
+    │   └─&gt; CourseDialog (Create/Edit Modal)
+    └─&gt; ConfirmDeleteDialog (Delete Confirmation)
+
+         ↓ uses
+
+hooks/useInstructorDashboard.ts (State Management)
+    ├─&gt; Manages courses state
+    ├─&gt; Handles create/delete actions
+    └─&gt; Manages dialog state
+
+         ↓ calls
+
+services/courseService.ts (Data Operations)
+    ├─&gt; listInstructorCourses()
+    ├─&gt; createCourse()
+    ├─&gt; updateCourse()
+    └─&gt; deleteCourseCascade()
+
+         ↓ uses
+
+lib/supabase/client.ts
+    └─&gt; Executes database queries
+</code></pre>
+<h3 id="interaction-flow-diagram_1">Interaction Flow Diagram</h3>
+<p><strong>US 1.49 - Add Course Flow</strong></p>
+<pre><code>┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ User clicks   │────&gt;│ InstructorDash   │────&gt;│ useInstructor    │
+│ &quot;Add Course&quot;  │     │ board            │     │ Dashboard        │
+└───────────────┘     │ (renders dialog) │     │ .openCreate      │
+                      └──────────────────┘     │ Dialog()         │
+                                               └──────────────────┘
+                                                       │
+                                                       ↓
+                                               ┌──────────────────┐
+                                               │ CourseDialog     │
+                                               │ appears          │
+                                               │ (US 1.49 - AT1)  │
+                                               └──────────────────┘
+                                                       │
+                      ┌────────────────────────────────┘
+                      ↓
+┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ User enters   │────&gt;│ CourseDialog     │────&gt;│ useInstructor    │
+│ title, image  │     │ (form submit)    │     │ Dashboard        │
+│ and submits   │     └──────────────────┘     │ .handleCreate    │
+└───────────────┘                              │ Course()         │
+                                               └──────────────────┘
+                                                       │
+                                                       ↓
+                                               ┌──────────────────┐
+                                               │ courseService    │
+                                               │ .createCourse()  │
+                                               └──────────────────┘
+                                                       │
+                                                       ↓
+                                               ┌──────────────────┐
+                                               │ Supabase insert  │
+                                               │ (US 1.49 - AT2)  │
+                                               └──────────────────┘
+                                                       │
+                      ┌────────────────────────────────┘
+                      ↓
+              ┌──────────────────┐
+              │ Update courses   │
+              │ state            │
+              │ (appears in list)│
+              │ (US 1.49 - AT2)  │
+              └──────────────────┘
+                      │
+                      ↓
+              ┌──────────────────┐
+              │ Close dialog     │
+              │ Show success     │
+              └──────────────────┘
+</code></pre>
+<p><strong>US 1.50 - Delete Course Flow</strong></p>
+<pre><code>┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ User clicks   │────&gt;│ CourseCard       │────&gt;│ useInstructor    │
+│ delete icon   │     │ (calls handler)  │     │ Dashboard        │
+└───────────────┘     └──────────────────┘     │ .openDelete      │
+                                               │ Dialog()         │
+                                               └──────────────────┘
+                                                       │
+                                                       ↓
+                                               ┌──────────────────┐
+                                               │ ConfirmDelete    │
+                                               │ Dialog shows     │
+                                               │ WARNING about    │
+                                               │ cascade delete   │
+                                               │ (US 1.50 - AT1)  │
+                                               └──────────────────┘
+                                                       │
+                      ┌────────────────────────────────┘
+                      ↓
+┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ User confirms │────&gt;│ ConfirmDelete    │────&gt;│ useInstructor    │
+│ deletion      │     │ Dialog           │     │ Dashboard        │
+└───────────────┘     │ (clicks confirm) │     │ .confirmDelete() │
+                      └──────────────────┘     └──────────────────┘
+                                                       │
+                                                       ↓
+                                               ┌──────────────────┐
+                                               │ courseService    │
+                                               │ .deleteCourse    │
+                                               │ Cascade()        │
+                                               └──────────────────┘
+                                                       │
+                                                       ↓
+                                               ┌──────────────────┐
+                                               │ 1. Delete lessons│
+                                               │    (cascade)     │
+                                               │ 2. Delete course │
+                                               │ (US 1.50 - AT2,3)│
+                                               └──────────────────┘
+                                                       │
+                      ┌────────────────────────────────┘
+                      ↓
+              ┌──────────────────┐
+              │ Remove from      │
+              │ courses state    │
+              │ Update UI        │
+              └──────────────────┘
+</code></pre>
+<h3 id="code-example-dashboard-component-interaction">Code Example: Dashboard Component Interaction</h3>
+<pre><code class="language-typescript">// 1. InstructorDashboard Component (Presentation)
+export function InstructorDashboard() {
+  const {
+    courses,
+    loading,
+    handleCreateCourse,
+    openDeleteDialog,
+    // ... other state
+  } = useInstructorDashboard();
+
+  return (
+    &lt;div&gt;
+      &lt;InstructorDashboardHeader onAddCourse={openCreateDialog} /&gt;
+      &lt;CoursesSection 
+        courses={courses}
+        onDeleteCourse={openDeleteDialog}
+      /&gt;
+      {/* Dialogs */}
+    &lt;/div&gt;
+  );
+}
+
+// 2. useInstructorDashboard Hook (State Management)
+export function useInstructorDashboard() {
+  const [courses, setCourses] = useState&lt;Course[]&gt;([]);
+  const [courseToDelete, setCourseToDelete] = useState&lt;string | null&gt;(null);
+
+  // Load courses on mount (US 1.04 - AT1)
+  useEffect(() =&gt; {
+    async function fetchCourses() {
+      const user = await supabase.auth.getUser();
+      const { data } = await courseService.listInstructorCourses(user.data.user!.id);
+      setCourses(data || []);
+    }
+    fetchCourses();
+  }, []);
+
+  // US 1.49 - Create course
+  const handleCreateCourse = async (input: CreateCourseInput) =&gt; {
+    const user = await supabase.auth.getUser();
+    const { data, error } = await courseService.createCourse(
+      user.data.user!.id,
+      input
+    );
+
+    if (!error &amp;&amp; data) {
+      setCourses(prev =&gt; [...prev, ...data]); // Update state
+      closeCreateDialog();
+    }
+  };
+
+  // US 1.50 - Delete course
+  const confirmDelete = async () =&gt; {
+    if (!courseToDelete) return;
+
+    const { courseResult } = await courseService.deleteCourseCascade(
+      courseToDelete
+    );
+
+    if (!courseResult.error) {
+      setCourses(prev =&gt; prev.filter(c =&gt; c.id !== courseToDelete));
+      closeDeleteDialog();
+    }
+  };
+
+  return {
+    courses,
+    handleCreateCourse,
+    openDeleteDialog: (id: string) =&gt; setCourseToDelete(id),
+    confirmDelete,
+    // ...
+  };
+}
+
+// 3. courseService (Data Layer)
+export async function createCourse(
+  instructorId: string,
+  input: CreateCourseInput
+) {
+  const supabase = createClient();
+
+  // US 1.49 - AT2: Insert and return course
+  return supabase
+    .from('courses')
+    .insert([{
+      instructor_id: instructorId,
+      title: input.title.trim(),
+      image_url: input.image_url?.trim() || null,
+    }])
+    .select();
+}
+
+export async function deleteCourseCascade(courseId: string) {
+  const supabase = createClient();
+
+  // US 1.50 - AT2, AT3: Cascade delete lessons, then course
+  const lessonsResult = await supabase
+    .from('lessons')
+    .delete()
+    .eq('course_id', courseId);
+
+  const courseResult = await supabase
+    .from('courses')
+    .delete()
+    .eq('id', courseId);
+
+  return { lessonsResult, courseResult };
+}
+</code></pre>
+<hr />
+<h2 id="3-lesson-session-flow">3. Lesson Session Flow</h2>
+<h3 id="components-involved_2">Components Involved</h3>
+<pre><code>SessionPage (Main Container)
+    ├─&gt; SessionActiveView (Active State)
+    │   ├─&gt; SessionHeaderActive (Header)
+    │   ├─&gt; JoinCodeOverlay (PIN Display)
+    │   ├─&gt; ActiveSidebar (Discussion List)
+    │   ├─&gt; ActiveCenter (Current Discussion)
+    │   └─&gt; ActiveRightPanel (Responses)
+    ├─&gt; SessionEndedView (Ended State)
+    │   ├─&gt; SessionHeaderEnded
+    │   └─&gt; Past data view
+    ├─&gt; SessionLoading (Loading State)
+    └─&gt; SessionNotFound (Error State)
+
+         ↓ uses
+
+hooks/useSessionPage.ts (State Management)
+    ├─&gt; Manages lesson lifecycle
+    ├─&gt; Handles start/end lesson
+    └─&gt; Manages discussions
+
+         ↓ calls
+
+services/lessonService.ts
+services/discussionService.ts
+
+         ↓ broadcasts via
+
+lib/realtime/useRealtime.ts (Real-time)
+</code></pre>
+<h3 id="interaction-flow-diagram_2">Interaction Flow Diagram</h3>
+<p><strong>US 1.06 - Start Lesson Flow</strong></p>
+<pre><code>┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ Instructor    │────&gt;│ SessionActive    │────&gt;│ useSessionPage   │
+│ clicks        │     │ View             │     │ .startLesson()   │
+│ &quot;Start&quot;       │     │ (button)         │     └──────────────────┘
+└───────────────┘     └──────────────────┘              │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ Update lesson    │
+                                                │ status = 'active'│
+                                                │ started_at = NOW │
+                                                │ (US 1.06 - AT3)  │
+                                                └──────────────────┘
+                                                         │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ JoinCodeOverlay  │
+                                                │ displays PIN     │
+                                                │ (US 1.06 - AT1)  │
+                                                │ (US 1.31 - AT1)  │
+                                                └──────────────────┘
+                                                         │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ Generate QR code │
+                                                │ (US 1.06 - AT2)  │
+                                                └──────────────────┘
+                                                         │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ PIN visible      │
+                                                │ to students      │
+                                                │ (US 1.06 - AT4)  │
+                                                └──────────────────┘
+</code></pre>
+<p><strong>US 1.28 - Start Discussion Flow</strong></p>
+<pre><code>┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ Instructor    │────&gt;│ ActiveSidebar    │────&gt;│ useSessionPage   │
+│ clicks        │     │ (discussion list)│     │ .startDiscussion │
+│ &quot;Start&quot; on    │     └──────────────────┘     │ ()               │
+│ discussion    │                              └──────────────────┘
+└───────────────┘                                       │
+                                                        ↓
+                                               ┌──────────────────┐
+                                               │ discussionService│
+                                               │ .publish()       │
+                                               │ status='active'  │
+                                               │ (US 1.28 - AT1)  │
+                                               └──────────────────┘
+                                                        │
+                                                        ↓
+                                               ┌──────────────────┐
+                                               │ useRealtime      │
+                                               │ .channel.send()  │
+                                               │ event:           │
+                                               │ 'discussion-     │
+                                               │  started'        │
+                                               └──────────────────┘
+                                                        │
+                      ┌─────────────────────────────────┴─────────────┐
+                      ↓                                               ↓
+              ┌──────────────────┐                           ┌──────────────────┐
+              │ Instructor UI    │                           │ All Students     │
+              │ updates          │                           │ receive prompt   │
+              │ (US 1.27 - AT2)  │                           │ (US 1.27 - AT1)  │
+              └──────────────────┘                           │ (US 2.09 - AT1,2)│
+                                                             └──────────────────┘
+</code></pre>
+<p><strong>US 1.34 - Real-time Responses Flow</strong></p>
+<pre><code>┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ Student       │────&gt;│ StudentResponse  │────&gt;│ responseService  │
+│ submits       │     │ Form             │     │ .submit()        │
+│ response      │     │ (US 2.07)        │     └──────────────────┘
+└───────────────┘     └──────────────────┘              │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ Insert into      │
+                                                │ responses table  │
+                                                │ (US 2.07 - AT1)  │
+                                                └──────────────────┘
+                                                         │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ useRealtime      │
+                                                │ .channel.send()  │
+                                                │ event:           │
+                                                │ 'response:new'   │
+                                                └──────────────────┘
+                                                         │
+                      ┌──────────────────────────────────┘
+                      ↓
+              ┌──────────────────┐
+              │ Instructor's     │
+              │ ActiveRightPanel │
+              │ receives event   │
+              │ (US 1.34 - AT1)  │
+              └──────────────────┘
+                      │
+                      ↓
+              ┌──────────────────┐
+              │ Add response to  │
+              │ responses array  │
+              │ NO manual refresh│
+              │ (US 1.34 - AT1)  │
+              └──────────────────┘
+                      │
+                      ↓
+              ┌──────────────────┐
+              │ Response appears │
+              │ in real-time     │
+              │ (US 1.34 - AT2)  │
+              └──────────────────┘
+</code></pre>
+<p><strong>US 1.09 - End Lesson Flow</strong></p>
+<pre><code>┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ Instructor    │────&gt;│ SessionActive    │────&gt;│ useSessionPage   │
+│ clicks        │     │ View             │     │ .endLesson()     │
+│ &quot;End Lesson&quot;  │     │ (button)         │     └──────────────────┘
+└───────────────┘     └──────────────────┘              │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ Update lesson    │
+                                                │ status = 'ended' │
+                                                │ ended_at = NOW   │
+                                                │ (US 1.09 - AT1)  │
+                                                └──────────────────┘
+                                                         │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ Close all active │
+                                                │ discussions      │
+                                                │ (US 1.09 - AT4)  │
+                                                └──────────────────┘
+                                                         │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ useRealtime      │
+                                                │ .channel.send()  │
+                                                │ event:           │
+                                                │ 'lesson-ended'   │
+                                                └──────────────────┘
+                                                         │
+                      ┌──────────────────────────────────┴─────────────┐
+                      ↓                                                ↓
+              ┌──────────────────┐                            ┌──────────────────┐
+              │ Show confirmation│                            │ Students kicked  │
+              │ to instructor    │                            │ from session     │
+              │ (US 1.09 - AT5)  │                            │ (US 1.09 - AT2,3)│
+              └──────────────────┘                            └──────────────────┘
+                      │
+                      ↓
+              ┌──────────────────┐
+              │ Render           │
+              │ SessionEndedView │
+              │ (past data only) │
+              └──────────────────┘
+</code></pre>
+<h3 id="code-example-session-component-interaction">Code Example: Session Component Interaction</h3>
+<pre><code class="language-typescript">// 1. SessionPage Component (Main Container)
+export function SessionPage({ lessonId }: { lessonId: string }) {
+  const vm = useSessionPage(lessonId);
+
+  if (vm.loading) return &lt;SessionLoading /&gt;;
+  if (vm.notFound) return &lt;SessionNotFound /&gt;;
+
+  // Route to appropriate view based on lesson status
+  if (vm.lesson.status === 'ended') {
+    return &lt;SessionEndedView vm={vm} /&gt;;
+  }
+
+  return &lt;SessionActiveView vm={vm} /&gt;;
+}
+
+// 2. useSessionPage Hook (State Management)
+export function useSessionPage(lessonId: string) {
+  const [lesson, setLesson] = useState&lt;Lesson | null&gt;(null);
+  const [discussions, setDiscussions] = useState&lt;Discussion[]&gt;([]);
+  const [activeDiscussionId, setActiveDiscussionId] = useState&lt;string | null&gt;(null);
+
+  // Setup real-time communication (US 1.34, US 1.27)
+  const { channel, isConnected } = useRealtime(lessonId, 'instructor');
+
+  // US 1.06 - Start lesson
+  const startLesson = async () =&gt; {
+    const { data } = await supabase
+      .from('lessons')
+      .update({
+        status: 'active',
+        started_at: new Date().toISOString(),
+      })
+      .eq('id', lessonId)
+      .select()
+      .single();
+
+    if (data) {
+      setLesson(data);
+    }
+  };
+
+  // US 1.28 - Start discussion
+  const startDiscussion = async (discussionId: string) =&gt; {
+    const updated = await discussionService.publish(discussionId);
+
+    // Broadcast to students (US 1.27 - AT2)
+    channel?.send({
+      type: 'broadcast',
+      event: 'discussion-started',
+      payload: {
+        discussionId: updated.id,
+        prompt: updated.prompt_text,
+      },
+    });
+
+    setActiveDiscussionId(discussionId);
+  };
+
+  // US 1.09 - End lesson
+  const endLesson = async () =&gt; {
+    // Close all active discussions (US 1.09 - AT4)
+    await Promise.all(
+      discussions
+        .filter(d =&gt; d.status === 'active')
+        .map(d =&gt; discussionService.close(d.id))
+    );
+
+    // Update lesson status (US 1.09 - AT1)
+    const { data } = await supabase
+      .from('lessons')
+      .update({
+        status: 'ended',
+        ended_at: new Date().toISOString(),
+      })
+      .eq('id', lessonId)
+      .select()
+      .single();
+
+    // Broadcast to students (US 1.09 - AT2, AT3)
+    channel?.send({
+      type: 'broadcast',
+      event: 'lesson-ended',
+      payload: { lessonId, endedAt: data.ended_at },
+    });
+
+    if (data) {
+      setLesson(data);
+    }
+  };
+
+  return {
+    lesson,
+    discussions,
+    startLesson,
+    startDiscussion,
+    endLesson,
+    channel,
+    isConnected,
+  };
+}
+
+// 3. SessionActiveView Component (Presentation)
+export function SessionActiveView({ vm }: { vm: SessionViewModel }) {
+  return (
+    &lt;div className=&quot;session-layout&quot;&gt;
+      &lt;SessionHeaderActive 
+        lesson={vm.lesson}
+        onEndLesson={vm.endLesson}
+      /&gt;
+
+      {/* US 1.31 - Display PIN */}
+      &lt;JoinCodeOverlay pinCode={vm.lesson.pin_code} /&gt;
+
+      {/* US 1.25 - Multiple discussions */}
+      &lt;ActiveSidebar 
+        discussions={vm.discussions}
+        onStartDiscussion={vm.startDiscussion}
+      /&gt;
+
+      {/* US 1.27 - Display prompt */}
+      &lt;ActiveCenter 
+        currentDiscussion={vm.activeDiscussion}
+      /&gt;
+
+      {/* US 1.34 - Real-time responses */}
+      &lt;ActiveRightPanel 
+        responses={vm.responses}
+        isConnected={vm.isConnected}
+      /&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<hr />
+<h2 id="4-student-session-flow">4. Student Session Flow</h2>
+<h3 id="components-involved_3">Components Involved</h3>
+<pre><code>HomeJoin (PIN Entry)
+    ↓ navigates to
+StudentSessionPage (Main View)
+    ├─&gt; StudentSessionShell (Layout)
+    ├─&gt; StudentPromptCard (Prompt Display)
+    ├─&gt; StudentResponseForm (Response Input)
+    ├─&gt; StudentStatusAlert (Status Messages)
+    └─&gt; StudentWaitingCard (Waiting State)
+
+         ↓ uses
+
+hooks/useStudentSession.ts (State Management)
+hooks/useHomeJoin.ts (PIN Validation)
+
+         ↓ calls
+
+services/responseService.ts
+
+         ↓ listens via
+
+lib/realtime/useRealtime.ts
+</code></pre>
+<h3 id="interaction-flow-diagram_3">Interaction Flow Diagram</h3>
+<p><strong>US 2.06 - Join via PIN Flow</strong></p>
+<pre><code>┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ Student       │────&gt;│ HomeJoin         │────&gt;│ useHomeJoin      │
+│ enters PIN    │     │ Component        │     │ .join()          │
+└───────────────┘     │ (validates)      │     └──────────────────┘
+                      └──────────────────┘              │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ Query lessons    │
+                                                │ table for PIN    │
+                                                │ AND status=      │
+                                                │ 'active'         │
+                                                │ (US 2.06 - AT1)  │
+                                                └──────────────────┘
+                                                         │
+                      ┌──────────────────────────────────┴─────────────┐
+                      ↓                                                ↓
+              ┌──────────────────┐                            ┌──────────────────┐
+              │ PIN valid        │                            │ PIN invalid      │
+              │ Lesson active    │                            │ OR lesson ended  │
+              │ (US 2.06 - AT4)  │                            │ (US 2.06 - AT2)  │
+              └──────────────────┘                            │ (US 2.03 - AT3,4)│
+                      │                                       └──────────────────┘
+                      ↓                                                │
+              ┌──────────────────┐                                    ↓
+              │ Navigate to      │                            ┌──────────────────┐
+              │ /student/        │                            │ Show error       │
+              │ [lessonId]       │                            │ message          │
+              └──────────────────┘                            │ Stay on home     │
+                                                              └──────────────────┘
+</code></pre>
+<p><strong>US 2.09 - Receive Prompt Flow</strong></p>
+<pre><code>┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ StudentSession│────&gt;│ useStudentSession│────&gt;│ useRealtime      │
+│ Page loads    │     │ subscribes to    │     │ .channel         │
+│               │     │ lesson channel   │     │ .on('discussion- │
+└───────────────┘     └──────────────────┘     │  started')       │
+                                               └──────────────────┘
+                                                         │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ Instructor starts│
+                                                │ discussion       │
+                                                │ (broadcasts)     │
+                                                └──────────────────┘
+                                                         │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ Student receives │
+                                                │ broadcast event  │
+                                                │ (US 2.09 - AT2)  │
+                                                └──────────────────┘
+                                                         │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ Update state:    │
+                                                │ currentDiscussion│
+                                                │ promptText       │
+                                                └──────────────────┘
+                                                         │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ StudentPromptCard│
+                                                │ renders prompt   │
+                                                │ (US 2.09 - AT1)  │
+                                                │ (US 2.09 - AT3)  │
+                                                └──────────────────┘
+</code></pre>
+<p><strong>US 2.07 - Submit Response Flow</strong></p>
+<pre><code>┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ Student types │────&gt;│ StudentResponse  │────&gt;│ useStudentSession│
+│ response and  │     │ Form             │     │ .handleSubmit()  │
+│ clicks submit │     │ (validates)      │     └──────────────────┘
+└───────────────┘     └──────────────────┘              │
+                                                         ↓
+                                                ┌──────────────────┐
+                                                │ Validate:        │
+                                                │ - Not blank      │
+                                                │   (US 2.07 - AT2)│
+                                                │ - Discussion     │
+                                                │   is active      │
+                                                │   (US 2.07 - AT3)│
+                                                └──────────────────┘
+                                                         │
+                      ┌──────────────────────────────────┴────────────────┐
+                      ↓                                                   ↓
+              ┌──────────────────┐                              ┌──────────────────┐
+              │ Validation passes│                              │ Validation fails │
+              └──────────────────┘                              │ Show error       │
+                      │                                         └──────────────────┘
+                      ↓
+              ┌──────────────────┐
+              │ responseService  │
+              │ .submit()        │
+              │ (US 2.07 - AT1)  │
+              └──────────────────┘
+                      │
+                      ↓
+              ┌──────────────────┐
+              │ Insert into      │
+              │ responses table  │
+              │ (anonymous)      │
+              │ (US 2.03 - AT2)  │
+              └──────────────────┘
+                      │
+                      ↓
+              ┌──────────────────┐
+              │ Broadcast via    │
+              │ realtime channel │
+              │ to instructor    │
+              └──────────────────┘
+                      │
+                      ↓
+              ┌──────────────────┐
+              │ Show confirmation│
+              │ (US 2.07 - AT4)  │
+              │ Clear form       │
+              └──────────────────┘
+</code></pre>
+<h3 id="code-example-student-component-interaction">Code Example: Student Component Interaction</h3>
+<pre><code class="language-typescript">// 1. HomeJoin Component (PIN Entry)
+export function HomeJoin() {
+  const { 
+    code, 
+    onChangeCode, 
+    join, 
+    error, 
+    pinOk 
+  } = useHomeJoin();
+
+  return (
+    &lt;Card&gt;
+      &lt;CardHeader&gt;
+        &lt;CardTitle&gt;Join a session&lt;/CardTitle&gt;
+      &lt;/CardHeader&gt;
+      &lt;CardContent&gt;
+        {error &amp;&amp; &lt;Alert variant=&quot;destructive&quot;&gt;{error}&lt;/Alert&gt;}
+
+        {/* US 2.06 - AT1: Input PIN */}
+        &lt;Input
+          value={code}
+          onChange={(e) =&gt; onChangeCode(e.target.value)}
+          placeholder=&quot;123456&quot;
+        /&gt;
+
+        {/* US 2.06 - AT4: Join button */}
+        &lt;Button onClick={join} disabled={!pinOk}&gt;
+          Join
+        &lt;/Button&gt;
+      &lt;/CardContent&gt;
+    &lt;/Card&gt;
+  );
+}
+
+// 2. useHomeJoin Hook (PIN Validation)
+export function useHomeJoin() {
+  const [code, setCode] = useState('');
+  const [error, setError] = useState&lt;string | null&gt;(null);
+  const router = useRouter();
+
+  const pinOk = code.length === 6;
+
+  const join = async () =&gt; {
+    setError(null);
+
+    // US 2.06 - AT3: Validate non-empty
+    if (!pinOk) {
+      setError('Enter exactly 6 digits');
+      return;
+    }
+
+    // US 2.06 - AT1: Query for active lesson with PIN
+    const { data: lesson, error: queryError } = await supabase
+      .from('lessons')
+      .select('*')
+      .eq('pin_code', code.toUpperCase())
+      .eq('status', 'active') // US 2.03 - AT4
+      .single();
+
+    if (queryError || !lesson) {
+      // US 2.06 - AT2: Invalid PIN
+      setError('Invalid PIN or lesson is not active');
+      return;
+    }
+
+    // US 2.06 - AT4: Navigate to session
+    router.push(`/student/${lesson.id}`);
+  };
+
+  return {
+    code,
+    onChangeCode: setCode,
+    join,
+    error,
+    pinOk,
+  };
+}
+
+// 3. StudentSessionPage Component
+export function StudentSessionPage({ lessonId }: { lessonId: string }) {
+  const {
+    currentDiscussion,
+    promptText,
+    responseText,
+    setResponseText,
+    handleSubmit,
+    submitting,
+    submitted,
+  } = useStudentSession(lessonId);
+
+  // US 2.09 - AT1: Display prompt when available
+  if (!currentDiscussion) {
+    return &lt;StudentWaitingCard /&gt;;
+  }
+
+  return (
+    &lt;StudentSessionShell&gt;
+      {/* US 2.09 - AT1, AT3: Show prompt */}
+      &lt;StudentPromptCard prompt={promptText} /&gt;
+
+      {/* US 2.07: Response form */}
+      &lt;StudentResponseForm
+        value={responseText}
+        onChange={setResponseText}
+        onSubmit={handleSubmit}
+        submitting={submitting}
+        submitted={submitted}
+      /&gt;
+    &lt;/StudentSessionShell&gt;
+  );
+}
+
+// 4. useStudentSession Hook
+export function useStudentSession(lessonId: string) {
+  const [currentDiscussion, setCurrentDiscussion] = useState&lt;Discussion | null&gt;(null);
+  const [promptText, setPromptText] = useState('');
+  const [responseText, setResponseText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  // US 2.09 - AT2: Subscribe to real-time updates
+  const { channel, isConnected } = useRealtime(lessonId, 'student');
+
+  useEffect(() =&gt; {
+    if (!channel || !isConnected) return;
+
+    // US 2.09 - AT2: Listen for discussion start
+    channel.on('broadcast', { event: 'discussion-started' }, (payload) =&gt; {
+      setCurrentDiscussion(payload.payload.discussion);
+      setPromptText(payload.payload.prompt);
+    });
+
+    // US 1.28 - AT3, US 2.07 - AT3: Listen for discussion close
+    channel.on('broadcast', { event: 'discussion-closed' }, () =&gt; {
+      setCurrentDiscussion(null);
+    });
+  }, [channel, isConnected]);
+
+  // US 2.07 - Submit response
+  const handleSubmit = async () =&gt; {
+    // US 2.07 - AT2: Validate non-blank
+    if (!responseText.trim()) {
+      alert('Response cannot be blank');
+      return;
+    }
+
+    // US 2.07 - AT3: Check discussion is active
+    if (!currentDiscussion || currentDiscussion.status !== 'active') {
+      alert('This discussion is closed');
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      // US 2.07 - AT1: Submit response
+      const response = await responseService.submit({
+        discussion_id: currentDiscussion.id,
+        response_text: responseText.trim(),
+      });
+
+      // Broadcast to instructor (US 1.34 - AT1)
+      channel?.send({
+        type: 'broadcast',
+        event: 'response:new',
+        payload: { response },
+      });
+
+      // US 2.07 - AT4: Show confirmation
+      setSubmitted(true);
+      setResponseText('');
+
+      setTimeout(() =&gt; setSubmitted(false), 2000);
+
+    } catch (error) {
+      alert('Failed to submit response');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return {
+    currentDiscussion,
+    promptText,
+    responseText,
+    setResponseText,
+    handleSubmit,
+    submitting,
+    submitted,
+  };
+}
+</code></pre>
+<hr />
+<h2 id="5-real-time-communication-architecture">5. Real-time Communication Architecture</h2>
+<h3 id="components-involved_4">Components Involved</h3>
+<pre><code>lib/realtime/useRealtime.ts (Supabase Realtime)
+    ├─&gt; Creates lesson-scoped channels
+    ├─&gt; Manages subscriptions
+    └─&gt; Handles broadcasts
+
+lib/socket/useSocket.ts (WebSocket alternative)
+    └─&gt; Fallback/backup communication
+
+Broadcast Events:
+    ├─&gt; 'discussion-started' (US 1.27, US 2.09)
+    ├─&gt; 'discussion-closed' (US 1.28)
+    ├─&gt; 'response:new' (US 1.34)
+    └─&gt; 'lesson-ended' (US 1.09)
+</code></pre>
+<h3 id="real-time-channel-architecture">Real-time Channel Architecture</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                    Supabase Realtime Server                      │
+│                                                                   │
+│  Channel: &quot;lesson:abc123&quot;                                        │
+│  ├─&gt; Subscribed: Instructor (1 connection)                       │
+│  └─&gt; Subscribed: Students (N connections)                        │
+└─────────────────────────────────────────────────────────────────┘
+                             │
+         ┌───────────────────┴───────────────────┐
+         │                                       │
+         ↓                                       ↓
+┌─────────────────────┐              ┌─────────────────────┐
+│   Instructor Client │              │   Student Clients   │
+│   (Publisher)       │              │   (Subscribers)     │
+├─────────────────────┤              ├─────────────────────┤
+│ useRealtime Hook    │              │ useRealtime Hook    │
+│ - channel.send()    │              │ - channel.on()      │
+│   broadcasts events │              │   listens for events│
+│                     │              │                     │
+│ Events Published:   │              │ Events Received:    │
+│ • discussion-started│─────────────&gt;│ • discussion-started│
+│ • discussion-closed │─────────────&gt;│ • discussion-closed │
+│ • lesson-ended      │─────────────&gt;│ • lesson-ended      │
+│                     │              │                     │
+│ Events Received:    │              │ Events Published:   │
+│ • response:new      │&lt;─────────────│ • response:new      │
+└─────────────────────┘              └─────────────────────┘
+</code></pre>
+<h3 id="real-time-event-flow">Real-time Event Flow</h3>
+<p><strong>Event: discussion-started</strong></p>
+<pre><code>Instructor clicks &quot;Start Discussion&quot;
+    │
+    ↓
+discussionService.publish(discussionId)
+    │
+    ↓
+Update discussion status = 'active'
+    │
+    ↓
+channel.send({
+  type: 'broadcast',
+  event: 'discussion-started',
+  payload: {
+    discussionId: string,
+    prompt: string,
+    promptType: PromptType
+  }
+})
+    │
+    ↓
+Supabase Realtime Server
+    │
+    ├──────────────────────────────────────┐
+    ↓                                      ↓
+Instructor receives                   All Students receive
+(UI update - AT2)                     (Show prompt - AT1)
+    │                                      │
+    ↓                                      ↓
+ActiveCenter shows                    StudentPromptCard
+current discussion                    renders prompt
+</code></pre>
+<p><strong>Event: response:new</strong></p>
+<pre><code>Student submits response
+    │
+    ↓
+responseService.submit(input)
+    │
+    ↓
+Insert into responses table
+    │
+    ↓
+channel.send({
+  type: 'broadcast',
+  event: 'response:new',
+  payload: {
+    response: Response
+  }
+})
+    │
+    ↓
+Supabase Realtime Server
+    │
+    ↓
+Instructor receives
+    │
+    ↓
+ActiveRightPanel.responses.push(newResponse)
+    │
+    ↓
+Response appears without refresh (US 1.34 - AT1)
+</code></pre>
+<h3 id="code-example-real-time-integration">Code Example: Real-time Integration</h3>
+<pre><code class="language-typescript">// 1. useRealtime Hook (Real-time Infrastructure)
+export function useRealtime(
+  lessonId: string,
+  role: 'instructor' | 'student'
+) {
+  const channelRef = useRef&lt;RealtimeChannel | null&gt;(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const supabaseRef = useRef(createClient());
+
+  useEffect(() =&gt; {
+    if (!lessonId) return;
+
+    const supabase = supabaseRef.current;
+
+    // Create lesson-scoped channel
+    const channel = supabase.channel(`lesson:${lessonId}`, {
+      config: {
+        broadcast: { ack: true }, // Wait for acknowledgment
+      },
+    });
+
+    // Subscribe to channel
+    channel.subscribe((status) =&gt; {
+      if (status === 'SUBSCRIBED') {
+        console.log(`${role} subscribed to lesson ${lessonId}`);
+        setIsConnected(true);
+        channelRef.current = channel;
+      }
+    });
+
+    // Cleanup on unmount
+    return () =&gt; {
+      channel.unsubscribe();
+      channelRef.current = null;
+      setIsConnected(false);
+    };
+  }, [lessonId, role]);
+
+  return {
+    channel: channelRef.current,
+    isConnected,
+  };
+}
+
+// 2. Instructor: Broadcasting events
+export function useSessionPage(lessonId: string) {
+  const { channel } = useRealtime(lessonId, 'instructor');
+
+  // US 1.28, US 1.27 - Start discussion
+  const startDiscussion = async (discussionId: string) =&gt; {
+    const discussion = await discussionService.publish(discussionId);
+
+    // Broadcast to all students
+    channel?.send({
+      type: 'broadcast',
+      event: 'discussion-started',
+      payload: {
+        discussionId: discussion.id,
+        prompt: discussion.prompt_text,
+        promptType: discussion.prompt_type,
+      },
+    });
+  };
+
+  return { startDiscussion };
+}
+
+// 3. Student: Listening for events
+export function useStudentSession(lessonId: string) {
+  const [promptText, setPromptText] = useState('');
+  const { channel, isConnected } = useRealtime(lessonId, 'student');
+
+  useEffect(() =&gt; {
+    if (!channel || !isConnected) return;
+
+    // US 2.09 - Listen for discussion start
+    channel.on('broadcast', { event: 'discussion-started' }, (payload) =&gt; {
+      setPromptText(payload.payload.prompt);
+    });
+
+    return () =&gt; {
+      channel.unsubscribe();
+    };
+  }, [channel, isConnected]);
+
+  return { promptText };
+}
+
+// 4. Instructor: Listening for responses (US 1.34)
+export function DiscussionPage({ discussionId }: DiscussionPageProps) {
+  const [responses, setResponses] = useState&lt;Response[]&gt;([]);
+  const { channel, isConnected } = useRealtime(lessonId, 'instructor');
+
+  useEffect(() =&gt; {
+    if (!channel || !isConnected) return;
+
+    // US 1.34 - AT1, AT2: Real-time response updates
+    channel.on('broadcast', { event: 'response:new' }, (payload) =&gt; {
+      const newResponse = payload.payload?.response;
+
+      if (newResponse &amp;&amp; newResponse.discussion_id === discussionId) {
+        // Add to top of list (US 1.34 - AT2)
+        setResponses((prev) =&gt; [newResponse, ...prev]);
+      }
+    });
+  }, [channel, isConnected, discussionId]);
+
+  return (
+    &lt;div&gt;
+      {responses.map((resp) =&gt; (
+        &lt;div key={resp.id}&gt;{resp.response_text}&lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<hr />
+<h2 id="6-data-flow-patterns">6. Data Flow Patterns</h2>
+<h3 id="pattern-1-crud-operations-courselesson-management">Pattern 1: CRUD Operations (Course/Lesson Management)</h3>
+<pre><code>User Action (Component)
+    │
+    ↓
+Custom Hook (State Management)
+    │ - Manages loading state
+    │ - Handles errors
+    │ - Updates local state
+    ↓
+Service Module (Business Logic)
+    │ - Validates input
+    │ - Calls Supabase client
+    │ - Returns typed response
+    ↓
+Supabase Client (Data Access)
+    │ - Executes SQL query
+    │ - Applies RLS policies
+    │ - Returns data
+    ↓
+Database (Persistence)
+    │ - Stores/retrieves data
+    │ - Enforces constraints
+    │ - Manages transactions
+    ↓
+Response flows back up the chain
+    │
+    ↓
+Component updates UI
+</code></pre>
+<h3 id="pattern-2-real-time-broadcasts-discussionresponse">Pattern 2: Real-time Broadcasts (Discussion/Response)</h3>
+<pre><code>Instructor Action (Component)
+    │
+    ↓
+Custom Hook (State Management)
+    │ - Updates database
+    │ - Broadcasts event
+    ↓
+useRealtime Hook (Communication)
+    │ - channel.send()
+    │ - Publishes to channel
+    ↓
+Supabase Realtime Server
+    │ - Distributes to subscribers
+    ├──────────────┬──────────────┐
+    ↓              ↓              ↓
+Student Client  Student Client  ...
+    │              │
+    ↓              ↓
+useRealtime Hook receives event
+    │              │
+    ↓              ↓
+Custom Hook updates state
+    │              │
+    ↓              ↓
+Component updates UI
+</code></pre>
+<h3 id="pattern-3-anonymous-access-student-pin-entry">Pattern 3: Anonymous Access (Student PIN Entry)</h3>
+<pre><code>Student enters PIN (HomeJoin)
+    │
+    ↓
+useHomeJoin Hook
+    │ - Validates PIN format
+    │
+    ↓
+Query lessons table
+    │ - Filter by pin_code
+    │ - Filter by status='active'
+    │ - No authentication required (US 2.03)
+    ↓
+    ├─&gt; PIN Valid &amp; Lesson Active
+    │       │
+    │       ↓
+    │   Navigate to /student/[lessonId]
+    │       │
+    │       ↓
+    │   StudentSessionPage loads
+    │       │
+    │       ↓
+    │   Subscribe to realtime channel
+    │       │
+    │       ↓
+    │   Receive broadcasts
+    │       │
+    │       ↓
+    │   Submit responses (anonymous)
+    │
+    └─&gt; PIN Invalid or Lesson Not Active
+            │
+            ↓
+        Show error message
+        Stay on home page
+</code></pre>
+<hr />
+<h2 id="7-security-and-authorization-flow">7. Security and Authorization Flow</h2>
+<h3 id="rls-policy-enforcement">RLS Policy Enforcement</h3>
+<pre><code>Client Request
+    │
+    ↓
+Supabase Client
+    │ - Includes auth token (if authenticated)
+    │ - OR anonymous (for students)
+    ↓
+Supabase Database
+    │ - Applies RLS policies
+    │ - Checks auth.uid()
+    │
+    ├─&gt; Authenticated Instructor
+    │       │
+    │       ↓
+    │   Check: auth.uid() = instructor_id
+    │       │
+    │       ├─&gt; Match: Allow operation
+    │       └─&gt; No match: Deny operation (US 1.04 - AT2)
+    │
+    └─&gt; Anonymous Student
+            │
+            ↓
+        Check: status = 'active'
+            │
+            ├─&gt; Active: Allow read/write
+            └─&gt; Not active: Deny access
+</code></pre>
+<h3 id="authorization-check-examples">Authorization Check Examples</h3>
+<pre><code class="language-typescript">// US 1.04 - AT2: Instructor cannot access others' resources
+// RLS Policy automatically enforces this
+const { data: courses } = await supabase
+  .from('courses')
+  .select('*');
+// Returns only courses where instructor_id = auth.uid()
+
+// US 2.03 - AT1, AT2: Anonymous student access
+// No authentication required, PIN is the authorization
+const { data: lesson } = await supabase
+  .from('lessons')
+  .select('*')
+  .eq('pin_code', userEnteredPIN)
+  .eq('status', 'active')
+  .single();
+// Returns lesson if PIN valid and active
+</code></pre>
+<hr />
+<h2 id="8-complete-user-flow-examples">8. Complete User Flow Examples</h2>
+<h3 id="example-1-instructor-creates-and-runs-a-lesson">Example 1: Instructor Creates and Runs a Lesson</h3>
+<pre><code>1. Instructor logs in (US 1.02)
+   LoginForm → auth.signInWithEmail() → Supabase Auth → Dashboard
+
+2. Instructor navigates to course (US 1.04)
+   Dashboard → CourseCard.onClick → router.push(/lessons_page/[courseId])
+
+3. Instructor creates lesson (US 1.05)
+   LessonsPage → useL essonsPage.handleCreateLesson() 
+   → lessonService.createLesson() → Supabase insert → Lesson created (AT2, AT4)
+
+4. Instructor starts lesson (US 1.06)
+   SessionPage → useSessionPage.startLesson() 
+   → Update status='active' → PIN displayed (AT1, AT3, AT4)
+
+5. Instructor creates discussion (US 1.21)
+   ActiveSidebar → useSessionPage.handleCreateDiscussion()
+   → discussionService.create() → Supabase insert (AT1, AT2)
+
+6. Instructor starts discussion (US 1.28)
+   ActiveSidebar → useSessionPage.startDiscussion()
+   → discussionService.publish() 
+   → channel.send('discussion-started') → Students notified (AT1, US 1.27 - AT2)
+
+7. Students submit responses (US 2.07)
+   StudentSessionPage → useStudentSession.handleSubmit()
+   → responseService.submit() → channel.send('response:new')
+   → Instructor sees responses in real-time (US 1.34 - AT1)
+
+8. Instructor ends lesson (US 1.09)
+   SessionActiveView → useSessionPage.endLesson()
+   → Update status='ended' → Close discussions (AT4)
+   → channel.send('lesson-ended') → Students disconnected (AT2, AT3, AT5)
+</code></pre>
+<h3 id="example-2-student-joins-and-participates">Example 2: Student Joins and Participates</h3>
+<pre><code>1. Student visits home page
+   / → HomeJoin component loads
+
+2. Student enters PIN (US 2.06)
+   HomeJoin → useHomeJoin.onChangeCode() → Validate format (AT3)
+
+3. Student clicks Join (US 2.06)
+   HomeJoin → useHomeJoin.join()
+   → Query lessons by PIN &amp; status='active' (AT1)
+   → Navigate to /student/[lessonId] (AT4)
+
+4. Student waits for discussion (US 2.09)
+   StudentSessionPage → useStudentSession subscribes to channel
+   → Shows StudentWaitingCard
+
+5. Discussion starts (US 1.27, US 2.09)
+   Instructor broadcasts 'discussion-started'
+   → useStudentSession receives event (AT2)
+   → StudentPromptCard displays prompt (AT1, AT3)
+
+6. Student types response (US 2.07)
+   StudentResponseForm → useStudentSession.setResponseText()
+   → Validates non-blank (AT2)
+
+7. Student submits response (US 2.07)
+   StudentResponseForm → useStudentSession.handleSubmit()
+   → responseService.submit() (AT1)
+   → channel.send('response:new')
+   → Show confirmation (AT4)
+
+8. Lesson ends (US 1.09)
+   Instructor broadcasts 'lesson-ended'
+   → useStudentSession receives event
+   → Show &quot;Thank you&quot; message (AT3)
+   → Student leaves session (AT2)
+</code></pre>
+<hr />
+<h2 id="9-error-handling-and-edge-cases">9. Error Handling and Edge Cases</h2>
+<h3 id="network-disconnection">Network Disconnection</h3>
+<pre><code>Student loses connection during session
+    │
+    ↓
+useRealtime.isConnected = false
+    │
+    ↓
+StudentStatusAlert shows &quot;Reconnecting...&quot;
+    │
+    ↓
+    ├─&gt; Connection restored
+    │       │
+    │       ↓
+    │   Re-subscribe to channel
+    │       │
+    │       ↓
+    │   Fetch latest discussion state (US 1.34 - AT3)
+    │       │
+    │       ↓
+    │   Resume normal operation
+    │
+    └─&gt; Connection not restored after 30s
+            │
+            ↓
+        Show error message
+        Suggest refresh
+</code></pre>
+<h3 id="invalid-pin-entry">Invalid PIN Entry</h3>
+<pre><code>Student enters invalid PIN (US 2.06 - AT2)
+    │
+    ↓
+useHomeJoin.join()
+    │
+    ↓
+Query lessons table
+    │
+    ↓
+No results found
+    │
+    ↓
+setError('Invalid PIN or lesson is not active')
+    │
+    ↓
+HomeJoin displays Alert
+    │
+    ↓
+Student remains on home page
+    │
+    ↓
+Can try again with different PIN
+</code></pre>
+<h3 id="closed-discussion-submission">Closed Discussion Submission</h3>
+<pre><code>Student attempts to submit to closed discussion (US 2.07 - AT3)
+    │
+    ↓
+useStudentSession.handleSubmit()
+    │
+    ↓
+Check: currentDiscussion.status === 'active'
+    │
+    ↓
+Status is 'closed'
+    │
+    ↓
+alert('This discussion is closed')
+    │
+    ↓
+Submission blocked
+    │
+    ↓
+Form remains disabled (US 1.28 - AT3)
+</code></pre>
+<hr />
+<h2 id="10-module-dependency-graph">10. Module Dependency Graph</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                        Component Layer                           │
+│  Page Components → Feature Components → UI Components           │
+└─────────────────────────────────────────────────────────────────┘
+                             │
+                             ↓ uses
+┌─────────────────────────────────────────────────────────────────┐
+│                          Hook Layer                              │
+│  Custom Hooks (useSessionPage, useInstructorDashboard, etc.)    │
+└─────────────────────────────────────────────────────────────────┘
+                             │
+                    ┌────────┴────────┐
+                    ↓                 ↓
+┌────────────────────────┐   ┌────────────────────────┐
+│    Service Layer       │   │   Real-time Layer      │
+│  courseService         │   │   useRealtime          │
+│  lessonService         │   │   useSocket            │
+│  discussionService     │   └────────────────────────┘
+│  responseService       │            │
+└────────────────────────┘            │
+                │                     │
+                └─────────┬───────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    Data Access Layer                             │
+│  Supabase Clients (client.ts, server.ts, auth.ts)              │
+└─────────────────────────────────────────────────────────────────┘
+                             │
+                             ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                     Supabase Backend                             │
+│  Auth, Database, Realtime                                        │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="key-dependencies">Key Dependencies</h3>
+<p><strong>Component Dependencies:</strong>
+- All components depend on UI components (shadcn/ui)
+- Page components depend on feature components
+- Feature components depend on custom hooks</p>
+<p><strong>Hook Dependencies:</strong>
+- Custom hooks depend on service modules
+- Custom hooks depend on useRealtime/useSocket
+- Custom hooks depend on Supabase clients</p>
+<p><strong>Service Dependencies:</strong>
+- All services depend on Supabase client
+- All services depend on type definitions
+- Services are independent of each other</p>
+<p><strong>Type Dependencies:</strong>
+- All layers depend on type definitions
+- Types have no dependencies (pure TypeScript)</p>
+<hr />
+<h2 id="summary">Summary</h2>
+<p>This document has provided comprehensive documentation of how all interfaces in the PMCOL Teaching Tool interact with each other:</p>
+<ol>
+<li><strong>Layered Architecture</strong>: Clear separation between presentation, state management, business logic, and data access</li>
+<li><strong>Component Interactions</strong>: Detailed diagrams showing how components call hooks, which call services</li>
+<li><strong>Real-time Communication</strong>: Complete flow of how events are broadcast and received</li>
+<li><strong>Data Flow Patterns</strong>: Three main patterns (CRUD, Real-time, Anonymous access)</li>
+<li><strong>Security Enforcement</strong>: How RLS policies protect data at the database level</li>
+<li><strong>Complete User Flows</strong>: End-to-end examples of instructor and student journeys</li>
+<li><strong>Error Handling</strong>: How the system handles network issues, invalid inputs, and edge cases</li>
+<li><strong>Module Dependencies</strong>: Clear dependency graph showing what depends on what</li>
+</ol>
+<p>Every interface has been mapped to specific Sprint 2 user stories with acceptance test references, ensuring that all planned functionalities can be explained and developed based on this design documentation.</p>
+<p><strong>All Sprint 2 User Stories Covered:</strong>
+- Authentication: US 1.01, 1.02, 1.03
+- Lesson Management: US 1.04, 1.05, 1.06, 1.08, 1.09
+- Course Management: US 1.49, 1.50
+- Discussions: US 1.21, 1.25, 1.27, 1.28
+- Real-time: US 1.31, 1.34, 1.37
+- File Upload: US 1.16 (future)
+- Responsive Design: US 2.01, 2.02
+- Student Access: US 2.03, 2.06, 2.07, 2.09</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

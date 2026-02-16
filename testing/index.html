@@ -1,0 +1,3377 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../ci-cd/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Testing - PMCOL Teaching Tool</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#testing" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PMCOL Teaching Tool" class="md-header__button md-logo" aria-label="PMCOL Teaching Tool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PMCOL Teaching Tool
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Testing
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PMCOL Teaching Tool" class="md-nav__button md-logo" aria-label="PMCOL Teaching Tool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PMCOL Teaching Tool
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../project-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../teamwork/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Teamwork
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../meetings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meetings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Details
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Technical Details
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API & Supabase
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../run-local/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run Locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../interface-interactions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interactions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#testing-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing Philosophy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requirements-traceability-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requirements Traceability Matrix
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Requirements Traceability Matrix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#must-have-features-sprint-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Must Have Features (Sprint 2)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-coverage-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Coverage Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-count-by-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Count by File
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Test Count by File">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acceptance-tests-60-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acceptance Tests (60 tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-tests-40-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Tests (40 tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ui-tests-playwright-26-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UI Tests — Playwright (26 tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-tests-10-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Tests (10 tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests-21-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Tests (21 tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#success-vs-failure-scenario-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success vs Failure Scenario Coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coverage-depth-by-user-story" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage Depth by User Story
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coverage-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage Levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-labeling-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Labeling Convention
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Test Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-acceptance-tests-testsacceptance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Acceptance Tests (tests/acceptance/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-api-tests-testsapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. API Tests (tests/api/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-component-tests-testscomponents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Component Tests (tests/components/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ui-tests-testsui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. UI Tests (tests/ui/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-unit-tests-testsunit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Unit Tests (tests/unit/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-fixtures-testsfixtures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Fixtures (tests/fixtures/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-smoke-test-testssmoketestts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Smoke Test (tests/smoke.test.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-data-setup-for-ui-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Data Setup for UI Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-all-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run All Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-tests-in-watch-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Tests in Watch Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-tests-with-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Tests with Coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-acceptance-tests-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Acceptance Tests Only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-api-tests-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run API Tests Only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-component-tests-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Component Tests Only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-unit-tests-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Unit Tests Only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-ui-tests-playwright" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run UI Tests (Playwright)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-tests-for-specific-user-story" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Tests for Specific User Story
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ci-pipeline-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI Pipeline Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Coverage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Test Coverage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#coverage-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage Goals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coverage-reports-in-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage Reports in CI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-new-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing New Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Writing New Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-a-new-acceptance-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a New Acceptance Test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-a-new-ui-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a New UI Test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-test-fixtures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding Test Fixtures
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-quality-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Quality Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tests-fail-locally-but-pass-in-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests Fail Locally But Pass in CI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#playwright-tests-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Playwright Tests Timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#playwright-tests-fail-with-lesson-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Playwright Tests Fail with "Lesson Not Found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mock-not-working" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mock Not Working
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-are-slow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests Are Slow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#playwright-port-already-in-use-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Playwright "Port Already in Use" Error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ui-tests-fail-in-ci-but-pass-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UI Tests Fail in CI But Pass Locally
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#testing-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing Philosophy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requirements-traceability-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requirements Traceability Matrix
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Requirements Traceability Matrix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#must-have-features-sprint-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Must Have Features (Sprint 2)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-coverage-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Coverage Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-count-by-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Count by File
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Test Count by File">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acceptance-tests-60-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acceptance Tests (60 tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-tests-40-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Tests (40 tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ui-tests-playwright-26-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UI Tests — Playwright (26 tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-tests-10-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Tests (10 tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests-21-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Tests (21 tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#success-vs-failure-scenario-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success vs Failure Scenario Coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coverage-depth-by-user-story" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage Depth by User Story
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coverage-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage Levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-labeling-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Labeling Convention
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Test Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-acceptance-tests-testsacceptance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Acceptance Tests (tests/acceptance/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-api-tests-testsapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. API Tests (tests/api/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-component-tests-testscomponents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Component Tests (tests/components/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ui-tests-testsui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. UI Tests (tests/ui/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-unit-tests-testsunit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Unit Tests (tests/unit/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-fixtures-testsfixtures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Fixtures (tests/fixtures/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-smoke-test-testssmoketestts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Smoke Test (tests/smoke.test.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-data-setup-for-ui-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Data Setup for UI Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-all-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run All Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-tests-in-watch-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Tests in Watch Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-tests-with-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Tests with Coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-acceptance-tests-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Acceptance Tests Only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-api-tests-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run API Tests Only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-component-tests-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Component Tests Only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-unit-tests-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Unit Tests Only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-ui-tests-playwright" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run UI Tests (Playwright)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-tests-for-specific-user-story" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Tests for Specific User Story
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ci-pipeline-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI Pipeline Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Coverage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Test Coverage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#coverage-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage Goals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coverage-reports-in-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage Reports in CI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-new-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing New Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Writing New Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-a-new-acceptance-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a New Acceptance Test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-a-new-ui-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a New UI Test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-test-fixtures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding Test Fixtures
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-quality-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Quality Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tests-fail-locally-but-pass-in-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests Fail Locally But Pass in CI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#playwright-tests-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Playwright Tests Timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#playwright-tests-fail-with-lesson-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Playwright Tests Fail with "Lesson Not Found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mock-not-working" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mock Not Working
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-are-slow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests Are Slow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#playwright-port-already-in-use-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Playwright "Port Already in Use" Error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ui-tests-fail-in-ci-but-pass-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UI Tests Fail in CI But Pass Locally
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="testing">Testing</h1>
+<p>This document describes the comprehensive testing strategy for the PMCOL Teaching Tool, including acceptance tests, API tests, component tests, unit tests, and UI automation tests. All tests are mapped to user stories through a Requirements Traceability Matrix to ensure complete coverage of functional requirements.</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#testing-overview">Testing Overview</a></li>
+<li><a href="#test-structure">Test Structure</a></li>
+<li><a href="#requirements-traceability-matrix">Requirements Traceability Matrix</a></li>
+<li><a href="#test-types">Test Types</a></li>
+<li><a href="#running-tests">Running Tests</a></li>
+<li><a href="#test-coverage">Test Coverage</a></li>
+<li><a href="#writing-new-tests">Writing New Tests</a></li>
+</ol>
+<hr />
+<h2 id="testing-overview">Testing Overview</h2>
+<p>The PMCOL Teaching Tool employs a multi-layered testing strategy that ensures reliability, maintainability, and confidence in the codebase:</p>
+<ul>
+<li><strong>Acceptance Tests</strong>: Validate user stories from the user's perspective</li>
+<li><strong>API Tests</strong>: Verify backend endpoints and data operations</li>
+<li><strong>Component Tests</strong>: Test React components in isolation</li>
+<li><strong>Unit Tests</strong>: Validate individual functions and utilities</li>
+<li><strong>UI Tests</strong>: End-to-end browser automation with Playwright</li>
+</ul>
+<h3 id="testing-philosophy">Testing Philosophy</h3>
+<ul>
+<li><strong>User Story-Driven</strong>: Every test is labeled with its corresponding user story ID</li>
+<li><strong>Success and Failure Scenarios</strong>: Tests cover both happy paths and edge cases</li>
+<li><strong>Traceability</strong>: All tests are tracked in the Requirements Traceability Matrix</li>
+<li><strong>Confidence Over Coverage</strong>: Tests focus on validating behavior rather than achieving arbitrary coverage metrics</li>
+</ul>
+<hr />
+<h2 id="test-structure">Test Structure</h2>
+<p>The test suite is organized by test type in the <code>app/tests/</code> directory:</p>
+<pre><code>app/tests/
+├── acceptance/              # User story acceptance tests (React Testing Library)
+│   ├── anonymous_access.acceptance.test.tsx
+│   ├── auth.acceptance.test.tsx
+│   ├── auto_save.acceptance.test.tsx
+│   ├── instructor_dashboard.acceptance.test.tsx
+│   ├── instructor_session_active_view.test.tsx
+│   ├── instructor_session_ended_view.test.tsx
+│   ├── instructor_session_page.test.tsx
+│   ├── lessons_page.acceptance.test.tsx
+│   ├── multiple_discussions.acceptance.test.tsx
+│   ├── real_time_responses.acceptance.test.tsx
+│   └── student_session_page.test.tsx
+├── api/                     # Backend API tests
+│   ├── auth.test.ts
+│   ├── courses.test.ts
+│   └── socket.test.ts
+├── components/              # Component integration tests
+│   ├── dashboard.test.tsx
+│   ├── lessons_page.test.tsx
+│   └── session.test.tsx
+├── fixtures/                # Test data fixtures
+│   └── discussions.ts
+├── ui/                      # End-to-end Playwright tests
+│   ├── global-setup.ts
+│   ├── global-teardown.ts
+│   ├── instructor_dashboard.spec.ts
+│   ├── instructor_login.spec.ts
+│   ├── student_anonymous_access.spec.ts
+│   ├── student_join.spec.ts
+│   ├── student_responsive.spec.ts
+│   └── student_submit_response.spec.ts
+├── unit/                    # Unit tests for utilities and hooks
+│   ├── authHelpers.test.ts
+│   ├── useRealtime.test.ts
+│   └── validation.test.ts
+├── jest.d.ts                # Jest TypeScript types
+└── smoke.test.ts            # CI smoke test
+</code></pre>
+<hr />
+<h2 id="requirements-traceability-matrix">Requirements Traceability Matrix</h2>
+<p>This matrix maps user stories to their corresponding tests, ensuring complete coverage of all functional requirements. Each test type (Acceptance, UI, API, Unit) validates different aspects of the user story from various perspectives.</p>
+<h3 id="must-have-features-sprint-2">Must Have Features (Sprint 2)</h3>
+<table>
+<thead>
+<tr>
+<th>User Story</th>
+<th>Description</th>
+<th>Acceptance Tests</th>
+<th>UI Tests (Playwright)</th>
+<th>API/Unit Tests</th>
+<th>Coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>US 1.01</strong></td>
+<td>Create instructor account</td>
+<td><code>auth.acceptance.test.tsx</code> (2.5)</td>
+<td><code>instructor_login.spec.ts</code> (20.1-20.5)</td>
+<td><code>auth.test.ts</code> (13.1, 13.2, 13.3)<br><code>authHelpers.test.ts</code> (25.1, 25.2)<br><code>validation.test.ts</code> (27.1-27.6)</td>
+<td><strong>Complete</strong>: Signup navigation, API auth, validation</td>
+</tr>
+<tr>
+<td><strong>US 1.02</strong></td>
+<td>Login via UAlberta SSO</td>
+<td><code>auth.acceptance.test.tsx</code> (2.1, 2.2, 2.3, 2.4)</td>
+<td><code>instructor_login.spec.ts</code> (20.6, 20.7, 20.8, 20.9)</td>
+<td><code>authHelpers.test.ts</code> (25.3, 25.4)</td>
+<td><strong>Complete</strong>: Email/password + OAuth flows + signup page validation</td>
+</tr>
+<tr>
+<td><strong>US 1.03</strong></td>
+<td>Logout securely</td>
+<td><code>instructor_dashboard.acceptance.test.tsx</code> (AT1)</td>
+<td><code>instructor_dashboard.spec.ts</code> (19.1)</td>
+<td><code>authHelpers.test.ts</code> (25.5)</td>
+<td><strong>Complete</strong>: Dashboard integration + API</td>
+</tr>
+<tr>
+<td><strong>US 1.04</strong></td>
+<td>Private lesson viewing</td>
+<td><code>instructor_dashboard.acceptance.test.tsx</code> (AT1, AT2)<br><code>instructor_session_page.test.tsx</code> (7.1)<br><code>lessons_page.acceptance.test.tsx</code> (8.9)</td>
+<td><code>instructor_dashboard.spec.ts</code> (19.2)<br><code>lessons_page.test.tsx</code> (16.1, 16.2, 16.3, 16.4)</td>
+<td>—</td>
+<td><strong>Complete</strong>: Authorization checks across all pages</td>
+</tr>
+<tr>
+<td><strong>US 1.05</strong></td>
+<td>Create new lesson</td>
+<td><code>lessons_page.acceptance.test.tsx</code> (AT1, AT2)</td>
+<td><code>instructor_dashboard.spec.ts</code> (19.2)</td>
+<td><code>lessons_page.test.tsx</code> (16.13-16.17)</td>
+<td><strong>Complete</strong>: Creation flow + validation + errors</td>
+</tr>
+<tr>
+<td><strong>US 1.06</strong></td>
+<td>Start lesson (PIN/QR)</td>
+<td><code>instructor_session_page.test.tsx</code> (7.2)<br><code>instructor_session_active_view.test.tsx</code> (5.1)<br><code>instructor_session_ended_view.test.tsx</code> (6.6)</td>
+<td>—</td>
+<td>—</td>
+<td><strong>Complete</strong>: Active state + PIN display tested; QR code generation not explicitly tested</td>
+</tr>
+<tr>
+<td><strong>US 1.08</strong></td>
+<td>Delete lesson</td>
+<td><code>lessons_page.acceptance.test.tsx</code> (AT1, AT2, AT4)</td>
+<td>—</td>
+<td><code>lessons_page.test.tsx</code> (16.18-16.20)</td>
+<td><strong>Complete</strong>: Delete flow + confirmation</td>
+</tr>
+<tr>
+<td><strong>US 1.09</strong></td>
+<td>End lesson</td>
+<td><code>instructor_session_active_view.test.tsx</code> (5.4, 5.7)<br><code>instructor_session_ended_view.test.tsx</code> (6.1, 6.3, 6.4)<br><code>student_session_page.test.tsx</code> (12.3)</td>
+<td>—</td>
+<td>—</td>
+<td><strong>Complete</strong>: End flow + student notification</td>
+</tr>
+<tr>
+<td><strong>US 1.10</strong></td>
+<td>Auto-save lesson</td>
+<td><code>auto_save.acceptance.test.tsx</code> (AT1, AT2, AT3)</td>
+<td>—</td>
+<td>—</td>
+<td><strong>Complete</strong>: Data persistence verification</td>
+</tr>
+<tr>
+<td><strong>US 1.25</strong></td>
+<td>Multiple discussions</td>
+<td><code>multiple_discussions.acceptance.test.tsx</code> (AT1, AT2, AT3)</td>
+<td>—</td>
+<td>—</td>
+<td><strong>Complete</strong>: Sequential discussion flow</td>
+</tr>
+<tr>
+<td><strong>US 1.27</strong></td>
+<td>Display prompt</td>
+<td><code>instructor_session_active_view.test.tsx</code> (5.5)<br><code>student_session_page.test.tsx</code> (12.1)</td>
+<td>—</td>
+<td>—</td>
+<td><strong>Complete</strong>: Prompt display covered implicitly via US 1.21/1.28 publish handler (test 5.5) and student prompt visibility (test 12.1); no explicit US 1.27 label in tests</td>
+</tr>
+<tr>
+<td><strong>US 1.28</strong></td>
+<td>Start/close discussions</td>
+<td><code>instructor_session_active_view.test.tsx</code> (5.5, 5.6)</td>
+<td>—</td>
+<td>—</td>
+<td><strong>Complete</strong>: Start/close handler calls verified; student-side closed state tested via student_session_page</td>
+</tr>
+<tr>
+<td><strong>US 1.31</strong></td>
+<td>Display PIN code</td>
+<td><code>instructor_session_active_view.test.tsx</code> (5.1, 5.2, 5.3)<br><code>instructor_session_page.test.tsx</code> (7.2, 7.4)</td>
+<td>—</td>
+<td>—</td>
+<td><strong>Complete</strong>: PIN visibility + overlay</td>
+</tr>
+<tr>
+<td><strong>US 1.34</strong></td>
+<td>Real-time responses</td>
+<td><code>real_time_responses.acceptance.test.tsx</code> (AT1, AT2, AT3)<br><code>instructor_session_ended_view.test.tsx</code> (6.2)</td>
+<td>—</td>
+<td><code>useRealtime.test.ts</code> (26.1-26.8)</td>
+<td><strong>Complete</strong>: Live updates + hook behavior</td>
+</tr>
+<tr>
+<td><strong>US 1.49</strong></td>
+<td>Add course</td>
+<td><code>instructor_dashboard.acceptance.test.tsx</code> (AT1, AT2, AT3)</td>
+<td><code>instructor_dashboard.spec.ts</code> (19.1)</td>
+<td><code>dashboard.test.tsx</code> (15.6)<br><code>courses.test.ts</code> (14.1, 14.3, 14.4)<br><code>validation.test.ts</code> (27.7, 27.8)</td>
+<td><strong>Complete</strong>: Full CRUD + validation</td>
+</tr>
+<tr>
+<td><strong>US 1.50</strong></td>
+<td>Delete course</td>
+<td><code>instructor_dashboard.acceptance.test.tsx</code> (AT1, AT2)</td>
+<td>—</td>
+<td><code>dashboard.test.tsx</code> (15.7)<br><code>courses.test.ts</code> (14.5, 14.6)</td>
+<td><strong>Complete</strong>: Delete flow + errors</td>
+</tr>
+<tr>
+<td><strong>US 2.01</strong></td>
+<td>Desktop access</td>
+<td><code>lessons_page.acceptance.test.tsx</code> (AT1)<br><code>instructor_dashboard.acceptance.test.tsx</code> (AT1)</td>
+<td><code>student_responsive.spec.ts</code> (23.1)</td>
+<td>—</td>
+<td><strong>Complete</strong>: Desktop viewport validation</td>
+</tr>
+<tr>
+<td><strong>US 2.02</strong></td>
+<td>Mobile access</td>
+<td>—</td>
+<td><code>student_responsive.spec.ts</code> (23.2, 23.3)</td>
+<td>—</td>
+<td><strong>Complete</strong>: Viewport rendering + no horizontal overflow validated; touch interactions not tested</td>
+</tr>
+<tr>
+<td><strong>US 2.03</strong></td>
+<td>Anonymous access</td>
+<td><code>anonymous_access.acceptance.test.tsx</code> (AT1, AT2, AT3, AT4)</td>
+<td><code>student_anonymous_access.spec.ts</code> (21.1, 21.2, 21.3)</td>
+<td>—</td>
+<td><strong>Complete</strong>: No auth required + no PII</td>
+</tr>
+<tr>
+<td><strong>US 2.06</strong></td>
+<td>Join via PIN</td>
+<td><code>student_session_page.test.tsx</code> (12.4)</td>
+<td><code>student_join.spec.ts</code> (22.1-22.6)</td>
+<td><code>useRealtime.test.ts</code> (26.1-26.8)</td>
+<td><strong>Complete</strong>: Valid/invalid PIN + validation</td>
+</tr>
+<tr>
+<td><strong>US 2.07</strong></td>
+<td>Submit responses</td>
+<td><code>student_session_page.test.tsx</code> (12.2)</td>
+<td><code>student_submit_response.spec.ts</code> (24.1, 24.2, 24.3)</td>
+<td>—</td>
+<td><strong>Complete</strong>: Submit flow + validation</td>
+</tr>
+<tr>
+<td><strong>US 2.09</strong></td>
+<td>View prompt</td>
+<td><code>student_session_page.test.tsx</code> (12.1)</td>
+<td><code>student_submit_response.spec.ts</code> (24.1)</td>
+<td>—</td>
+<td><strong>Complete</strong>: Prompt visibility</td>
+</tr>
+</tbody>
+</table>
+<h3 id="test-coverage-summary">Test Coverage Summary</h3>
+<ul>
+<li><strong>Total User Stories Tested</strong>: 22 (Sprint 2 features)</li>
+<li><strong>Acceptance Tests</strong>: 11 files, 60 test cases</li>
+<li><strong>Component Tests</strong>: 3 files, 40 test cases</li>
+<li><strong>UI Tests (Playwright)</strong>: 6 spec files, 26 test cases</li>
+<li><strong>API Tests</strong>: 3 files, 10 test cases</li>
+<li><strong>Unit Tests</strong>: 3 files, 21 test cases</li>
+<li><strong>Smoke Tests</strong>: 1 file, 1 test case</li>
+<li><strong>Total Test Cases</strong>: 158 (across 27 files)</li>
+</ul>
+<h3 id="test-count-by-file">Test Count by File</h3>
+<h4 id="acceptance-tests-60-tests">Acceptance Tests (60 tests)</h4>
+<table>
+<thead>
+<tr>
+<th>Test File</th>
+<th>User Stories</th>
+<th>Tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>anonymous_access.acceptance.test.tsx</code></td>
+<td>US 2.03</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>auth.acceptance.test.tsx</code></td>
+<td>US 1.01, 1.02</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>auto_save.acceptance.test.tsx</code></td>
+<td>US 1.10</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>instructor_dashboard.acceptance.test.tsx</code></td>
+<td>US 1.03, 1.04, 1.49, 1.50, 2.01</td>
+<td>9</td>
+</tr>
+<tr>
+<td><code>instructor_session_active_view.test.tsx</code></td>
+<td>US 1.06, 1.09, 1.27, 1.28, 1.31</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>instructor_session_ended_view.test.tsx</code></td>
+<td>US 1.06, 1.09, 1.34</td>
+<td>6</td>
+</tr>
+<tr>
+<td><code>instructor_session_page.test.tsx</code></td>
+<td>US 1.04, 1.06, 1.09, 1.31</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>lessons_page.acceptance.test.tsx</code></td>
+<td>US 1.04, 1.05, 1.08, 2.01</td>
+<td>9</td>
+</tr>
+<tr>
+<td><code>multiple_discussions.acceptance.test.tsx</code></td>
+<td>US 1.25</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>real_time_responses.acceptance.test.tsx</code></td>
+<td>US 1.34</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>student_session_page.test.tsx</code></td>
+<td>US 1.09, 2.03, 2.06, 2.07, 2.09</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<h4 id="component-tests-40-tests">Component Tests (40 tests)</h4>
+<table>
+<thead>
+<tr>
+<th>Test File</th>
+<th>User Stories</th>
+<th>Tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dashboard.test.tsx</code></td>
+<td>US 1.03, 1.49, 1.50</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>lessons_page.test.tsx</code></td>
+<td>US 1.04, 1.05, 1.08</td>
+<td>20</td>
+</tr>
+<tr>
+<td><code>session.test.tsx</code></td>
+<td>US 1.06, 1.09, 1.10, 1.34</td>
+<td>13</td>
+</tr>
+</tbody>
+</table>
+<h4 id="ui-tests-playwright-26-tests">UI Tests — Playwright (26 tests)</h4>
+<table>
+<thead>
+<tr>
+<th>Test File</th>
+<th>User Stories</th>
+<th>Tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>instructor_login.spec.ts</code></td>
+<td>US 1.01, 1.02</td>
+<td>9</td>
+</tr>
+<tr>
+<td><code>instructor_dashboard.spec.ts</code></td>
+<td>US 1.03, 1.04, 1.05, 1.49</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>student_anonymous_access.spec.ts</code></td>
+<td>US 2.03</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>student_join.spec.ts</code></td>
+<td>US 2.06</td>
+<td>6</td>
+</tr>
+<tr>
+<td><code>student_submit_response.spec.ts</code></td>
+<td>US 2.07, 2.09</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>student_responsive.spec.ts</code></td>
+<td>US 2.01, 2.02</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<h4 id="api-tests-10-tests">API Tests (10 tests)</h4>
+<table>
+<thead>
+<tr>
+<th>Test File</th>
+<th>User Stories</th>
+<th>Tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auth.test.ts</code></td>
+<td>US 1.01</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>courses.test.ts</code></td>
+<td>US 1.49, 1.50</td>
+<td>6</td>
+</tr>
+<tr>
+<td><code>socket.test.ts</code></td>
+<td>Infrastructure</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h4 id="unit-tests-21-tests">Unit Tests (21 tests)</h4>
+<table>
+<thead>
+<tr>
+<th>Test File</th>
+<th>User Stories</th>
+<th>Tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>authHelpers.test.ts</code></td>
+<td>US 1.01, 1.02, 1.03</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>useRealtime.test.ts</code></td>
+<td>US 1.34, 2.06</td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>validation.test.ts</code></td>
+<td>US 1.01, 1.49</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<h3 id="success-vs-failure-scenario-coverage">Success vs Failure Scenario Coverage</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Success</th>
+<th>Failure</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Authentication (US 1.01, 1.02, 1.03)</td>
+<td>13</td>
+<td>8</td>
+<td>21</td>
+</tr>
+<tr>
+<td>Authorization (US 1.04)</td>
+<td>4</td>
+<td>3</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Lesson Management (US 1.05, 1.06, 1.08, 1.09)</td>
+<td>16</td>
+<td>6</td>
+<td>22</td>
+</tr>
+<tr>
+<td>Auto-save (US 1.10)</td>
+<td>3</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Discussions (US 1.25, 1.27, 1.28)</td>
+<td>6</td>
+<td>1</td>
+<td>7</td>
+</tr>
+<tr>
+<td>PIN Display (US 1.31)</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Real-time (US 1.34)</td>
+<td>10</td>
+<td>1</td>
+<td>11</td>
+</tr>
+<tr>
+<td>Courses (US 1.49, 1.50)</td>
+<td>11</td>
+<td>5</td>
+<td>16</td>
+</tr>
+<tr>
+<td>Responsive Design (US 2.01, 2.02)</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Student Access (US 2.03, 2.06, 2.07, 2.09)</td>
+<td>18</td>
+<td>5</td>
+<td>23</td>
+</tr>
+<tr>
+<td><strong>TOTALS</strong></td>
+<td><strong>91</strong></td>
+<td><strong>30</strong></td>
+<td><strong>121</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="coverage-depth-by-user-story">Coverage Depth by User Story</h3>
+<p><strong>Well-Covered (8+ tests):</strong>
+US 1.01 (12), US 1.04 (7), US 1.05 (9), US 1.34 (11), US 1.49 (10), US 2.03 (7), US 2.06 (10)</p>
+<p><strong>Adequately Covered (4–7 tests):</strong>
+US 1.02 (5), US 1.03 (4), US 1.08 (6), US 1.09 (4), US 1.10 (4), US 1.25 (4), US 1.31 (5), US 1.50 (6), US 2.07 (4)</p>
+<p><strong>Minimally Covered (1–3 tests):</strong>
+US 1.06 (3), US 1.27 (1), US 1.28 (2), US 2.01 (3), US 2.02 (2), US 2.09 (2)</p>
+<p>Even minimally covered stories have tests across multiple test types (acceptance + UI or unit), providing confidence through diverse validation rather than test count alone.</p>
+<h3 id="coverage-levels">Coverage Levels</h3>
+<table>
+<thead>
+<tr>
+<th>Coverage Type</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Success Scenarios</strong></td>
+<td>All user stories have success path tests</td>
+</tr>
+<tr>
+<td><strong>Failure Scenarios</strong></td>
+<td>All user stories have failure/error tests</td>
+</tr>
+<tr>
+<td><strong>User Story Labeling</strong></td>
+<td>All tests labeled with <code>[US X.XX][ATY]</code> format</td>
+</tr>
+<tr>
+<td><strong>UI Automation</strong></td>
+<td>Critical flows automated with Playwright</td>
+</tr>
+<tr>
+<td><strong>API Testing</strong></td>
+<td>All backend API routes tested</td>
+</tr>
+<tr>
+<td><strong>Cross-browser</strong></td>
+<td>Chromium, Firefox, WebKit supported</td>
+</tr>
+</tbody>
+</table>
+<h3 id="test-labeling-convention">Test Labeling Convention</h3>
+<p>All tests follow a consistent labeling format:</p>
+<pre><code class="language-typescript">it('[US X.XX][ATY] success/failure: test description', () =&gt; {
+  // Test implementation
+});
+</code></pre>
+<p><strong>Where:</strong>
+- <code>US X.XX</code> = User Story ID
+- <code>ATY</code> = Acceptance Test number (AT1, AT2, etc.)
+- <code>success/failure/state</code> = Test scenario type</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-typescript">it('[US 1.02][AT1] success: email/password login redirects instructor to dashboard', async () =&gt; {
+  // ...
+});
+</code></pre>
+<hr />
+<h2 id="test-types">Test Types</h2>
+<h3 id="1-acceptance-tests-testsacceptance">1. Acceptance Tests (<code>tests/acceptance/</code>)</h3>
+<p><strong>Purpose</strong>: Validate user stories from the user's perspective using React Testing Library.</p>
+<p><strong>Technology</strong>: Jest + React Testing Library</p>
+<p><strong>Key Features</strong>:
+- Tests user-facing behavior
+- Mocks external dependencies (Supabase, Next.js router)
+- Tests both success and failure scenarios
+- Validates UI state changes</p>
+<p><strong>Example Test</strong>:</p>
+<pre><code class="language-typescript">// [US 2.03] Anonymous access
+it('[US 2.03][AT1] success: student joins without providing name, email, or ID', () =&gt; {
+  useStudentSessionMock.mockReturnValue({
+    lesson: { title: 'Lesson' },
+    activeDiscussion: { status: 'active', prompt_text: 'What is X?' },
+    // ... other state
+  });
+
+  render(&lt;StudentSessionPage lessonId=&quot;lesson-1&quot; /&gt;);
+
+  expect(screen.getByText(/What is X\?/i)).toBeInTheDocument();
+  expect(screen.queryByLabelText(/name/i)).not.toBeInTheDocument();
+  expect(screen.queryByLabelText(/email/i)).not.toBeInTheDocument();
+});
+</code></pre>
+<p><strong>Coverage</strong>:
+- 11 acceptance test files
+- 60 individual test cases
+- All Sprint 2 user stories covered</p>
+<hr />
+<h3 id="2-api-tests-testsapi">2. API Tests (<code>tests/api/</code>)</h3>
+<p><strong>Purpose</strong>: Verify backend endpoints and data operations.</p>
+<p><strong>Technology</strong>: Jest</p>
+<p><strong>Key Features</strong>:
+- Tests Supabase client interactions
+- Validates OAuth callback flow
+- Tests CRUD operations on courses
+- Verifies error handling</p>
+<p><strong>Example Test</strong>:</p>
+<pre><code class="language-typescript">it('[US 1.01][AT2] should exchange code for session successfully', async () =&gt; {
+  const validCode = 'validcode';
+
+  mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({
+    data: { session: { access_token: 'token' } },
+    error: null,
+  });
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.exchangeCodeForSession(validCode);
+
+  expect(error).toBeNull();
+  expect(data.session).not.toBeNull();
+});
+</code></pre>
+<p><strong>Coverage</strong>:
+- Auth callback tests (success, failure, edge cases)
+- Course operations (fetch, create, delete)
+- Socket.io placeholder endpoint</p>
+<hr />
+<h3 id="3-component-tests-testscomponents">3. Component Tests (<code>tests/components/</code>)</h3>
+<p><strong>Purpose</strong>: Test React components with more integration than unit tests but less than acceptance tests.</p>
+<p><strong>Technology</strong>: Jest + React Testing Library</p>
+<p><strong>Key Features</strong>:
+- Tests component rendering
+- Validates user interactions
+- Tests state management
+- Verifies navigation flows</p>
+<p><strong>Example Test</strong>:</p>
+<pre><code class="language-typescript">it('should display courses when loaded', async () =&gt; {
+  const mockCourses = [
+    { id: '1', title: 'PMCOL 400' },
+    { id: '2', title: 'PMCOL 401' },
+  ];
+
+  mockSupabase.from.mockReturnValue({
+    select: jest.fn().mockReturnValue({
+      eq: jest.fn().mockReturnValue({
+        order: jest.fn().mockResolvedValue({
+          data: mockCourses,
+          error: null,
+        }),
+      }),
+    }),
+  });
+
+  render(&lt;Dashboard /&gt;);
+
+  await waitFor(() =&gt; {
+    expect(screen.getByText('PMCOL 400')).toBeInTheDocument();
+    expect(screen.getByText('PMCOL 401')).toBeInTheDocument();
+  });
+});
+</code></pre>
+<p><strong>Coverage</strong>:
+- Dashboard component (loading, rendering, CRUD operations)
+- Lessons page (authentication, authorization, navigation)
+- Session page (active view, ended view, state management)</p>
+<hr />
+<h3 id="4-ui-tests-testsui">4. UI Tests (<code>tests/ui/</code>)</h3>
+<p><strong>Purpose</strong>: End-to-end browser automation testing real user flows.</p>
+<p><strong>Technology</strong>: Playwright</p>
+<p><strong>Key Features</strong>:
+- Tests complete user journeys
+- Runs in real browsers (Chromium, Firefox, WebKit)
+- Tests responsive design
+- Validates cross-browser compatibility
+- Uses global setup/teardown for test data</p>
+<p><strong>Global Setup/Teardown</strong>:</p>
+<p>The UI tests use Playwright's global setup and teardown to manage test data:</p>
+<pre><code class="language-typescript">// global-setup.ts
+// Verifies test lesson with PIN 123456 exists before tests run
+export default async function globalSetup() {
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const { data: lesson } = await supabase
+    .from('lessons')
+    .select('id, status, pin_code')
+    .eq('pin_code', '123456')
+    .single();
+
+  if (!lesson || lesson.status !== 'active') {
+    console.warn('Test lesson not found or inactive');
+  }
+}
+
+// global-teardown.ts
+// Cleans up responses created during test runs
+export default async function globalTeardown() {
+  // Delete test responses but keep lesson for next run
+  await supabase.from('responses').delete().eq('discussion_id', testDiscussionId);
+}
+</code></pre>
+<p><strong>Test Files</strong>:</p>
+<ol>
+<li><strong><code>instructor_login.spec.ts</code></strong> - Login and signup flows</li>
+<li>Tests login form rendering and validation</li>
+<li>Tests email/password authentication</li>
+<li>Tests Google OAuth button presence</li>
+<li>Tests validation for empty/invalid credentials</li>
+<li>Tests navigation between login and signup pages</li>
+<li>Tests password length validation (min 8 characters)</li>
+<li>Tests terms and conditions checkbox requirement</li>
+</ol>
+<p>```typescript
+   test('[US 1.01] success: login page renders with email and password fields', async ({ page }) =&gt; {
+     await page.goto('/login_instructor');</p>
+<pre><code> await expect(page.getByText('Welcome back')).toBeVisible();
+ await expect(page.getByLabel('Email')).toBeVisible();
+ await expect(page.getByLabel('Password')).toBeVisible();
+ await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible();
+</code></pre>
+<p>});
+   ```</p>
+<ol>
+<li><strong><code>instructor_dashboard.spec.ts</code></strong> - Dashboard auth gating</li>
+<li>Tests that unauthenticated users are redirected</li>
+<li>Tests loading state before redirect</li>
+<li>Validates auth protection on lessons pages</li>
+</ol>
+<p><code>typescript
+   test('[US 1.49][US 1.03] unauthenticated user sees loading then redirects to home', async ({ page }) =&gt; {
+     await page.goto('/instructor_dashboard');
+     await expect(page).toHaveURL('http://localhost:3000/', { timeout: 10000 });
+     await expect(page.getByLabel('PIN code')).toBeVisible();
+   });</code></p>
+<ol>
+<li><strong><code>student_anonymous_access.spec.ts</code></strong> - Anonymous access verification</li>
+<li>Tests landing page has no login requirement</li>
+<li>Verifies no personal data fields are required</li>
+<li>Tests student can reach session without authentication</li>
+</ol>
+<p>```typescript
+   test('[US 2.03] success: landing page has no login requirement for students', async ({ page }) =&gt; {
+     await page.goto('/');</p>
+<pre><code> const pinInput = page.getByLabel('PIN code');
+ await expect(pinInput).toBeVisible();
+
+ // No name/email/password fields should be visible
+ await expect(page.getByLabel(/name/i)).not.toBeVisible();
+ await expect(page.getByLabel(/email/i)).not.toBeVisible();
+</code></pre>
+<p>});
+   ```</p>
+<ol>
+<li><strong><code>student_join.spec.ts</code></strong> - Student PIN join flow</li>
+<li>Tests valid PIN joins lesson successfully</li>
+<li>Tests invalid PIN shows error message</li>
+<li>Tests empty PIN shows validation hint</li>
+<li>Tests non-numeric PIN is rejected</li>
+<li>Tests too short PIN is rejected</li>
+<li>Tests 6-digit PIN enables join button</li>
+</ol>
+<p>```typescript
+   test('[US 2.06] success: valid PIN joins lesson', async ({ page }) =&gt; {
+     await page.goto('/');</p>
+<pre><code> await page.getByLabel('PIN code').fill('123456');
+ await page.getByRole('button', { name: 'Join' }).click();
+
+ // Should navigate to student session
+ await expect(page).toHaveURL(/\/student\//, { timeout: 30000 });
+</code></pre>
+<p>});
+   ```</p>
+<ol>
+<li><strong><code>student_submit_response.spec.ts</code></strong> - Response submission flow</li>
+<li>Tests prompt visibility and response submission</li>
+<li>Tests blank response is blocked</li>
+<li>Tests whitespace-only response is blocked</li>
+<li>Tests successful submission shows confirmation</li>
+</ol>
+<p>```typescript
+   test('[US 2.09][US 2.07] prompt visible -&gt; can submit response', async ({ page }) =&gt; {
+     // Join lesson first
+     await page.goto('/');
+     await page.getByLabel('PIN code').fill('123456');
+     await page.getByRole('button', { name: 'Join' }).click();</p>
+<pre><code> // Wait for response form
+ const responseBox = page.getByPlaceholder('Type your response here...');
+ await responseBox.waitFor({ state: 'visible', timeout: 10000 });
+
+ await responseBox.fill('My response from Playwright');
+ await page.getByRole('button', { name: 'Submit response' }).click();
+
+ await expect(page.getByText('Response submitted')).toBeVisible({ timeout: 5000 });
+</code></pre>
+<p>});
+   ```</p>
+<ol>
+<li><strong><code>student_responsive.spec.ts</code></strong> - Responsive design validation</li>
+<li>Tests landing page on desktop viewport (1280x720)</li>
+<li>Tests landing page on mobile viewport (375x667, iPhone SE)</li>
+<li>Tests session page on mobile viewport</li>
+<li>Verifies no horizontal scrollbar on mobile</li>
+</ol>
+<p>```typescript
+   test('[US 2.02] success: landing page renders on mobile viewport', async ({ page }) =&gt; {
+     await page.setViewportSize({ width: 375, height: 667 });
+     await page.goto('/');</p>
+<pre><code> await expect(page.getByLabel('PIN code')).toBeVisible();
+ await expect(page.getByRole('button', { name: 'Join' })).toBeVisible();
+
+ // Verify no horizontal scrollbar
+ const bodyWidth = await page.locator('body').evaluate((el) =&gt; el.scrollWidth);
+ expect(bodyWidth).toBeLessThanOrEqual(375);
+</code></pre>
+<p>});
+   ```</p>
+<p><strong>Test Configuration</strong>:</p>
+<p>The UI tests use serial mode for tests that depend on shared state:</p>
+<pre><code class="language-typescript">test.describe('Student Submit Response', () =&gt; {
+  test.describe.configure({ mode: 'serial' });
+
+  // Tests run sequentially within this describe block
+});
+</code></pre>
+<p><strong>Coverage</strong>:
+- <strong>6 spec files</strong> (plus global setup/teardown) with <strong>26 test cases</strong>
+- <strong>All critical user flows</strong> automated end-to-end
+- <strong>Cross-browser testing</strong> on Chromium, Firefox, WebKit
+- <strong>Responsive design</strong> validated on desktop and mobile viewports
+- <strong>Real-world scenarios</strong> including success, failure, and edge cases</p>
+<p><strong>Benefits</strong>:
+- Catches integration issues between frontend and backend
+- Validates actual user experience in real browsers
+- Tests JavaScript execution and DOM interactions
+- Verifies responsive design on different screen sizes
+- Provides confidence that deployed app works correctly</p>
+<hr />
+<h3 id="5-unit-tests-testsunit">5. Unit Tests (<code>tests/unit/</code>)</h3>
+<p><strong>Purpose</strong>: Test individual functions, utilities, and hooks in isolation.</p>
+<p><strong>Technology</strong>: Jest + React Testing Library (for hooks)</p>
+<p><strong>Key Features</strong>:
+- Tests pure functions
+- Validates utility logic
+- Tests custom React hooks
+- Fast execution time</p>
+<p><strong>Test Files</strong>:</p>
+<ol>
+<li><strong><code>authHelpers.test.ts</code></strong> - Authentication helper functions</li>
+<li>Tests <code>signUpWithEmail</code> with correct Supabase parameters</li>
+<li>Tests signup error handling (duplicate user)</li>
+<li>Tests <code>signInWithEmail</code> with password authentication</li>
+<li>Tests login error handling (invalid credentials)</li>
+<li>Tests <code>signOut</code> functionality</li>
+</ol>
+<p>```typescript
+   describe('signUpWithEmail [US 1.01]', () =&gt; {
+     it('[US 1.01][AT1] should call Supabase signUp with correct parameters', async () =&gt; {
+       const { signUpWithEmail } = await import('@/lib/supabase/auth');</p>
+<pre><code>   mockSupabase.auth.signUp.mockResolvedValue({
+     data: { user: { id: '123' } },
+     error: null,
+   });
+
+   const result = await signUpWithEmail('test@ualberta.ca', 'password123', 'Test User');
+
+   expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
+     email: 'test@ualberta.ca',
+     password: 'password123',
+     options: { data: { full_name: 'Test User' } },
+   });
+   expect(result.error).toBeNull();
+ });
+</code></pre>
+<p>});
+   ```</p>
+<ol>
+<li><strong><code>useRealtime.test.ts</code></strong> - Real-time Supabase channel hook</li>
+<li>Tests channel creation with correct lesson ID</li>
+<li>Tests subscription and connection status</li>
+<li>Tests channel reference availability</li>
+<li>Tests cleanup on unmount</li>
+<li>Tests connection status changes (CLOSED)</li>
+<li>Tests channel recreation when lesson ID changes</li>
+<li>Tests handling of empty lesson ID</li>
+<li>Tests both instructor and student roles</li>
+</ol>
+<p>```typescript
+   it('should subscribe to channel and set isConnected to true', async () =&gt; {
+     const lessonId = 'lesson-123';
+     const { result } = renderHook(() =&gt; useRealtime(lessonId, 'instructor'));</p>
+<pre><code> // Initially not connected
+ expect(result.current.isConnected).toBe(false);
+
+ // Wait for subscription to complete
+ await waitFor(() =&gt; {
+   expect(result.current.isConnected).toBe(true);
+ });
+
+ expect(mockChannel.subscribe).toHaveBeenCalled();
+</code></pre>
+<p>});
+   ```</p>
+<ol>
+<li><strong><code>validation.test.ts</code></strong> - Input validation utilities</li>
+<li>Tests email validation (valid, invalid, empty)</li>
+<li>Tests password validation (8+ chars, too short, empty)</li>
+<li>Tests course title validation (non-empty, whitespace-only)</li>
+</ol>
+<p>```typescript
+   describe('Email Validation [US 1.01]', () =&gt; {
+     it('should accept valid email', () =&gt; {
+       const validEmail = 'test@ualberta.ca';
+       const emailRegex = /^[^\s@]+@[^\s@]+.[^\s@]+$/;
+       expect(emailRegex.test(validEmail)).toBe(true);
+     });</p>
+<pre><code> it('should reject invalid email format', () =&gt; {
+   const invalidEmail = 'notanemail';
+   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+   expect(emailRegex.test(invalidEmail)).toBe(false);
+ });
+</code></pre>
+<p>});
+   ```</p>
+<p><strong>Coverage</strong>:
+- <strong>3 unit test files</strong> with <strong>21 test cases</strong>
+- <strong>Auth helpers</strong>: Complete coverage of signup, login, logout functions
+- <strong>Real-time hook</strong>: Full lifecycle testing including connection, subscription, cleanup
+- <strong>Validation logic</strong>: Email, password, and title validation rules</p>
+<p><strong>Benefits</strong>:
+- Fast execution (milliseconds per test)
+- Easy to debug when failures occur
+- Tests logic in isolation from UI
+- Provides foundation for integration tests
+- High confidence in core utilities</p>
+<hr />
+<h3 id="6-fixtures-testsfixtures">6. Fixtures (<code>tests/fixtures/</code>)</h3>
+<p><strong>Purpose</strong>: Provide consistent test data across test files.</p>
+<p><strong>Benefits</strong>:
+- Reduces duplication
+- Ensures data structure validity
+- Makes tests more maintainable
+- Provides helper functions for generating test data</p>
+<p><strong>Test Fixtures</strong>:</p>
+<p><strong><code>discussions.ts</code></strong> - Mock data for discussion and response testing</p>
+<p>Provides predefined mock objects:
+- <code>mockDiscussion</code> - Active discussion fixture
+- <code>mockClosedDiscussion</code> - Closed discussion fixture
+- <code>mockMultipleChoiceDiscussion</code> - MC question fixture
+- <code>mockResponse</code>, <code>mockResponse2</code>, <code>mockResponse3</code> - Response fixtures
+- <code>mockDiscussionWithCount</code> - Discussion with response count
+- <code>mockDiscussionWithZeroResponses</code> - Empty discussion
+- <code>mockClosedDiscussionWithCount</code> - Closed discussion with count</p>
+<p>Helper functions:
+- <code>createMockDiscussions(count)</code> - Generate multiple discussions
+- <code>createMockResponses(discussionId, count)</code> - Generate multiple responses
+- <code>withResponseCount(discussion, count)</code> - Add response count to discussion</p>
+<p><strong>Example Fixture</strong>:</p>
+<pre><code class="language-typescript">export const mockDiscussion: Discussion = {
+  id: 'discussion-123',
+  lesson_id: 'lesson-456',
+  prompt_text: 'What is the main purpose of the WWW Consortium?',
+  prompt_type: 'short_answer',
+  status: 'active',
+  created_at: '2026-02-10T14:05:23Z',
+  published_at: '2026-02-10T14:05:25Z',
+  closed_at: null,
+  display_order: 0
+};
+
+export function createMockDiscussions(count: number): Discussion[] {
+  return Array.from({ length: count }, (_, index) =&gt; ({
+    id: `discussion-${index}`,
+    lesson_id: 'lesson-456',
+    prompt_text: `Discussion prompt #${index + 1}`,
+    prompt_type: 'short_answer' as const,
+    status: index === count - 1 ? 'active' as const : 'closed' as const,
+    created_at: new Date(2026, 1, 10, 14, index, 0).toISOString(),
+    published_at: new Date(2026, 1, 10, 14, index, 2).toISOString(),
+    closed_at: index === count - 1 ? null : new Date(2026, 1, 10, 14, index, 30).toISOString(),
+    display_order: index
+  }));
+}
+</code></pre>
+<p><strong>Usage in Tests</strong>:</p>
+<pre><code class="language-typescript">import { mockDiscussion, createMockResponses } from '@/tests/fixtures/discussions';
+
+describe('Discussion Component', () =&gt; {
+  it('should render discussion with responses', () =&gt; {
+    const responses = createMockResponses(mockDiscussion.id, 3);
+    render(&lt;DiscussionView discussion={mockDiscussion} responses={responses} /&gt;);
+
+    expect(screen.getByText(mockDiscussion.prompt_text)).toBeInTheDocument();
+    expect(screen.getAllByTestId('response-item')).toHaveLength(3);
+  });
+});
+</code></pre>
+<hr />
+<h3 id="7-smoke-test-testssmoketestts">7. Smoke Test (<code>tests/smoke.test.ts</code>)</h3>
+<p><strong>Purpose</strong>: Verify test infrastructure is working in CI/CD pipeline.</p>
+<p><strong>Simple validation test</strong>:</p>
+<pre><code class="language-typescript">describe(&quot;CI Smoke Test&quot;, () =&gt; {
+  it(&quot;should confirm tests are running in GitHub Actions&quot;, () =&gt; {
+    expect(1 + 1).toBe(2);
+  });
+});
+</code></pre>
+<p><strong>Why it's important</strong>:
+- Quickly validates Jest is configured correctly
+- Confirms GitHub Actions can run tests
+- Provides instant feedback on CI setup issues
+- Executes in &lt;1 second</p>
+<p>This test always passes and serves as a baseline verification that the testing infrastructure is operational before running more complex tests.</p>
+<hr />
+<h2 id="running-tests">Running Tests</h2>
+<h3 id="prerequisites">Prerequisites</h3>
+<pre><code class="language-bash">cd app
+npm install
+</code></pre>
+<h3 id="test-data-setup-for-ui-tests">Test Data Setup for UI Tests</h3>
+<p>The Playwright UI tests require a test lesson with PIN <code>123456</code> to be seeded in the Supabase database. This is a one-time setup:</p>
+<p><strong>SQL Seed Script</strong> (Run in Supabase SQL Editor):</p>
+<pre><code class="language-sql">-- Insert test course (if not exists)
+INSERT INTO courses (id, title, instructor_id, date_created)
+VALUES (
+  'test-course-123',
+  'Test Course for UI Tests',
+  'your-instructor-user-id-here',  -- Replace with actual instructor ID
+  NOW()
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Insert test lesson with PIN 123456
+INSERT INTO lessons (id, title, course_id, status, pin_code, created_at)
+VALUES (
+  'test-lesson-123',
+  'Test Lesson for Playwright',
+  'test-course-123',
+  'active',
+  '123456',
+  NOW()
+)
+ON CONFLICT (id) DO UPDATE SET status = 'active';
+
+-- Insert test discussion
+INSERT INTO discussions (id, lesson_id, prompt_text, prompt_type, status, created_at, published_at)
+VALUES (
+  'test-discussion-123',
+  'test-lesson-123',
+  'What is your favorite color?',
+  'short_answer',
+  'active',
+  NOW(),
+  NOW()
+)
+ON CONFLICT (id) DO UPDATE SET status = 'active';
+</code></pre>
+<p><strong>Note</strong>: 
+- Replace <code>your-instructor-user-id-here</code> with an actual instructor user ID from your Supabase auth.users table
+- The test lesson remains active between test runs
+- <code>global-teardown.ts</code> cleans up test responses but keeps the lesson intact
+- If tests fail with "lesson not found" warnings, verify the seed data exists</p>
+<h3 id="run-all-tests">Run All Tests</h3>
+<pre><code class="language-bash">npm test
+</code></pre>
+<h3 id="run-tests-in-watch-mode">Run Tests in Watch Mode</h3>
+<pre><code class="language-bash">npm run test:watch
+</code></pre>
+<h3 id="run-tests-with-coverage">Run Tests with Coverage</h3>
+<pre><code class="language-bash">npm run test:coverage
+</code></pre>
+<p>Coverage reports are generated in <code>app/coverage/</code> and include:
+- Line coverage
+- Branch coverage
+- Function coverage
+- Statement coverage</p>
+<h3 id="run-acceptance-tests-only">Run Acceptance Tests Only</h3>
+<pre><code class="language-bash">npm test -- tests/acceptance
+</code></pre>
+<h3 id="run-api-tests-only">Run API Tests Only</h3>
+<pre><code class="language-bash">npm test -- tests/api
+</code></pre>
+<h3 id="run-component-tests-only">Run Component Tests Only</h3>
+<pre><code class="language-bash">npm test -- tests/components
+</code></pre>
+<h3 id="run-unit-tests-only">Run Unit Tests Only</h3>
+<pre><code class="language-bash">npm test -- tests/unit
+</code></pre>
+<h3 id="run-ui-tests-playwright">Run UI Tests (Playwright)</h3>
+<p><strong>Prerequisites</strong>:</p>
+<pre><code class="language-bash">npx playwright install --with-deps
+</code></pre>
+<p><strong>Important</strong>: Ensure test data is seeded (see Test Data Setup above) before running UI tests.</p>
+<p><strong>Run all UI tests (headless)</strong>:</p>
+<pre><code class="language-bash">npm run test:ui
+</code></pre>
+<p><strong>Run UI tests with browser visible</strong>:</p>
+<pre><code class="language-bash">npm run test:ui:headed
+</code></pre>
+<p><strong>Run UI tests in debug mode</strong>:</p>
+<pre><code class="language-bash">npm run test:ui:debug
+</code></pre>
+<p><strong>Run specific UI test file</strong>:</p>
+<pre><code class="language-bash">npx playwright test tests/ui/instructor_login.spec.ts
+npx playwright test tests/ui/student_join.spec.ts
+</code></pre>
+<p><strong>Run UI tests in specific browser</strong>:</p>
+<pre><code class="language-bash">npx playwright test --project=chromium
+npx playwright test --project=firefox
+npx playwright test --project=webkit
+</code></pre>
+<p><strong>View Playwright test report</strong>:</p>
+<pre><code class="language-bash">npx playwright show-report
+</code></pre>
+<h3 id="run-tests-for-specific-user-story">Run Tests for Specific User Story</h3>
+<pre><code class="language-bash"># Example: Find all tests for US 1.02 (Login via SSO)
+npm test -- --testNamePattern=&quot;US 1.02&quot;
+
+# Example: Find all tests for US 2.06 (Join via PIN)
+npm test -- --testNamePattern=&quot;US 2.06&quot;
+</code></pre>
+<h3 id="ci-pipeline-tests">CI Pipeline Tests</h3>
+<p>In GitHub Actions, all test types run automatically:</p>
+<pre><code class="language-yaml">- name: Run Jest (Acceptance, API, Component, Unit)
+  run: npm test
+
+- name: Run Playwright (UI Tests)
+  run: npm run test:ui
+</code></pre>
+<p>See <code>.github/workflows/ci.yml</code> for full CI configuration.</p>
+<hr />
+<h2 id="test-coverage">Test Coverage</h2>
+<h3 id="coverage-goals">Coverage Goals</h3>
+<p>While we don't mandate specific coverage percentages, we aim for:</p>
+<ul>
+<li><strong>Critical paths</strong>: 100% coverage (auth, lesson lifecycle, data persistence)</li>
+<li><strong>User-facing features</strong>: &gt;90% coverage</li>
+<li><strong>Utility functions</strong>: &gt;80% coverage</li>
+<li><strong>UI components</strong>: Behavior-focused (not coverage-focused)</li>
+</ul>
+<h3 id="current-coverage">Current Coverage</h3>
+<p>To view current coverage:</p>
+<pre><code class="language-bash">npm run test:coverage
+</code></pre>
+<p>Then open <code>app/coverage/lcov-report/index.html</code> in your browser.</p>
+<h3 id="coverage-reports-in-ci">Coverage Reports in CI</h3>
+<p>Coverage reports are uploaded as artifacts in GitHub Actions:</p>
+<ol>
+<li>Go to the Actions tab</li>
+<li>Select a workflow run</li>
+<li>Download <code>jest-coverage</code> artifact</li>
+</ol>
+<hr />
+<h2 id="writing-new-tests">Writing New Tests</h2>
+<h3 id="best-practices">Best Practices</h3>
+<ol>
+<li>
+<p><strong>Label with User Story ID</strong>: Every test should reference its user story
+   <code>typescript
+   it('[US 1.XX][AT1] success: description', () =&gt; { ... });</code></p>
+</li>
+<li>
+<p><strong>Test Success and Failure Scenarios</strong>:
+   ```typescript
+   // Success case
+   it('[US 1.05][AT1] success: creates lesson with valid title', () =&gt; { ... });</p>
+</li>
+</ol>
+<p>// Failure case
+   it('[US 1.05][AT2] failure: shows error with empty title', () =&gt; { ... });
+   ```</p>
+<ol>
+<li>
+<p><strong>Use Descriptive Test Names</strong>: Test names should explain what is being tested and expected outcome</p>
+</li>
+<li>
+<p><strong>Arrange-Act-Assert Pattern</strong>:
+   ```typescript
+   it('should do something', () =&gt; {
+     // Arrange: Set up test data
+     const mockData = { ... };</p>
+<p>// Act: Perform action
+ const result = performAction(mockData);</p>
+<p>// Assert: Verify outcome
+ expect(result).toBe(expected);
+   });
+   ```</p>
+</li>
+<li>
+<p><strong>Keep Tests Independent</strong>: Each test should run independently without relying on other tests</p>
+</li>
+<li>
+<p><strong>Mock External Dependencies</strong>: Use Jest mocks for Supabase, Next.js router, etc.</p>
+</li>
+</ol>
+<h3 id="adding-a-new-acceptance-test">Adding a New Acceptance Test</h3>
+<ol>
+<li>Create test file in <code>tests/acceptance/</code>:
+   ```typescript
+   // tests/acceptance/my_feature.acceptance.test.tsx
+   import { render, screen } from '@testing-library/react';
+   import { MyComponent } from '@/components/MyComponent';</li>
+</ol>
+<p>describe('My Feature (Acceptance) [US 1.XX]', () =&gt; {
+     it('[US 1.XX][AT1] success: feature works correctly', () =&gt; {
+       render(<MyComponent />);
+       expect(screen.getByText('Expected Text')).toBeInTheDocument();
+     });
+   });
+   ```</p>
+<ol>
+<li>
+<p>Update Requirements Traceability Matrix in this document</p>
+</li>
+<li>
+<p>Run test: <code>npm test -- my_feature.acceptance.test.tsx</code></p>
+</li>
+</ol>
+<h3 id="adding-a-new-ui-test">Adding a New UI Test</h3>
+<ol>
+<li>Create test file in <code>tests/ui/</code>:
+   ```typescript
+   // tests/ui/my_feature.spec.ts
+   import { test, expect } from '@playwright/test';</li>
+</ol>
+<p>test('[US 1.XX] feature end-to-end flow', async ({ page }) =&gt; {
+     await page.goto('/my-feature');
+     await expect(page.getByText('Expected Text')).toBeVisible();
+   });
+   ```</p>
+<ol>
+<li>Run test: <code>npm run test:ui -- my_feature.spec.ts</code></li>
+</ol>
+<h3 id="adding-test-fixtures">Adding Test Fixtures</h3>
+<ol>
+<li>
+<p>Add fixtures to <code>tests/fixtures/</code>:
+   <code>typescript
+   // tests/fixtures/my_data.ts
+   export const mockMyData = {
+     id: 'test-id',
+     name: 'Test Name',
+     // ...
+   };</code></p>
+</li>
+<li>
+<p>Import in tests:
+   <code>typescript
+   import { mockMyData } from '@/tests/fixtures/my_data';</code></p>
+</li>
+</ol>
+<hr />
+<h2 id="test-quality-checklist">Test Quality Checklist</h2>
+<p>Before submitting a PR, ensure your tests:</p>
+<ul>
+<li>Are labeled with user story IDs</li>
+<li>Cover both success and failure scenarios</li>
+<li>Are added to the Requirements Traceability Matrix</li>
+<li>Run successfully in CI</li>
+<li>Follow naming conventions</li>
+<li>Use appropriate mocking</li>
+<li>Are independent and isolated</li>
+<li>Have descriptive names</li>
+<li>Test behavior, not implementation</li>
+</ul>
+<hr />
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="tests-fail-locally-but-pass-in-ci">Tests Fail Locally But Pass in CI</h3>
+<ul>
+<li>Ensure you have the latest dependencies: <code>npm ci</code></li>
+<li>Clear Jest cache: <code>npx jest --clearCache</code></li>
+<li>Check for environment-specific issues</li>
+</ul>
+<h3 id="playwright-tests-timeout">Playwright Tests Timeout</h3>
+<ul>
+<li>Increase timeout in <code>playwright.config.ts</code></li>
+<li>Ensure the app is running on the correct port</li>
+<li>Check for network issues</li>
+<li><strong>Verify test data is seeded</strong> (see Test Data Setup section)</li>
+</ul>
+<h3 id="playwright-tests-fail-with-lesson-not-found">Playwright Tests Fail with "Lesson Not Found"</h3>
+<p>This indicates the test lesson with PIN <code>123456</code> is not in the database:</p>
+<ol>
+<li>Check <code>global-setup.ts</code> output for warnings</li>
+<li>Run the SQL seed script in Supabase SQL Editor (see Test Data Setup)</li>
+<li>Verify the lesson has <code>status = 'active'</code></li>
+<li>Ensure your <code>.env.local</code> has correct Supabase credentials</li>
+</ol>
+<h3 id="mock-not-working">Mock Not Working</h3>
+<ul>
+<li>Ensure mock is defined before the import</li>
+<li>Clear module cache: <code>jest.resetModules()</code></li>
+<li>Check mock path matches actual import path</li>
+</ul>
+<h3 id="tests-are-slow">Tests Are Slow</h3>
+<ul>
+<li>Run tests in parallel (default for Jest)</li>
+<li>Use <code>test.concurrent</code> in Playwright</li>
+<li>Optimize test setup/teardown</li>
+<li>Consider splitting large test files</li>
+</ul>
+<h3 id="playwright-port-already-in-use-error">Playwright "Port Already in Use" Error</h3>
+<p>On self-hosted runners:</p>
+<pre><code class="language-bash"># Kill process on port 3000
+lsof -ti:3000 | xargs kill -9
+# or
+fuser -k 3000/tcp
+</code></pre>
+<p>The CI pipeline includes automatic cleanup.</p>
+<h3 id="ui-tests-fail-in-ci-but-pass-locally">UI Tests Fail in CI But Pass Locally</h3>
+<ul>
+<li>Check if test data exists in CI environment</li>
+<li>Verify environment variables are set in GitHub Secrets</li>
+<li>Check for timing issues (add explicit waits)</li>
+<li>Review CI logs for specific error messages</li>
+</ul>
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://jestjs.io/docs/getting-started">Jest Documentation</a></li>
+<li><a href="https://testing-library.com/docs/react-testing-library/intro/">React Testing Library</a></li>
+<li><a href="https://playwright.dev/docs/intro">Playwright Documentation</a></li>
+<li><a href="https://kentcdodds.com/blog/common-mistakes-with-react-testing-library">Testing Best Practices</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
