@@ -7,6 +7,7 @@ import { useRealtime } from '@/lib/realtime/useRealtime';
 import type { Lesson } from '@/types/lesson';
 import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
+import type { LessonFile } from '@/types/ai';
 
 type DiscussionWithResponses = Discussion & { responses: Response[] };
 
@@ -73,6 +74,12 @@ export type SessionVM = {
 
   handleExportLessonData: () => Promise<void> | void;
   handleActivate: () => Promise<void> | void;
+
+  // US 1.16 — file state for AI context management
+  files: LessonFile[];
+  isUploading: boolean;
+  uploadFile: (file: File) => Promise<void>;
+  deleteFile: (fileId: string) => Promise<void>;
 };
 
 export function useSessionPage(lessonId: string): SessionVM {
@@ -104,6 +111,10 @@ export function useSessionPage(lessonId: string): SessionVM {
   const [promptInput, setPromptInput] = useState('');
   const [publishing, setPublishing] = useState(false);
 
+  // US 1.16 — file state for AI context management
+  const [files, setFiles] = useState<LessonFile[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
   // Generate 6-digit PIN code (same behavior as original)
   const generatePinCode = (): string => {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -131,6 +142,54 @@ export function useSessionPage(lessonId: string): SessionVM {
     const active = discussionsWithCounts.find((d) => d.status === 'active');
     setActiveDiscussion(active || null);
   }, [lessonId]);
+
+  const fetchFiles = useCallback(async () => {
+    const res = await fetch(`/api/lessons/${lessonId}/files`);
+    if (!res.ok) return;
+    const data = await res.json() as LessonFile[];
+    setFiles(data);
+  }, [lessonId]);
+
+  const uploadFile = useCallback(async (file: File) => {
+    setIsUploading(true);
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: LessonFile = {
+      id: tempId,
+      lessonId,
+      fileName: file.name,
+      fileType: file.name.endsWith('.pdf') ? 'pdf' : 'pptx',
+      fileSizeBytes: file.size,
+      status: 'uploading',
+      uploadedAt: new Date().toISOString(),
+    };
+    setFiles((prev) => [optimistic, ...prev]);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`/api/lessons/${lessonId}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) {
+        const err = await res.json() as { error?: string };
+        throw new Error(err.error ?? 'Upload failed');
+      }
+    } finally {
+      setIsUploading(false);
+      setFiles((prev) => prev.filter((f) => f.id !== tempId));
+      await fetchFiles();
+    }
+  }, [lessonId, fetchFiles]);
+
+  const deleteFile = useCallback(async (fileId: string) => {
+    const res = await fetch(`/api/lessons/${lessonId}/files/${fileId}`, {
+      method: 'DELETE',
+    });
+    if (res.ok) {
+      await fetchFiles();
+    }
+  }, [lessonId, fetchFiles]);
 
   // initial lesson load (same behavior as original)
   useEffect(() => {
@@ -215,14 +274,15 @@ export function useSessionPage(lessonId: string): SessionVM {
         }
       }
 
-      // Fetch existing discussions
+      // Fetch existing discussions and files
       await fetchDiscussions();
+      await fetchFiles();
 
       setLoading(false);
     };
 
     run();
-  }, [lessonId, router, fetchDiscussions]);
+  }, [lessonId, router, fetchDiscussions, fetchFiles]);
 
   // realtime response submissions (same behavior as original)
   useEffect(() => {
@@ -540,6 +600,12 @@ export function useSessionPage(lessonId: string): SessionVM {
       activatingLesson,
       handleExportLessonData,
       handleActivate,
+
+      // US 1.16 — file management
+      files,
+      isUploading,
+      uploadFile,
+      deleteFile,
     }),
     [
       lesson,
@@ -564,6 +630,10 @@ export function useSessionPage(lessonId: string): SessionVM {
       activatingLesson,
       handleExportLessonData,
       handleActivate,
+      files,
+      isUploading,
+      uploadFile,
+      deleteFile,
     ]
   );
 }
