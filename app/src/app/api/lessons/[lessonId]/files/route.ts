@@ -21,10 +21,10 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Verify ownership
+    // Two-step ownership check — avoids !inner array/object type ambiguity
     const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
-      .select('id, courses!inner(instructor_id)')
+      .select('id, course_id')
       .eq('id', lessonId)
       .single();
 
@@ -32,8 +32,17 @@ export async function GET(
       return NextResponse.json({ error: 'Lesson not found' }, { status: 404 });
     }
 
-    const lessonData = lesson as { id: string; courses: { instructor_id: string } };
-    if (lessonData.courses.instructor_id !== user.id) {
+    const { data: course, error: courseError } = await supabase
+      .from('courses')
+      .select('instructor_id')
+      .eq('id', (lesson as { id: string; course_id: string }).course_id)
+      .single();
+
+    if (courseError || !course) {
+      return NextResponse.json({ error: 'Course not found' }, { status: 404 });
+    }
+
+    if ((course as { instructor_id: string }).instructor_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

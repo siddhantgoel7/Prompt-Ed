@@ -1,25 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { parseFile } from '@/lib/ai/parsers/index';
+import OpenAI from 'openai';
+import { parseFile } from '@/lib/ai/parsers';
 import { embedChunks } from '@/lib/ai/embedChunks';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
-import OpenAI from 'openai';
-import { randomUUID } from 'crypto';
 
-// 20 MB in bytes
-const MAX_FILE_SIZE = 20 * 1024 * 1024;
-const MAX_CHUNKS = 500;
-const MAX_FILES_PER_LESSON = 5;
+const MAX_FILE_SIZE = 25 * 1024 * 1024;
+const MAX_CHUNKS_PER_FILE = 500;
 
-/**
- * POST /api/lessons/[lessonId]/upload
- * Validates, parses, chunks, and stores a PDF or PPTX file for AI context.
- *
- * @see US 1.16
- *
- * SECURITY: Magic byte validation rejects spoofed MIME types.
- * DoS limit: 500 chunks per file, 20MB max size.
- */
+const MAGIC = {
+  pdf: Buffer.from([0x25, 0x50, 0x44, 0x46]),
+  pptx: Buffer.from([0x50, 0x4b, 0x03, 0x04]),
+};
+
+function detectFileType(buffer: Buffer): 'pdf' | 'pptx' | null {
+  if (buffer.subarray(0, 4).equals(MAGIC.pdf)) return 'pdf';
+  if (buffer.subarray(0, 4).equals(MAGIC.pptx)) return 'pptx';
+  return null;
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ lessonId: string }> }
@@ -29,15 +28,15 @@ export async function POST(
   try {
     const supabase = await createClient();
 
-    // 1. Auth: verify instructor owns lesson
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Verify ownership — two-step to avoid the Supabase array/object join ambiguity
     const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
-      .select('id, courses!inner(instructor_id)')
+      .select('id, course_id')
       .eq('id', lessonId)
       .single();
 
@@ -45,152 +44,97 @@ export async function POST(
       return NextResponse.json({ error: 'Lesson not found' }, { status: 404 });
     }
 
-    const lessonData = lesson as { id: string; courses: { instructor_id: string } };
-    if (lessonData.courses.instructor_id !== user.id) {
+    const { data: course, error: courseError } = await supabase
+      .from('courses')
+      .select('instructor_id')
+      .eq('id', (lesson as { id: string; course_id: string }).course_id)
+      .single();
+
+    if (courseError || !course) {
+      return NextResponse.json({ error: 'Course not found' }, { status: 404 });
+    }
+
+    if ((course as { instructor_id: string }).instructor_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // 2. Extract file from FormData
     const formData = await req.formData();
-    const file = formData.get('file');
-    if (!file || typeof file === 'string') {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    const file = formData.get('file') as File | null;
+    if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    if (file.size > MAX_FILE_SIZE) return NextResponse.json({ error: 'File too large (max 25MB)' }, { status: 400 });
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const detectedType = detectFileType(buffer);
+    if (!detectedType) {
+      return NextResponse.json({ error: 'Only PDF and PPTX files are supported' }, { status: 400 });
     }
 
-    const arrayBuffer = await (file as File).arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const fileName = (file as File).name;
-    const mimeType = (file as File).type;
-
-    // 3. Magic byte check
-    const magic = buffer.subarray(0, 4);
-    let fileType: 'pdf' | 'pptx';
-    if (magic[0] === 0x25 && magic[1] === 0x50 && magic[2] === 0x44 && magic[3] === 0x46) {
-      fileType = 'pdf';
-    } else if (magic[0] === 0x50 && magic[1] === 0x4b && magic[2] === 0x03 && magic[3] === 0x04) {
-      fileType = 'pptx';
-    } else {
-      return NextResponse.json(
-        { error: 'Unsupported file type. Only PDF and PPTX files are accepted.' },
-        { status: 400 }
-      );
-    }
-
-    // 4. MIME check (belt-and-suspenders)
-    const validMimes = [
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'application/vnd.ms-powerpoint',
-    ];
-    if (mimeType && !validMimes.includes(mimeType)) {
-      return NextResponse.json(
-        { error: 'Unsupported file type. Only PDF and PPTX files are accepted.' },
-        { status: 400 }
-      );
-    }
-
-    // 5. Size check
-    if (buffer.length > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: 'File exceeds 20MB size limit.' },
-        { status: 400 }
-      );
-    }
-
-    // 6. File count check (max 5 per lesson)
-    const { count, error: countError } = await supabase
+    // Max 5 files per lesson
+    const { count } = await supabase
       .from('lesson_files')
       .select('id', { count: 'exact', head: true })
       .eq('lesson_id', lessonId);
-
-    if (countError) {
-      return NextResponse.json({ error: 'Failed to check file count' }, { status: 500 });
-    }
-    if ((count ?? 0) >= MAX_FILES_PER_LESSON) {
-      return NextResponse.json(
-        { error: `Maximum of ${MAX_FILES_PER_LESSON} files per lesson.` },
-        { status: 422 }
-      );
+    if ((count ?? 0) >= 5) {
+      return NextResponse.json({ error: 'Maximum 5 files per lesson' }, { status: 400 });
     }
 
-    // 7. Parse file text
-    let rawText: string;
-    try {
-      rawText = await parseFile(buffer, fileType);
-    } catch (parseErr) {
-      const msg = parseErr instanceof Error ? parseErr.message : 'Failed to parse file';
-      return NextResponse.json({ error: msg }, { status: 422 });
-    }
-
-    // 8. Check for empty text
-    if (!rawText || !rawText.trim()) {
-      return NextResponse.json(
-        { error: 'No text could be extracted from this file. Please check the file content.' },
-        { status: 422 }
-      );
-    }
-
-    // 9. Chunk text
-    const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1200,
-      chunkOverlap: 200,
-    });
-    const chunks = await splitter.splitText(rawText);
-
-    // 10. DoS limit: 500 chunks
-    if (chunks.length > MAX_CHUNKS) {
-      return NextResponse.json(
-        { error: 'File is too large to process (exceeds 500 chunks limit).' },
-        { status: 422 }
-      );
-    }
-
-    // 11. Upload raw file to Supabase Storage
-    const storageId = randomUUID();
-    const storagePath = `${user.id}/${lessonId}/${storageId}-${fileName}`;
+    // Upload to storage
+    const storagePath = `${lessonId}/${crypto.randomUUID()}-${file.name}`;
     const { error: storageError } = await supabase.storage
       .from('lesson-files')
-      .upload(storagePath, buffer, {
-        contentType: mimeType || (fileType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.presentationml.presentation'),
-        upsert: false,
-      });
-
+      .upload(storagePath, buffer, { contentType: file.type });
     if (storageError) {
-      return NextResponse.json({ error: 'Failed to upload file to storage' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to store file' }, { status: 500 });
     }
 
-    // 12. Insert lesson_files row (status = 'processing')
-    const { data: fileRow, error: fileInsertError } = await supabase
+    // Insert DB record as 'processing'
+    const { data: fileRecord, error: fileInsertError } = await supabase
       .from('lesson_files')
       .insert({
         lesson_id: lessonId,
-        file_name: fileName,
-        file_type: fileType,
-        file_size_bytes: buffer.length,
+        file_name: file.name,
+        file_type: detectedType,
+        file_size_bytes: file.size,
         storage_path: storagePath,
         status: 'processing',
       })
-      .select('id')
+      .select()
       .single();
 
-    if (fileInsertError || !fileRow) {
-      return NextResponse.json({ error: 'Failed to save file record' }, { status: 500 });
+    if (fileInsertError || !fileRecord) {
+      return NextResponse.json({ error: 'Failed to record file' }, { status: 500 });
     }
 
-    const fileId = (fileRow as { id: string }).id;
+    // Parse text
+    let rawText = '';
+    try {
+      rawText = await parseFile(buffer, detectedType);
+    } catch (err) {
+      console.error('[upload] Parse error:', err);
+      await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
+      return NextResponse.json({
+        error: err instanceof Error ? err.message : 'Text extraction failed',
+      }, { status: 422 });
+    }
 
-    // 13. Insert lesson_chunks rows
-    const chunkRows = chunks.map((content, index) => ({
+    // Chunk
+    const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 500, chunkOverlap: 200 });
+    const chunks = (await splitter.splitText(rawText))
+      .filter((c) => c.trim())
+      .slice(0, MAX_CHUNKS_PER_FILE);
+
+    if (chunks.length === 0) {
+      await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
+      return NextResponse.json({ error: 'No text could be extracted from this file' }, { status: 422 });
+    }
+
+    // Insert chunks without embeddings
+    const chunkRows = chunks.map((content, i) => ({
       lesson_id: lessonId,
-      lesson_file_id: fileId,
-      content_type: 'slide' as const,
+      lesson_file_id: fileRecord.id,
+      content_type: 'slide',
       content,
-      embedding: null,
-      metadata: {
-        source: 'slide_body' as const,
-        file_name: fileName,
-        chunk_index: index,
-      },
+      metadata: { file_name: file.name, chunk_index: i },
     }));
 
     const { data: insertedChunks, error: chunksError } = await supabase
@@ -199,31 +143,36 @@ export async function POST(
       .select('id');
 
     if (chunksError || !insertedChunks) {
-      return NextResponse.json({ error: 'Failed to store file chunks' }, { status: 500 });
+      await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
+      return NextResponse.json({ error: 'Failed to store chunks' }, { status: 500 });
     }
 
-    const chunkIds = (insertedChunks as { id: string }[]).map((c) => c.id);
-
-    // 14. Embed chunks and update file status
+    // Embed using teammate's batched embedder
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     try {
+      const chunkIds = (insertedChunks as { id: string }[]).map((c) => c.id);
       await embedChunks(chunkIds, supabase, openai);
-      await supabase
-        .from('lesson_files')
-        .update({ status: 'ready' })
-        .eq('id', fileId);
-    } catch (embedErr) {
-      await supabase
-        .from('lesson_files')
-        .update({ status: 'failed' })
-        .eq('id', fileId);
-      // Don't fail the whole upload — file is stored, just not embedded
-      console.error('Embedding failed:', embedErr instanceof Error ? embedErr.message : String(embedErr));
+    } catch (err) {
+      console.error('[upload] Embedding error:', err);
+      await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
+      return NextResponse.json({ error: 'Embedding failed — file stored but not searchable' }, { status: 500 });
     }
 
-    return NextResponse.json({ fileId, fileName, chunkCount: chunks.length });
+    await supabase.from('lesson_files').update({ status: 'ready' }).eq('id', fileRecord.id);
+
+    return NextResponse.json({
+      id: fileRecord.id,
+      lessonId,
+      fileName: file.name,
+      fileType: detectedType,
+      fileSizeBytes: file.size,
+      status: 'ready',
+      uploadedAt: (fileRecord as { uploaded_at: string }).uploaded_at,
+      chunks_stored: chunks.length,
+    });
+
   } catch (err) {
-    console.error(err instanceof Error ? err.message : String(err));
+    console.error('[upload] Unexpected error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

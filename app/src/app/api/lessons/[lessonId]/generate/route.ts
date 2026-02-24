@@ -11,14 +11,7 @@ import type { CandidateSet } from '@/types/ai';
  * Body: { promptType: PromptType, transcriptText?: string }
  * Returns: CandidateSet (is_correct STRIPPED from all mcOptions)
  *
- * The transcriptText field is the STT integration point:
- * - Sprint 3: manually typed by instructor
- * - Sprint 4: auto-populated by Whisper STT route (same API contract)
- *
- * SECURITY: is_correct is stripped from mc_options before returning.
- * It is never sent to any client — student or instructor.
- * Correct-answer comparison happens server-side after student submission.
- *
+ * SECURITY: is_correct is never sent to any client.
  * @see US 1.18, 1.19, 1.23
  */
 export async function POST(
@@ -30,16 +23,15 @@ export async function POST(
   try {
     const supabase = await createClient();
 
-    // Auth check
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Verify ownership
+    // Two-step ownership check — avoids !inner array/object type ambiguity
     const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
-      .select('id, courses!inner(instructor_id)')
+      .select('id, course_id')
       .eq('id', lessonId)
       .single();
 
@@ -47,12 +39,20 @@ export async function POST(
       return NextResponse.json({ error: 'Lesson not found' }, { status: 404 });
     }
 
-    const lessonData = lesson as { id: string; courses: { instructor_id: string } };
-    if (lessonData.courses.instructor_id !== user.id) {
+    const { data: course, error: courseError } = await supabase
+      .from('courses')
+      .select('instructor_id')
+      .eq('id', (lesson as { id: string; course_id: string }).course_id)
+      .single();
+
+    if (courseError || !course) {
+      return NextResponse.json({ error: 'Course not found' }, { status: 404 });
+    }
+
+    if ((course as { instructor_id: string }).instructor_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Parse request body
     const body = await req.json() as { promptType?: PromptType; transcriptText?: string };
     const promptType = body.promptType ?? 'long_answer';
     const transcriptText = body.transcriptText ?? '';
@@ -64,7 +64,6 @@ export async function POST(
 
     let result: CandidateSet;
 
-    // Mock mode for development/demo
     if (process.env.MOCK_AI === 'true') {
       const { generatePrompts: mockGenerate } = await import('@/lib/ai/__mocks__/generatePrompts');
       result = await mockGenerate(lessonId, transcriptText, promptType);
