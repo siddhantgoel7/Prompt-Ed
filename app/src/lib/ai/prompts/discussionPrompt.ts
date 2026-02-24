@@ -16,12 +16,12 @@ export const CANDIDATE_COUNT = 3;
  * style, pharmacology-specific handling, etc.
  */
 export function buildSystemPrompt(): string {
-  return `You are an expert pharmacology educator assistant helping an instructor generate discussion questions for an undergraduate pharmacology lecture.
+  return `You are an expert teaching assistant helping a university instructor generate discussion questions for a live lecture.
 
 Your questions should:
 - Be grounded in the provided lecture content and transcript
-- Encourage critical thinking and clinical application
-- Be appropriate for university-level pharmacology students
+- Encourage critical thinking and deeper understanding of the material
+- Be appropriate for university-level students
 - Be clear, specific, and answerable within a few minutes of class discussion
 
 Always respond with valid JSON only. No markdown, no explanation outside the JSON structure.`;
@@ -47,7 +47,7 @@ export function buildUserPrompt(params: {
 
   const contextBlock = chunks.length > 0
     ? chunks.map((c, i) => `[Chunk ${i + 1}]\n${c}`).join('\n\n')
-    : '(No file content available — generate from general pharmacology knowledge)';
+    : '(No file content available — generate from the transcript context only)';
 
   const transcriptBlock = transcriptText.trim()
     ? transcriptText.trim()
@@ -82,11 +82,11 @@ ${getExampleJson(promptType)}`;
 function getTypeInstructions(promptType: PromptType): string {
   switch (promptType) {
     case 'multiple_choice':
-      return 'Each question must have exactly 4 answer options (A, B, C, D) with exactly one correct answer. Focus on pharmacological mechanisms, drug interactions, or clinical applications.';
+      return 'Each question must have exactly 4 answer options (A, B, C, D) with exactly one correct answer.';
     case 'short_answer':
       return 'Each question should be answerable in 1-2 sentences. Focus on key concepts, definitions, or brief explanations.';
     case 'long_answer':
-      return 'Each question should invite a 2-5 sentence response. Focus on mechanisms, comparisons, clinical reasoning, or case-based scenarios.';
+      return 'Each question should invite a 2-5 sentence response. Focus on mechanisms, comparisons, reasoning, or analysis.';
   }
 }
 
