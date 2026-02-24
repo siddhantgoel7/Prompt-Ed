@@ -1,24 +1,40 @@
 /**
- * Extracts text content from a PDF buffer.
- *
- * Uses dynamic require() to avoid ESM/CJS conflict with pdf-parse in Next.js API routes.
- * If this still fails (e.g. webpack bundler issues), replace with pdfjs-dist.
+ * Extracts text from a PDF buffer using pdfjs-dist directly.
+ * pdf-parse was skipped — its installed version misresolves to pdfjs-dist internals.
+ * pdfjs-dist is already present as a transitive dependency.
  *
  * MVP LIMITATION: Scanned PDFs (image-based) return empty string — no OCR.
- * Sprint 4: Add OCR pipeline for scanned documents.
  *
  * @see US 1.16
  */
 export async function parsePdf(buffer: Buffer): Promise<string> {
-  // Dynamic require to avoid ESM/CJS conflict with pdf-parse in Next.js API routes
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ text: string }>;
-  const data = await pdfParse(buffer);
-  const text = data.text?.trim() ?? '';
-  if (!text) {
+  const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs') as unknown as {
+    getDocument: (src: { data: Uint8Array }) => {
+      promise: Promise<{
+        numPages: number;
+        getPage: (n: number) => Promise<{
+          getTextContent: () => Promise<{ items: Array<{ str: string }> }>;
+        }>;
+      }>;
+    };
+  };
+
+  const data = new Uint8Array(buffer);
+  const pdf = await pdfjsLib.getDocument({ data }).promise;
+
+  const pages: string[] = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const text = content.items.map((item) => item.str).join(' ').trim();
+    if (text) pages.push(text);
+  }
+
+  const result = pages.join('\n').trim();
+  if (!result) {
     throw new Error(
       'No text found in this PDF. Please upload a text-based PDF (not a scanned image).'
     );
   }
-  return text;
+  return result;
 }

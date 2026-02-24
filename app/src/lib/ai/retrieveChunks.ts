@@ -25,9 +25,9 @@ export async function retrieveChunksBySimilarity(
 ): Promise<string[]> {
   try {
     const { data, error } = await supabase.rpc('match_lesson_chunks', {
-      match_lesson_id: lessonId,
-      query_embedding: queryEmbedding,
-      match_count: 8,
+      p_lesson_id: lessonId,
+      p_embedding: queryEmbedding,
+      p_match_count: 8,
     });
 
     if (error) {
