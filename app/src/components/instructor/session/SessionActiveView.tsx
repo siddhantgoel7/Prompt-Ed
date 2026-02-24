@@ -37,6 +37,10 @@ export function SessionActiveView({ vm }: { vm: SessionVM }) {
           discussions={vm.discussions}
           activeDiscussionId={vm.activeDiscussion?.id ?? null}
           responses={vm.responses}
+          files={vm.files}
+          isUploading={vm.isUploading}
+          onUploadFile={vm.uploadFile}
+          onDeleteFile={vm.deleteFile}
         />
 
         <ActiveCenter
