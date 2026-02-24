@@ -7,7 +7,8 @@ import { useRealtime } from '@/lib/realtime/useRealtime';
 import type { Lesson } from '@/types/lesson';
 import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
-import type { LessonFile } from '@/types/ai';
+import type { LessonFile, GeneratedPrompt, CandidateSet } from '@/types/ai';
+import type { PromptType } from '@/types/discussion';
 
 type DiscussionWithResponses = Discussion & { responses: Response[] };
 
@@ -80,6 +81,18 @@ export type SessionVM = {
   isUploading: boolean;
   uploadFile: (file: File) => Promise<void>;
   deleteFile: (fileId: string) => Promise<void>;
+
+  // US 1.18, 1.19 — AI generation state
+  transcriptText: string;
+  setTranscriptText: React.Dispatch<React.SetStateAction<string>>;
+  promptType: PromptType;
+  setPromptType: React.Dispatch<React.SetStateAction<PromptType>>;
+  candidates: GeneratedPrompt[];
+  isGenerating: boolean;
+  generationWarning: string | null;
+  generateCandidates: () => Promise<void>;
+  selectCandidate: (p: GeneratedPrompt) => void;
+  regenerateCandidates: () => Promise<void>;
 };
 
 export function useSessionPage(lessonId: string): SessionVM {
@@ -114,6 +127,13 @@ export function useSessionPage(lessonId: string): SessionVM {
   // US 1.16 — file state for AI context management
   const [files, setFiles] = useState<LessonFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+
+  // US 1.18, 1.19 — AI generation state
+  const [transcriptText, setTranscriptText] = useState('');
+  const [promptType, setPromptType] = useState<PromptType>('long_answer');
+  const [candidates, setCandidates] = useState<GeneratedPrompt[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationWarning, setGenerationWarning] = useState<string | null>(null);
 
   // Generate 6-digit PIN code (same behavior as original)
   const generatePinCode = (): string => {
@@ -190,6 +210,40 @@ export function useSessionPage(lessonId: string): SessionVM {
       await fetchFiles();
     }
   }, [lessonId, fetchFiles]);
+
+  // US 1.18, 1.19 — AI generation handlers
+  const generateCandidates = useCallback(async () => {
+    setIsGenerating(true);
+    setGenerationWarning(null);
+    try {
+      const res = await fetch(`/api/lessons/${lessonId}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ promptType, transcriptText }),
+      });
+      if (!res.ok) {
+        const err = await res.json() as { error?: string };
+        throw new Error(err.error ?? 'Generation failed');
+      }
+      const data = await res.json() as CandidateSet;
+      setCandidates(data.candidates);
+      setGenerationWarning(data.warning ?? null);
+    } catch (err) {
+      setGenerationWarning(err instanceof Error ? err.message : 'Failed to generate prompts');
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [lessonId, promptType, transcriptText]);
+
+  const selectCandidate = useCallback((p: GeneratedPrompt) => {
+    setPromptInput(p.promptText);
+    setPromptType(p.promptType);
+  }, []);
+
+  const regenerateCandidates = useCallback(async () => {
+    setCandidates([]);
+    await generateCandidates();
+  }, [generateCandidates]);
 
   // initial lesson load (same behavior as original)
   useEffect(() => {
@@ -606,6 +660,18 @@ export function useSessionPage(lessonId: string): SessionVM {
       isUploading,
       uploadFile,
       deleteFile,
+
+      // US 1.18, 1.19 — AI generation
+      transcriptText,
+      setTranscriptText,
+      promptType,
+      setPromptType,
+      candidates,
+      isGenerating,
+      generationWarning,
+      generateCandidates,
+      selectCandidate,
+      regenerateCandidates,
     }),
     [
       lesson,
@@ -634,6 +700,14 @@ export function useSessionPage(lessonId: string): SessionVM {
       isUploading,
       uploadFile,
       deleteFile,
+      transcriptText,
+      promptType,
+      candidates,
+      isGenerating,
+      generationWarning,
+      generateCandidates,
+      selectCandidate,
+      regenerateCandidates,
     ]
   );
 }

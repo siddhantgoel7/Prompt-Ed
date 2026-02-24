@@ -50,6 +50,16 @@ export function SessionActiveView({ vm }: { vm: SessionVM }) {
           activeDiscussionId={vm.activeDiscussion?.id ?? null}
           onPublish={vm.handlePublishDiscussion}
           onClose={vm.handleCloseDiscussion}
+          transcriptText={vm.transcriptText}
+          setTranscriptText={vm.setTranscriptText}
+          promptType={vm.promptType}
+          setPromptType={vm.setPromptType}
+          candidates={vm.candidates}
+          isGenerating={vm.isGenerating}
+          generationWarning={vm.generationWarning}
+          onGenerate={vm.generateCandidates}
+          onSelectCandidate={vm.selectCandidate}
+          onRegenerate={vm.regenerateCandidates}
         />
 
         <ActiveRightPanel responses={vm.responses} />
