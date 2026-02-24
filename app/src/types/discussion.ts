@@ -1,3 +1,5 @@
+import { MCOptionSafe } from './ai';
+
 export type PromptType = 'short_answer' | 'long_answer' | 'multiple_choice';
 export type DiscussionStatus = 'draft' | 'active' | 'closed';
 
@@ -11,6 +13,8 @@ export interface Discussion {
   published_at: string | null;
   closed_at: string | null;
   display_order: number;
+  source: 'manual' | 'ai_generated' | null;
+  mc_options: MCOptionSafe[] | null;
 }
 
 export interface CreateDiscussionInput {
