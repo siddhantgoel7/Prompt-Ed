@@ -2,9 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [sprint-2, main]
+    branches:
+      - main
+      - "sprint-*"
   pull_request:
-    branches: [sprint-2, main]
+    branches:
+      - main
+      - "sprint-*"
   workflow_dispatch:
 
 concurrency:
