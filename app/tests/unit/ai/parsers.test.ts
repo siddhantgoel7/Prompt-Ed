@@ -5,6 +5,7 @@
 import { parsePdf } from '@/lib/ai/parsers/pdfParser';
 import { parsePptx } from '@/lib/ai/parsers/pptxParser';
 import { parseFile } from '@/lib/ai/parsers/index';
+import JSZip from 'jszip';
 
 // Mock pdfjs-dist to avoid actual PDF processing in unit tests
 jest.mock('pdfjs-dist/legacy/build/pdf.mjs', () => {
@@ -46,7 +47,6 @@ describe('parsePdf', () => {
 describe('parsePptx', () => {
   it('extracts slide body and notes text', async () => {
     // Build a minimal PPTX (ZIP) in memory using jszip
-    const JSZip = require('jszip');
     const zip = new JSZip();
 
     // Minimal slide XML with a text run
@@ -89,7 +89,6 @@ describe('parsePptx', () => {
   });
 
   it('returns empty string for PPTX with no text', async () => {
-    const JSZip = require('jszip');
     const zip = new JSZip();
     // Empty PPTX with a slide that has no text nodes
     const emptySlideXml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -113,7 +112,6 @@ describe('parseFile', () => {
 
   it('dispatches to parsePptx for pptx type', async () => {
     // Use a minimal valid zip buffer
-    const JSZip = require('jszip');
     const zip = new JSZip();
     const buf = await zip.generateAsync({ type: 'nodebuffer' }) as Buffer;
     const result = await parseFile(buf, 'pptx');

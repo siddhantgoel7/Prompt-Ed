@@ -1,7 +1,7 @@
 // src/components/student/session/StudentSessionPage.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StudentSessionShell } from './StudentSessionShell';
 import { StudentStatusAlert } from './StudentStatusAlert';
@@ -27,11 +27,13 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
   } = useStudentSession(lessonId);
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [prevDiscussionId, setPrevDiscussionId] = useState<string | undefined>(undefined);
 
   // Reset selected option when active discussion changes
-  useEffect(() => {
+  if (activeDiscussion?.id !== prevDiscussionId) {
+    setPrevDiscussionId(activeDiscussion?.id);
     setSelectedOption(null);
-  }, [activeDiscussion?.id]);
+  }
 
   return (
     <StudentSessionShell title={lesson?.title}>
@@ -82,7 +84,7 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
             value={activeDiscussion.prompt_type === 'multiple_choice'
               ? (selectedOption ? `Option ${selectedOption}: ${activeDiscussion.mc_options?.find(o => o.label === selectedOption)?.text ?? ''}` : '')
               : responseText}
-            onChange={activeDiscussion.prompt_type === 'multiple_choice' ? () => {} : setResponseText}
+            onChange={activeDiscussion.prompt_type === 'multiple_choice' ? () => { } : setResponseText}
             onSubmit={submitResponse}
             disabled={!canSubmit || (activeDiscussion.prompt_type === 'multiple_choice' && !selectedOption)}
             submitting={submitting}

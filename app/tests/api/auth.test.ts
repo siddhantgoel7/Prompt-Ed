@@ -32,7 +32,7 @@ describe('API: /api/auth/callback Logic [US 1.01][US 1.02]', () => {
         exchangeCodeForSession: jest.fn(),
       },
     }
-    ;(createClient as jest.Mock).mockResolvedValue(mockSupabase)
+      ; (createClient as jest.Mock).mockResolvedValue(mockSupabase)
   })
 
   afterEach(() => {
@@ -55,7 +55,7 @@ describe('API: /api/auth/callback Logic [US 1.01][US 1.02]', () => {
     expect(mockSupabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(validCode)
     expect(error).toBeNull()
     expect(data.session).not.toBeNull();
-    const session = data.session!;
+    expect(data.session!.access_token).toBe('token');
   })
 
   // 13.2
