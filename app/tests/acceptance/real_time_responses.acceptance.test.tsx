@@ -87,7 +87,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     handleExportLessonData: jest.fn(),
     handleActivate: jest.fn(),
     ...overrides,
-  };
+  } as unknown as SessionVM;
 }
 
 describe('Real-time Responses (Acceptance) [US 1.34]', () => {

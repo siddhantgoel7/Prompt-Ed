@@ -6,16 +6,27 @@ import { parsePdf } from '@/lib/ai/parsers/pdfParser';
 import { parsePptx } from '@/lib/ai/parsers/pptxParser';
 import { parseFile } from '@/lib/ai/parsers/index';
 
-// Mock pdf-parse to avoid actual PDF processing in unit tests
-jest.mock('pdf-parse', () =>
-  jest.fn((buf: Buffer) => {
-    const content = buf.toString();
-    if (content.includes('EMPTY')) {
-      return Promise.resolve({ text: '' });
-    }
-    return Promise.resolve({ text: 'Hello PDF content' });
-  })
-);
+// Mock pdfjs-dist to avoid actual PDF processing in unit tests
+jest.mock('pdfjs-dist/legacy/build/pdf.mjs', () => {
+  return {
+    getDocument: jest.fn((src: { data: Uint8Array }) => {
+      const content = Buffer.from(src.data).toString();
+      if (content.includes('EMPTY')) {
+        return { promise: Promise.resolve({ numPages: 0 }) };
+      }
+      return {
+        promise: Promise.resolve({
+          numPages: 1,
+          getPage: jest.fn().mockResolvedValue({
+            getTextContent: jest.fn().mockResolvedValue({
+              items: [{ str: 'Hello PDF content' }]
+            })
+          })
+        })
+      };
+    })
+  };
+});
 
 describe('parsePdf', () => {
   it('returns extracted text from a PDF buffer', async () => {
