@@ -18,7 +18,9 @@ export const mockDiscussion: Discussion = {
   created_at: '2026-02-10T14:05:23Z',
   published_at: '2026-02-10T14:05:25Z',
   closed_at: null,
-  display_order: 0
+  display_order: 0,
+  source: null,
+  mc_options: null
 };
 
 // 18.2
@@ -31,7 +33,9 @@ export const mockClosedDiscussion: Discussion = {
   created_at: '2026-02-10T13:50:00Z',
   published_at: '2026-02-10T13:50:05Z',
   closed_at: '2026-02-10T13:58:30Z',
-  display_order: 0
+  display_order: 0,
+  source: null,
+  mc_options: null
 };
 
 // 18.3
@@ -44,7 +48,9 @@ export const mockMultipleChoiceDiscussion: Discussion = {
   created_at: '2026-02-10T14:10:00Z',
   published_at: '2026-02-10T14:10:02Z',
   closed_at: null,
-  display_order: 1
+  display_order: 1,
+  source: null,
+  mc_options: null
 };
 
 // 18.4
@@ -107,7 +113,9 @@ export function createMockDiscussions(count: number): Discussion[] {
     created_at: new Date(2026, 1, 10, 14, index, 0).toISOString(),
     published_at: new Date(2026, 1, 10, 14, index, 2).toISOString(),
     closed_at: index === count - 1 ? null : new Date(2026, 1, 10, 14, index, 30).toISOString(),
-    display_order: index
+    display_order: index,
+    source: null,
+    mc_options: null
   }));
 }
 

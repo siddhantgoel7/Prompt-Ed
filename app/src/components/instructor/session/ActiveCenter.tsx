@@ -2,50 +2,344 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import * as React from 'react';
+import type { GeneratedPrompt } from '@/types/ai';
+import type { PromptType } from '@/types/discussion';
+
+// ─── Audio recorder hook (US 1.17) ───────────────────────────────────────────
+
+function useAudioRecorder() {
+  const [isRecording, setIsRecording] = React.useState(false);
+  const [elapsed, setElapsed] = React.useState(0);
+  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const chunksRef = React.useRef<Blob[]>([]);
+  const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const start = React.useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      chunksRef.current = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      recorder.start(500);
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+      setElapsed(0);
+      timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
+    } catch {
+      alert('Microphone access denied. Please allow microphone access and try again.');
+    }
+  }, []);
+
+  const stop = React.useCallback((): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const recorder = mediaRecorderRef.current;
+      if (!recorder) { resolve(new Blob([])); return; }
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+        recorder.stream.getTracks().forEach((t) => t.stop());
+        resolve(blob);
+      };
+      recorder.stop();
+      setIsRecording(false);
+      if (timerRef.current) clearInterval(timerRef.current);
+    });
+  }, []);
+
+  const fmt = (s: number) =>
+    `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
+
+  return { isRecording, elapsed, fmt, start, stop };
+}
+
+// ─── Candidate card (teammate's design) ──────────────────────────────────────
+
+function CandidateCard({
+  candidate,
+  isSelected,
+  onSelect,
+}: {
+  candidate: GeneratedPrompt;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      onClick={onSelect}
+      className={[
+        'w-full text-left p-3 rounded-lg border-2 text-sm transition-colors',
+        isSelected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400 bg-white',
+      ].join(' ')}
+    >
+      <div className="flex items-center gap-2 mb-1">
+        <Badge variant="secondary" className="text-xs capitalize">
+          {candidate.promptType.replace('_', ' ')}
+        </Badge>
+        {isSelected && <span className="text-xs text-green-600 font-medium">Selected</span>}
+      </div>
+      <p className="leading-snug">{candidate.promptText}</p>
+      {candidate.mcOptions && candidate.mcOptions.length > 0 && (
+        <ul className="mt-2 space-y-1">
+          {candidate.mcOptions.map((opt) => (
+            <li key={opt.label} className="text-xs text-muted-foreground">
+              <span className="font-semibold">{opt.label}.</span> {opt.text}
+            </li>
+          ))}
+        </ul>
+      )}
+    </button>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export function ActiveCenter({
+  lessonId,
   promptInput,
   setPromptInput,
   isConnected,
   activeDiscussionId,
   onPublish,
   onClose,
+  // AI generation props (from teammate's design)
+  transcriptText,
+  setTranscriptText,
+  promptType,
+  setPromptType,
+  candidates,
+  isGenerating,
+  generationWarning,
+  onGenerate,
+  onSelectCandidate,
+  onRegenerate,
+  // Direct publish (our addition — skips text input)
+  onPublishAiCandidate,
 }: {
+  lessonId: string;
   promptInput: string;
   setPromptInput: (v: string) => void;
   isConnected: boolean;
   activeDiscussionId: string | null;
   onPublish: () => void;
   onClose: (discussionId: string) => void;
+  transcriptText: string;
+  setTranscriptText: (v: string) => void;
+  promptType: PromptType;
+  setPromptType: (v: PromptType) => void;
+  candidates: GeneratedPrompt[];
+  isGenerating: boolean;
+  generationWarning: string | null;
+  onGenerate: () => void;
+  onSelectCandidate: (p: GeneratedPrompt) => void;
+  onRegenerate: () => void;
+  onPublishAiCandidate?: (candidate: GeneratedPrompt) => void;
 }) {
+  const recorder = useAudioRecorder();
+  const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
+  const [sttStatus, setSttStatus] = React.useState<'idle' | 'transcribing' | 'error'>('idle');
+  const [sttError, setSttError] = React.useState<string | null>(null);
+
+  // Reset selection when candidates change
+  React.useEffect(() => { setSelectedIndex(null); }, [candidates]);
+
+  // Stop recording → Whisper → populate transcriptText → trigger generate
+  const handleStopAndTranscribe = React.useCallback(async () => {
+    setSttError(null);
+    setSttStatus('transcribing');
+
+    const audioBlob = await recorder.stop();
+
+    if (!audioBlob.size) {
+      setSttError('No audio captured. Try again.');
+      setSttStatus('error');
+      return;
+    }
+
+    try {
+      const form = new FormData();
+      form.append('audio', audioBlob, 'recording.webm');
+      const res = await fetch(`/api/lessons/${lessonId}/transcript`, {
+        method: 'POST',
+        body: form,
+      });
+      if (!res.ok) {
+        const e = await res.json() as { error?: string };
+        throw new Error(e.error ?? 'Transcription failed');
+      }
+      const data = await res.json() as { transcript: string };
+      setTranscriptText(data.transcript ?? '');
+      setSttStatus('idle');
+      // Auto-trigger generation after successful transcription
+      // Small delay so setTranscriptText flushes before onGenerate reads it
+      setTimeout(() => onGenerate(), 50);
+    } catch (err) {
+      setSttError(err instanceof Error ? err.message : 'Transcription failed — type manually.');
+      setSttStatus('error');
+    }
+  }, [lessonId, recorder, setTranscriptText, onGenerate]);
+
+  const handleSelectCandidate = (p: GeneratedPrompt, index: number) => {
+    setSelectedIndex(index);
+    onSelectCandidate(p);
+  };
+
+  const handlePublishSelected = (p: GeneratedPrompt) => {
+    if (onPublishAiCandidate) {
+      onPublishAiCandidate(p);
+      setSelectedIndex(null);
+    }
+  };
+
   return (
-    <div className="flex-1 p-6">
+    <div className="flex-1 p-6 space-y-4 overflow-y-auto">
+
+      {/* ── AI generation section ── */}
+      <div className="space-y-3 border rounded-lg p-4 bg-gray-50">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold">AI Prompt Generation</span>
+
+          {/* STT recording button (US 1.17) */}
+          <div className="flex items-center gap-2">
+            {recorder.isRecording && (
+              <span className="flex items-center gap-1 text-xs text-red-600 font-medium">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
+                {recorder.fmt(recorder.elapsed)}
+              </span>
+            )}
+            {!recorder.isRecording ? (
+              <Button
+                onClick={recorder.start}
+                disabled={isGenerating || sttStatus === 'transcribing'}
+                size="sm"
+                variant="outline"
+                className="text-xs h-7 px-3 border-red-300 text-red-700 hover:bg-red-50"
+              >
+                🎙 Start Recording
+              </Button>
+            ) : (
+              <Button
+                onClick={handleStopAndTranscribe}
+                size="sm"
+                className="text-xs h-7 px-3 bg-gray-900 text-white hover:bg-gray-800"
+              >
+                ⏹ Stop &amp; Transcribe
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {sttStatus === 'transcribing' && (
+          <p className="text-xs text-gray-500 animate-pulse">Transcribing audio…</p>
+        )}
+        {sttStatus === 'error' && sttError && (
+          <p className="text-xs text-red-600">{sttError}</p>
+        )}
+
+        {/* Transcript / context input */}
+        <textarea
+          value={transcriptText}
+          onChange={(e) => setTranscriptText(e.target.value)}
+          placeholder="Spoken content will appear here after recording, or type a topic manually"
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none"
+          rows={2}
+        />
+
+        {/* Prompt type + generate */}
+        <div className="flex items-center gap-2">
+          <select
+            value={promptType}
+            onChange={(e) => setPromptType(e.target.value as PromptType)}
+            className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-black"
+          >
+            <option value="long_answer">Long Answer</option>
+            <option value="short_answer">Short Answer</option>
+            <option value="multiple_choice">Multiple Choice</option>
+          </select>
+
+          <Button
+            onClick={onGenerate}
+            disabled={isGenerating || recorder.isRecording}
+            size="sm"
+            className="px-4 py-1.5 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
+          >
+            {isGenerating ? 'Generating…' : 'Generate Prompts'}
+          </Button>
+        </div>
+
+        {generationWarning && (
+          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+            {generationWarning}
+          </p>
+        )}
+
+        {/* Candidate cards */}
+        {candidates.length > 0 && (
+          <div className="space-y-2">
+            {candidates.map((c, i) => (
+              <div key={i}>
+                <CandidateCard
+                  candidate={c}
+                  isSelected={selectedIndex === i}
+                  onSelect={() => handleSelectCandidate(c, i)}
+                />
+                {selectedIndex === i && onPublishAiCandidate && (
+                  <Button
+                    size="sm"
+                    onClick={() => handlePublishSelected(c)}
+                    className="mt-1 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800"
+                  >
+                    Publish This Question →
+                  </Button>
+                )}
+              </div>
+            ))}
+
+            <div className="flex gap-2 pt-1">
+              <Button
+                onClick={onRegenerate}
+                disabled={isGenerating}
+                variant="outline"
+                size="sm"
+                className="text-xs"
+              >
+                {isGenerating ? 'Regenerating…' : 'Regenerate'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Manual prompt input ── */}
       <Input
         type="text"
         value={promptInput}
         onChange={(e) => setPromptInput(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter' && promptInput.trim() && isConnected) onPublish(); }}
         placeholder="Space to type multiple prompts"
-        className="w-full mb-4 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
       />
 
-      {/* Keep label "Start Discussion" for tests */}
-      <Button
-        onClick={onPublish}
-        disabled={!promptInput.trim() || !isConnected}
-        className="px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
-      >
-        Start Discussion
-      </Button>
-
-      {/* Keep label "Close Discussion" for tests */}
-      <Button
-        onClick={() => activeDiscussionId && onClose(activeDiscussionId)}
-        disabled={!activeDiscussionId}
-        className="ml-2 px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
-      >
-        Close Discussion
-      </Button>
+      {/* Keep labels for tests */}
+      <div className="flex gap-2">
+        <Button
+          onClick={onPublish}
+          disabled={!promptInput.trim() || !isConnected}
+          className="px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
+        >
+          Start Discussion
+        </Button>
+        <Button
+          onClick={() => activeDiscussionId && onClose(activeDiscussionId)}
+          disabled={!activeDiscussionId}
+          className="px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
+        >
+          Close Discussion
+        </Button>
+      </div>
     </div>
   );
 }

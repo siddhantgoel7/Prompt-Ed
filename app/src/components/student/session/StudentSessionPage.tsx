@@ -1,6 +1,7 @@
 // src/components/student/session/StudentSessionPage.tsx
 'use client';
 
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StudentSessionShell } from './StudentSessionShell';
 import { StudentStatusAlert } from './StudentStatusAlert';
@@ -25,12 +26,21 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
     submitResponse,
   } = useStudentSession(lessonId);
 
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [prevDiscussionId, setPrevDiscussionId] = useState<string | undefined>(undefined);
+
+  // Reset selected option when active discussion changes
+  if (activeDiscussion?.id !== prevDiscussionId) {
+    setPrevDiscussionId(activeDiscussion?.id);
+    setSelectedOption(null);
+  }
+
   return (
     <StudentSessionShell title={lesson?.title}>
       {/* Connection hint (optional but nice for production UX) */}
       {!isConnected && view !== 'loading' ? (
         <StudentStatusAlert
-          title="Connecting…"
+          title="Connecting\u2026"
           description="Trying to establish realtime updates."
         />
       ) : null}
@@ -65,12 +75,18 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
 
       {view === 'active' && activeDiscussion?.status === 'active' ? (
         <div className="space-y-4">
-          <StudentPromptCard prompt={activeDiscussion.prompt_text} />
+          <StudentPromptCard
+            discussion={activeDiscussion}
+            selectedOption={selectedOption}
+            onSelectOption={setSelectedOption}
+          />
           <StudentResponseForm
-            value={responseText}
-            onChange={setResponseText}
+            value={activeDiscussion.prompt_type === 'multiple_choice'
+              ? (selectedOption ? `Option ${selectedOption}: ${activeDiscussion.mc_options?.find(o => o.label === selectedOption)?.text ?? ''}` : '')
+              : responseText}
+            onChange={activeDiscussion.prompt_type === 'multiple_choice' ? () => { } : setResponseText}
             onSubmit={submitResponse}
-            disabled={!canSubmit}
+            disabled={!canSubmit || (activeDiscussion.prompt_type === 'multiple_choice' && !selectedOption)}
             submitting={submitting}
           />
         </div>
@@ -79,7 +95,7 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
       {view === 'submitted' ? (
         <StudentStatusAlert
           title="Response submitted"
-          description="You’re all set. Wait for the next prompt."
+          description="You're all set. Wait for the next prompt."
         />
       ) : null}
     </StudentSessionShell>

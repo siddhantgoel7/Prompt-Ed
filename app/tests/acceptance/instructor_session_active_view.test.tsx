@@ -82,7 +82,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     handleExportLessonData: jest.fn(),
     handleActivate: jest.fn(),
     ...overrides,
-  };
+  } as unknown as SessionVM;
 }
 
 describe('SessionActiveView (Acceptance)', () => {

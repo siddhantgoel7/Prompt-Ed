@@ -54,7 +54,7 @@ function makeEndedVM(overrides: Partial<SessionVM> = {}): SessionVM {
     handleExportLessonData: jest.fn(),
     handleActivate: jest.fn(),
     ...overrides,
-  };
+  } as unknown as SessionVM;
 }
 
 describe('Anonymous Access (Acceptance) [US 2.03]', () => {

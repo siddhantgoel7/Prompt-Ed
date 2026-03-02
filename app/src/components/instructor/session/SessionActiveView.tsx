@@ -1,4 +1,5 @@
 'use client';
+// MERGED: wires all AI props from VM to components
 
 import * as React from 'react';
 import { JoinCodeOverlay } from '@/components/instructor/session/JoinCodeOverlay';
@@ -26,26 +27,41 @@ export function SessionActiveView({ vm }: { vm: SessionVM }) {
       <JoinCodeOverlay
         open={vm.displayState}
         code={lesson.pin_code}
-        onClose={() => {
-          // Keep behavior identical: Display toggles the same boolean
-          if (vm.displayState) vm.handleDisplay();
-        }}
+        onClose={() => { if (vm.displayState) vm.handleDisplay(); }}
       />
 
       <div className="flex-1 flex flex-col md:flex-row">
+        {/* Sidebar: discussions + file upload (US 1.16) */}
         <ActiveSidebar
           discussions={vm.discussions}
           activeDiscussionId={vm.activeDiscussion?.id ?? null}
           responses={vm.responses}
+          files={vm.files}
+          isUploading={vm.isUploading}
+          onUploadFile={vm.uploadFile}
+          onDeleteFile={vm.deleteFile}
         />
 
+        {/* Center: AI generation + STT (US 1.17, 1.18, 1.19) */}
         <ActiveCenter
+          lessonId={lesson.id}
           promptInput={vm.promptInput}
           setPromptInput={vm.setPromptInput}
           isConnected={vm.isConnected}
           activeDiscussionId={vm.activeDiscussion?.id ?? null}
           onPublish={vm.handlePublishDiscussion}
           onClose={vm.handleCloseDiscussion}
+          transcriptText={vm.transcriptText}
+          setTranscriptText={vm.setTranscriptText}
+          promptType={vm.promptType}
+          setPromptType={vm.setPromptType}
+          candidates={vm.candidates}
+          isGenerating={vm.isGenerating}
+          generationWarning={vm.generationWarning}
+          onGenerate={vm.generateCandidates}
+          onSelectCandidate={vm.selectCandidate}
+          onRegenerate={vm.regenerateCandidates}
+          onPublishAiCandidate={vm.handlePublishAiCandidate}
         />
 
         <ActiveRightPanel responses={vm.responses} />
