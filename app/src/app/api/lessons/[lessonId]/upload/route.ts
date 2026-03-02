@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import OpenAI from 'openai';
 import { parseFile } from '@/lib/ai/parsers';
 import { embedChunks } from '@/lib/ai/embedChunks';
+import { generatePrompts } from '@/lib/ai/generatePrompts';
+import { OpenAIProvider } from '@/lib/ai/providers';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
@@ -105,60 +106,56 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to record file' }, { status: 500 });
     }
 
-    // Parse text
-    let rawText = '';
-    try {
-      rawText = await parseFile(buffer, detectedType);
-    } catch (err) {
-      console.error('[upload] Parse error:', err);
-      await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
-      return NextResponse.json({
-        error: err instanceof Error ? err.message : 'Text extraction failed',
-      }, { status: 422 });
-    }
+    // --- BACKGROUND PROCESSING ---
+    const processFile = async () => {
+      try {
+        // Parse text
+        const rawText = await parseFile(buffer, detectedType);
 
-    // Chunk
-    const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 500, chunkOverlap: 200 });
-    const chunks = (await splitter.splitText(rawText))
-      .filter((c) => c.trim())
-      .slice(0, MAX_CHUNKS_PER_FILE);
+        // Chunk
+        const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 500, chunkOverlap: 200 });
+        const chunks = (await splitter.splitText(rawText)).filter((c) => c.trim()).slice(0, MAX_CHUNKS_PER_FILE);
 
-    if (chunks.length === 0) {
-      await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
-      return NextResponse.json({ error: 'No text could be extracted from this file' }, { status: 422 });
-    }
+        if (chunks.length === 0) {
+          await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
+          return;
+        }
 
-    // Insert chunks without embeddings
-    const chunkRows = chunks.map((content, i) => ({
-      lesson_id: lessonId,
-      lesson_file_id: fileRecord.id,
-      content_type: 'slide',
-      content,
-      metadata: { file_name: file.name, chunk_index: i },
-    }));
+        // Insert chunks without embeddings
+        const chunkRows = chunks.map((content, i) => ({
+          lesson_id: lessonId,
+          lesson_file_id: fileRecord.id,
+          content_type: 'slide',
+          content,
+          metadata: { file_name: file.name, chunk_index: i },
+        }));
 
-    const { data: insertedChunks, error: chunksError } = await supabase
-      .from('lesson_chunks')
-      .insert(chunkRows)
-      .select('id');
+        const { data: insertedChunks, error: chunksError } = await supabase
+          .from('lesson_chunks')
+          .insert(chunkRows)
+          .select('id');
 
-    if (chunksError || !insertedChunks) {
-      await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
-      return NextResponse.json({ error: 'Failed to store chunks' }, { status: 500 });
-    }
+        if (chunksError || !insertedChunks) {
+          await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
+          return;
+        }
 
-    // Embed using teammate's batched embedder
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    try {
-      const chunkIds = (insertedChunks as { id: string }[]).map((c) => c.id);
-      await embedChunks(chunkIds, supabase, openai);
-    } catch (err) {
-      console.error('[upload] Embedding error:', err);
-      await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
-      return NextResponse.json({ error: 'Embedding failed — file stored but not searchable' }, { status: 500 });
-    }
+        // Embed using our new adapter layer
+        const aiProvider = new OpenAIProvider();
+        const chunkIds = (insertedChunks as { id: string }[]).map((c) => c.id);
+        await embedChunks(chunkIds, supabase, aiProvider);
 
-    await supabase.from('lesson_files').update({ status: 'ready' }).eq('id', fileRecord.id);
+        // Mark as ready
+        await supabase.from('lesson_files').update({ status: 'ready' }).eq('id', fileRecord.id);
+
+      } catch (err) {
+        console.error('[upload] Background parse/embed error:', err);
+        await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
+      }
+    };
+
+    // Fire and forget
+    processFile();
 
     return NextResponse.json({
       id: fileRecord.id,
@@ -166,9 +163,8 @@ export async function POST(
       fileName: file.name,
       fileType: detectedType,
       fileSizeBytes: file.size,
-      status: 'ready',
+      status: 'processing', // Returning processing immediately
       uploadedAt: (fileRecord as { uploaded_at: string }).uploaded_at,
-      chunks_stored: chunks.length,
     });
 
   } catch (err) {

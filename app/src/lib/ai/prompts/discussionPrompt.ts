@@ -8,7 +8,7 @@ import type { PromptType } from '@/types/discussion';
  * CANDIDATE_COUNT: number of discussion candidates to generate per call.
  * Increase for more options; decrease for faster response time.
  */
-export const CANDIDATE_COUNT = 3;
+export const CANDIDATE_COUNT = 5;
 
 /**
  * The AI's persona and instructions.
@@ -18,13 +18,13 @@ export const CANDIDATE_COUNT = 3;
 export function buildSystemPrompt(): string {
   return `You are an expert teaching assistant helping a university instructor generate discussion questions for a live lecture.
 
-Your questions should:
-- Be grounded in the provided lecture content and transcript
-- Encourage critical thinking and deeper understanding of the material
-- Be appropriate for university-level students
-- Be clear, specific, and answerable within a few minutes of class discussion
-
-Always respond with valid JSON only. No markdown, no explanation outside the JSON structure.`;
+<rules>
+1. Grounding: Questions must be strictly grounded in the provided lecture content and transcript.
+2. Cognitive Level: Encourage critical thinking, application, and deeper understanding (Bloom's Taxonomy: Apply, Analyze, Evaluate).
+3. Audience: Appropriate for university-level students in medical/pharmacology disciplines.
+4. Format: Clear, specific, and answerable within a 2-3 minute class discussion.
+5. Output: Always respond with valid JSON only. Do not wrap in backticks or include any conversational text.
+</rules>`;
 }
 
 /**
@@ -55,28 +55,36 @@ export function buildUserPrompt(params: {
 
   const typeInstructions = getTypeInstructions(promptType);
 
-  return `<context>
+  return `<instructions>
+Based on the provided <context> and <transcript> from the lecture, generate exactly ${CANDIDATE_COUNT} discussion questions.
+
+<question_type_rules>
+${typeInstructions}
+</question_type_rules>
+
+<output_format>
+Respond with a JSON array containing exactly ${CANDIDATE_COUNT} objects.
+Each object must strictly align with this schema:
+- "promptText": string (the discussion question)
+- "promptType": "${promptType}" (literal string)
+${promptType === 'multiple_choice' ? `- "mcOptions": array of exactly 4 objects, each with:
+  - "label": "A", "B", "C", or "D"
+  - "text": string (the answer option text)
+  - "is_correct": boolean (exactly one option must be true)` : ''}
+</output_format>
+
+<example>
+${getExampleJson(promptType)}
+</example>
+</instructions>
+
+<context>
 ${contextBlock}
 </context>
 
 <transcript>
 ${transcriptBlock}
-</transcript>
-
-Generate exactly ${CANDIDATE_COUNT} discussion questions based on the lecture content above.
-
-${typeInstructions}
-
-Respond with a JSON array of exactly ${CANDIDATE_COUNT} objects. Each object must have:
-- "promptText": string — the discussion question
-- "promptType": "${promptType}"
-${promptType === 'multiple_choice' ? `- "mcOptions": array of exactly 4 objects, each with:
-  - "label": "A", "B", "C", or "D"
-  - "text": string — the answer option text
-  - "is_correct": boolean — exactly one option must be true` : ''}
-
-Example format:
-${getExampleJson(promptType)}`;
+</transcript>`;
 }
 
 function getTypeInstructions(promptType: PromptType): string {
