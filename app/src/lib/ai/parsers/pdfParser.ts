@@ -1,61 +1,37 @@
 import type { AIProvider } from '@/lib/ai/providers';
-import { createCanvas, Image } from 'canvas';
+import { createCanvas, Image } from '@napi-rs/canvas';
 
 const NO_VISUAL_CONTENT = 'NO_VISUAL_CONTENT';
 const VISION_DEBUG = process.env.VISION_DEBUG === 'true';
 function dlog(msg: string) { if (VISION_DEBUG) console.log(msg); }
 
-/**
- * Canvas factory required by pdfjs-dist when running in Node.
- * Without this, pdfjs cannot decode embedded images and falls back
- * to a no-op renderer that produces blank PNGs.
- */
-const NodeCanvasFactory = {
-  create(width: number, height: number) {
-    const canvas = createCanvas(width, height);
-    return { canvas, context: canvas.getContext('2d') };
-  },
-  reset(
-    canvasAndContext: { canvas: ReturnType<typeof createCanvas>; context: unknown },
-    width: number,
-    height: number
-  ) {
-    canvasAndContext.canvas.width = width;
-    canvasAndContext.canvas.height = height;
-  },
-  destroy(canvasAndContext: { canvas: ReturnType<typeof createCanvas> }) {
-    canvasAndContext.canvas.width = 0;
-    canvasAndContext.canvas.height = 0;
-  },
-};
-
 export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise<string> {
-  const pdfjsLib = (await import('pdfjs-dist/legacy/build/pdf.mjs')) as unknown as {
-    getDocument: (src: {
-      data: Uint8Array;
-      canvasFactory?: typeof NodeCanvasFactory;
-      cMapUrl?: string;
-      cMapPacked?: boolean;
-    }) => {
-      promise: Promise<{
-        numPages: number;
-        getPage: (n: number) => Promise<{
-          getTextContent: () => Promise<{ items: Array<{ str: string }> }>;
-          getViewport: (opts: { scale: number }) => { width: number; height: number };
-          render: (ctx: {
-            canvasContext: unknown;
-            viewport: unknown;
-            canvasFactory?: typeof NodeCanvasFactory;
-          }) => { promise: Promise<void> };
-        }>;
-      }>;
-    };
+  const pdfjs = await import('pdfjs-serverless');
+  pdfjs.GlobalWorkerOptions.workerSrc = '';
+
+  const CanvasFactory = {
+    create(width: number, height: number) {
+      const canvas = createCanvas(width, height);
+      return { canvas, context: canvas.getContext('2d') };
+    },
+    reset(pair: { canvas: ReturnType<typeof createCanvas> }, width: number, height: number) {
+      pair.canvas.width = width;
+      pair.canvas.height = height;
+    },
+    destroy(pair: { canvas: ReturnType<typeof createCanvas> }) {
+      pair.canvas.width = 0;
+      pair.canvas.height = 0;
+    },
   };
 
   const data = new Uint8Array(buffer);
-  const pdf = await pdfjsLib.getDocument({
+
+  // Cast to any to pass canvasFactory which exists at runtime but not in the types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pdf = await (pdfjs.getDocument as any)({
     data,
-    canvasFactory: NodeCanvasFactory,
+    canvasFactory: CanvasFactory,
+    cMapPacked: true,
   }).promise;
 
   dlog(`[pdfParser] pages=${pdf.numPages} aiProvider=${!!aiProvider}`);
@@ -68,7 +44,11 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
 
     // ---- 1) Text ----
     const content = await page.getTextContent();
-    const pageText = content.items.map((item: { str: string }) => item.str).join(' ').trim();
+    const pageText = (content.items as Array<{ str: string }>)
+      .map((item) => item.str)
+      .join(' ')
+      .trim();
+
     dlog(`[pdfParser] page=${pageNumber} textLen=${pageText.length}`);
     if (pageText) {
       pageParts.push(`[Page ${pageNumber} Text] ${pageText}`);
@@ -81,16 +61,21 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
         const canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
         const ctx = canvas.getContext('2d');
 
+        // Cast canvasContext to any — @napi-rs/canvas context is not
+        // identical to CanvasRenderingContext2D but is compatible at runtime
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await page.render({
-          canvasContext: ctx as unknown,
-          viewport: viewport as unknown,
-          canvasFactory: NodeCanvasFactory,
+          canvasContext: ctx as any,
+          viewport,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          canvasFactory: CanvasFactory as any,
         }).promise;
 
-        const pngBuffer = canvas.toBuffer('image/png');
+        const pngBuffer = await canvas.encode('png');
+
         dlog(`[pdfParser] page=${pageNumber} rendered bytes=${pngBuffer.length}`);
 
-        if (pngBuffer.length > 5000) { // blank PNG is ~6424, real content is much larger
+        if (pngBuffer.length > 10000) {
           const base64 = pngBuffer.toString('base64');
           dlog(`[pdfParser] page=${pageNumber} callingVision b64Chars=${base64.length}`);
 
@@ -106,7 +91,7 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
             pageParts.push(`[Page ${pageNumber} Visual Content] ${description}`);
           }
         } else {
-          dlog(`[pdfParser] page=${pageNumber} skippingVision: blank canvas (bytes=${pngBuffer.length})`);
+          dlog(`[pdfParser] page=${pageNumber} skippingVision: blank (bytes=${pngBuffer.length})`);
         }
       } catch (err) {
         console.warn(`[pdfParser] Vision failed for page ${pageNumber}, skipping:`, err);
