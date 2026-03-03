@@ -1,11 +1,50 @@
 import type { AIProvider } from '@/lib/ai/providers';
-import { createCanvas, Image } from '@napi-rs/canvas';
+import { createCanvas, Path2D } from '@napi-rs/canvas';
 
 const NO_VISUAL_CONTENT = 'NO_VISUAL_CONTENT';
 const VISION_DEBUG = process.env.VISION_DEBUG === 'true';
 function dlog(msg: string) { if (VISION_DEBUG) console.log(msg); }
 
+/**
+ * Registers globals that pdfjs-serverless needs for both text and image pages.
+ *
+ * TWO globals are required — not just one:
+ *
+ * 1. globalThis.Path2D
+ *    Used by pdfjs for clipping paths and bezier curves during ANY page render.
+ *    Fixed the original "Path2D is not defined" error.
+ *
+ * 2. globalThis.createCanvas
+ *    Used by pdfjs-dist's INTERNAL NodeCanvasFactory when compositing image
+ *    XObjects (embedded JPEGs/PNGs inside the PDF). This is a SEPARATE code
+ *    path from the canvasFactory option we pass to getDocument — it kicks in
+ *    only for pages that contain raster images, which is why text-only pages
+ *    rendered fine while image pages threw:
+ *    "Error: @napi-rs/canvas is not available in this environment"
+ *
+ *    pdfjs-dist 5.x checks: if (typeof globalThis.createCanvas === 'function')
+ *    before falling back to its own require('@napi-rs/canvas'). Registering it
+ *    here ensures the internal factory finds a working canvas constructor
+ *    without going through a require() that may be broken by Next.js bundling.
+ */
+function registerCanvasGlobals() {
+  const g = globalThis as unknown as Record<string, unknown>;
+
+  if (typeof g.Path2D === 'undefined') {
+    g.Path2D = Path2D;
+    dlog('[pdfParser] Polyfilled globalThis.Path2D');
+  }
+
+  if (typeof g.createCanvas === 'undefined') {
+    g.createCanvas = createCanvas;
+    dlog('[pdfParser] Polyfilled globalThis.createCanvas');
+  }
+}
+
 export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise<string> {
+  // Must run BEFORE pdfjs import so both globals are available at module init time
+  registerCanvasGlobals();
+
   const pdfjs = await import('pdfjs-serverless');
   pdfjs.GlobalWorkerOptions.workerSrc = '';
 
@@ -26,7 +65,6 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
 
   const data = new Uint8Array(buffer);
 
-  // Cast to any to pass canvasFactory which exists at runtime but not in the types
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pdf = await (pdfjs.getDocument as any)({
     data,
@@ -42,7 +80,7 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
     const page = await pdf.getPage(pageNumber);
     const pageParts: string[] = [];
 
-    // ---- 1) Text ----
+    // ── 1) Text extraction ────────────────────────────────────────────────────
     const content = await page.getTextContent();
     const pageText = (content.items as Array<{ str: string }>)
       .map((item) => item.str)
@@ -54,15 +92,13 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
       pageParts.push(`[Page ${pageNumber} Text] ${pageText}`);
     }
 
-    // ---- 2) Vision ----
+    // ── 2) Vision (render page → PNG → GPT-4o) ────────────────────────────────
     if (aiProvider) {
       try {
         const viewport = page.getViewport({ scale: 1.5 });
         const canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
         const ctx = canvas.getContext('2d');
 
-        // Cast canvasContext to any — @napi-rs/canvas context is not
-        // identical to CanvasRenderingContext2D but is compatible at runtime
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await page.render({
           canvasContext: ctx as any,
@@ -75,7 +111,7 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
 
         dlog(`[pdfParser] page=${pageNumber} rendered bytes=${pngBuffer.length}`);
 
-        if (pngBuffer.length > 10000) {
+        if (pngBuffer.length > 10_000) {
           const base64 = pngBuffer.toString('base64');
           dlog(`[pdfParser] page=${pageNumber} callingVision b64Chars=${base64.length}`);
 
