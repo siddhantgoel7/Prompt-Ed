@@ -2,135 +2,145 @@ import JSZip from 'jszip';
 import type { AIProvider } from '@/lib/ai/providers';
 
 const NO_VISUAL_CONTENT = 'NO_VISUAL_CONTENT';
-
 const VISION_DEBUG = process.env.VISION_DEBUG === 'true';
+function dlog(msg: string) { if (VISION_DEBUG) console.log(msg); }
 
-function dlog(msg: string) {
-  if (VISION_DEBUG) console.log(msg);
-}
-
-// MIME types GPT-4o vision accepts, mapped from PPTX media extensions
+// MIME types GPT-4o vision accepts, mapped from PPTX media extensions.
+// EMF, WMF, SVG, GIF are intentionally excluded — GPT-4o does not accept them.
 const VISION_MIME_MAP: Record<string, 'image/png' | 'image/jpeg' | 'image/webp'> = {
-  png: 'image/png',
-  jpg: 'image/jpeg',
+  png:  'image/png',
+  jpg:  'image/jpeg',
   jpeg: 'image/jpeg',
   webp: 'image/webp',
 };
 
 /**
  * Extracts text AND visual content from a PPTX buffer.
+ *
+ * Per-slide pipeline:
+ *   1. Body text  → [Slide N Body]
+ *   2. Speaker notes → [Slide N Notes]
+ *   3. Embedded images (PNG/JPG/WEBP) + body + notes → ONE GPT-4o call
+ *      → [Slide N Visual Content]
+ *
+ * Why one call per slide (not one call per image):
+ *   - GPT-4o sees body text, notes, and ALL images simultaneously, so it can
+ *     cross-reference diagram labels with slide text without losing context.
+ *   - Reduces API calls from (images × slides) to (slides with images).
+ *   - The model is explicitly told not to repeat what's already in text/notes,
+ *     so visual descriptions are additive, not redundant.
+ *
+ * Why not send the whole PPTX as a file (like we do for PDF):
+ *   - OpenAI file inputs only support PDF natively; PPTX is not a supported format.
+ *   - We extract images directly from the ZIP and send them as image_url parts.
  */
 export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promise<string> {
   const zip = await JSZip.loadAsync(buffer);
 
-  // Collect all slide file names in slide-number order
   const slideFiles = Object.keys(zip.files)
     .filter((name) => /^ppt\/slides\/slide\d+\.xml$/.test(name))
-    .sort((a, b) => {
-      const numA = parseInt(a.match(/\d+/)?.[0] ?? '0', 10);
-      const numB = parseInt(b.match(/\d+/)?.[0] ?? '0', 10);
-      return numA - numB;
-    });
+    .sort((a, b) => slideNum(a) - slideNum(b));
 
   dlog(`[pptxParser] slidesFound=${slideFiles.length} aiProvider=${!!aiProvider}`);
 
   const parts: string[] = [];
 
   for (const slideFile of slideFiles) {
-    const slideNumber = parseInt(slideFile.match(/slide(\d+)\.xml$/)?.[1] ?? '0', 10);
+    const n = slideNum(slideFile);
     const slideParts: string[] = [];
 
-    dlog(`[pptxParser] slide=${slideNumber} start file=${slideFile}`);
+    dlog(`[pptxParser] ── slide ${n} ──────────────────────`);
 
-    // --- 1. Slide body text ---
+    // ── 1) Body text ──────────────────────────────────────────────────────────
     const slideXml = await zip.files[slideFile].async('text');
-    const slideBodyText = extractTextNodes(slideXml);
-    if (slideBodyText) {
-      slideParts.push(`[Slide ${slideNumber} Body] ${slideBodyText}`);
+    const bodyText = extractTextNodes(slideXml);
+    if (bodyText) {
+      slideParts.push(`[Slide ${n} Body] ${bodyText}`);
+      dlog(`[pptxParser] slide=${n} bodyText len=${bodyText.length}: "${bodyText.slice(0, 80)}..."`);
+    } else {
+      dlog(`[pptxParser] slide=${n} bodyText: (empty)`);
     }
 
-    // --- 2. Speaker notes ---
-    const relsFile = `ppt/slides/_rels/slide${slideNumber}.xml.rels`;
+    // ── 2) Speaker notes ──────────────────────────────────────────────────────
+    const relsFile = `ppt/slides/_rels/slide${n}.xml.rels`;
     let relsXml = '';
     if (zip.files[relsFile]) {
       relsXml = await zip.files[relsFile].async('text');
     }
-    dlog(`[pptxParser] slide=${slideNumber} relsLoaded=${!!relsXml && relsXml.length > 0}`);
 
+    let notesText = '';
     if (relsXml) {
-      const notesPath = findNotesSlideTarget(relsXml, slideNumber);
+      const notesPath = findNotesSlideTarget(relsXml, n);
       if (notesPath && zip.files[notesPath]) {
         const notesXml = await zip.files[notesPath].async('text');
-        const notesText = extractTextNodes(notesXml);
-        if (notesText) {
-          slideParts.push(`[Slide ${slideNumber} Notes] ${notesText}`);
-        }
+        notesText = extractTextNodes(notesXml);
       }
     }
 
-    // --- 3. Embedded images via vision ---
-    if (!aiProvider) {
-      dlog(`[pptxParser] slide=${slideNumber} visionSkipped: aiProvider=false`);
+    if (notesText) {
+      slideParts.push(`[Slide ${n} Notes] ${notesText}`);
+      dlog(`[pptxParser] slide=${n} notes len=${notesText.length}: "${notesText.slice(0, 80)}..."`);
+    } else {
+      dlog(`[pptxParser] slide=${n} notes: (empty)`);
     }
 
-    if (aiProvider) {
+    // ── 3) Vision pass — one call per slide with ALL images ───────────────────
+    if (!aiProvider) {
+      dlog(`[pptxParser] slide=${n} vision: SKIPPED (no aiProvider)`);
+    } else {
+      // Collect all supported images for this slide
       const imageTargets = findImageTargets(relsXml);
-      dlog(`[pptxParser] slide=${slideNumber} imageTargets=${imageTargets.length}`);
+      dlog(`[pptxParser] slide=${n} imageRefs found=${imageTargets.length}: ${imageTargets.join(', ')}`);
 
-      let imageIndex = 0;
+      const images: Array<{ base64: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp'; zipPath: string }> = [];
 
       for (const relTarget of imageTargets) {
         const zipPath = resolveMediaPath(relTarget);
-        dlog(`[pptxParser] slide=${slideNumber} relTarget=${relTarget} zipPath=${zipPath}`);
-
-        if (!zipPath || !zip.files[zipPath]) continue;
+        if (!zipPath || !zip.files[zipPath]) {
+          dlog(`[pptxParser] slide=${n} imageRef="${relTarget}" → zipPath="${zipPath}" NOT FOUND in zip`);
+          continue;
+        }
 
         const ext = zipPath.split('.').pop()?.toLowerCase() ?? '';
         const mimeType = VISION_MIME_MAP[ext];
 
-        dlog(
-          `[pptxParser] slide=${slideNumber} zipPath=${zipPath} ext=${ext} mime=${
-            mimeType ?? 'unsupported'
-          }`
-        );
-
-        // Skip unsupported formats (gif, emf, wmf, svg, etc.)
         if (!mimeType) {
-          console.log(`[pptxParser] Skipping unsupported image type: ${zipPath}`);
+          dlog(`[pptxParser] slide=${n} zipPath="${zipPath}" ext="${ext}" → SKIPPED (unsupported format)`);
           continue;
         }
 
-        imageIndex++;
+        const imageBuffer = await zip.files[zipPath].async('nodebuffer');
+        const base64 = imageBuffer.toString('base64');
+        images.push({ base64, mimeType, zipPath });
+        dlog(`[pptxParser] slide=${n} image loaded: zipPath="${zipPath}" mime=${mimeType} b64Chars=${base64.length}`);
+      }
 
+      dlog(`[pptxParser] slide=${n} vision-eligible images=${images.length}`);
+
+      if (images.length === 0) {
+        dlog(`[pptxParser] slide=${n} vision: SKIPPED (no supported images)`);
+      } else {
+        // One GPT-4o call: body text + notes + all images together
+        dlog(`[pptxParser] slide=${n} calling generatePptxSlideVisualDescription with ${images.length} image(s)`);
         try {
-          const imageBuffer = await zip.files[zipPath].async('nodebuffer');
-          const base64 = imageBuffer.toString('base64');
-
-          dlog(
-            `[pptxParser] slide=${slideNumber} image=${imageIndex} callingVision b64Chars=${base64.length} mime=${mimeType}`
+          const description = await aiProvider.generatePptxSlideVisualDescription(
+            n,
+            bodyText,
+            notesText,
+            images.map(({ base64, mimeType }) => ({ base64, mimeType }))
           );
 
-          // Pass slide text as context so vision focuses on what text doesn't cover
-          const contextHint = slideBodyText || undefined;
-          const description = await aiProvider.generateVisionDescription(base64, mimeType, contextHint);
-
+          const isNoVisual = !description || description === NO_VISUAL_CONTENT;
           dlog(
-            `[pptxParser] slide=${slideNumber} image=${imageIndex} visionResult len=${
-              (description ?? '').length
-            } isNoVisual=${description === NO_VISUAL_CONTENT} preview="${(description ?? '').slice(
-              0,
-              120
-            )}"`
+            `[pptxParser] slide=${n} vision result: isNoVisual=${isNoVisual} ` +
+            `len=${description?.length ?? 0} preview="${(description ?? '').slice(0, 120)}"`
           );
 
-          if (description && description !== NO_VISUAL_CONTENT) {
-            slideParts.push(`[Slide ${slideNumber} Image ${imageIndex} Visual Content] ${description}`);
+          if (!isNoVisual) {
+            slideParts.push(`[Slide ${n} Visual Content] ${description}`);
           }
         } catch (err) {
-          console.warn(
-            `[pptxParser] Vision failed for slide ${slideNumber} image ${imageIndex} (${zipPath}), skipping:`,
-            err
-          );
+          console.warn(`[pptxParser] slide=${n} vision call failed, skipping:`, err);
         }
       }
     }
@@ -138,11 +148,16 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
     if (slideParts.length > 0) {
       parts.push(slideParts.join('\n'));
     }
+
+    dlog(`[pptxParser] slide=${n} done — parts emitted: ${slideParts.length}`);
   }
 
   const combined = parts.join('\n');
+  dlog(`[pptxParser] COMPLETE — total chars=${combined.length}`);
   return stripControlChars(combined);
 }
+
+// ── XML helpers ────────────────────────────────────────────────────────────────
 
 function extractTextNodes(xml: string): string {
   const matches = xml.match(/<a:t[^>]*>([^<]*)<\/a:t>/g) ?? [];
@@ -154,9 +169,9 @@ function extractTextNodes(xml: string): string {
 }
 
 function findNotesSlideTarget(relsXml: string, slideNumber: number): string | null {
-  const notesRelPattern = /Type="[^"]*notesSlide"[^>]*Target="([^"]+)"/g;
+  const pattern = /Type="[^"]*notesSlide"[^>]*Target="([^"]+)"/g;
   let match;
-  while ((match = notesRelPattern.exec(relsXml)) !== null) {
+  while ((match = pattern.exec(relsXml)) !== null) {
     const target = match[1];
     if (target.startsWith('../')) return `ppt/${target.slice(3)}`;
     if (!target.startsWith('ppt/')) return `ppt/slides/${target}`;
@@ -167,10 +182,10 @@ function findNotesSlideTarget(relsXml: string, slideNumber: number): string | nu
 
 function findImageTargets(relsXml: string): string[] {
   if (!relsXml) return [];
-  const imageRelPattern = /Type="[^"]*\/image"[^>]*Target="([^"]+)"/g;
+  const pattern = /Type="[^"]*\/image"[^>]*Target="([^"]+)"/g;
   const targets: string[] = [];
   let match;
-  while ((match = imageRelPattern.exec(relsXml)) !== null) {
+  while ((match = pattern.exec(relsXml)) !== null) {
     targets.push(match[1]);
   }
   return targets;
@@ -185,4 +200,8 @@ function resolveMediaPath(target: string): string | null {
 
 function stripControlChars(text: string): string {
   return text.replace(/[\u0000-\u0008\u000B-\u001F\u202A-\u202E\u2066-\u2069]/g, '');
+}
+
+function slideNum(path: string): number {
+  return parseInt(path.match(/\d+/)?.[0] ?? '0', 10);
 }

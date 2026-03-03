@@ -24,14 +24,34 @@ export interface AIProvider {
      * Uses OpenAI's native PDF file input (data URI) which lets GPT-4o
      * process all pages including embedded images in a single API call.
      * Pages with only text return NO_VISUAL_CONTENT and are excluded from the map.
-     *
-     * @param pdfBuffer  Raw PDF bytes
-     * @param numPages   Total page count (used to build the extraction prompt)
      */
     generatePdfVisualDescriptions(
         pdfBuffer: Buffer,
         numPages: number
     ): Promise<Map<number, string>>;
+
+    /**
+     * Describes all visual content on a single PPTX slide.
+     *
+     * Sends the slide's extracted text, speaker notes, AND all embedded images
+     * together in one GPT-4o call. Combining them gives the model full context —
+     * it can see which labels in the text correspond to which diagram — and
+     * avoids redundant per-image API calls.
+     *
+     * Returns a plain-text description of visual content not already captured
+     * in the slide text/notes, or NO_VISUAL_CONTENT if nothing visual is present.
+     *
+     * @param slideNumber   1-based slide index (for logging)
+     * @param bodyText      Extracted slide body text (may be empty)
+     * @param notesText     Extracted speaker notes text (may be empty)
+     * @param images        Array of { base64, mimeType } for each embedded image
+     */
+    generatePptxSlideVisualDescription(
+        slideNumber: number,
+        bodyText: string,
+        notesText: string,
+        images: Array<{ base64: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp' }>
+    ): Promise<string>;
 }
 
 export class OpenAIProvider implements AIProvider {
@@ -111,9 +131,6 @@ export class OpenAIProvider implements AIProvider {
         pdfBuffer: Buffer,
         numPages: number
     ): Promise<Map<number, string>> {
-        // Encode the entire PDF as a base64 data URI.
-        // GPT-4o's native PDF support processes all pages including embedded images
-        // without any client-side rendering — the model handles decoding internally.
         const base64Pdf = pdfBuffer.toString('base64');
         const pdfDataUri = `data:application/pdf;base64,${base64Pdf}`;
 
@@ -175,5 +192,59 @@ export class OpenAIProvider implements AIProvider {
         }
 
         return result;
+    }
+
+    async generatePptxSlideVisualDescription(
+        slideNumber: number,
+        bodyText: string,
+        notesText: string,
+        images: Array<{ base64: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp' }>
+    ): Promise<string> {
+        const systemPrompt =
+            'You are a visual content extractor for a pharmacology teaching tool. ' +
+            'You will be given a PowerPoint slide: its text, speaker notes, and embedded images. ' +
+            'Describe ONLY visual content not already captured in the text/notes: ' +
+            'chemical structures (atoms, bonds, functional groups, stereochemistry), ' +
+            'receptor/pathway diagrams (all components, arrows, labels), ' +
+            'tables (transcribe all cell values), graphs (axes, units, data trends). ' +
+            'Do NOT repeat information already present in the slide text or notes. ' +
+            'Be factual and specific — describe exactly what is visually present. ' +
+            'If the images add no information beyond what the text/notes already cover, ' +
+            'respond with exactly: NO_VISUAL_CONTENT';
+
+        // Build user message: text context first, then all images
+        const userContent: OpenAI.Chat.ChatCompletionContentPart[] = [];
+
+        // Text context block
+        const contextParts: string[] = [`Slide ${slideNumber} text: ${bodyText || '(none)'}`];
+        if (notesText) contextParts.push(`Speaker notes: ${notesText}`);
+        userContent.push({ type: 'text', text: contextParts.join('\n') });
+
+        // All slide images
+        for (const img of images) {
+            userContent.push({
+                type: 'image_url',
+                image_url: {
+                    url: `data:${img.mimeType};base64,${img.base64}`,
+                    detail: 'high',
+                },
+            });
+        }
+
+        userContent.push({
+            type: 'text',
+            text: 'Describe any visual content in the images above that is NOT already covered by the slide text or speaker notes.',
+        });
+
+        const response = await this.openai.chat.completions.create({
+            model: 'gpt-4o',
+            max_tokens: 600,
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userContent },
+            ],
+        });
+
+        return response.choices[0]?.message?.content?.trim() ?? '';
     }
 }
