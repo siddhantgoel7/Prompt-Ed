@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import type { AIProvider } from './providers';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PromptType } from '@/types/discussion';
 import type { CandidateSet, GeneratedPrompt, MCOption, MCOptionSafe } from '@/types/ai';
@@ -23,7 +23,7 @@ export async function generatePrompts(
   transcriptText: string,
   promptType: PromptType,
   supabase: SupabaseClient,
-  openai: OpenAI
+  aiProvider: AIProvider
 ): Promise<CandidateSet> {
   let chunks: string[] = [];
   let warning: string | undefined;
@@ -31,11 +31,8 @@ export async function generatePrompts(
   try {
     if (transcriptText.trim()) {
       // Semantic retrieval: embed transcript text, find similar chunks
-      const embeddingResponse = await openai.embeddings.create({
-        model: 'text-embedding-3-small',
-        input: transcriptText.trim(),
-      });
-      const queryEmbedding = embeddingResponse.data[0].embedding;
+      const embeddingResponse = await aiProvider.generateEmbedding(transcriptText.trim());
+      const queryEmbedding = embeddingResponse[0];
       chunks = await retrieveChunksBySimilarity(lessonId, queryEmbedding, supabase);
     }
 
@@ -49,19 +46,13 @@ export async function generatePrompts(
       }
     }
 
-    // Build and call gpt-4o-mini
+    // Build and call
     const userPrompt = buildUserPrompt({ chunks, transcriptText, promptType });
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: buildSystemPrompt() },
-        { role: 'user', content: userPrompt },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-    });
+    const rawContent = await aiProvider.generateChatCompletion([
+      { role: 'system', content: buildSystemPrompt() },
+      { role: 'user', content: userPrompt }
+    ], { jsonMode: true, temperature: 0.7 });
 
-    const rawContent = completion.choices[0]?.message?.content ?? '[]';
     const parsed = parseAIResponse(rawContent, promptType);
 
     return { candidates: parsed, warning };

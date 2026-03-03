@@ -200,6 +200,18 @@ export function useSessionPage(lessonId: string): SessionVM {
     if (res.ok) await fetchFiles();
   }, [lessonId, fetchFiles]);
 
+  // Poll for processing files
+  useEffect(() => {
+    const hasProcessing = files.some(f => f.status === 'processing');
+    if (!hasProcessing) return;
+
+    const intervalId = setInterval(() => {
+      fetchFiles();
+    }, 2000);
+
+    return () => clearInterval(intervalId);
+  }, [files, fetchFiles]);
+
   // US 1.18, 1.19 — AI generation
   const generateCandidates = useCallback(async () => {
     setIsGenerating(true);

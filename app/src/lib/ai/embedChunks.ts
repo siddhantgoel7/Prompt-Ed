@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import type { AIProvider } from './providers';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
@@ -14,7 +14,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export async function embedChunks(
   chunkIds: string[],
   supabase: SupabaseClient,
-  openai: OpenAI
+  aiProvider: AIProvider
 ): Promise<void> {
   if (chunkIds.length === 0) return;
 
@@ -36,11 +36,7 @@ export async function embedChunks(
 
     let embeddings: number[][];
     try {
-      const response = await openai.embeddings.create({
-        model: 'text-embedding-3-small',
-        input: inputs,
-      });
-      embeddings = response.data.map((e) => e.embedding);
+      embeddings = await aiProvider.generateEmbedding(inputs);
     } catch (err) {
       const e = err as { code?: string; message?: string };
       console.error(`EMBED_ERR [${e.code ?? 'unknown'}]: ${e.message ?? String(err)}`);

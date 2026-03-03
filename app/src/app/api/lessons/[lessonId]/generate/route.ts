@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import OpenAI from 'openai';
+import { OpenAIProvider } from '@/lib/ai/providers';
 import type { PromptType } from '@/types/discussion';
 import type { CandidateSet } from '@/types/ai';
 
@@ -68,9 +68,9 @@ export async function POST(
       const { generatePrompts: mockGenerate } = await import('@/lib/ai/__mocks__/generatePrompts');
       result = await mockGenerate(lessonId, transcriptText, promptType);
     } else {
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const aiProvider = new OpenAIProvider();
       const { generatePrompts } = await import('@/lib/ai/generatePrompts');
-      result = await generatePrompts(lessonId, transcriptText, promptType, supabase, openai);
+      result = await generatePrompts(lessonId, transcriptText, promptType, supabase, aiProvider);
     }
 
     // SECURITY: Strip is_correct from all mcOptions before returning
