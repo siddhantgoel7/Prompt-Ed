@@ -1,15 +1,14 @@
 import { parsePdf } from './pdfParser';
 import { parsePptx } from './pptxParser';
+import type { AIProvider } from '@/lib/ai/providers';
 
-/**
- * Dispatches file parsing based on file type.
- * Returns extracted text content as a single string.
- *
- * @see US 1.16
- */
-export async function parseFile(buffer: Buffer, fileType: 'pdf' | 'pptx'): Promise<string> {
-  if (fileType === 'pdf') {
-    return parsePdf(buffer);
-  }
-  return parsePptx(buffer);
+export async function parseFile(
+    buffer: Buffer,
+    fileType: 'pdf' | 'pptx',
+    aiProvider?: AIProvider
+): Promise<string> {
+    if (fileType === 'pdf') {
+        return parsePdf(buffer, aiProvider);
+    }
+    return parsePptx(buffer, aiProvider);
 }

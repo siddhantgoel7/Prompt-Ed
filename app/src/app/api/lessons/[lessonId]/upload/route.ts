@@ -106,11 +106,13 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to record file' }, { status: 500 });
     }
 
+    const aiProvider = new OpenAIProvider();
+
     // --- BACKGROUND PROCESSING ---
     const processFile = async () => {
       try {
         // Parse text
-        const rawText = await parseFile(buffer, detectedType);
+        const rawText = await parseFile(buffer, detectedType, aiProvider);
 
         // Chunk
         const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 500, chunkOverlap: 200 });
@@ -141,7 +143,6 @@ export async function POST(
         }
 
         // Embed using our new adapter layer
-        const aiProvider = new OpenAIProvider();
         const chunkIds = (insertedChunks as { id: string }[]).map((c) => c.id);
         await embedChunks(chunkIds, supabase, aiProvider);
 
