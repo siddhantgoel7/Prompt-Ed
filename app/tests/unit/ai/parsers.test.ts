@@ -7,9 +7,10 @@ import { parsePptx } from '@/lib/ai/parsers/pptxParser';
 import { parseFile } from '@/lib/ai/parsers/index';
 import JSZip from 'jszip';
 
-// Mock pdfjs-dist to avoid actual PDF processing in unit tests
-jest.mock('pdfjs-dist/legacy/build/pdf.mjs', () => {
+// Mock pdfjs-serverless to avoid actual PDF processing in unit tests and dynamic import issues
+jest.mock('pdfjs-serverless', () => {
   return {
+    GlobalWorkerOptions: { workerSrc: '' },
     getDocument: jest.fn((src: { data: Uint8Array }) => {
       const content = Buffer.from(src.data).toString();
       if (content.includes('EMPTY')) {
@@ -33,13 +34,13 @@ describe('parsePdf', () => {
   it('returns extracted text from a PDF buffer', async () => {
     const buf = Buffer.from('fake pdf content');
     const result = await parsePdf(buf);
-    expect(result).toBe('Hello PDF content');
+    expect(result).toBe('[Page 1 Text] Hello PDF content');
   });
 
   it('throws when PDF has no extractable text', async () => {
     const buf = Buffer.from('EMPTY');
     await expect(parsePdf(buf)).rejects.toThrow(
-      'No text found in this PDF'
+      'No text or visual content found in this PDF.'
     );
   });
 });
@@ -107,7 +108,7 @@ describe('parseFile', () => {
   it('dispatches to parsePdf for pdf type', async () => {
     const buf = Buffer.from('fake pdf');
     const result = await parseFile(buf, 'pdf');
-    expect(result).toBe('Hello PDF content');
+    expect(result).toBe('[Page 1 Text] Hello PDF content');
   });
 
   it('dispatches to parsePptx for pptx type', async () => {
