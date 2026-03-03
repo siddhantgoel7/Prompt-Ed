@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { parseFile } from '@/lib/ai/parsers';
 import { embedChunks } from '@/lib/ai/embedChunks';
-import { generatePrompts } from '@/lib/ai/generatePrompts';
 import { OpenAIProvider } from '@/lib/ai/providers';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 

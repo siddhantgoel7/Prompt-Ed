@@ -8,7 +8,10 @@ jest.mock('next/navigation', () => ({
 }));
 
 jest.mock('next/link', () => {
-    return ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+    function MockLink({ children }: { children: React.ReactNode }) {
+        return <div>{children}</div>;
+    }
+    return MockLink;
 });
 
 jest.mock('@/components/ui/tabs', () => ({
