@@ -413,6 +413,7 @@ export function useSessionPage(lessonId: string): SessionVM {
       .then(({ data }) => {
         if (data) setResponses(data as Response[]);
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- we only refetch when the ID changes, not the full object
   }, [activeDiscussion?.id]);
 
   // Realtime: incoming student responses

@@ -209,7 +209,9 @@ function Pane({
 
   // Track the selected discussion ID in a ref so the listener stays stable
   const selectedIdRef = React.useRef(state.selectedDiscussionId);
-  selectedIdRef.current = state.selectedDiscussionId;
+  React.useEffect(() => {
+    selectedIdRef.current = state.selectedDiscussionId;
+  }, [state.selectedDiscussionId]);
 
   // Listen for real-time new responses (single listener per channel)
   React.useEffect(() => {
