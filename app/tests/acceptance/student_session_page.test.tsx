@@ -71,6 +71,110 @@ describe('Student Session Page (Acceptance)', () => {
     expect(screen.getByText(/Lesson has ended/i)).toBeInTheDocument();
   });
 
+  // 12.5
+  it('[US 1.52][AT1] success: shows green Active badge when discussion is open', () => {
+    useStudentSessionMock.mockReturnValue({
+      lesson: { title: 'Lesson' },
+      activeDiscussion: { id: 'd1', status: 'active', prompt_text: 'What is 2+2?' },
+      responseText: '',
+      setResponseText: jest.fn(),
+      submitting: false,
+      isConnected: true,
+      view: 'active',
+      endedMessage: null,
+      errorMessage: null,
+      canSubmit: false,
+      submitResponse: jest.fn(),
+    });
+
+    render(<StudentSessionPage lessonId="lesson-1" />);
+    expect(screen.getByText('Active')).toBeInTheDocument();
+  });
+
+  // 12.6
+  it('[US 1.52][AT1] success: shows green Active badge when waiting (no open discussion)', () => {
+    useStudentSessionMock.mockReturnValue({
+      lesson: { title: 'Lesson' },
+      activeDiscussion: null,
+      responseText: '',
+      setResponseText: jest.fn(),
+      submitting: false,
+      isConnected: true,
+      view: 'waiting',
+      endedMessage: null,
+      errorMessage: null,
+      canSubmit: false,
+      submitResponse: jest.fn(),
+    });
+
+    render(<StudentSessionPage lessonId="lesson-1" />);
+    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.queryByText('Ended')).not.toBeInTheDocument();
+  });
+
+  // 12.7
+  it('[US 1.52][AT1] success: shows green Active badge on submitted view', () => {
+    useStudentSessionMock.mockReturnValue({
+      lesson: { title: 'Lesson' },
+      activeDiscussion: { id: 'd1', status: 'active', prompt_text: 'Question' },
+      responseText: '',
+      setResponseText: jest.fn(),
+      submitting: false,
+      isConnected: true,
+      view: 'submitted',
+      endedMessage: null,
+      errorMessage: null,
+      canSubmit: false,
+      submitResponse: jest.fn(),
+    });
+
+    render(<StudentSessionPage lessonId="lesson-1" />);
+    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.queryByText('Ended')).not.toBeInTheDocument();
+  });
+
+  // 12.8
+  it('[US 1.52][AT2] success: shows red Ended badge when lesson has ended', () => {
+    useStudentSessionMock.mockReturnValue({
+      lesson: { title: 'Lesson' },
+      activeDiscussion: null,
+      responseText: '',
+      setResponseText: jest.fn(),
+      submitting: false,
+      isConnected: true,
+      view: 'ended',
+      endedMessage: 'Lesson has ended',
+      errorMessage: null,
+      canSubmit: false,
+      submitResponse: jest.fn(),
+    });
+
+    render(<StudentSessionPage lessonId="lesson-1" />);
+    expect(screen.getByText('Ended')).toBeInTheDocument();
+    expect(screen.queryByText('Active')).not.toBeInTheDocument();
+  });
+
+  // 12.9
+  it('[US 1.52][AT3] success: no status badge shown during loading', () => {
+    useStudentSessionMock.mockReturnValue({
+      lesson: null,
+      activeDiscussion: null,
+      responseText: '',
+      setResponseText: jest.fn(),
+      submitting: false,
+      isConnected: false,
+      view: 'loading',
+      endedMessage: null,
+      errorMessage: null,
+      canSubmit: false,
+      submitResponse: jest.fn(),
+    });
+
+    render(<StudentSessionPage lessonId="lesson-1" />);
+    expect(screen.queryByText('Active')).not.toBeInTheDocument();
+    expect(screen.queryByText('Ended')).not.toBeInTheDocument();
+  });
+
   // 12.4
   it('[US 2.06][AT1] failure: disconnected shows "Connecting…" hint', () => {
     useStudentSessionMock.mockReturnValue({

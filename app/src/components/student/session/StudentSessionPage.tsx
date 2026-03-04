@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { StudentSessionShell } from './StudentSessionShell';
 import { StudentStatusAlert } from './StudentStatusAlert';
 import { StudentPromptCard } from './StudentPromptCard';
@@ -51,6 +52,21 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
           title="Something went wrong"
           description={errorMessage}
         />
+      ) : null}
+
+      {/* Lesson status indicator */}
+      {view !== 'loading' && view !== 'error' ? (
+        <div className="flex items-center gap-2">
+          {view === 'ended' ? (
+            <Badge variant="secondary" className="bg-red-100 text-red-800">
+              Ended
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="bg-green-100 text-green-800">
+              Active
+            </Badge>
+          )}
+        </div>
       ) : null}
 
       {view === 'loading' ? (
