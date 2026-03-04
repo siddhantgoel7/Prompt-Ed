@@ -9,12 +9,14 @@ export function SessionHeaderActive({
   endingLesson,
   onDisplay,
   onEnd,
+  onSplitView,
 }: {
   title: string;
   pinCode: string | null;
   endingLesson: boolean;
   onDisplay: () => void;
   onEnd: () => void;
+  onSplitView: () => void;
 }) {
   return (
     <header className="border-b border-gray-300 px-4 md:px-6 py-3 md:py-4 flex flex-wrap items-center justify-between gap-2">
@@ -34,6 +36,8 @@ export function SessionHeaderActive({
         <Button size="sm" onClick={onEnd} disabled={endingLesson} variant="destructive">
           {endingLesson ? 'Ending...' : 'End'}
         </Button>
+
+        <Button size="sm" variant="outline" onClick={onSplitView}>Split View</Button>
 
         <Button size="sm" variant="secondary">Settings</Button>
       </div>

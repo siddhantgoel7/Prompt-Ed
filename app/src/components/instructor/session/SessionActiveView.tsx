@@ -7,10 +7,22 @@ import { SessionHeaderActive } from '@/components/instructor/session/SessionHead
 import { ActiveSidebar } from '@/components/instructor/session/ActiveSidebar';
 import { ActiveCenter } from '@/components/instructor/session/ActiveCenter';
 import { ActiveRightPanel } from '@/components/instructor/session/ActiveRightPanel';
+import { SplitView } from '@/components/instructor/session/SplitView';
 import type { SessionVM } from '@/hooks/useSessionPage';
 
 export function SessionActiveView({ vm }: { vm: SessionVM }) {
   const lesson = vm.lesson;
+  const [splitView, setSplitView] = React.useState(false);
+
+  if (splitView) {
+    return (
+      <SplitView
+        discussions={vm.discussions}
+        lessonId={lesson.id}
+        onBack={() => setSplitView(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -20,6 +32,7 @@ export function SessionActiveView({ vm }: { vm: SessionVM }) {
         endingLesson={vm.endingLesson}
         onDisplay={vm.handleDisplay}
         onEnd={vm.handleEnd}
+        onSplitView={() => setSplitView(true)}
       />
 
       {vm.endError ? <p className="text-sm text-red-600 px-6 py-2">{vm.endError}</p> : null}

@@ -9,12 +9,14 @@ export function SessionHeaderEnded({
   activating,
   onExport,
   onActivate,
+  onSplitView,
 }: {
   title: string;
   exporting: boolean;
   activating: boolean;
   onExport: () => void;
   onActivate: () => void;
+  onSplitView: () => void;
 }) {
   return (
     <header className="border-b border-gray-300 px-6 py-4 flex items-center justify-between">
@@ -28,6 +30,8 @@ export function SessionHeaderEnded({
         <Button onClick={onActivate} disabled={activating} variant="secondary">
           {activating ? 'Activating...' : 'Activate'}
         </Button>
+
+        <Button onClick={onSplitView} variant="outline">Split View</Button>
       </div>
     </header>
   );
