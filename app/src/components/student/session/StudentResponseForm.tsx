@@ -1,4 +1,3 @@
-// src/components/student/session/StudentResponseForm.tsx
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -10,12 +9,14 @@ export function StudentResponseForm({
   onSubmit,
   disabled,
   submitting,
+  validationMessage,
 }: {
   value: string;
   onChange: (v: string) => void;
   onSubmit: () => void;
   disabled: boolean;
   submitting: boolean;
+  validationMessage?: string;
 }) {
   const chars = value.length;
 
@@ -32,7 +33,12 @@ export function StudentResponseForm({
         <span>{chars} characters</span>
         <span className="hidden sm:inline">Be concise and specific</span>
       </div>
-      <Button className="w-full" onClick={onSubmit} disabled={disabled}>
+      {validationMessage ? (
+        <p role="alert" className="text-sm font-medium text-destructive">
+          {validationMessage}
+        </p>
+      ) : null}
+      <Button className="w-full" onClick={onSubmit} disabled={disabled || submitting}>
         {submitting ? 'Submitting…' : 'Submit response'}
       </Button>
     </div>
