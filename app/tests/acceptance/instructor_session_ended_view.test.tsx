@@ -38,6 +38,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     loading: false,
     notFound: false,
     isConnected: false,
+    handleReconnect: jest.fn(),
     discussions: [],
     activeDiscussion: null,
     responses: [],

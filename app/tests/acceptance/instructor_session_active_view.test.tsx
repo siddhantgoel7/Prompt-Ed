@@ -38,6 +38,15 @@ jest.mock('@/components/instructor/session/ActiveSidebar', () => ({
   ActiveSidebar: () => <div>Sidebar</div>,
 }));
 
+jest.mock('@/components/instructor/session/ConnectionStatus', () => ({
+  ConnectionStatus: (props: any) => (
+    <div>
+      <div>Connection: {props.isConnected ? 'connected' : 'disconnected'}</div>
+      <button onClick={props.onReconnect}>Reconnect</button>
+    </div>
+  ),
+}));
+
 jest.mock('@/components/instructor/session/ActiveRightPanel', () => ({
   ActiveRightPanel: (props: any) => <div>RightPanel count={props.responses?.length ?? 0}</div>,
 }));
@@ -72,6 +81,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     loading: false,
     notFound: false,
     isConnected: true,
+    handleReconnect: jest.fn(),
     discussions: [],
     activeDiscussion: null,
     responses: [],
@@ -186,5 +196,30 @@ describe('SessionActiveView (Acceptance)', () => {
     fireEvent.click(screen.getByRole('button', { name: /Back to Session/i }));
     expect(screen.queryByText('Split View Overlay')).not.toBeInTheDocument();
     expect(screen.getByText('Sidebar')).toBeInTheDocument();
+  });
+
+  // 5.10
+  it('success: shows connected status when isConnected=true', () => {
+    const vm = makeVM({ isConnected: true });
+    render(<SessionActiveView vm={vm} />);
+
+    expect(screen.getByText('Connection: connected')).toBeInTheDocument();
+  });
+
+  // 5.11
+  it('success: shows disconnected status when isConnected=false', () => {
+    const vm = makeVM({ isConnected: false });
+    render(<SessionActiveView vm={vm} />);
+
+    expect(screen.getByText('Connection: disconnected')).toBeInTheDocument();
+  });
+
+  // 5.12
+  it('success: clicking Reconnect calls vm.handleReconnect', () => {
+    const vm = makeVM({ isConnected: false });
+    render(<SessionActiveView vm={vm} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Reconnect/i }));
+    expect(vm.handleReconnect).toHaveBeenCalled();
   });
 });

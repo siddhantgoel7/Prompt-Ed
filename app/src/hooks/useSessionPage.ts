@@ -47,6 +47,7 @@ export type SessionVM = {
 
   // realtime
   isConnected: boolean;
+  handleReconnect: () => void;
 
   // discussions
   discussions: DiscussionWithResponseCount[];
@@ -100,7 +101,7 @@ export type SessionVM = {
 
 export function useSessionPage(lessonId: string): SessionVM {
   const router = useRouter();
-  const { channel, isConnected } = useRealtime(lessonId, 'instructor');
+  const { channel, isConnected, reconnect } = useRealtime(lessonId, 'instructor');
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
@@ -562,9 +563,15 @@ export function useSessionPage(lessonId: string): SessionVM {
     }
   }, [lesson, files]);
 
+  const handleReconnect = useCallback(async () => {
+    reconnect();
+    await fetchDiscussions();
+    await fetchFiles();
+  }, [reconnect, fetchDiscussions, fetchFiles]);
+
   return useMemo(() => ({
     lesson: lesson as Lesson,
-    loading, notFound, isConnected,
+    loading, notFound, isConnected, handleReconnect,
     discussions, activeDiscussion, responses, promptInput, setPromptInput,
     displayState, handleDisplay,
     endingLesson, endError, handleEnd,
@@ -577,7 +584,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
   }), [
-    lesson, loading, notFound, isConnected,
+    lesson, loading, notFound, isConnected, handleReconnect,
     discussions, activeDiscussion, responses, promptInput,
     displayState, handleDisplay,
     endingLesson, endError, handleEnd,
