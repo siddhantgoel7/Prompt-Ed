@@ -398,24 +398,27 @@ export function useSessionPage(lessonId: string): SessionVM {
     run();
   }, [lessonId, router, fetchDiscussions, fetchFiles]);
 
-  // Fetch existing responses when the active discussion changes
-  useEffect(() => {
+  const fetchResponses = useCallback(async () => {
     if (!activeDiscussion) {
       setResponses([]);
       return;
     }
 
     const supabase = createClient();
-    supabase
+    const { data } = await supabase
       .from('responses')
       .select('*')
       .eq('discussion_id', activeDiscussion.id)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        if (data) setResponses(data as Response[]);
-      });
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- we only refetch when the ID changes, not the full object
-  }, [activeDiscussion?.id]);
+      .order('created_at', { ascending: false });
+
+    if (data) setResponses(data as Response[]);
+  }, [activeDiscussion]);
+
+  // Fetch existing responses when the active discussion changes
+  useEffect(() => {
+    fetchResponses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only refetch when the ID changes, not the full object
+  }, [activeDiscussion?.id, fetchResponses]);
 
   // Realtime: incoming student responses
   useEffect(() => {
@@ -566,8 +569,9 @@ export function useSessionPage(lessonId: string): SessionVM {
   const handleReconnect = useCallback(async () => {
     reconnect();
     await fetchDiscussions();
+    await fetchResponses();
     await fetchFiles();
-  }, [reconnect, fetchDiscussions, fetchFiles]);
+  }, [reconnect, fetchDiscussions, fetchResponses, fetchFiles]);
 
   return useMemo(() => ({
     lesson: lesson as Lesson,
