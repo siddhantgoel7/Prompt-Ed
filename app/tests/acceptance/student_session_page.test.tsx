@@ -1,5 +1,5 @@
 // tests/acceptance/student_session_page.test.tsx
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { StudentSessionPage } from '@/components/student/session/StudentSessionPage';
 
 jest.mock('@/hooks/useStudentSession', () => ({
@@ -193,5 +193,203 @@ describe('Student Session Page (Acceptance)', () => {
 
     render(<StudentSessionPage lessonId="lesson-1" />);
     expect(screen.getByText(/Connecting/i)).toBeInTheDocument();
+  });
+
+  // 12.10
+  it('[US 2.10][AT1] success: shows correct feedback for multiple choice', () => {
+    useStudentSessionMock.mockReturnValue({
+      lesson: { title: 'Lesson' },
+      activeDiscussion: {
+        id: 'd1',
+        status: 'active',
+        prompt_type: 'multiple_choice',
+        prompt_text: 'What is 2+2?',
+        mc_options: [
+          { label: 'A', text: '3' },
+          { label: 'B', text: '4' }
+        ],
+        correct_option: 'B',
+        feedback_enabled: true,
+      },
+      responseText: '',
+      setResponseText: jest.fn(),
+      submitting: false,
+      isConnected: true,
+      view: 'active', // initially active to allow selection
+      endedMessage: null,
+      errorMessage: null,
+      canSubmit: false,
+      submitResponse: jest.fn(),
+    });
+
+    const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
+
+    // Select option B (Correct)
+    fireEvent.click(screen.getByText('B.'));
+
+    // Submit
+    fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
+
+    // Now mock the hook returning 'submitted'
+    useStudentSessionMock.mockReturnValue({
+      lesson: { title: 'Lesson' },
+      activeDiscussion: {
+        id: 'd1',
+        status: 'active',
+        prompt_type: 'multiple_choice',
+        prompt_text: 'What is 2+2?',
+        mc_options: [
+          { label: 'A', text: '3' },
+          { label: 'B', text: '4' }
+        ],
+        correct_option: 'B',
+        feedback_enabled: true,
+      },
+      responseText: '',
+      setResponseText: jest.fn(),
+      submitting: false,
+      isConnected: true,
+      view: 'submitted',
+      endedMessage: null,
+      errorMessage: null,
+      canSubmit: false,
+      submitResponse: jest.fn(),
+    });
+
+    rerender(<StudentSessionPage lessonId="lesson-1" />);
+
+    expect(screen.getByText(/✅ Correct!/i)).toBeInTheDocument();
+    expect(screen.getByText(/You selected the correct answer/i)).toBeInTheDocument();
+  });
+
+  // 12.11
+  it('[US 2.10][AT2] success: shows incorrect feedback and correct option when wrong', () => {
+    useStudentSessionMock.mockReturnValue({
+      lesson: { title: 'Lesson' },
+      activeDiscussion: {
+        id: 'd1',
+        status: 'active',
+        prompt_type: 'multiple_choice',
+        prompt_text: 'What is 2+2?',
+        mc_options: [
+          { label: 'A', text: '3' },
+          { label: 'B', text: '4' }
+        ],
+        correct_option: 'B',
+        feedback_enabled: true,
+      },
+      responseText: '',
+      setResponseText: jest.fn(),
+      submitting: false,
+      isConnected: true,
+      view: 'active',
+      endedMessage: null,
+      errorMessage: null,
+      canSubmit: false,
+      submitResponse: jest.fn(),
+    });
+
+    const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
+
+    // Select option A (Incorrect)
+    fireEvent.click(screen.getByText('A.'));
+
+    // Submit
+    fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
+
+    // Now mock the hook returning 'submitted'
+    useStudentSessionMock.mockReturnValue({
+      lesson: { title: 'Lesson' },
+      activeDiscussion: {
+        id: 'd1',
+        status: 'active',
+        prompt_type: 'multiple_choice',
+        prompt_text: 'What is 2+2?',
+        mc_options: [
+          { label: 'A', text: '3' },
+          { label: 'B', text: '4' }
+        ],
+        correct_option: 'B',
+        feedback_enabled: true,
+      },
+      responseText: '',
+      setResponseText: jest.fn(),
+      submitting: false,
+      isConnected: true,
+      view: 'submitted',
+      endedMessage: null,
+      errorMessage: null,
+      canSubmit: false,
+      submitResponse: jest.fn(),
+    });
+
+    rerender(<StudentSessionPage lessonId="lesson-1" />);
+
+    expect(screen.getByText(/❌ Incorrect/i)).toBeInTheDocument();
+    expect(screen.getByText(/Correct Answer: Option B/i)).toBeInTheDocument();
+  });
+
+  // 12.12
+  it('[US 2.10][AT3] success: does not show correctness feedback if feedback_enabled is false', () => {
+    useStudentSessionMock.mockReturnValue({
+      lesson: { title: 'Lesson' },
+      activeDiscussion: {
+        id: 'd1',
+        status: 'active',
+        prompt_type: 'multiple_choice',
+        prompt_text: 'What is 2+2?',
+        mc_options: [
+          { label: 'A', text: '3' },
+          { label: 'B', text: '4' }
+        ],
+        correct_option: 'B',
+        feedback_enabled: false, // Feedback disabled
+      },
+      responseText: '',
+      setResponseText: jest.fn(),
+      submitting: false,
+      isConnected: true,
+      view: 'active',
+      endedMessage: null,
+      errorMessage: null,
+      canSubmit: false,
+      submitResponse: jest.fn(),
+    });
+
+    const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
+
+    fireEvent.click(screen.getByText('B.'));
+    fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
+
+    useStudentSessionMock.mockReturnValue({
+      lesson: { title: 'Lesson' },
+      activeDiscussion: {
+        id: 'd1',
+        status: 'active',
+        prompt_type: 'multiple_choice',
+        prompt_text: 'What is 2+2?',
+        mc_options: [
+          { label: 'A', text: '3' },
+          { label: 'B', text: '4' }
+        ],
+        correct_option: 'B',
+        feedback_enabled: false,
+      },
+      responseText: '',
+      setResponseText: jest.fn(),
+      submitting: false,
+      isConnected: true,
+      view: 'submitted',
+      endedMessage: null,
+      errorMessage: null,
+      canSubmit: false,
+      submitResponse: jest.fn(),
+    });
+
+    rerender(<StudentSessionPage lessonId="lesson-1" />);
+
+    expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
+    expect(screen.queryByText(/✅ Correct!/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/❌ Incorrect/i)).not.toBeInTheDocument();
   });
 });

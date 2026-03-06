@@ -226,7 +226,7 @@ describe('AI Features (Acceptance)', () => {
             fireEvent.click(screen.getByText('Option A'));
             fireEvent.click(screen.getByRole('button', { name: /Publish This Question/i }));
 
-            expect(defaultCenterProps.onPublishAiCandidate).toHaveBeenCalledWith(candidates[0]);
+            expect(defaultCenterProps.onPublishAiCandidate).toHaveBeenCalledWith(candidates[0], null, false);
         });
     });
 
