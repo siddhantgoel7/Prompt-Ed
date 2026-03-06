@@ -383,20 +383,26 @@ export function ActiveCenter({
               Close Discussion
             </Button>
           ) : (
-            <Button
-              onClick={() => {
-                if (transcriptText.trim() && transcriptText !== promptInput) {
-                  setPromptInput(transcriptText);
-                  setTimeout(() => onPublish(), 0);
-                } else {
-                  onPublish();
-                }
-              }}
-              disabled={!(promptInput.trim() || transcriptText.trim()) || !isConnected}
-              className="w-full px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
-            >
-              Start Discussion
-            </Button>
+            selectedIndex === null && (
+              <Button
+                onClick={() => {
+                  if (promptType === 'multiple_choice') {
+                    alert('Manual creation of multiple-choice questions is not supported. Please generate AI prompts and select one to publish, or change the type to Short/Long Answer.');
+                    return;
+                  }
+                  if (transcriptText.trim() && transcriptText !== promptInput) {
+                    setPromptInput(transcriptText);
+                    setTimeout(() => onPublish(), 0);
+                  } else {
+                    onPublish();
+                  }
+                }}
+                disabled={!(promptInput.trim() || transcriptText.trim()) || !isConnected}
+                className="w-full px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
+              >
+                Start Discussion
+              </Button>
+            )
           )}
         </div>
       </div>

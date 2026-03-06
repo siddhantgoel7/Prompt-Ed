@@ -190,7 +190,7 @@ export function useStudentSession(lessonId: string) {
     const newResponse = data as Response | null;
 
     if (error || !newResponse) {
-      console.error('Error submitting response:', error);
+      console.error('Error submitting response to Supabase:', error);
       setErrorMessage('Could not submit your response. Please try again.');
       setSubmitting(false);
       return;

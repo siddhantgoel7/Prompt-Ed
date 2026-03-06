@@ -316,6 +316,7 @@ export function useSessionPage(lessonId: string): SessionVM {
       .single();
 
     if (error || !newDiscussion) {
+      console.error('Failed to insert discussion into Supabase:', error);
       setPublishing(false);
       return;
     }
