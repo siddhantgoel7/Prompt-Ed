@@ -438,7 +438,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   // Fetch existing responses when the active discussion changes
   useEffect(() => {
     fetchResponses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only refetch when the ID changes, not the full object
+     
   }, [activeDiscussion?.id, fetchResponses]);
 
   // Realtime: incoming student responses

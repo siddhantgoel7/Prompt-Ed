@@ -14,9 +14,9 @@ async function main() {
     instructor_id: 'test-instructor',
     date_created: new Date().toISOString()
   }).select().single();
-  
+
   if (!course) {
-     const { data: existingCourse } = await supabase.from('courses').select('id').eq('id', 'test-course-123').single();
+    await supabase.from('courses').select('id').eq('id', 'test-course-123').single();
   }
 
   const { data: lesson } = await supabase.from('lessons').insert({
@@ -29,7 +29,7 @@ async function main() {
   }).select().single();
 
   if (!lesson) {
-     const { data: existingLesson } = await supabase.from('lessons').select('id').eq('id', 'test-lesson-123').single();
+    await supabase.from('lessons').select('id').eq('id', 'test-lesson-123').single();
   }
 }
 main();

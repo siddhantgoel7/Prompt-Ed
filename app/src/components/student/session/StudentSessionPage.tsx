@@ -1,7 +1,7 @@
 // src/components/student/session/StudentSessionPage.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { StudentSessionShell } from './StudentSessionShell';
@@ -33,14 +33,12 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
   const [isSubmitCorrect, setIsSubmitCorrect] = useState<boolean | null>(null);
 
   // Reset selected option and validation state when active discussion changes
-  useEffect(() => {
-    if (activeDiscussion?.id !== prevDiscussionId) {
-      setPrevDiscussionId(activeDiscussion?.id);
-      setSelectedOption(null);
-      setSubmitAttempted(false);
-      setIsSubmitCorrect(null);
-    }
-  }, [activeDiscussion?.id, prevDiscussionId]);
+  if (activeDiscussion?.id !== prevDiscussionId) {
+    setPrevDiscussionId(activeDiscussion?.id);
+    setSelectedOption(null);
+    setSubmitAttempted(false);
+    setIsSubmitCorrect(null);
+  }
 
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
 

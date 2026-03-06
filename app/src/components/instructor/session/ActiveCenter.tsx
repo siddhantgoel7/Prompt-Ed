@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { Badge } from '@/components/ui/badge';
 import * as React from 'react';
 import type { GeneratedPrompt } from '@/types/ai';
@@ -196,7 +196,7 @@ export function ActiveCenter({
       setSttError(err instanceof Error ? err.message : 'Transcription failed — type manually.');
       setSttStatus('error');
     }
-  }, [lessonId, recorder, setTranscriptText, onGenerate]);
+  }, [lessonId, recorder, setTranscriptText, setPromptInput, onGenerate]);
 
   const handleSelectCandidate = (p: GeneratedPrompt, index: number) => {
     setSelectedIndex(index);

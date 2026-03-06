@@ -23,7 +23,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { StudentSessionPage } from '@/components/student/session/StudentSessionPage';
 
 jest.mock('@/hooks/useStudentSession', () => ({

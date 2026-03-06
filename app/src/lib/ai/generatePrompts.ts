@@ -1,7 +1,7 @@
 import type { AIProvider } from './providers';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PromptType } from '@/types/discussion';
-import type { CandidateSet, GeneratedPrompt, MCOption, MCOptionSafe } from '@/types/ai';
+import type { CandidateSet, GeneratedPrompt, MCOption } from '@/types/ai';
 import { retrieveChunksBySimilarity, retrieveRecentChunks } from './retrieveChunks';
 import { buildSystemPrompt, buildUserPrompt, CANDIDATE_COUNT } from './prompts/discussionPrompt';
 
