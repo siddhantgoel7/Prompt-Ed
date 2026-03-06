@@ -73,16 +73,11 @@ export async function POST(
       result = await generatePrompts(lessonId, transcriptText, promptType, supabase, aiProvider);
     }
 
-    // SECURITY: Strip is_correct from all mcOptions before returning
-    const sanitized: CandidateSet = {
-      ...result,
-      candidates: result.candidates.map((c) => ({
-        ...c,
-        mcOptions: c.mcOptions?.map(({ label, text }) => ({ label, text })),
-      })),
-    };
+    // SECURITY EXCLUSION: We no longer strip is_correct here because the Instructor UI 
+    // requires it to auto-select the correct option when publishing. 
+    // The stripping for student security happens in `channel.send` within `useSessionPage.ts`.
 
-    return NextResponse.json(sanitized);
+    return NextResponse.json(result);
   } catch (err) {
     const e = err as { code?: string; message?: string };
     console.error(`GENERATE_ERR [${e.code ?? 'unknown'}]: ${e.message ?? String(err)}`);

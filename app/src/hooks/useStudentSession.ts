@@ -162,7 +162,7 @@ export function useStudentSession(lessonId: string) {
 
   // 3) Submit response
   // responseTextOverride: for MC questions, the page passes the formatted option string directly so we don't race against the setState for responseText.
-  const submitResponse = async (responseTextOverride?: string) => {
+  const submitResponse = async (responseTextOverride?: string, selectedOptionOverride?: string, isCorrectOverride?: boolean) => {
     if (!activeDiscussion?.id) return;
     if (view !== 'active') return;
 
@@ -180,6 +180,8 @@ export function useStudentSession(lessonId: string) {
         {
           discussion_id: activeDiscussion.id,
           response_text: text,
+          selected_option: selectedOptionOverride ?? null,
+          is_correct: isCorrectOverride ?? null,
         },
       ])
       .select()
@@ -188,7 +190,7 @@ export function useStudentSession(lessonId: string) {
     const newResponse = data as Response | null;
 
     if (error || !newResponse) {
-      console.error('Error submitting response:', error);
+      console.error('Error submitting response to Supabase:', error);
       setErrorMessage('Could not submit your response. Please try again.');
       setSubmitting(false);
       return;

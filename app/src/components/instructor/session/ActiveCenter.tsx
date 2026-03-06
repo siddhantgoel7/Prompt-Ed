@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { Badge } from '@/components/ui/badge';
 import * as React from 'react';
 import type { GeneratedPrompt } from '@/types/ai';
@@ -136,15 +136,30 @@ export function ActiveCenter({
   onGenerate: () => void;
   onSelectCandidate: (p: GeneratedPrompt) => void;
   onRegenerate: () => void;
-  onPublishAiCandidate?: (candidate: GeneratedPrompt) => void;
+  onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => void;
 }) {
   const recorder = useAudioRecorder();
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
   const [sttStatus, setSttStatus] = React.useState<'idle' | 'transcribing' | 'error'>('idle');
   const [sttError, setSttError] = React.useState<string | null>(null);
+  const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
+  const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
+
+  const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
+
+  React.useEffect(() => {
+    if (transcriptRef.current) {
+      transcriptRef.current.style.height = 'auto';
+      transcriptRef.current.style.height = transcriptRef.current.scrollHeight + 'px';
+    }
+  }, [transcriptText]);
 
   // Reset selection when candidates change
-  React.useEffect(() => { setSelectedIndex(null); }, [candidates]);
+  React.useEffect(() => {
+    setSelectedIndex(null);
+    setOverrideCorrectOption(null);
+    setFeedbackEnabled(false);
+  }, [candidates]);
 
   // Stop recording → Whisper → populate transcriptText → trigger generate
   const handleStopAndTranscribe = React.useCallback(async () => {
@@ -172,6 +187,7 @@ export function ActiveCenter({
       }
       const data = await res.json() as { transcript: string };
       setTranscriptText(data.transcript ?? '');
+      setPromptInput(data.transcript ?? '');
       setSttStatus('idle');
       // Auto-trigger generation after successful transcription
       // Small delay so setTranscriptText flushes before onGenerate reads it
@@ -180,16 +196,27 @@ export function ActiveCenter({
       setSttError(err instanceof Error ? err.message : 'Transcription failed — type manually.');
       setSttStatus('error');
     }
-  }, [lessonId, recorder, setTranscriptText, onGenerate]);
+  }, [lessonId, recorder, setTranscriptText, setPromptInput, onGenerate]);
 
   const handleSelectCandidate = (p: GeneratedPrompt, index: number) => {
     setSelectedIndex(index);
     onSelectCandidate(p);
+
+    setPromptInput(p.promptText);
+    setTranscriptText(p.promptText);
+
+    // Initialize correct option based on AI suggestion
+    if (p.promptType === 'multiple_choice' && p.mcOptions) {
+      const correctOpt = p.mcOptions.find(o => o.is_correct);
+      setOverrideCorrectOption(correctOpt ? correctOpt.label : null);
+    } else {
+      setOverrideCorrectOption(null);
+    }
   };
 
   const handlePublishSelected = (p: GeneratedPrompt) => {
     if (onPublishAiCandidate) {
-      onPublishAiCandidate(p);
+      onPublishAiCandidate(p, overrideCorrectOption, feedbackEnabled);
       setSelectedIndex(null);
     }
   };
@@ -239,12 +266,16 @@ export function ActiveCenter({
           <p className="text-xs text-red-600">{sttError}</p>
         )}
 
-        {/* Transcript / context input */}
+        {/* Prompt / context input */}
         <textarea
-          value={transcriptText}
-          onChange={(e) => setTranscriptText(e.target.value)}
+          ref={transcriptRef}
+          value={promptInput}
+          onChange={(e) => {
+            setPromptInput(e.target.value);
+            setTranscriptText(e.target.value); // Keep in sync for STT context
+          }}
           placeholder="Spoken content will appear here after recording, or type a topic manually"
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none"
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none overflow-hidden min-h-[50px]"
           rows={2}
         />
 
@@ -286,11 +317,45 @@ export function ActiveCenter({
                   isSelected={selectedIndex === i}
                   onSelect={() => handleSelectCandidate(c, i)}
                 />
+
+                {selectedIndex === i && c.promptType === 'multiple_choice' && onPublishAiCandidate && (
+                  <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200">
+                    <p className="text-xs font-semibold mb-2">Correct Answer</p>
+                    <div className="space-y-1">
+                      {c.mcOptions?.map((opt) => (
+                        <label key={opt.label} className="flex items-center gap-2 text-xs cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`correct-option-${i}`}
+                            value={opt.label}
+                            checked={overrideCorrectOption === opt.label}
+                            onChange={() => setOverrideCorrectOption(opt.label)}
+                          />
+                          <span className={overrideCorrectOption === opt.label ? 'font-medium' : ''}>
+                            Option {opt.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={feedbackEnabled}
+                          onChange={(e) => setFeedbackEnabled(e.target.checked)}
+                        />
+                        Show correctness feedback to students
+                      </label>
+                    </div>
+                  </div>
+                )}
+
                 {selectedIndex === i && onPublishAiCandidate && (
                   <Button
                     size="sm"
                     onClick={() => handlePublishSelected(c)}
-                    className="mt-1 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800"
+                    className="mt-2 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800"
                   >
                     Publish This Question →
                   </Button>
@@ -311,34 +376,43 @@ export function ActiveCenter({
             </div>
           </div>
         )}
-      </div>
 
-      {/* ── Manual prompt input ── */}
-      <Input
-        type="text"
-        value={promptInput}
-        onChange={(e) => setPromptInput(e.target.value)}
-        onKeyDown={(e) => { if (e.key === 'Enter' && promptInput.trim() && isConnected) onPublish(); }}
-        placeholder="Space to type multiple prompts"
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-      />
-
-      {/* Keep labels for tests */}
-      <div className="flex gap-2">
-        <Button
-          onClick={onPublish}
-          disabled={!promptInput.trim() || !isConnected}
-          className="px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
-        >
-          Start Discussion
-        </Button>
-        <Button
-          onClick={() => activeDiscussionId && onClose(activeDiscussionId)}
-          disabled={!activeDiscussionId}
-          className="px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
-        >
-          Close Discussion
-        </Button>
+        {/* Start / Close Discussion Toggle */}
+        <div className="pt-2">
+          {activeDiscussionId ? (
+            <Button
+              onClick={() => onClose(activeDiscussionId)}
+              className="w-full px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800"
+            >
+              Close Discussion
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                if (promptType === 'multiple_choice') {
+                  if (selectedIndex !== null && candidates[selectedIndex]) {
+                    if (onPublishAiCandidate) {
+                      onPublishAiCandidate(
+                        { ...candidates[selectedIndex], promptText: promptInput },
+                        overrideCorrectOption,
+                        feedbackEnabled
+                      );
+                      setSelectedIndex(null);
+                    }
+                    return;
+                  }
+                  alert('Manual creation of multiple-choice questions is not supported. Please generate AI prompts and select one to publish, or change the type to Short/Long Answer.');
+                  return;
+                }
+                onPublish();
+              }}
+              disabled={!promptInput.trim() || !isConnected}
+              className="w-full px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
+            >
+              Start Discussion
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -30,12 +30,14 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [prevDiscussionId, setPrevDiscussionId] = useState<string | undefined>(undefined);
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [isSubmitCorrect, setIsSubmitCorrect] = useState<boolean | null>(null);
 
   // Reset selected option and validation state when active discussion changes
   if (activeDiscussion?.id !== prevDiscussionId) {
     setPrevDiscussionId(activeDiscussion?.id);
     setSelectedOption(null);
     setSubmitAttempted(false);
+    setIsSubmitCorrect(null);
   }
 
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
@@ -53,7 +55,11 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
     }
     if (isMC && selectedOption) {
       const optionText = activeDiscussion?.mc_options?.find(o => o.label === selectedOption)?.text ?? '';
-      submitResponse(`Option ${selectedOption}: ${optionText}`);
+
+      const isCorrect = selectedOption === activeDiscussion?.correct_option;
+      setIsSubmitCorrect(isCorrect);
+
+      submitResponse(`Option ${selectedOption}: ${optionText}`, selectedOption, isCorrect);
       return;
     }
     submitResponse();
@@ -128,11 +134,11 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
             value={
               isMC
                 ? (selectedOption
-                    ? `Option ${selectedOption}: ${activeDiscussion.mc_options?.find(o => o.label === selectedOption)?.text ?? ''}`
-                    : '')
+                  ? `Option ${selectedOption}: ${activeDiscussion.mc_options?.find(o => o.label === selectedOption)?.text ?? ''}`
+                  : '')
                 : responseText
             }
-            onChange={isMC ? () => {} : setResponseText}
+            onChange={isMC ? () => { } : setResponseText}
             onSubmit={handleSubmit}
             disabled={!effectiveCanSubmit}
             submitting={submitting}
@@ -142,10 +148,25 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
       ) : null}
 
       {view === 'submitted' ? (
-        <StudentStatusAlert
-          title="Response submitted"
-          description="You're all set. Wait for the next prompt."
-        />
+        <div className="space-y-4">
+          <StudentStatusAlert
+            title="Response submitted"
+            description="You're all set. Wait for the next prompt."
+          />
+          {activeDiscussion?.feedback_enabled && isMC && isSubmitCorrect !== null && (
+            <div className={`p-4 rounded-lg border text-sm font-medium ${isSubmitCorrect ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'}`}>
+              <p className="flex items-center gap-2 text-lg">
+                {isSubmitCorrect ? '✅ Correct!' : '❌ Incorrect'}
+              </p>
+              <p className="mt-2 opacity-90 font-normal">
+                {isSubmitCorrect
+                  ? 'You selected the correct answer.'
+                  : `Correct Answer: Option ${activeDiscussion.correct_option}`
+                }
+              </p>
+            </div>
+          )}
+        </div>
       ) : null}
     </StudentSessionShell>
   );

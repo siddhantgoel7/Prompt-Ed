@@ -15,6 +15,9 @@ export interface Discussion {
   display_order: number;
   source: 'manual' | 'ai_generated' | null;
   mc_options: MCOptionSafe[] | null;
+  correct_option: string | null;
+  feedback_enabled: boolean;
+  ai_generated_correct_option: string | null;
 }
 
 export interface CreateDiscussionInput {
