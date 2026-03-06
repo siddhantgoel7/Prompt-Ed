@@ -102,11 +102,7 @@ function parseAIResponse(raw: string, promptType: PromptType): GeneratedPrompt[]
     };
 
     if (promptType === 'multiple_choice' && Array.isArray(candidate.mcOptions)) {
-      // Strip is_correct — safe for client
-      result.mcOptions = candidate.mcOptions.map((opt: MCOption): MCOptionSafe => ({
-        label: opt.label,
-        text: opt.text,
-      }));
+      result.mcOptions = candidate.mcOptions;
     }
 
     return result;

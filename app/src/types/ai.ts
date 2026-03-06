@@ -20,7 +20,7 @@ export type MCOptionSafe = Omit<MCOption, 'is_correct'>;
 export interface GeneratedPrompt {
   promptText: string;
   promptType: PromptType;
-  mcOptions?: MCOptionSafe[]; // only present when promptType === 'multiple_choice'
+  mcOptions?: MCOption[]; // only present when promptType === 'multiple_choice'
 }
 
 // Result of a generate call

@@ -136,12 +136,14 @@ export function ActiveCenter({
   onGenerate: () => void;
   onSelectCandidate: (p: GeneratedPrompt) => void;
   onRegenerate: () => void;
-  onPublishAiCandidate?: (candidate: GeneratedPrompt) => void;
+  onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => void;
 }) {
   const recorder = useAudioRecorder();
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
   const [sttStatus, setSttStatus] = React.useState<'idle' | 'transcribing' | 'error'>('idle');
   const [sttError, setSttError] = React.useState<string | null>(null);
+  const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
+  const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
 
   const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -153,7 +155,11 @@ export function ActiveCenter({
   }, [transcriptText]);
 
   // Reset selection when candidates change
-  React.useEffect(() => { setSelectedIndex(null); }, [candidates]);
+  React.useEffect(() => {
+    setSelectedIndex(null);
+    setOverrideCorrectOption(null);
+    setFeedbackEnabled(false);
+  }, [candidates]);
 
   // Stop recording → Whisper → populate transcriptText → trigger generate
   const handleStopAndTranscribe = React.useCallback(async () => {
@@ -194,11 +200,19 @@ export function ActiveCenter({
   const handleSelectCandidate = (p: GeneratedPrompt, index: number) => {
     setSelectedIndex(index);
     onSelectCandidate(p);
+
+    // Initialize correct option based on AI suggestion
+    if (p.promptType === 'multiple_choice' && p.mcOptions) {
+      const correctOpt = p.mcOptions.find(o => o.is_correct);
+      setOverrideCorrectOption(correctOpt ? correctOpt.label : null);
+    } else {
+      setOverrideCorrectOption(null);
+    }
   };
 
   const handlePublishSelected = (p: GeneratedPrompt) => {
     if (onPublishAiCandidate) {
-      onPublishAiCandidate(p);
+      onPublishAiCandidate(p, overrideCorrectOption, feedbackEnabled);
       setSelectedIndex(null);
     }
   };
@@ -299,11 +313,45 @@ export function ActiveCenter({
                   isSelected={selectedIndex === i}
                   onSelect={() => handleSelectCandidate(c, i)}
                 />
+
+                {selectedIndex === i && c.promptType === 'multiple_choice' && onPublishAiCandidate && (
+                  <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200">
+                    <p className="text-xs font-semibold mb-2">Correct Answer</p>
+                    <div className="space-y-1">
+                      {c.mcOptions?.map((opt) => (
+                        <label key={opt.label} className="flex items-center gap-2 text-xs cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`correct-option-${i}`}
+                            value={opt.label}
+                            checked={overrideCorrectOption === opt.label}
+                            onChange={() => setOverrideCorrectOption(opt.label)}
+                          />
+                          <span className={overrideCorrectOption === opt.label ? 'font-medium' : ''}>
+                            Option {opt.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={feedbackEnabled}
+                          onChange={(e) => setFeedbackEnabled(e.target.checked)}
+                        />
+                        Show correctness feedback to students
+                      </label>
+                    </div>
+                  </div>
+                )}
+
                 {selectedIndex === i && onPublishAiCandidate && (
                   <Button
                     size="sm"
                     onClick={() => handlePublishSelected(c)}
-                    className="mt-1 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800"
+                    className="mt-2 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800"
                   >
                     Publish This Question →
                   </Button>

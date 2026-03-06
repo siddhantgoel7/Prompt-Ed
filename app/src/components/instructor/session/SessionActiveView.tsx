@@ -78,7 +78,10 @@ export function SessionActiveView({ vm }: { vm: SessionVM }) {
           onPublishAiCandidate={vm.handlePublishAiCandidate}
         />
 
-        <ActiveRightPanel responses={vm.responses} />
+        <ActiveRightPanel
+          responses={vm.responses}
+          activeDiscussion={vm.activeDiscussion}
+        />
       </div>
 
       <ConnectionStatus isConnected={vm.isConnected} onReconnect={vm.handleReconnect} />

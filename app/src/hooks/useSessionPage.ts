@@ -96,7 +96,7 @@ export type SessionVM = {
   regenerateCandidates: () => Promise<void>;
 
   // US 1.17 — STT: publish AI candidate directly as a discussion
-  handlePublishAiCandidate: (candidate: GeneratedPrompt) => Promise<void>;
+  handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => Promise<void>;
 };
 
 export function useSessionPage(lessonId: string): SessionVM {
@@ -269,7 +269,7 @@ export function useSessionPage(lessonId: string): SessionVM {
 
   // US 1.17 — Publish AI candidate directly (skips text input, closes previous discussion)
   // SECURITY: is_correct is stripped before broadcasting to students
-  const handlePublishAiCandidate = useCallback(async (candidate: GeneratedPrompt) => {
+  const handlePublishAiCandidate = useCallback(async (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled: boolean = false) => {
     if (publishing) return;
     setPublishing(true);
 
@@ -278,6 +278,23 @@ export function useSessionPage(lessonId: string): SessionVM {
     if (activeDiscussion) {
       await handleCloseDiscussion(activeDiscussion.id);
     }
+
+    // Determine the AI suggested correct option
+    let aiSuggestedCorrectOption = null;
+    if (candidate.mcOptions) {
+      const correctOpt = candidate.mcOptions.find(o => o.is_correct);
+      if (correctOpt) {
+        aiSuggestedCorrectOption = correctOpt.label;
+      }
+    }
+
+    const finalCorrectOption = overrideCorrectOption || aiSuggestedCorrectOption;
+
+    // Update mcOptions if overrideCorrectOption is provided to ensure is_correct matches
+    const finalMcOptions = candidate.mcOptions ? candidate.mcOptions.map(opt => ({
+      ...opt,
+      is_correct: opt.label === finalCorrectOption
+    })) : null;
 
     const { data: newDiscussion, error } = await supabase
       .from('discussions')
@@ -290,7 +307,10 @@ export function useSessionPage(lessonId: string): SessionVM {
         display_order: discussions.length,
         source: 'ai_generated',
         // Store full mc_options with is_correct server-side
-        mc_options: candidate.mcOptions ? candidate.mcOptions : null,
+        mc_options: finalMcOptions,
+        correct_option: finalCorrectOption,
+        feedback_enabled: feedbackEnabled,
+        ai_generated_correct_option: aiSuggestedCorrectOption,
       }])
       .select()
       .single();
