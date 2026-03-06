@@ -46,6 +46,14 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     activatingLesson: false,
     handleExportLessonData: jest.fn(),
     handleActivate: jest.fn(),
+    transcripts: [],
+    transcriptsLoading: false,
+    transcriptsError: null,
+    files: [],
+    isUploading: false,
+    uploadFile: jest.fn(),
+    deleteFile: jest.fn(),
+    openFile: jest.fn(),
     ...overrides,
   } as unknown as SessionVM;
 }
@@ -114,4 +122,57 @@ describe('SessionEndedView (Acceptance)', () => {
     fireEvent.click(screen.getByRole('button', { name: /Activate/i }));
     expect(vm.handleActivate).toHaveBeenCalled();
   });
+
+  it('[US 1.14][AT5] success: renders transcript segments when present', () => {
+  const vm = makeVM({
+    transcripts: [
+      { id: 't1', content: 'First transcript chunk', created_at: '2026-03-06T10:00:00Z' },
+      { id: 't2', content: 'Second transcript chunk', created_at: '2026-03-06T10:05:00Z' },
+    ],
+  });
+
+  render(<SessionEndedView vm={vm} />);
+  expect(screen.getByText(/First transcript chunk/i)).toBeInTheDocument();
+  expect(screen.getByText(/Second transcript chunk/i)).toBeInTheDocument();
+  });
+
+  it('[US 1.14] success: renders uploaded lecture materials', () => {
+    const vm = makeVM({
+      files: [
+        {
+          id: 'f1',
+          lessonId: 'lesson-1',
+          fileName: 'lecture-1.pdf',
+          fileType: 'pdf',
+          fileSizeBytes: 1024,
+          status: 'ready',
+          uploadedAt: '2026-03-06T10:00:00Z',
+        },
+      ],
+    });
+
+    render(<SessionEndedView vm={vm} />);
+    expect(screen.getByText(/lecture-1\.pdf/i)).toBeInTheDocument();
+  });
+
+  it('[US 1.14] success: clicking download calls vm.openFile', () => {
+    const vm = makeVM({
+      files: [
+        {
+          id: 'f1',
+          lessonId: 'lesson-1',
+          fileName: 'lecture-1.pdf',
+          fileType: 'pdf',
+          fileSizeBytes: 1024,
+          status: 'ready',
+          uploadedAt: '2026-03-06T10:00:00Z',
+        },
+      ],
+    });
+
+    render(<SessionEndedView vm={vm} />);
+    fireEvent.click(screen.getByRole('button', { name: /download file/i }));
+    expect(vm.openFile).toHaveBeenCalledWith('f1');
+  });
+
 });

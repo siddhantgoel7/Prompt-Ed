@@ -74,3 +74,46 @@ export async function DELETE(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ lessonId: string; fileId: string }> }
+) {
+  const { lessonId, fileId } = await params;
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { data: lesson } = await supabase.from('lessons').select('id, course_id').eq('id', lessonId).single();
+  if (!lesson) return NextResponse.json({ error: 'Lesson not found' }, { status: 404 });
+
+  const { data: course } = await supabase.from('courses').select('instructor_id').eq('id', lesson.course_id).single();
+  if (!course || course.instructor_id !== user.id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  const { data: fileRecord, error: fileError } = await supabase
+    .from('lesson_files')
+    .select('storage_path, status, file_name')
+    .eq('id', fileId)
+    .eq('lesson_id', lessonId)
+    .single();
+
+  if (fileError || !fileRecord) {
+    return NextResponse.json({ error: 'File not found' }, { status: 404 });
+  }
+
+  const { data: signed, error: signedErr } = await supabase
+    .storage
+    .from('lesson-files')
+    .createSignedUrl(fileRecord.storage_path, 600);
+
+  if (signedErr || !signed?.signedUrl) {
+    return NextResponse.json({ error: 'Failed to create file URL' }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    url: signed.signedUrl,
+    fileName: fileRecord.file_name,
+  });
+}
