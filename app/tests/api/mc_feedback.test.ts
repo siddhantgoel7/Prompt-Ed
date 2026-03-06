@@ -133,7 +133,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
 
             expect(data).toBeNull();
             expect(error).toBeTruthy();
-            expect(error.message).toMatch(/not found/i);
+            expect(error?.message).toMatch(/not found/i);
         });
 
         // 33.3
@@ -298,7 +298,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
                 .eq('id', 'd-mc-api-1')
                 .single();
 
-            data.mc_options.forEach((opt: Record<string, unknown>) => {
+            data?.mc_options.forEach((opt: Record<string, unknown>) => {
                 expect(opt).toHaveProperty('label');
                 expect(opt).toHaveProperty('text');
                 expect(opt).not.toHaveProperty('is_correct');
@@ -327,7 +327,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
 
             // feedback_enabled must be present so student UI can decide whether to show feedback
             expect(data).toHaveProperty('feedback_enabled');
-            expect(typeof data.feedback_enabled).toBe('boolean');
+            expect(typeof data?.feedback_enabled).toBe('boolean');
         });
     });
 
