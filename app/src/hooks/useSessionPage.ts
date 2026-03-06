@@ -31,6 +31,13 @@ type ExportDiscussionRow = {
   created_at: string;
   responses?: Array<{ response_text: string; created_at: string }>;
 };
+type TranscriptRow = {
+  id: string;
+  content: string;
+  created_at: string;
+  metadata?: { recordedAt?: string };
+};
+
 
 type BroadcastEnvelope<T> = { payload?: T } & Partial<T>;
 function unwrapBroadcast<T>(raw: unknown): T | undefined {
@@ -63,6 +70,13 @@ export type SessionVM = {
   endingLesson: boolean;
   endError: string | null;
   handleEnd: () => Promise<void> | void;
+
+  transcripts: TranscriptRow[];
+  transcriptsLoading: boolean;
+  transcriptsError: string | null;
+
+  openFile: (fileId: string) => Promise<void>;
+
 
   handlePublishDiscussion: () => Promise<void> | void;
   handleCloseDiscussion: (discussionId: string) => Promise<void> | void;
@@ -106,6 +120,15 @@ export function useSessionPage(lessonId: string): SessionVM {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  const [transcripts, setTranscripts] = useState<TranscriptRow[]>([]);
+  const [transcriptsLoading, setTranscriptsLoading] = useState(false);
+  const [transcriptsError, setTranscriptsError] = useState<string | null>(null);
+
+  const syncIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const initializedConnectionRef = React.useRef(false);
+  const wasConnectedRef = React.useRef(false);
+
 
   const [displayState, setDisplayState] = useState(false);
   const [endError, setEndError] = useState<string | null>(null);
@@ -156,7 +179,26 @@ export function useSessionPage(lessonId: string): SessionVM {
     setDiscussions(discussionsWithCounts);
     const active = discussionsWithCounts.find((d) => d.status === 'active');
     setActiveDiscussion(active || null);
+    await fetchResponsesForDiscussion(active?.id ?? null);
   }, [lessonId]);
+
+  const fetchResponsesForDiscussion = useCallback(async (discussionId: string | null) => {
+    if (!discussionId) {
+      setResponses([]);
+      return;
+    }
+    const supabase = createClient();
+    const { data } = await supabase
+      .from('responses')
+      .select('*')
+      .eq('discussion_id', discussionId)
+      .order('created_at', { ascending: false });
+
+    setResponses((data ?? []) as Response[]);
+  }, []);
+
+  
+
 
   const fetchFiles = useCallback(async () => {
     const res = await fetch(`/api/lessons/${lessonId}/files`);
@@ -164,6 +206,38 @@ export function useSessionPage(lessonId: string): SessionVM {
     const data = await res.json() as LessonFile[];
     setFiles(data);
   }, [lessonId]);
+
+  const syncLessonState = useCallback(async () => {
+    await fetchDiscussions();
+    await fetchFiles();
+  }, [fetchDiscussions, fetchFiles]);
+
+  const fetchTranscripts = useCallback(async () => {
+    setTranscriptsLoading(true);
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('lesson_chunks')
+        .select('id, content, created_at, metadata')
+        .eq('lesson_id', lessonId)
+        .eq('content_type', 'transcript')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        setTranscriptsError('Failed to load transcripts.');
+        setTranscripts([]);
+      } else {
+        setTranscriptsError(null);
+        setTranscripts((data ?? []) as TranscriptRow[]);
+      }
+    } catch {
+      setTranscriptsError('Failed to load transcripts.');
+      setTranscripts([]);
+    } finally {
+      setTranscriptsLoading(false);
+    }
+  }, [lessonId]);
+
 
   const uploadFile = useCallback(async (file: File) => {
     setIsUploading(true);
@@ -201,6 +275,29 @@ export function useSessionPage(lessonId: string): SessionVM {
     if (res.ok) await fetchFiles();
   }, [lessonId, fetchFiles]);
 
+  const openFile = useCallback(async (fileId: string) => {
+    const res = await fetch(`/api/lessons/${lessonId}/files/${fileId}`);
+    if (!res.ok) return;
+
+    const { url, fileName } = await res.json() as { url: string; fileName: string };
+
+    // download with clean filename
+    const fileRes = await fetch(url);
+    const blob = await fileRes.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = fileName; // this is the clean original name
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  }, [lessonId]);
+
+  
+
+
   // Poll for processing files
   useEffect(() => {
     const hasProcessing = files.some(f => f.status === 'processing');
@@ -212,6 +309,7 @@ export function useSessionPage(lessonId: string): SessionVM {
 
     return () => clearInterval(intervalId);
   }, [files, fetchFiles]);
+
 
   // US 1.18, 1.19 — AI generation
   const generateCandidates = useCallback(async () => {
@@ -387,6 +485,8 @@ export function useSessionPage(lessonId: string): SessionVM {
             setLessonDiscussions((discussionsData || []) as DiscussionWithResponses[]);
           }
           setHistoryLoading(false);
+          await fetchTranscripts();
+
         }
       }
 
@@ -396,7 +496,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     };
 
     run();
-  }, [lessonId, router, fetchDiscussions, fetchFiles]);
+  }, [lessonId, router, fetchDiscussions, fetchFiles, fetchTranscripts]);
 
   // Fetch existing responses when the active discussion changes
   useEffect(() => {
@@ -439,6 +539,67 @@ export function useSessionPage(lessonId: string): SessionVM {
     });
     return () => sub.unsubscribe();
   }, [channel]);
+
+  
+
+  useEffect(() => {
+  // skip first render/connect
+    if (!initializedConnectionRef.current) {
+      initializedConnectionRef.current = true;
+      wasConnectedRef.current = isConnected;
+      return;
+    }
+
+    // only true reconnect: false -> true
+    if (isConnected && !wasConnectedRef.current) {
+      void syncLessonState();
+    }
+
+    wasConnectedRef.current = isConnected;
+  }, [isConnected, syncLessonState]);
+
+  const draftKey = `lesson:${lessonId}:instructor-draft`;
+
+  useEffect(() => {
+    if (!lesson || lesson.status !== 'active') return;
+    localStorage.setItem(
+      draftKey,
+      JSON.stringify({ promptInput, transcriptText, promptType, savedAt: new Date().toISOString() })
+    );
+  }, [draftKey, lesson, promptInput, transcriptText, promptType]);
+
+  useEffect(() => {
+    const raw = localStorage.getItem(draftKey);
+    if (!raw) return;
+    try {
+      const d = JSON.parse(raw) as { promptInput?: string; transcriptText?: string; promptType?: PromptType };
+      if (d.promptInput) setPromptInput(d.promptInput);
+      if (d.transcriptText) setTranscriptText(d.transcriptText);
+      if (d.promptType) setPromptType(d.promptType);
+    } catch {}
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!lesson || lesson.status !== 'active') return;
+
+    if (syncIntervalRef.current) {
+      clearInterval(syncIntervalRef.current);
+    }
+
+    syncIntervalRef.current = setInterval(() => {
+      void syncLessonState();
+    }, 30000);
+
+    return () => {
+      if (syncIntervalRef.current) {
+        clearInterval(syncIntervalRef.current);
+        syncIntervalRef.current = null;
+      }
+    };
+  }, [lesson?.id, lesson?.status, syncLessonState]);
+
+
+
 
   const handleDisplay = useCallback(() => {
     if (!lesson) return;
@@ -544,6 +705,19 @@ export function useSessionPage(lessonId: string): SessionVM {
         if (res.length === 0) { lines.push('  - No responses'); }
         else { res.forEach((r, ri) => { lines.push(`  ${ri + 1}. ${r.response_text}`, `     ${new Date(r.created_at).toLocaleString()}`); }); }
       });
+      lines.push('', 'TRANSCRIPTS', '-----------');
+      if (transcripts.length === 0) {
+        lines.push('No transcripts used.');
+      } else {
+        transcripts.forEach((t, i) => {
+          const when = new Date(t.metadata?.recordedAt ?? t.created_at).toLocaleString();
+          lines.push(
+            `Segment ${i + 1} (${when})`,
+            t.content,
+            ''
+          );
+        });
+      }
 
       lines.push('', 'LECTURE MATERIAL', '----------------');
       if (files.length === 0) { lines.push('No lecture material uploaded.'); }
@@ -561,7 +735,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     } finally {
       setExportingData(false);
     }
-  }, [lesson, files]);
+  }, [lesson, files, transcripts]);
 
   const handleReconnect = useCallback(async () => {
     reconnect();
@@ -577,8 +751,9 @@ export function useSessionPage(lessonId: string): SessionVM {
     endingLesson, endError, handleEnd,
     handlePublishDiscussion, handleCloseDiscussion,
     historyLoading, historyError, lessonDiscussions,
+    transcripts, transcriptsLoading, transcriptsError,
     exportingData, activatingLesson, handleExportLessonData, handleActivate,
-    files, isUploading, uploadFile, deleteFile,
+    files, isUploading, uploadFile, deleteFile, openFile,
     transcriptText, setTranscriptText, promptType, setPromptType,
     candidates, isGenerating, generationWarning,
     generateCandidates, selectCandidate, regenerateCandidates,
@@ -590,8 +765,9 @@ export function useSessionPage(lessonId: string): SessionVM {
     endingLesson, endError, handleEnd,
     handlePublishDiscussion, handleCloseDiscussion,
     historyLoading, historyError, lessonDiscussions,
+    transcripts, transcriptsLoading, transcriptsError,
     exportingData, activatingLesson, handleExportLessonData, handleActivate,
-    files, isUploading, uploadFile, deleteFile,
+    files, isUploading, uploadFile, deleteFile, openFile,
     transcriptText, promptType, candidates, isGenerating, generationWarning,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
