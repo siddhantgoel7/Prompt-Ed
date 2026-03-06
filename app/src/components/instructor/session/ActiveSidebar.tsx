@@ -57,7 +57,8 @@ function DiscussionHistory({
 
   return (
     <div className="space-y-2">
-      {discussions.map((d, index) => {
+      {[...discussions].reverse().map((d, index) => {
+        const originalIndex = discussions.length - index;
         const isActive = d.id === activeDiscussionId;
 
         return (
@@ -74,7 +75,7 @@ function DiscussionHistory({
             >
               <CardContent className="p-3">
                 <div className="flex items-start justify-between mb-2">
-                  <span className="text-xs font-semibold text-muted-foreground">#{index + 1}</span>
+                  <span className="text-xs font-semibold text-muted-foreground">#{originalIndex}</span>
 
                   {d.status === 'active' ? (
                     <Badge variant="secondary" className="bg-green-100 text-green-800">
@@ -261,32 +262,32 @@ export function ActiveSidebar({
           </TabsContent>
 
           <TabsContent value="analytics" className="mt-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-semibold">Student Responses</div>
-                  <div className="text-xs text-muted-foreground">{responses.length}</div>
-                </div>
-
-                <ScrollArea className="h-[calc(100vh-230px)] pr-2">
-                  {responses.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4">Waiting for student responses...</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {responses.map((r) => (
-                        <Card key={r.id}>
-                          <CardContent className="p-3">
-                            <p className="text-sm">{r.response_text}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {new Date(r.created_at).toLocaleTimeString()}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-semibold">Student Responses</div>
+                <div className="text-xs text-muted-foreground">{responses.length}</div>
               </div>
-            </TabsContent>
+
+              <ScrollArea className="h-[calc(100vh-230px)] pr-2">
+                {responses.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4">Waiting for student responses...</p>
+                ) : (
+                  <div className="space-y-2">
+                    {responses.map((r) => (
+                      <Card key={r.id}>
+                        <CardContent className="p-3">
+                          <p className="text-sm">{r.response_text}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(r.created_at).toLocaleTimeString()}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
+          </TabsContent>
 
         </Tabs>
       </div>
