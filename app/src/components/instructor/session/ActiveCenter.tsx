@@ -143,6 +143,15 @@ export function ActiveCenter({
   const [sttStatus, setSttStatus] = React.useState<'idle' | 'transcribing' | 'error'>('idle');
   const [sttError, setSttError] = React.useState<string | null>(null);
 
+  const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
+
+  React.useEffect(() => {
+    if (transcriptRef.current) {
+      transcriptRef.current.style.height = 'auto';
+      transcriptRef.current.style.height = transcriptRef.current.scrollHeight + 'px';
+    }
+  }, [transcriptText]);
+
   // Reset selection when candidates change
   React.useEffect(() => { setSelectedIndex(null); }, [candidates]);
 
@@ -241,10 +250,14 @@ export function ActiveCenter({
 
         {/* Transcript / context input */}
         <textarea
+          ref={transcriptRef}
           value={transcriptText}
-          onChange={(e) => setTranscriptText(e.target.value)}
+          onChange={(e) => {
+            setTranscriptText(e.target.value);
+            setPromptInput(e.target.value); // Keep promptInput in sync for manual publishing
+          }}
           placeholder="Spoken content will appear here after recording, or type a topic manually"
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none"
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none overflow-hidden min-h-[50px]"
           rows={2}
         />
 
@@ -311,34 +324,33 @@ export function ActiveCenter({
             </div>
           </div>
         )}
-      </div>
 
-      {/* ── Manual prompt input ── */}
-      <Input
-        type="text"
-        value={promptInput}
-        onChange={(e) => setPromptInput(e.target.value)}
-        onKeyDown={(e) => { if (e.key === 'Enter' && promptInput.trim() && isConnected) onPublish(); }}
-        placeholder="Space to type multiple prompts"
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-      />
-
-      {/* Keep labels for tests */}
-      <div className="flex gap-2">
-        <Button
-          onClick={onPublish}
-          disabled={!promptInput.trim() || !isConnected}
-          className="px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
-        >
-          Start Discussion
-        </Button>
-        <Button
-          onClick={() => activeDiscussionId && onClose(activeDiscussionId)}
-          disabled={!activeDiscussionId}
-          className="px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
-        >
-          Close Discussion
-        </Button>
+        {/* Start / Close Discussion Toggle */}
+        <div className="pt-2">
+          {activeDiscussionId ? (
+            <Button
+              onClick={() => onClose(activeDiscussionId)}
+              className="w-full px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800"
+            >
+              Close Discussion
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                if (transcriptText.trim() && transcriptText !== promptInput) {
+                  setPromptInput(transcriptText);
+                  setTimeout(() => onPublish(), 0);
+                } else {
+                  onPublish();
+                }
+              }}
+              disabled={!(promptInput.trim() || transcriptText.trim()) || !isConnected}
+              className="w-full px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
+            >
+              Start Discussion
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
