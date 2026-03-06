@@ -28,22 +28,28 @@ export function ActiveRightPanel({ responses, activeDiscussion }: { responses: R
         <div className="text-sm text-gray-500">{responses.length}</div>
       </div>
 
-      {isMC && (
+      {isMC && activeDiscussion?.mc_options && (
         <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-          {activeDiscussion.correct_option ? (
-            <div className="text-sm font-semibold mb-2">
-              Correct Answer: Option {activeDiscussion.correct_option}
-            </div>
-          ) : (
-            <div className="text-sm font-semibold mb-2 text-muted-foreground">
-              No Correct Answer Selected
-            </div>
-          )}
-          <div className="text-xs space-y-1">
-            <div className="font-semibold text-gray-700 mb-1">Student Responses</div>
+          <div className="text-sm font-semibold mb-2 text-gray-800">Options:</div>
+          <div className="space-y-2 mb-4">
+            {activeDiscussion.mc_options.map((opt) => (
+              <div key={opt.label} className="text-xs">
+                <span className="font-semibold mr-1">{opt.label}.</span>
+                <span className={activeDiscussion.correct_option === opt.label ? 'font-bold text-green-700' : ''}>
+                  {opt.text}
+                </span>
+                {activeDiscussion.correct_option === opt.label && (
+                  <span className="ml-2 text-[10px] bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Correct</span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="text-xs space-y-1 pt-3 border-t border-gray-200">
+            <div className="font-semibold text-gray-700 mb-2">Student Responses</div>
             {Object.entries(distribution).map(([label, count]) => (
               <div key={label} className="flex justify-between items-center">
-                <span>{label}:</span>
+                <span>Option {label}:</span>
                 <span className="font-medium">{count}</span>
               </div>
             ))}

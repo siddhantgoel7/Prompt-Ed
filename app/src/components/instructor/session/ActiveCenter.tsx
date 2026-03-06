@@ -187,6 +187,7 @@ export function ActiveCenter({
       }
       const data = await res.json() as { transcript: string };
       setTranscriptText(data.transcript ?? '');
+      setPromptInput(data.transcript ?? '');
       setSttStatus('idle');
       // Auto-trigger generation after successful transcription
       // Small delay so setTranscriptText flushes before onGenerate reads it
@@ -200,6 +201,9 @@ export function ActiveCenter({
   const handleSelectCandidate = (p: GeneratedPrompt, index: number) => {
     setSelectedIndex(index);
     onSelectCandidate(p);
+
+    setPromptInput(p.promptText);
+    setTranscriptText(p.promptText);
 
     // Initialize correct option based on AI suggestion
     if (p.promptType === 'multiple_choice' && p.mcOptions) {
@@ -262,13 +266,13 @@ export function ActiveCenter({
           <p className="text-xs text-red-600">{sttError}</p>
         )}
 
-        {/* Transcript / context input */}
+        {/* Prompt / context input */}
         <textarea
           ref={transcriptRef}
-          value={transcriptText}
+          value={promptInput}
           onChange={(e) => {
-            setTranscriptText(e.target.value);
-            setPromptInput(e.target.value); // Keep promptInput in sync for manual publishing
+            setPromptInput(e.target.value);
+            setTranscriptText(e.target.value); // Keep in sync for STT context
           }}
           placeholder="Spoken content will appear here after recording, or type a topic manually"
           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none overflow-hidden min-h-[50px]"
@@ -383,26 +387,30 @@ export function ActiveCenter({
               Close Discussion
             </Button>
           ) : (
-            selectedIndex === null && (
-              <Button
-                onClick={() => {
-                  if (promptType === 'multiple_choice') {
-                    alert('Manual creation of multiple-choice questions is not supported. Please generate AI prompts and select one to publish, or change the type to Short/Long Answer.');
+            <Button
+              onClick={() => {
+                if (promptType === 'multiple_choice') {
+                  if (selectedIndex !== null && candidates[selectedIndex]) {
+                    if (onPublishAiCandidate) {
+                      onPublishAiCandidate(
+                        { ...candidates[selectedIndex], promptText: promptInput },
+                        overrideCorrectOption,
+                        feedbackEnabled
+                      );
+                      setSelectedIndex(null);
+                    }
                     return;
                   }
-                  if (transcriptText.trim() && transcriptText !== promptInput) {
-                    setPromptInput(transcriptText);
-                    setTimeout(() => onPublish(), 0);
-                  } else {
-                    onPublish();
-                  }
-                }}
-                disabled={!(promptInput.trim() || transcriptText.trim()) || !isConnected}
-                className="w-full px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
-              >
-                Start Discussion
-              </Button>
-            )
+                  alert('Manual creation of multiple-choice questions is not supported. Please generate AI prompts and select one to publish, or change the type to Short/Long Answer.');
+                  return;
+                }
+                onPublish();
+              }}
+              disabled={!promptInput.trim() || !isConnected}
+              className="w-full px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
+            >
+              Start Discussion
+            </Button>
           )}
         </div>
       </div>
