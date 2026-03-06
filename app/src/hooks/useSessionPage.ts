@@ -54,6 +54,7 @@ export type SessionVM = {
 
   // realtime
   isConnected: boolean;
+  handleReconnect: () => void;
 
   // discussions
   discussions: DiscussionWithResponseCount[];
@@ -114,7 +115,7 @@ export type SessionVM = {
 
 export function useSessionPage(lessonId: string): SessionVM {
   const router = useRouter();
-  const { channel, isConnected } = useRealtime(lessonId, 'instructor');
+  const { channel, isConnected, reconnect } = useRealtime(lessonId, 'instructor');
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
@@ -497,6 +498,25 @@ export function useSessionPage(lessonId: string): SessionVM {
     run();
   }, [lessonId, router, fetchDiscussions, fetchFiles, fetchTranscripts]);
 
+  // Fetch existing responses when the active discussion changes
+  useEffect(() => {
+    if (!activeDiscussion) {
+      setResponses([]);
+      return;
+    }
+
+    const supabase = createClient();
+    supabase
+      .from('responses')
+      .select('*')
+      .eq('discussion_id', activeDiscussion.id)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        if (data) setResponses(data as Response[]);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- we only refetch when the ID changes, not the full object
+  }, [activeDiscussion?.id]);
+
   // Realtime: incoming student responses
   useEffect(() => {
     if (!channel) return;
@@ -505,7 +525,10 @@ export function useSessionPage(lessonId: string): SessionVM {
       const data = unwrapBroadcast<{ response: Response }>(raw);
       const response = data?.response;
       if (!response) return;
-      setResponses((prev) => [response, ...prev]);
+      setResponses((prev) => {
+        if (prev.some((r) => r.id === response.id)) return prev;
+        return [response, ...prev];
+      });
       setDiscussions((prev) =>
         prev.map((d) =>
           d.id === response.discussion_id
@@ -714,9 +737,15 @@ export function useSessionPage(lessonId: string): SessionVM {
     }
   }, [lesson, files, transcripts]);
 
+  const handleReconnect = useCallback(async () => {
+    reconnect();
+    await fetchDiscussions();
+    await fetchFiles();
+  }, [reconnect, fetchDiscussions, fetchFiles]);
+
   return useMemo(() => ({
     lesson: lesson as Lesson,
-    loading, notFound, isConnected,
+    loading, notFound, isConnected, handleReconnect,
     discussions, activeDiscussion, responses, promptInput, setPromptInput,
     displayState, handleDisplay,
     endingLesson, endError, handleEnd,
@@ -730,7 +759,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
   }), [
-    lesson, loading, notFound, isConnected,
+    lesson, loading, notFound, isConnected, handleReconnect,
     discussions, activeDiscussion, responses, promptInput,
     displayState, handleDisplay,
     endingLesson, endError, handleEnd,

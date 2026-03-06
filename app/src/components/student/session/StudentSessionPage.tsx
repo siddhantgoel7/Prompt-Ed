@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { StudentSessionShell } from './StudentSessionShell';
 import { StudentStatusAlert } from './StudentStatusAlert';
 import { StudentPromptCard } from './StudentPromptCard';
@@ -28,11 +29,39 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [prevDiscussionId, setPrevDiscussionId] = useState<string | undefined>(undefined);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  // Reset selected option when active discussion changes
+  // Reset selected option and validation state when active discussion changes
   if (activeDiscussion?.id !== prevDiscussionId) {
     setPrevDiscussionId(activeDiscussion?.id);
     setSelectedOption(null);
+    setSubmitAttempted(false);
+  }
+
+  const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
+
+  // For MC, canSubmit from the hook is always false (responseText is empty).
+  // We override it here: MC just needs a connection + active view + no ongoing submit.
+  const effectiveCanSubmit = isMC
+    ? view === 'active' && !submitting && isConnected && Boolean(activeDiscussion?.id)
+    : canSubmit;
+
+  function handleSubmit() {
+    if (isMC && !selectedOption) {
+      setSubmitAttempted(true);
+      return;
+    }
+    if (isMC && selectedOption) {
+      const optionText = activeDiscussion?.mc_options?.find(o => o.label === selectedOption)?.text ?? '';
+      submitResponse(`Option ${selectedOption}: ${optionText}`);
+      return;
+    }
+    submitResponse();
+  }
+
+  function handleSelectOption(label: string) {
+    setSelectedOption(label);
+    setSubmitAttempted(false); // clear error once they make a selection
   }
 
   return (
@@ -51,6 +80,21 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
           title="Something went wrong"
           description={errorMessage}
         />
+      ) : null}
+
+      {/* Lesson status indicator */}
+      {view !== 'loading' && view !== 'error' ? (
+        <div className="flex items-center gap-2">
+          {view === 'ended' ? (
+            <Badge variant="secondary" className="bg-red-100 text-red-800">
+              Ended
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="bg-green-100 text-green-800">
+              Active
+            </Badge>
+          )}
+        </div>
       ) : null}
 
       {view === 'loading' ? (
@@ -78,16 +122,21 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
           <StudentPromptCard
             discussion={activeDiscussion}
             selectedOption={selectedOption}
-            onSelectOption={setSelectedOption}
+            onSelectOption={handleSelectOption}
           />
           <StudentResponseForm
-            value={activeDiscussion.prompt_type === 'multiple_choice'
-              ? (selectedOption ? `Option ${selectedOption}: ${activeDiscussion.mc_options?.find(o => o.label === selectedOption)?.text ?? ''}` : '')
-              : responseText}
-            onChange={activeDiscussion.prompt_type === 'multiple_choice' ? () => { } : setResponseText}
-            onSubmit={submitResponse}
-            disabled={!canSubmit || (activeDiscussion.prompt_type === 'multiple_choice' && !selectedOption)}
+            value={
+              isMC
+                ? (selectedOption
+                    ? `Option ${selectedOption}: ${activeDiscussion.mc_options?.find(o => o.label === selectedOption)?.text ?? ''}`
+                    : '')
+                : responseText
+            }
+            onChange={isMC ? () => {} : setResponseText}
+            onSubmit={handleSubmit}
+            disabled={!effectiveCanSubmit}
             submitting={submitting}
+            validationMessage={submitAttempted && isMC && !selectedOption ? 'Please select an answer' : undefined}
           />
         </div>
       ) : null}

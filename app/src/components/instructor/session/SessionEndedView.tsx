@@ -2,7 +2,9 @@
 
 import * as React from 'react';
 import { SessionHeaderEnded } from '@/components/instructor/session/SessionHeaderEnded';
+import { SplitView } from '@/components/instructor/session/SplitView';
 import type { SessionVM } from '@/hooks/useSessionPage';
+import type { DiscussionWithResponseCount } from '@/types/discussion';
 
 
 export function SessionEndedView({ vm }: { vm: SessionVM }) {
@@ -12,6 +14,27 @@ export function SessionEndedView({ vm }: { vm: SessionVM }) {
   const transcriptsError = vm.transcriptsError ?? null;
   const files = vm.files ?? [];
 
+  const [splitView, setSplitView] = React.useState(false);
+
+  // Convert lessonDiscussions (with embedded responses) to DiscussionWithResponseCount
+  const discussionsForSplit: DiscussionWithResponseCount[] = React.useMemo(
+    () =>
+      vm.lessonDiscussions.map((d) => ({
+        ...d,
+        response_count: (d.responses || []).length,
+      })),
+    [vm.lessonDiscussions],
+  );
+
+  if (splitView) {
+    return (
+      <SplitView
+        discussions={discussionsForSplit}
+        lessonId={lesson.id}
+        onBack={() => setSplitView(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -21,6 +44,7 @@ export function SessionEndedView({ vm }: { vm: SessionVM }) {
         activating={vm.activatingLesson}
         onExport={vm.handleExportLessonData}
         onActivate={vm.handleActivate}
+        onSplitView={() => setSplitView(true)}
       />
 
       <main className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-88px)]">

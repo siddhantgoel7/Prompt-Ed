@@ -8,8 +8,19 @@ jest.mock('@/components/instructor/session/SessionHeaderEnded', () => ({
       <div>Ended Header: {props.title}</div>
       <button onClick={props.onExport}>Export Txt</button>
       <button onClick={props.onActivate}>Activate</button>
+      <button onClick={props.onSplitView}>Split View</button>
       <div>exporting={String(props.exporting)}</div>
       <div>activating={String(props.activating)}</div>
+    </div>
+  ),
+}));
+
+jest.mock('@/components/instructor/session/SplitView', () => ({
+  SplitView: (props: any) => (
+    <div>
+      <div>Split View Overlay</div>
+      <div>Discussions: {props.discussions.length}</div>
+      <button onClick={props.onBack}>Back to Session</button>
     </div>
   ),
 }));
@@ -27,6 +38,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     loading: false,
     notFound: false,
     isConnected: false,
+    handleReconnect: jest.fn(),
     discussions: [],
     activeDiscussion: null,
     responses: [],
@@ -147,10 +159,8 @@ describe('SessionEndedView (Acceptance)', () => {
           fileSizeBytes: 1024,
           status: 'ready',
           uploadedAt: '2026-03-06T10:00:00Z',
-        },
-      ],
+        },],
     });
-
     render(<SessionEndedView vm={vm} />);
     expect(screen.getByText(/lecture-1\.pdf/i)).toBeInTheDocument();
   });
@@ -174,5 +184,70 @@ describe('SessionEndedView (Acceptance)', () => {
     fireEvent.click(screen.getByRole('button', { name: /download file/i }));
     expect(vm.openFile).toHaveBeenCalledWith('f1');
   });
+  // 6.7
+  it('success: clicking Split View opens the split view overlay', () => {
+    const vm = makeVM();
+    render(<SessionEndedView vm={vm} />);
 
+    fireEvent.click(screen.getByRole('button', { name: /Split View/i }));
+
+    expect(screen.getByText('Split View Overlay')).toBeInTheDocument();
+    expect(screen.queryByText('Discussions and Responses')).not.toBeInTheDocument();
+  });
+
+  // 6.8
+  it('success: clicking Back to Session returns to normal ended view', () => {
+    const vm = makeVM();
+    render(<SessionEndedView vm={vm} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Split View/i }));
+    expect(screen.getByText('Split View Overlay')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Back to Session/i }));
+    expect(screen.queryByText('Split View Overlay')).not.toBeInTheDocument();
+    expect(screen.getByText('Discussions and Responses')).toBeInTheDocument();
+  });
+
+  // 6.9
+  it('success: passes lessonDiscussions with response_count to SplitView', () => {
+    const vm = makeVM({
+      lessonDiscussions: [
+        {
+          id: 'd1',
+          lesson_id: 'lesson-1',
+          prompt_text: 'What is 2+2?',
+          prompt_type: 'short_answer',
+          status: 'closed',
+          created_at: new Date().toISOString(),
+          published_at: new Date().toISOString(),
+          closed_at: new Date().toISOString(),
+          display_order: 0,
+          source: null,
+          mc_options: null,
+          responses: [
+            { id: 'r1', discussion_id: 'd1', response_text: '4', created_at: new Date().toISOString() },
+            { id: 'r2', discussion_id: 'd1', response_text: 'Four', created_at: new Date().toISOString() },
+          ],
+        } as any,
+        {
+          id: 'd2',
+          lesson_id: 'lesson-1',
+          prompt_text: 'What is 3+3?',
+          prompt_type: 'short_answer',
+          status: 'closed',
+          created_at: new Date().toISOString(),
+          published_at: new Date().toISOString(),
+          closed_at: new Date().toISOString(),
+          display_order: 1,
+          source: null,
+          mc_options: null,
+          responses: [],
+        } as any,
+      ],
+    });
+    render(<SessionEndedView vm={vm} />);
+    fireEvent.click(screen.getByRole('button', { name: /Split View/i }));
+
+    expect(screen.getByText('Discussions: 2')).toBeInTheDocument();
+  });
 });

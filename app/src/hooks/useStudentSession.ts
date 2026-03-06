@@ -15,7 +15,6 @@ type ViewState = 'loading' | 'waiting' | 'active' | 'submitted' | 'ended' | 'err
 
 type BroadcastEnvelope<T> = { payload?: T } & Partial<T>;
 function unwrapBroadcast<T>(payload: BroadcastEnvelope<T>): T | undefined {
-  // Supabase sometimes wraps at payload.payload
   return (payload?.payload as T) ?? (payload as unknown as T);
 }
 
@@ -24,7 +23,6 @@ type DiscussionPublishedPayload = { discussion: Discussion };
 type DiscussionClosedPayload = { discussionId: string };
 type ResponseNewPayload = { response: Response };
 
-// Minimal shape we need from Supabase realtime channel (no `any`)
 type RealtimeLikeChannel = {
   on: (
     type: 'broadcast',
@@ -74,7 +72,6 @@ export function useStudentSession(lessonId: string) {
         .eq('id', lessonId)
         .single();
 
-      // Not active or not found -> send home
       if (lessonError || !lessonData || (lessonData as { status?: string }).status !== 'active') {
         router.push('/');
         return;
@@ -93,7 +90,6 @@ export function useStudentSession(lessonId: string) {
       if (cancelled) return;
 
       if (discussionError) {
-        // keep UX: don’t hard-fail, just show waiting + log
         console.error('Error fetching active discussion:', discussionError);
       }
 
@@ -164,12 +160,13 @@ export function useStudentSession(lessonId: string) {
     };
   }, [channel]);
 
-  // 3) Submit response (REMOVE useCallback to satisfy react-hooks/preserve-manual-memoization)
-  const submitResponse = async () => {
+  // 3) Submit response
+  // responseTextOverride: for MC questions, the page passes the formatted option string directly so we don't race against the setState for responseText.
+  const submitResponse = async (responseTextOverride?: string) => {
     if (!activeDiscussion?.id) return;
     if (view !== 'active') return;
 
-    const text = responseText.trim();
+    const text = (responseTextOverride ?? responseText).trim();
     if (!text) return;
 
     setSubmitting(true);
@@ -212,7 +209,6 @@ export function useStudentSession(lessonId: string) {
     setView('submitted');
   };
 
-  // If we’re submitted and a new discussion is not active, keep waiting
   useEffect(() => {
     if (view !== 'submitted') return;
   }, [view]);
