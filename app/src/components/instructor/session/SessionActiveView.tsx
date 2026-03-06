@@ -8,6 +8,7 @@ import { ActiveSidebar } from '@/components/instructor/session/ActiveSidebar';
 import { ActiveCenter } from '@/components/instructor/session/ActiveCenter';
 import { ActiveRightPanel } from '@/components/instructor/session/ActiveRightPanel';
 import { SplitView } from '@/components/instructor/session/SplitView';
+import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
 import type { SessionVM } from '@/hooks/useSessionPage';
 
 export function SessionActiveView({ vm }: { vm: SessionVM }) {
@@ -79,6 +80,8 @@ export function SessionActiveView({ vm }: { vm: SessionVM }) {
 
         <ActiveRightPanel responses={vm.responses} />
       </div>
+
+      <ConnectionStatus isConnected={vm.isConnected} onReconnect={vm.handleReconnect} />
     </div>
   );
 }

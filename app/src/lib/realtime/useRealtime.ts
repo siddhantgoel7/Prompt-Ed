@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -19,7 +19,7 @@ import { RealtimeChannel } from '@supabase/supabase-js';
  *
  * @param {string} lessonId - Unique identifier for the lesson
  * @param {'instructor' | 'student'} role - User role (for logging only)
- * @returns {{ channel: RealtimeChannel | null, isConnected: boolean }}
+ * @returns {{ channel: RealtimeChannel | null, isConnected: boolean, reconnect: () => void }}
  *
  * Usage:
  * const { channel, isConnected } = useRealtime(lessonId, 'instructor');
@@ -33,6 +33,8 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
   const supabaseRef = useRef(createClient());
   // Force re-render when channel changes
   const [, forceUpdate] = useState(0);
+  // Bump to force the effect to re-run (used by reconnect)
+  const [connectAttempt, setConnectAttempt] = useState(0);
 
   useEffect(() => {
     if (!lessonId) return;
@@ -66,13 +68,45 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
       channelRef.current = null;
       setIsConnected(false);
     };
-  }, [lessonId, role]);
+  }, [lessonId, role, connectAttempt]);
+
+  // Detect browser online/offline to immediately update connection status
+  useEffect(() => {
+    const handleOffline = () => setIsConnected(false);
+    const handleOnline = () => {
+      // Browser is back online — reconnect the channel
+      if (channelRef.current) {
+        channelRef.current.unsubscribe();
+        channelRef.current = null;
+      }
+      setConnectAttempt(prev => prev + 1);
+    };
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
+
+  const reconnect = useCallback(() => {
+    // Tear down existing channel and re-subscribe by bumping the attempt counter
+    if (channelRef.current) {
+      channelRef.current.unsubscribe();
+      channelRef.current = null;
+      setIsConnected(false);
+    }
+    setConnectAttempt(prev => prev + 1);
+  }, []);
 
   // Safe to return ref.current here because forceUpdate ensures re-renders
   /* eslint-disable react-hooks/refs */
   return {
     channel: channelRef.current,
     isConnected,
+    reconnect,
   };
   /* eslint-enable react-hooks/refs */
 }
