@@ -183,7 +183,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
     // Validation: submit without selecting an option
 
     // 34.8
-    test('[US 2.10][UI-AT8] failure: clicking Submit without selecting an option shows validation message', async ({ page }) => {
+    test('[US 2.08][AC4-AT1] failure: clicking Submit without selecting an option shows validation message', async ({ page }) => {
         await joinAndWaitForMC(page);
 
         if (!await hasMCDiscussion(page)) {
@@ -199,7 +199,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
     });
 
     // 34.9
-    test('[US 2.10][UI-AT9] failure: validation error clears after selecting an option', async ({ page }) => {
+    test('[US 2.08][AC4-AT2] failure: validation error clears after selecting an option', async ({ page }) => {
         await joinAndWaitForMC(page);
 
         if (!await hasMCDiscussion(page)) {
