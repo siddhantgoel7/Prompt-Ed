@@ -7,94 +7,10 @@ import * as React from 'react';
 import type { GeneratedPrompt } from '@/types/ai';
 import type { PromptType } from '@/types/discussion';
 import { SessionContext } from './SessionContext';
+import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { CandidateCard } from './CandidateCard';
 
-// ─── Audio recorder hook (US 1.17) ───────────────────────────────────────────
 
-function useAudioRecorder() {
-  const [isRecording, setIsRecording] = React.useState(false);
-  const [elapsed, setElapsed] = React.useState(0);
-  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
-  const chunksRef = React.useRef<Blob[]>([]);
-  const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const start = React.useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-        ? 'audio/webm;codecs=opus'
-        : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
-      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
-      chunksRef.current = [];
-      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-      recorder.start(500);
-      mediaRecorderRef.current = recorder;
-      setIsRecording(true);
-      setElapsed(0);
-      timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
-    } catch {
-      alert('Microphone access denied. Please allow microphone access and try again.');
-    }
-  }, []);
-
-  const stop = React.useCallback((): Promise<Blob> => {
-    return new Promise((resolve) => {
-      const recorder = mediaRecorderRef.current;
-      if (!recorder) { resolve(new Blob([])); return; }
-      recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
-        recorder.stream.getTracks().forEach((t) => t.stop());
-        resolve(blob);
-      };
-      recorder.stop();
-      setIsRecording(false);
-      if (timerRef.current) clearInterval(timerRef.current);
-    });
-  }, []);
-
-  const fmt = (s: number) =>
-    `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
-
-  return { isRecording, elapsed, fmt, start, stop };
-}
-
-// ─── Candidate card (teammate's design) ──────────────────────────────────────
-
-function CandidateCard({
-  candidate,
-  isSelected,
-  onSelect,
-}: {
-  candidate: GeneratedPrompt;
-  isSelected: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <button
-      onClick={onSelect}
-      className={[
-        'w-full text-left p-3 rounded-lg border-2 text-sm transition-colors',
-        isSelected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400 bg-white',
-      ].join(' ')}
-    >
-      <div className="flex items-center gap-2 mb-1">
-        <Badge variant="secondary" className="text-xs capitalize">
-          {candidate.promptType.replace('_', ' ')}
-        </Badge>
-        {isSelected && <span className="text-xs text-green-600 font-medium">Selected</span>}
-      </div>
-      <p className="leading-snug">{candidate.promptText}</p>
-      {candidate.mcOptions && candidate.mcOptions.length > 0 && (
-        <ul className="mt-2 space-y-1">
-          {candidate.mcOptions.map((opt) => (
-            <li key={opt.label} className="text-xs text-muted-foreground">
-              <span className="font-semibold">{opt.label}.</span> {opt.text}
-            </li>
-          ))}
-        </ul>
-      )}
-    </button>
-  );
-}
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export function ActiveCenter(props: Partial<{

@@ -7,7 +7,7 @@ import { useLessonsPage } from '@/hooks/useLessonsPage';
 import { LessonsPageHeader } from './LessonsPageHeader';
 import { LessonsGrid } from './LessonsGrid';
 import { LessonCreateDialog } from './LessonCreateDialog';
-import { ConfirmDeleteLessonDialog } from './ConfirmDeleteLessonDialog';
+import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 
 export function LessonsPage({ courseId }: { courseId: string }) {
   const page = useLessonsPage(courseId);
@@ -66,11 +66,13 @@ export function LessonsPage({ courseId }: { courseId: string }) {
         saving={page.saving}
       />
 
-      <ConfirmDeleteLessonDialog
+      <ConfirmDeleteDialog
         open={page.modal.type === 'delete'}
         onOpenChange={(open) => {
           if (!open) page.closeModal();
         }}
+        title="Delete Lesson?"
+        description="Are you sure you want to delete this lesson? This action cannot be undone."
         deleting={page.deleting}
         error={page.error}
         onCancel={page.closeModal}

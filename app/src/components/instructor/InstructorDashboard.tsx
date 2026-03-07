@@ -61,6 +61,7 @@ export function InstructorDashboard() {
       <ConfirmDeleteDialog
         open={dashboard.modal.type === 'delete'}
         title="Delete Course?"
+        description="Are you sure you want to delete this course? This will also delete all lessons associated with this course. This action cannot be undone."
         error={dashboard.error}
         deleting={dashboard.deleting}
         onOpenChange={(open) => {

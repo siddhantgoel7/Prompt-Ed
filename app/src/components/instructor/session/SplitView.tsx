@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRealtime } from '@/lib/realtime/useRealtime';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
+import { truncateText } from '@/lib/utils';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -32,10 +33,7 @@ interface PaneState {
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-function truncateText(text: string, maxLength = 80) {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + '...';
-}
+
 
 /* ------------------------------------------------------------------ */
 /*  DiscussionList – reusable list shown inside each pane              */
