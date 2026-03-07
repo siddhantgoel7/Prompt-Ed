@@ -7,6 +7,7 @@ import { SessionActiveView } from '@/components/instructor/session/SessionActive
 import { SessionEndedView } from '@/components/instructor/session/SessionEndedView';
 import { SessionLoading } from '@/components/instructor/session/SessionLoading';
 import { SessionNotFound } from '@/components/instructor/session/SessionNotFound';
+import { SessionProvider } from '@/components/instructor/session/SessionContext';
 
 export function SessionPage({ lessonId }: { lessonId: string }) {
   const vm = useSessionPage(lessonId);
@@ -14,7 +15,15 @@ export function SessionPage({ lessonId }: { lessonId: string }) {
   if (vm.loading) return <SessionLoading />;
   if (vm.notFound) return <SessionNotFound />;
 
-  // at this point, vm.lesson is guaranteed non-null (per VM contract)
-  if (vm.lesson.status === 'ended') return <SessionEndedView vm={vm} />;
-  return <SessionActiveView vm={vm} />;
+  if (vm.lesson.status === 'ended') return (
+    <SessionProvider vm={vm}>
+      <SessionEndedView />
+    </SessionProvider>
+  );
+
+  return (
+    <SessionProvider vm={vm}>
+      <SessionActiveView />
+    </SessionProvider>
+  );
 }

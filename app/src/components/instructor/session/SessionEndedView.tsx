@@ -5,9 +5,11 @@ import { SessionHeaderEnded } from '@/components/instructor/session/SessionHeade
 import { SplitView } from '@/components/instructor/session/SplitView';
 import type { SessionVM } from '@/hooks/useSessionPage';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
+import { SessionContext, SessionProvider } from './SessionContext';
 
-
-export function SessionEndedView({ vm }: { vm: SessionVM }) {
+export function SessionEndedView(props: { vm?: SessionVM }) {
+  const context = React.useContext(SessionContext);
+  const vm = context || props.vm!;
   const lesson = vm.lesson;
   const transcripts = vm.transcripts ?? [];
   const transcriptsLoading = vm.transcriptsLoading ?? false;
@@ -27,25 +29,19 @@ export function SessionEndedView({ vm }: { vm: SessionVM }) {
   );
 
   if (splitView) {
-    return (
+    const splitContent = (
       <SplitView
         discussions={discussionsForSplit}
         lessonId={lesson.id}
         onBack={() => setSplitView(false)}
       />
     );
+    return context ? splitContent : <SessionProvider vm={vm}>{splitContent}</SessionProvider>;
   }
 
-  return (
+  const content = (
     <div className="min-h-screen bg-white flex flex-col">
-      <SessionHeaderEnded
-        title={lesson.title}
-        exporting={vm.exportingData}
-        activating={vm.activatingLesson}
-        onExport={vm.handleExportLessonData}
-        onActivate={vm.handleActivate}
-        onSplitView={() => setSplitView(true)}
-      />
+      <SessionHeaderEnded onSplitView={() => setSplitView(true)} />
 
       <main className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-88px)]">
         <section className="border border-gray-200 rounded-lg p-4 h-full overflow-y-auto">
@@ -91,8 +87,8 @@ export function SessionEndedView({ vm }: { vm: SessionVM }) {
                   Segment {i + 1} • {new Date(t.metadata?.recordedAt ?? t.created_at).toLocaleString()}
                 </p>
                 <p className="text-sm whitespace-pre-wrap">{t.content}</p>
-          </div>
-        ))}
+              </div>
+            ))}
 
           </section>
 
@@ -124,4 +120,6 @@ export function SessionEndedView({ vm }: { vm: SessionVM }) {
       </main>
     </div>
   );
+
+  return context ? content : <SessionProvider vm={vm}>{content}</SessionProvider>;
 }

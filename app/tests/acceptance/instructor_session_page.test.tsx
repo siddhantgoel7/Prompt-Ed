@@ -20,12 +20,16 @@ jest.mock('@/components/instructor/session/SessionNotFound', () => ({
   SessionNotFound: () => <div>Session not found</div>,
 }));
 jest.mock('@/components/instructor/session/SessionActiveView', () => ({
-  SessionActiveView: ({ vm }: { vm: SessionVM }) => (
-    <div>
-      <h1>Active Lesson</h1>
-      <div>PIN: {vm.lesson.pin_code}</div>
-    </div>
-  ),
+  SessionActiveView: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <h1>Active Lesson</h1>
+        <div>PIN: {vm.lesson.pin_code}</div>
+      </div>
+    );
+  },
 }));
 jest.mock('@/components/instructor/session/SessionEndedView', () => ({
   SessionEndedView: () => <div>Lesson ended view</div>,

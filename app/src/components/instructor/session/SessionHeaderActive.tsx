@@ -2,22 +2,23 @@
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
+import { SessionContext } from './SessionContext';
 
-export function SessionHeaderActive({
-  title,
-  pinCode,
-  endingLesson,
-  onDisplay,
-  onEnd,
-  onSplitView,
-}: {
-  title: string;
-  pinCode: string | null;
-  endingLesson: boolean;
-  onDisplay: () => void;
-  onEnd: () => void;
+export function SessionHeaderActive(props: {
+  title?: string;
+  pinCode?: string | null;
+  endingLesson?: boolean;
+  onDisplay?: () => void;
+  onEnd?: () => void;
   onSplitView: () => void;
 }) {
+  const context = React.useContext(SessionContext);
+  const title = context ? context.lesson.title : props.title!;
+  const pinCode = context ? context.lesson.pin_code : props.pinCode!;
+  const endingLesson = context ? context.endingLesson : props.endingLesson!;
+  const onDisplay = context ? context.handleDisplay : props.onDisplay!;
+  const onEnd = context ? context.handleEnd : props.onEnd!;
+  const onSplitView = props.onSplitView;
   return (
     <header className="border-b border-gray-300 px-4 md:px-6 py-3 md:py-4 flex flex-wrap items-center justify-between gap-2">
       <h1 className="text-lg md:text-xl font-semibold truncate">{title}</h1>

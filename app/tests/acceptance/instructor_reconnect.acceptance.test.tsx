@@ -13,10 +13,10 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { SessionActiveView } from '@/components/instructor/session/SessionActiveView';
 import type { SessionVM } from '@/hooks/useSessionPage';
-import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
+
 
 // We mock the internals except ConnectionStatus to test the integration of connection state
 jest.mock('@/components/instructor/session/SessionHeaderActive', () => ({
@@ -32,15 +32,23 @@ jest.mock('@/components/instructor/session/ActiveSidebar', () => ({
     ActiveSidebar: () => <div>ActiveSidebar</div>,
 }));
 jest.mock('@/components/instructor/session/ActiveRightPanel', () => ({
-    ActiveRightPanel: (props: any) => <div data-testid="right-panel">RightPanel count={props.responses?.length ?? 0}</div>,
+    ActiveRightPanel: () => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+        return <div data-testid="right-panel">RightPanel count={vm.responses?.length ?? 0}</div>;
+    },
 }));
 jest.mock('@/components/instructor/session/ActiveCenter', () => ({
-    ActiveCenter: (props: any) => (
-        <div data-testid="center-panel">
-            <div>Center</div>
-            <div>activeDiscussionId={String(props.activeDiscussionId)}</div>
-        </div>
-    ),
+    ActiveCenter: () => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+        return (
+            <div data-testid="center-panel">
+                <div>Center</div>
+                <div>activeDiscussionId={String(vm.activeDiscussion?.id ?? null)}</div>
+            </div>
+        );
+    },
 }));
 
 function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {

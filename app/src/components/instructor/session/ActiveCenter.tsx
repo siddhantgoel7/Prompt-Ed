@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import * as React from 'react';
 import type { GeneratedPrompt } from '@/types/ai';
 import type { PromptType } from '@/types/discussion';
+import { SessionContext } from './SessionContext';
 
 // ─── Audio recorder hook (US 1.17) ───────────────────────────────────────────
 
@@ -96,29 +97,7 @@ function CandidateCard({
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-
-export function ActiveCenter({
-  lessonId,
-  promptInput,
-  setPromptInput,
-  isConnected,
-  activeDiscussionId,
-  onPublish,
-  onClose,
-  // AI generation props (from teammate's design)
-  transcriptText,
-  setTranscriptText,
-  promptType,
-  setPromptType,
-  candidates,
-  isGenerating,
-  generationWarning,
-  onGenerate,
-  onSelectCandidate,
-  onRegenerate,
-  // Direct publish (our addition — skips text input)
-  onPublishAiCandidate,
-}: {
+export function ActiveCenter(props: Partial<{
   lessonId: string;
   promptInput: string;
   setPromptInput: (v: string) => void;
@@ -137,7 +116,26 @@ export function ActiveCenter({
   onSelectCandidate: (p: GeneratedPrompt) => void;
   onRegenerate: () => void;
   onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => void;
-}) {
+}>) {
+  const context = React.useContext(SessionContext);
+  const promptInput = context ? context.promptInput : props.promptInput!;
+  const setPromptInput = context ? context.setPromptInput : props.setPromptInput!;
+  const isConnected = context ? context.isConnected : props.isConnected!;
+  const onPublish = context ? context.handlePublishDiscussion : props.onPublish!;
+  const onClose = context ? context.handleCloseDiscussion : props.onClose!;
+  const transcriptText = context ? context.transcriptText : props.transcriptText!;
+  const setTranscriptText = context ? context.setTranscriptText : props.setTranscriptText!;
+  const promptType = context ? context.promptType : props.promptType!;
+  const setPromptType = context ? context.setPromptType : props.setPromptType!;
+  const candidates = context ? context.candidates : props.candidates!;
+  const isGenerating = context ? context.isGenerating : props.isGenerating!;
+  const generationWarning = context ? context.generationWarning : props.generationWarning!;
+  const onGenerate = context ? context.generateCandidates : props.onGenerate!;
+  const onSelectCandidate = context ? context.selectCandidate : props.onSelectCandidate!;
+  const onRegenerate = context ? context.regenerateCandidates : props.onRegenerate!;
+  const onPublishAiCandidate = context ? context.handlePublishAiCandidate : props.onPublishAiCandidate;
+  const lessonId = context ? context.lesson.id : props.lessonId!;
+  const activeDiscussionId = context ? (context.activeDiscussion?.id ?? null) : props.activeDiscussionId!;
   const recorder = useAudioRecorder();
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
   const [sttStatus, setSttStatus] = React.useState<'idle' | 'transcribing' | 'error'>('idle');
@@ -310,7 +308,7 @@ export function ActiveCenter({
         {/* Candidate cards */}
         {candidates.length > 0 && (
           <div className="space-y-2">
-            {candidates.map((c, i) => (
+            {candidates.map((c: GeneratedPrompt, i: number) => (
               <div key={i}>
                 <CandidateCard
                   candidate={c}
@@ -318,11 +316,11 @@ export function ActiveCenter({
                   onSelect={() => handleSelectCandidate(c, i)}
                 />
 
-                {selectedIndex === i && c.promptType === 'multiple_choice' && onPublishAiCandidate && (
+                {selectedIndex === i && c.promptType === 'multiple_choice' && (
                   <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200">
                     <p className="text-xs font-semibold mb-2">Correct Answer</p>
                     <div className="space-y-1">
-                      {c.mcOptions?.map((opt) => (
+                      {c.mcOptions?.map((opt: { label: string; text: string; is_correct?: boolean }) => (
                         <label key={opt.label} className="flex items-center gap-2 text-xs cursor-pointer">
                           <input
                             type="radio"
@@ -351,7 +349,7 @@ export function ActiveCenter({
                   </div>
                 )}
 
-                {selectedIndex === i && onPublishAiCandidate && (
+                {selectedIndex === i && (
                   <Button
                     size="sm"
                     onClick={() => handlePublishSelected(c)}

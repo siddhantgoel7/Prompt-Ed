@@ -5,8 +5,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
+import { SessionContext } from './SessionContext';
 
-export function ActiveRightPanel({ responses, activeDiscussion }: { responses: Response[], activeDiscussion: Discussion | null }) {
+export function ActiveRightPanel(props: {
+  responses?: Response[];
+  activeDiscussion?: Discussion | null;
+}) {
+  const context = React.useContext(SessionContext);
+  const responses = context ? context.responses : props.responses!;
+  const activeDiscussion = context ? context.activeDiscussion : props.activeDiscussion!;
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
 
   const distribution: Record<string, number> = {};

@@ -3,15 +3,17 @@
 import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-export function JoinCodeOverlay({
-  open,
-  code,
-  onClose,
-}: {
-  open: boolean;
-  code: string | null;
+import { SessionContext } from './SessionContext';
+
+export function JoinCodeOverlay(props: {
+  open?: boolean;
+  code?: string | null;
   onClose?: () => void;
 }) {
+  const context = React.useContext(SessionContext);
+  const open = context ? context.displayState : props.open!;
+  const code = context ? (context.lesson?.pin_code ?? null) : props.code!;
+  const onClose = context ? () => { if (open) context.handleDisplay(); } : props.onClose!;
   // If there is no code, keep behavior safe: nothing to show.
   if (!code) return null;
 

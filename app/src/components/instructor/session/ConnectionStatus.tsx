@@ -3,13 +3,15 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 
-export function ConnectionStatus({
-  isConnected,
-  onReconnect,
-}: {
-  isConnected: boolean;
-  onReconnect: () => void;
+import { SessionContext } from './SessionContext';
+
+export function ConnectionStatus(props: {
+  isConnected?: boolean;
+  onReconnect?: () => void;
 }) {
+  const context = React.useContext(SessionContext);
+  const isConnected = context ? context.isConnected : props.isConnected!;
+  const onReconnect = context ? context.handleReconnect : props.onReconnect!;
   const [reconnecting, setReconnecting] = React.useState(false);
 
   // Reset reconnecting flag once connection is restored

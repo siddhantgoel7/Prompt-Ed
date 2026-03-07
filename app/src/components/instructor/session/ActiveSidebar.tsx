@@ -11,6 +11,7 @@ import type { Response } from '@/types/response';
 import type { LessonFile, UploadStatus } from '@/types/ai';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { SessionContext } from './SessionContext';
 
 function formatTime(timestamp: string) {
   const date = new Date(timestamp);
@@ -210,23 +211,23 @@ function FilesTab({
   );
 }
 
-export function ActiveSidebar({
-  discussions,
-  activeDiscussionId,
-  responses,
-  files,
-  isUploading,
-  onUploadFile,
-  onDeleteFile,
-}: {
-  discussions: DiscussionWithResponseCount[];
-  activeDiscussionId: string | null;
-  responses: Response[];
-  files: LessonFile[];
-  isUploading: boolean;
-  onUploadFile: (file: File) => Promise<void>;
-  onDeleteFile: (fileId: string) => Promise<void>;
+export function ActiveSidebar(props: {
+  discussions?: DiscussionWithResponseCount[];
+  activeDiscussionId?: string | null;
+  responses?: Response[];
+  files?: LessonFile[];
+  isUploading?: boolean;
+  onUploadFile?: (file: File) => Promise<void>;
+  onDeleteFile?: (fileId: string) => Promise<void>;
 }) {
+  const context = React.useContext(SessionContext);
+  const discussions = context ? context.discussions : props.discussions!;
+  const activeDiscussionId = context ? (context.activeDiscussion?.id ?? null) : props.activeDiscussionId!;
+  const responses = context ? context.responses : props.responses!;
+  const files = context ? context.files : props.files!;
+  const isUploading = context ? context.isUploading : props.isUploading!;
+  const onUploadFile = context ? context.uploadFile : props.onUploadFile!;
+  const onDeleteFile = context ? context.deleteFile : props.onDeleteFile!;
   return (
     <aside className="w-full md:w-72 border-r bg-white">
       <div className="p-4">
