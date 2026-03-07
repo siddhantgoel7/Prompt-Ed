@@ -29,3 +29,5 @@ site/
 .venv/
 venv
 site/
+
+*.log

@@ -25,7 +25,7 @@ export function JoinCodeOverlay(props: {
         if (!nextOpen) onClose?.();
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Join Code</DialogTitle>
         </DialogHeader>

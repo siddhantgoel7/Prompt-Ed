@@ -41,7 +41,7 @@ export function CourseDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent aria-describedby={undefined}>
         <DialogHeader>
           {/* ✅ tests search for "Add a Course" */}
           <DialogTitle>{title}</DialogTitle>
