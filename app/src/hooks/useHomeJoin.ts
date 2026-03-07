@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { fetchLessonByPinApi } from '@/lib/api/lessonApi';
 
 type ViewState = 'checking-auth' | 'ready' | 'joining';
 
@@ -78,13 +79,7 @@ export function useHomeJoin() {
 
     setView('joining');
 
-    const supabase = createClient();
-
-    const { data: lesson, error: lookupError } = await supabase
-      .from('lessons')
-      .select('id, status')
-      .eq('pin_code', pin)
-      .single();
+    const { data: lesson, error: lookupError } = await fetchLessonByPinApi(pin);
 
     // If it doesn’t exist or query failed → invalid
     if (lookupError || !lesson) {

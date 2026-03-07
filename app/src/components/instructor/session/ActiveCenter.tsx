@@ -9,6 +9,7 @@ import type { PromptType } from '@/types/discussion';
 import { SessionContext } from './SessionContext';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { CandidateCard } from './CandidateCard';
+import { transcribeAudioApi } from '@/lib/api/aiApi';
 
 
 
@@ -89,19 +90,9 @@ export function ActiveCenter(props: Partial<{
     }
 
     try {
-      const form = new FormData();
-      form.append('audio', audioBlob, 'recording.webm');
-      const res = await fetch(`/api/lessons/${lessonId}/transcript`, {
-        method: 'POST',
-        body: form,
-      });
-      if (!res.ok) {
-        const e = await res.json() as { error?: string };
-        throw new Error(e.error ?? 'Transcription failed');
-      }
-      const data = await res.json() as { transcript: string };
-      setTranscriptText(data.transcript ?? '');
-      setPromptInput(data.transcript ?? '');
+      const transcript = await transcribeAudioApi(lessonId, audioBlob);
+      setTranscriptText(transcript ?? '');
+      setPromptInput(transcript ?? '');
       setSttStatus('idle');
       // Auto-trigger generation after successful transcription
       // Small delay so setTranscriptText flushes before onGenerate reads it

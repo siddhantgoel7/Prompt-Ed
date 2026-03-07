@@ -46,14 +46,14 @@ export async function closeDiscussionApi(discussionId: string): Promise<void> {
         .eq('id', discussionId);
 }
 
-export async function fetchResponsesApi(discussionId: string | null): Promise<Response[]> {
+export async function fetchResponsesApi(discussionId: string | null, ascending: boolean = false): Promise<Response[]> {
     if (!discussionId) return [];
     const supabase = createClient();
     const { data, error } = await supabase
         .from('responses')
         .select('*')
         .eq('discussion_id', discussionId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending });
 
     if (error || !data) return [];
     return data as Response[];
@@ -86,4 +86,30 @@ export async function fetchExportDiscussionsApi(lessonId: string) {
         .select('prompt_text, created_at, responses ( response_text, created_at )')
         .eq('lesson_id', lessonId)
         .order('display_order', { ascending: true });
+}
+
+export async function fetchStudentActiveDiscussionApi(lessonId: string) {
+    const supabase = createClient();
+    return supabase
+        .from('discussions')
+        .select('*')
+        .eq('lesson_id', lessonId)
+        .eq('status', 'active')
+        .maybeSingle();
+}
+
+export async function submitStudentResponseApi(discussionId: string, text: string, selectedOption: string | null = null, isCorrect: boolean | null = null) {
+    const supabase = createClient();
+    return supabase
+        .from('responses')
+        .insert([
+            {
+                discussion_id: discussionId,
+                response_text: text,
+                selected_option: selectedOption,
+                is_correct: isCorrect,
+            },
+        ])
+        .select()
+        .single();
 }

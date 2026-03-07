@@ -83,3 +83,21 @@ export async function reactivateLessonApi(lessonId: string) {
         .update({ status: 'active', started_at: new Date().toISOString(), ended_at: null })
         .eq('id', lessonId);
 }
+
+export async function fetchLessonByPinApi(pinCode: string) {
+    const supabase = createClient();
+    return supabase
+        .from('lessons')
+        .select('id, status')
+        .eq('pin_code', pinCode)
+        .single();
+}
+
+export async function fetchLessonByIdApi(lessonId: string) {
+    const supabase = createClient();
+    return supabase
+        .from('lessons')
+        .select('*')
+        .eq('id', lessonId)
+        .single();
+}

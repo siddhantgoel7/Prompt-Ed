@@ -13,3 +13,21 @@ export async function generateCandidatesApi(lessonId: string, promptType: Prompt
     }
     return res.json() as Promise<CandidateSet>;
 }
+
+export async function transcribeAudioApi(lessonId: string, audioBlob: Blob): Promise<string> {
+    const form = new FormData();
+    form.append('audio', audioBlob, 'recording.webm');
+
+    const res = await fetch(`/api/lessons/${lessonId}/transcript`, {
+        method: 'POST',
+        body: form,
+    });
+
+    if (!res.ok) {
+        const err = await res.json() as { error?: string };
+        throw new Error(err.error ?? 'Transcription failed');
+    }
+
+    const data = await res.json() as { transcript: string };
+    return data.transcript;
+}
