@@ -79,11 +79,13 @@ describe('[US 1.16] OpenAIProvider.generatePdfVisualDescriptions', () => {
   });
 
   it('failure: returns empty map (not throws) when GPT-4o returns malformed JSON', async () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => { });
     mockCreate.mockResolvedValue(makeCompletion('this is not json at all'));
 
     const result = await provider.generatePdfVisualDescriptions(Buffer.from('pdf'), 2);
     expect(result).toBeInstanceOf(Map);
     expect(result.size).toBe(0);
+    (console.warn as jest.Mock).mockRestore();
   });
 
   it('failure: propagates API errors (network failure, 429, 500)', async () => {
