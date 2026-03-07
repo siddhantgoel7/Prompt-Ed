@@ -12,7 +12,7 @@ import {
   createCourse,
   updateCourse,
   deleteCourseCascade,
-} from '@/services/courseService';
+} from '@/lib/api/courseApi';
 
 type ModalState =
   | { type: 'none' }

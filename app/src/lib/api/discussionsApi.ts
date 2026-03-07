@@ -58,3 +58,32 @@ export async function fetchResponsesApi(discussionId: string | null): Promise<Re
     if (error || !data) return [];
     return data as Response[];
 }
+
+export async function closeActiveDiscussionsApi(lessonId: string, now: string): Promise<void> {
+    const supabase = createClient();
+    await supabase.from('discussions')
+        .update({ status: 'closed', closed_at: now })
+        .eq('lesson_id', lessonId)
+        .eq('status', 'active');
+}
+
+export async function fetchEndedDiscussionsApi(lessonId: string) {
+    const supabase = createClient();
+    return supabase
+        .from('discussions')
+        .select(`
+        id, lesson_id, prompt_text, prompt_type, status, created_at, published_at, closed_at, display_order,
+        responses ( id, discussion_id, response_text, created_at )
+      `)
+        .eq('lesson_id', lessonId)
+        .order('display_order', { ascending: true });
+}
+
+export async function fetchExportDiscussionsApi(lessonId: string) {
+    const supabase = createClient();
+    return supabase
+        .from('discussions')
+        .select('prompt_text, created_at, responses ( response_text, created_at )')
+        .eq('lesson_id', lessonId)
+        .order('display_order', { ascending: true });
+}

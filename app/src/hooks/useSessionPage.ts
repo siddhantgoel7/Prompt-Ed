@@ -12,6 +12,18 @@ import type { PromptType } from '@/types/discussion';
 import { useLessonAI } from './useSessionPage/useLessonAI';
 import { useLessonDiscussions } from './useSessionPage/useLessonDiscussions';
 import { useLessonFiles } from './useSessionPage/useLessonFiles';
+import {
+  fetchLessonWithInstructorIdApi,
+  activateDraftLessonApi,
+  endLessonApi,
+  reactivateLessonApi,
+  fetchTranscriptsApi
+} from '@/lib/api/lessonApi';
+import {
+  fetchEndedDiscussionsApi,
+  closeActiveDiscussionsApi,
+  fetchExportDiscussionsApi
+} from '@/lib/api/discussionsApi';
 
 type DiscussionWithResponses = Discussion & { responses: Response[] };
 
@@ -142,13 +154,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   const fetchTranscripts = useCallback(async () => {
     setTranscriptsLoading(true);
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('lesson_chunks')
-        .select('id, content, created_at, metadata')
-        .eq('lesson_id', lessonId)
-        .eq('content_type', 'transcript')
-        .order('created_at', { ascending: true });
+      const { data, error } = await fetchTranscriptsApi(lessonId);
 
       if (error) {
         setTranscriptsError('Failed to load transcripts.');
@@ -182,11 +188,7 @@ export function useSessionPage(lessonId: string): SessionVM {
         return;
       }
 
-      const { data: lessonData, error: lessonError } = await supabase
-        .from('lessons')
-        .select('*, courses!inner(instructor_id)')
-        .eq('id', lessonId)
-        .single();
+      const { data: lessonData, error: lessonError } = await fetchLessonWithInstructorIdApi(lessonId);
 
       if (lessonError || !lessonData) {
         setNotFound(true);
@@ -204,26 +206,14 @@ export function useSessionPage(lessonId: string): SessionVM {
 
       if (lessonData.status === 'draft') {
         const pinCode = generatePinCode();
-        const { data: updatedLesson } = await supabase
-          .from('lessons')
-          .update({ status: 'active', pin_code: pinCode, started_at: new Date().toISOString() })
-          .eq('id', lessonId)
-          .select()
-          .single();
+        const { data: updatedLesson } = await activateDraftLessonApi(lessonId, pinCode);
         setLesson((updatedLesson as Lesson) ?? (lessonData as Lesson));
       } else {
         setLesson(lessonData as Lesson);
 
         if (lessonData.status === 'ended') {
           setHistoryLoading(true);
-          const { data: discussionsData, error: discussionsError } = await supabase
-            .from('discussions')
-            .select(`
-              id, lesson_id, prompt_text, prompt_type, status, created_at, published_at, closed_at, display_order,
-              responses ( id, discussion_id, response_text, created_at )
-            `)
-            .eq('lesson_id', lessonId)
-            .order('display_order', { ascending: true });
+          const { data: discussionsData, error: discussionsError } = await fetchEndedDiscussionsApi(lessonId);
 
           if (discussionsError) {
             setHistoryError('Failed to load discussions/responses.');
@@ -305,15 +295,9 @@ export function useSessionPage(lessonId: string): SessionVM {
     if (!lesson) return;
     setEndingLesson(true);
     setEndError(null);
-    const supabase = createClient();
     const now = new Date().toISOString();
-
-    await supabase.from('discussions')
-      .update({ status: 'closed', closed_at: now })
-      .eq('lesson_id', lesson.id).eq('status', 'active');
-
-    const { error } = await supabase.from('lessons')
-      .update({ status: 'ended', ended_at: now }).eq('id', lesson.id);
+    await closeActiveDiscussionsApi(lesson.id, now);
+    const { error } = await endLessonApi(lesson.id, now);
 
     if (error) { setEndError('Failed to end lesson. Please try again.'); setEndingLesson(false); return; }
 
@@ -330,10 +314,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   const handleActivate = useCallback(async () => {
     if (!lesson) return;
     setActivatingLesson(true);
-    const supabase = createClient();
-    const { error } = await supabase.from('lessons')
-      .update({ status: 'active', started_at: new Date().toISOString(), ended_at: null })
-      .eq('id', lesson.id);
+    const { error } = await reactivateLessonApi(lesson.id);
 
     if (error) { setEndError('Failed to activate lesson.'); setActivatingLesson(false); return; }
     setLesson((prev) => prev ? { ...prev, status: 'active', started_at: new Date().toISOString(), ended_at: null } : prev);
@@ -344,12 +325,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     if (!lesson) return;
     setExportingData(true);
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('discussions')
-        .select('prompt_text, created_at, responses ( response_text, created_at )')
-        .eq('lesson_id', lesson.id)
-        .order('display_order', { ascending: true });
+      const { data, error } = await fetchExportDiscussionsApi(lesson.id);
 
       if (error) { setEndError('Failed to export lesson data.'); return; }
 

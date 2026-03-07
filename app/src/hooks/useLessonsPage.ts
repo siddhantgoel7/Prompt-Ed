@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 
 import type { Course } from '@/types/course';
 import type { Lesson, CreateLessonInput } from '@/types/lesson';
-import { createLesson, deleteLesson, getOwnedCourse, listLessons } from '@/services/lessonService';
+import { createLesson, deleteLesson, getOwnedCourse, listLessons } from '@/lib/api/lessonApi';
 
 type ModalState =
   | { type: 'none' }
