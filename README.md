@@ -1,7 +1,5 @@
 # PMCOL Teaching Tool
 
-![Architecture Diagram](docs/images/architecture.png)
-
 **Full Documentation:** [MkDocs Site](https://ualberta-cmput401.github.io/W26project-DeptofPharmacology/)
 
 The PMCOL Teaching Tool is an interactive, AI-driven educational platform designed for the Department of Pharmacology. It empowers instructors to seamlessly create, host, and manage live classroom sessions while allowing students to join anonymously and answer AI-generated and instructor-curated discussion prompts.
