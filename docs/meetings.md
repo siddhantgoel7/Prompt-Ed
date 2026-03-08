@@ -314,6 +314,94 @@
 
 ---
 
+## Meeting 13 — Sprint 3 Standup & Demo
+
+**Date:** February 25, 2026
+**Time:** 3:00 PM
+**Place:** UCOMM
+
+**Attendees:** Nikita, Tomiwa, Siddhant, Kristian, Aldo, Shahbaz, Muaadh
+**Absent:** None
+
+### Agenda
+- Standup
+- Demo
+
+### Decisions
+- Accessibility & UI design principles should be implemented and explained in docs
+- Sprint 2 feedback expected before March 4, 2026
+- Document use of GitHub app agents
+
+### Action Items
+- UI should be mostly complete
+- Deploy project to the cloud
+- Peer review due tonight
+- Update MkDocs documentation website
+- Move instructions in README.md
+
+---
+
+## Meeting 14 — Sprint 3 Demo & AI Discussion
+
+**Date:** February 27, 2026
+**Time:** 5:00 PM
+**Place:** Zoom
+
+**Attendees:** Nikita, Tomiwa, Siddhant, Aldo, Shahbaz, Muaadh
+**Absent:** Kristian
+
+### Agenda
+- Demo of app so far
+
+### Decisions
+- Make backend modular to allow switching AI API providers
+- Enable question generation immediately after a discussion is started
+- Support introductory questions
+- Nikita pushed a change to delete non-UAlberta accounts from Supabase
+
+### Action Items
+- Consider user story: instructor to view all individual discussions in a simple consolidated view
+- Add statistics for multiple choice questions
+- Schedule brainstorming session on prompt engineering before Sprint 4 begins
+
+### UI & Color Scheme
+```css
+:root {
+  --theme-color-primary: #255932;
+  --theme-color-secondary: #f2b705;
+  --theme-color-tertiary: white;
+  --theme-color-forth: rgba(76, 175, 98, 0.36);
+  --logout-button-color: #e00000;
+  --table-title-color: #8aa590;
+  --button-color-secondary: #ffd60a;
+  --button-color-hover-secondary: #e6bf00;
+  --game-tile-color: #020a77;
+  --button-color-primary: #03112c;
+  --student-color-primary: #b32476;
+  --student-color-secondary: #142e9c;
+}
+```
+---
+
+## Meeting 15 — Sprint 3 Standup & Usability
+
+**Date:** March 4, 2026
+**Time:** 10:00 AM
+**Place:** UCOMM 4
+
+**Attendees:** Nikita, Tomiwa, Siddhant, Shahbaz, Muaadh
+**Absent:** Aldo, Kristian
+
+### Agenda
+- Standup
+- Usability metrics
+
+### Decisions
+- Starting from next meeting, no one may be more than 5 minutes late
+
+### Action Items
+- N/A
+
 ## Meeting Summary
 
 ### Sprint 1 (Planning Phase)
@@ -324,8 +412,6 @@
 - **Meetings 8–12**: Task assignment, client reviews, standup meetings, and sprint finalization
 - **Key Outcomes**: Core features implemented (auth, lessons, discussions, responses), CI/CD pipeline established, tests written
 
-### Attendance Summary
-- **Best Attendance**: Meetings 1, 5, 7, 11 (all team members present)
-- **Most Absences**: Meeting 2 (5 members absent)
-- **Common Absentee**: Aldo (absent from 4 meetings)
-- **Notes**: Shahbahz and Muaadh had excused absences for Meeting 4
+### Sprint 3 (AI Integration Phase)
+- **Meetings 13–15**: Sprint standups, app demos, AI pipeline discussions, and usability planning
+- **Key Outcomes**: AI prompt generation implemented, UAlberta SSO integrated, modular AI provider architecture established, UI accessibility principles documented, project deployed to cloud
