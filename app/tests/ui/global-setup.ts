@@ -17,28 +17,28 @@ export default async function globalSetup() {
   if (error || !lesson) {
     console.log(`[global-setup] Test lesson ${TEST_PIN} not found. Seeding now...`);
     const { data: users } = await supabase.auth.admin.listUsers();
-    
+
     if (!users || !users.users || users.users.length === 0) {
-        console.warn('[global-setup] Cannot seed lesson automatically: No Auth users found. Tests may fail.');
-        return;
+      console.warn('[global-setup] Cannot seed lesson automatically: No Auth users found. Tests may fail.');
+      return;
     }
     const instructorId = users.users[0].id;
 
     // Grab or create a generic course
     let { data: course } = await supabase.from('courses').select('id').limit(1).single();
     if (!course) {
-        const res = await supabase.from('courses').insert([{ title: 'Automated Test Course', instructor_id: instructorId }]).select('id').single();
-        course = res.data;
+      const res = await supabase.from('courses').insert([{ title: 'Automated Test Course', instructor_id: instructorId }]).select('id').single();
+      course = res.data;
     }
 
     if (course) {
-        const res = await supabase.from('lessons').insert([{ 
-            title: '__playwright_test_lesson__', 
-            course_id: course.id, 
-            pin_code: TEST_PIN,
-            status: 'active' 
-        }]).select('id, status, pin_code').single();
-        lesson = res.data;
+      const res = await supabase.from('lessons').insert([{
+        title: '__playwright_test_lesson__',
+        course_id: course.id,
+        pin_code: TEST_PIN,
+        status: 'active'
+      }]).select('id, course_id, status, pin_code').single();
+      lesson = res.data;
     }
   }
 
@@ -52,20 +52,20 @@ export default async function globalSetup() {
 
     // 2. Ensure the active MC discussion exists
     await supabase.from('discussions').update({ status: 'closed' }).eq('lesson_id', lesson.id).eq('status', 'active');
-    
+
     await supabase.from('discussions').insert({
-        lesson_id: lesson.id,
-        prompt_text: 'What is Playwright testing?',
-        prompt_type: 'multiple_choice',
-        status: 'active',
-        mc_options: [
-            { label: 'A', text: 'Browser testing' },
-            { label: 'B', text: 'A text editor' },
-            { label: 'C', text: 'Some choice C' },
-            { label: 'D', text: 'Some choice D' }
-        ],
-        correct_option: 'A',
-        feedback_enabled: true
+      lesson_id: lesson.id,
+      prompt_text: 'What is Playwright testing?',
+      prompt_type: 'multiple_choice',
+      status: 'active',
+      mc_options: [
+        { label: 'A', text: 'Browser testing' },
+        { label: 'B', text: 'A text editor' },
+        { label: 'C', text: 'Some choice C' },
+        { label: 'D', text: 'Some choice D' }
+      ],
+      correct_option: 'A',
+      feedback_enabled: true
     });
     console.log(`[global-setup] Seeded active MC discussion successfully.`);
   }
