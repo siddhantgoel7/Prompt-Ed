@@ -8,11 +8,12 @@ export default async function globalSetup() {
   const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
   // 1. Ensure the lesson exists and is active
-  let { data: lesson, error } = await supabase
+  const { data, error } = await supabase
     .from('lessons')
     .select('id, course_id, status, pin_code')
     .eq('pin_code', TEST_PIN)
     .single();
+  let lesson = data;
 
   if (error || !lesson) {
     console.log(`[global-setup] Test lesson ${TEST_PIN} not found. Seeding now...`);
