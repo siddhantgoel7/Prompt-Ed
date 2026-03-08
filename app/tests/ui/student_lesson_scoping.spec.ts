@@ -37,6 +37,7 @@ test.describe('Student Session API Scoping & Real-time Status', () => {
         });
     });
 
+    // 40.1
     test('[US 1.26][US 2.04] success: student sees only prompts scoped to their exact lesson_id', async ({ page }) => {
         await page.route('**/rest/v1/discussions*lesson_id=eq.student-lesson-id*', async (route) => {
             await route.fulfill({
@@ -68,6 +69,7 @@ test.describe('Student Session API Scoping & Real-time Status', () => {
     });
 
     // [US 2.15]
+    // 40.2
     test('[US 2.15] success: student sees exact status badge based on discussion state', async ({ page }) => {
         test.skip(!!process.env.CI, 'Flaky in CI');
         await page.route('**/rest/v1/discussions*lesson_id=eq.student-lesson-id*', async (route) => {

@@ -94,6 +94,7 @@ describe('AI Features (Acceptance)', () => {
 
     // [1.16] Upload files (pdf, pptx) so i can provide sources for discussion prompts
     describe('[US 1.16] Upload files', () => {
+        // 34.1
         it('success: Upload File button is visible and triggers file upload', async () => {
             render(<ActiveSidebar {...defaultSidebarProps} />);
 
@@ -111,6 +112,7 @@ describe('AI Features (Acceptance)', () => {
             });
         });
 
+        // 34.2
         it('failure: Shows error when file upload fails', async () => {
             defaultSidebarProps.onUploadFile.mockRejectedValue(new Error('File too large'));
             render(<ActiveSidebar {...defaultSidebarProps} />);
@@ -121,6 +123,7 @@ describe('AI Features (Acceptance)', () => {
             expect(await screen.findByText('File too large')).toBeInTheDocument();
         });
 
+        // 34.3
         it('state: Uploaded files appear in the list', async () => {
             const files = [
                 { id: 'f1', fileName: 'lecture.pdf', fileSizeBytes: 1048576, status: 'ready' }
@@ -134,6 +137,7 @@ describe('AI Features (Acceptance)', () => {
 
     // [1.17] Activate and deactivate stt transcript capture
     describe('[US 1.17] Activate and deactivate STT transcript capture', () => {
+        // 34.4
         it('success: Start Recording triggers audio capture', async () => {
             render(<ActiveCenter {...defaultCenterProps} />);
 
@@ -146,6 +150,7 @@ describe('AI Features (Acceptance)', () => {
             expect(screen.getByRole('button', { name: /Stop & Transcribe/i })).toBeInTheDocument();
         });
 
+        // 34.5
         it('success: Stop Recording triggers STT transcription', async () => {
             render(<ActiveCenter {...defaultCenterProps} />);
 
@@ -173,6 +178,7 @@ describe('AI Features (Acceptance)', () => {
 
     // [1.18] Trigger ai prompt generation
     describe('[US 1.18] Trigger AI prompt generation', () => {
+        // 34.6
         it('success: Clicking Generate AI Prompt calls onGenerate', () => {
             render(<ActiveCenter {...defaultCenterProps} transcriptText="Some content" />);
 
@@ -182,12 +188,14 @@ describe('AI Features (Acceptance)', () => {
             expect(defaultCenterProps.onGenerate).toHaveBeenCalled();
         });
 
+        // 34.7
         it('state: Displays loading indicator while generating', () => {
             render(<ActiveCenter {...defaultCenterProps} isGenerating={true} />);
 
             expect(screen.getByRole('button', { name: /Generating…/i })).toBeDisabled();
         });
 
+        // 34.8
         it('failure: Shows error when content is insufficient (generationWarning)', () => {
             render(<ActiveCenter {...defaultCenterProps} generationWarning="More content needed" />);
 
@@ -202,6 +210,7 @@ describe('AI Features (Acceptance)', () => {
             { promptText: 'Option B', promptType: 'short_answer' }
         ];
 
+        // 34.9
         it('success: Shows full list of generated prompt options', () => {
             render(<ActiveCenter {...defaultCenterProps} candidates={candidates} />);
 
@@ -209,6 +218,7 @@ describe('AI Features (Acceptance)', () => {
             expect(screen.getByText('Option B')).toBeInTheDocument();
         });
 
+        // 34.10
         it('success: Selecting a prompt marks it as selected and shows Publish button', () => {
             render(<ActiveCenter {...defaultCenterProps} candidates={candidates} />);
 
@@ -220,6 +230,7 @@ describe('AI Features (Acceptance)', () => {
             expect(screen.getByRole('button', { name: /Publish This Question/i })).toBeInTheDocument();
         });
 
+        // 34.11
         it('success: Can publish selected prompt', () => {
             render(<ActiveCenter {...defaultCenterProps} candidates={candidates} />);
 
@@ -232,6 +243,7 @@ describe('AI Features (Acceptance)', () => {
 
     // [1.23] Generate multiple choice short answer and long answer type discussion prompts
     describe('[US 1.23] Generate multiple choice, short answer, and long answer prompts', () => {
+        // 34.12
         it('success: Can select prompt type', () => {
             render(<ActiveCenter {...defaultCenterProps} />);
 
@@ -241,6 +253,7 @@ describe('AI Features (Acceptance)', () => {
             expect(defaultCenterProps.setPromptType).toHaveBeenCalledWith('multiple_choice');
         });
 
+        // 34.13
         it('success: Generated multiple choice prompt includes answer options', () => {
             const candidates = [
                 {
@@ -263,6 +276,7 @@ describe('AI Features (Acceptance)', () => {
 
     // [1.24] Regenerate ai prompts if i'm not satisfied
     describe('[US 1.24] Regenerate AI prompts', () => {
+        // 34.14
         it('success: Can click Regenerate when prompts exist', () => {
             const candidates = [{ promptText: 'Option A', promptType: 'short_answer' }];
             render(<ActiveCenter {...defaultCenterProps} candidates={candidates} />);

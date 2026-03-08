@@ -54,6 +54,7 @@ test.describe('Instructor AI Features & Tools', () => {
         await expect(page.getByText('AI Lesson Room')).toBeVisible({ timeout: 15000 });
     });
 
+    // 43.1
     test('[US 1.16] success: file upload button exists and tab handles pdf sources', async ({ page }) => {
         test.skip(!!process.env.CI, 'Flaky in CI');
         const uploadTab = page.getByRole('tab', { name: 'Files' });
@@ -64,6 +65,7 @@ test.describe('Instructor AI Features & Tools', () => {
         await expect(addFilesButton).toBeVisible({ timeout: 15000 });
     });
 
+    // 43.2
     test('[US 1.17] success: toggle STT transcript capture', async ({ page }) => {
         test.skip(!!process.env.CI, 'Flaky in CI');
         const startRecord = page.locator('button:has-text("Start Recording")').or(page.locator('button', { hasText: /Start Recording/i }));
@@ -71,6 +73,7 @@ test.describe('Instructor AI Features & Tools', () => {
         await expect(page.locator('textarea[placeholder*="Spoken content"]')).toBeVisible({ timeout: 15000 });
     });
 
+    // 43.3
     test('[US 1.18][US 1.19][US 1.23] success: generates different prompt types and allows selection', async ({ page }) => {
         test.skip(!!process.env.CI, 'Flaky in CI');
         await page.route('**/api/lessons/ai-lesson-id/generate', async (route) => {

@@ -85,7 +85,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
     // Fetching discussion with correct_option (instructor/server side)
     describe('Fetch Discussion — includes correct_option [US 2.10]', () => {
 
-        // 33.1
+        // 31.1
         it('[US 2.10][API1] success: fetches discussion with correct_option and feedback_enabled', async () => {
             mockSupabase.from.mockReturnValue({
                 select: jest.fn().mockReturnValue({
@@ -111,7 +111,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
             expect(data.mc_options).toHaveLength(4);
         });
 
-        // 33.2
+        // 31.2
         it('[US 2.10][API2] failure: returns error when discussion not found', async () => {
             mockSupabase.from.mockReturnValue({
                 select: jest.fn().mockReturnValue({
@@ -136,7 +136,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
             expect(error?.message).toMatch(/not found/i);
         });
 
-        // 33.3
+        // 31.3
         it('[US 2.10][API3] success: all four mc_options are returned with label and text', async () => {
             mockSupabase.from.mockReturnValue({
                 select: jest.fn().mockReturnValue({
@@ -168,7 +168,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
     // Submitting a response with is_correct
     describe('Submit Student Response — with is_correct flag [US 2.10]', () => {
 
-        // 33.4
+        // 31.4
         it('[US 2.10][API4] success: inserts response record with is_correct=true for correct answer', async () => {
             const responsePayload = {
                 discussion_id: 'd-mc-api-1',
@@ -197,7 +197,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
             expect(data?.[0].selected_option).toBe('B');
         });
 
-        // 33.5
+        // 31.5
         it('[US 2.10][API5] failure: inserts response record with is_correct=false for wrong answer', async () => {
             const responsePayload = {
                 discussion_id: 'd-mc-api-1',
@@ -225,7 +225,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
             expect(data?.[0].is_correct).toBe(false);
         });
 
-        // 33.6
+        // 31.6
         it('[US 2.10][API6] failure: response insert fails when lesson is ended', async () => {
             mockSupabase.from.mockReturnValue({
                 insert: jest.fn().mockReturnValue({
@@ -255,7 +255,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
     // Safe/student-facing discussion view (no correct_option)
     describe('Student-safe Discussion View — correct_option stripped [US 2.10]', () => {
 
-        // 33.7
+        // 31.7
         it('[US 2.10][SEC-API1] success: safe row does not contain correct_option field', async () => {
             mockSupabase.from.mockReturnValue({
                 select: jest.fn().mockReturnValue({
@@ -278,7 +278,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
             expect(data).not.toHaveProperty('correct_option');
         });
 
-        // 33.8
+        // 31.8
         it('[US 2.10][SEC-API2] success: mc_options in safe row only contain label and text', async () => {
             mockSupabase.from.mockReturnValue({
                 select: jest.fn().mockReturnValue({
@@ -305,7 +305,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
             });
         });
 
-        // 33.9
+        // 31.9
         it('[US 2.10][SEC-API3] success: feedback_enabled is available to student view', async () => {
             mockSupabase.from.mockReturnValue({
                 select: jest.fn().mockReturnValue({
@@ -334,7 +334,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
     // feedback_enabled toggle (instructor side)
     describe('Update Discussion — feedback_enabled toggle [US 2.10]', () => {
 
-        // 33.10
+        // 31.10
         it('[US 2.10][API7] success: enables feedback on a discussion', async () => {
             mockSupabase.from.mockReturnValue({
                 update: jest.fn().mockReturnValue({
@@ -355,7 +355,7 @@ describe('Discussions API — MC Feedback Data Layer [US 2.10]', () => {
             expect(mockSupabase.from).toHaveBeenCalledWith('discussions');
         });
 
-        // 33.11
+        // 31.11
         it('[US 2.10][API8] success: disables feedback on a discussion', async () => {
             mockSupabase.from.mockReturnValue({
                 update: jest.fn().mockReturnValue({
