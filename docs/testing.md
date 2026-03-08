@@ -383,21 +383,19 @@ The UI tests use Playwright's global setup and teardown to manage test data:
 
 ```typescript
 // global-setup.ts
-// Verifies test lesson with PIN 123456 exists before tests run
+// Automatically seeds a test lesson with PIN 123456 and an active MC discussion
 export default async function globalSetup() {
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
   
-  const { data: lesson } = await supabase
+  let { data: lesson } = await supabase
     .from('lessons')
-    .select('id, status, pin_code')
+    .select('id, course_id, status, pin_code')
     .eq('pin_code', '123456')
     .single();
     
-  if (!lesson || lesson.status !== 'active') {
-    console.warn('Test lesson not found or inactive');
-  }
+  // If not found, the script automatically re-seeds the lesson and discussions...
 }
-
+```
 // global-teardown.ts
 // Cleans up responses created during test runs
 export default async function globalTeardown() {
@@ -765,52 +763,15 @@ npm install
 
 ### Test Data Setup for UI Tests
 
-The Playwright UI tests require a test lesson with PIN `123456` to be seeded in the Supabase database. This is a one-time setup:
+The Playwright UI tests require a test lesson with PIN `123456` and an active discussion.
 
-**SQL Seed Script** (Run in Supabase SQL Editor):
+**Automated Setup Execution**:
+You do not need to manually seed the database anymore. `tests/ui/global-setup.ts` will automatically verify if the 123456 test lesson exists with an active multiple-choice discussion. 
 
-```sql
--- Insert test course (if not exists)
-INSERT INTO courses (id, title, instructor_id, date_created)
-VALUES (
-  'test-course-123',
-  'Test Course for UI Tests',
-  'your-instructor-user-id-here',  -- Replace with actual instructor ID
-  NOW()
-)
-ON CONFLICT (id) DO NOTHING;
+If it does not exist, the `global-setup.ts` script securely uses your `SUPABASE_SERVICE_ROLE_KEY` to recreate the course, lesson, and active discussion in the background right before the Playwright tests begin running.
 
--- Insert test lesson with PIN 123456
-INSERT INTO lessons (id, title, course_id, status, pin_code, created_at)
-VALUES (
-  'test-lesson-123',
-  'Test Lesson for Playwright',
-  'test-course-123',
-  'active',
-  '123456',
-  NOW()
-)
-ON CONFLICT (id) DO UPDATE SET status = 'active';
-
--- Insert test discussion
-INSERT INTO discussions (id, lesson_id, prompt_text, prompt_type, status, created_at, published_at)
-VALUES (
-  'test-discussion-123',
-  'test-lesson-123',
-  'What is your favorite color?',
-  'short_answer',
-  'active',
-  NOW(),
-  NOW()
-)
-ON CONFLICT (id) DO UPDATE SET status = 'active';
-```
-
-**Note**: 
-- Replace `your-instructor-user-id-here` with an actual instructor user ID from your Supabase auth.users table
-- The test lesson remains active between test runs
-- `global-teardown.ts` cleans up test responses but keeps the lesson intact
-- If tests fail with "lesson not found" warnings, verify the seed data exists
+- The test lesson remains active between test runs.
+- `global-teardown.ts` cleans up test responses but keeps the lesson intact.
 
 ### Run All Tests
 
