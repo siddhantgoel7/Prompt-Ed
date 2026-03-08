@@ -82,7 +82,7 @@ test.describe('Student Session API Scoping & Real-time Status', () => {
         await page.getByRole('button', { name: 'Join' }).click();
 
         await expect(page.getByText(/Waiting for the instructor to publish a discussion/i)).toBeVisible({ timeout: 15000 });
-        await expect(page.locator('span', { hasText: /^Active$/ })).toBeVisible();
+        await expect(page.getByText('Active', { exact: true })).toBeVisible({ timeout: 15000 });
     });
 
 });

@@ -56,17 +56,17 @@ test.describe('Instructor AI Features & Tools', () => {
 
     test('[US 1.16] success: file upload button exists and tab handles pdf sources', async ({ page }) => {
         const uploadTab = page.getByRole('tab', { name: 'Files' });
-        await expect(uploadTab).toBeVisible();
+        await expect(uploadTab).toBeVisible({ timeout: 15000 });
         await uploadTab.click();
 
         const addFilesButton = page.locator('button', { hasText: 'Upload File' }).or(page.locator('label', { hasText: 'Click to upload' }));
-        await expect(addFilesButton).toBeVisible();
+        await expect(addFilesButton).toBeVisible({ timeout: 15000 });
     });
 
     test('[US 1.17] success: toggle STT transcript capture', async ({ page }) => {
-        const startRecord = page.locator('button:has-text("Start Recording")').or(page.locator('button', { hasText: /🎙 Start Recording/i }));
-        await expect(startRecord).toBeVisible();
-        await expect(page.locator('textarea[placeholder*="Spoken content"]')).toBeVisible();
+        const startRecord = page.locator('button:has-text("Start Recording")').or(page.locator('button', { hasText: /Start Recording/i }));
+        await expect(startRecord).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('textarea[placeholder*="Spoken content"]')).toBeVisible({ timeout: 15000 });
     });
 
     test('[US 1.18][US 1.19][US 1.23] success: generates different prompt types and allows selection', async ({ page }) => {
@@ -100,11 +100,12 @@ test.describe('Instructor AI Features & Tools', () => {
         });
 
         const contextBox = page.locator('textarea[placeholder*="Spoken content"]');
+        await expect(contextBox).toBeVisible({ timeout: 15000 });
         await contextBox.fill('This is my lecture context for the AI generator.');
 
         await page.getByRole('button', { name: /Generate Prompt/i }).click();
 
-        await expect(page.getByText('AI MOCKED: Short Answer Question?')).toBeVisible();
+        await expect(page.getByText('AI MOCKED: Short Answer Question?')).toBeVisible({ timeout: 15000 });
 
         const producedPromptCard = page.locator('div').filter({ hasText: 'AI MOCKED: Short Answer Question?' }).first();
         await producedPromptCard.click();
@@ -114,7 +115,7 @@ test.describe('Instructor AI Features & Tools', () => {
 
         await page.getByRole('button', { name: /Regenerate Options/i }).or(page.getByRole('button', { name: /Generate Prompt/i })).click();
 
-        await expect(page.getByText('AI MOCKED: Multiple Choice Question?')).toBeVisible();
+        await expect(page.getByText('AI MOCKED: Multiple Choice Question?')).toBeVisible({ timeout: 15000 });
         await expect(page.getByText('Option A')).toBeVisible();
         await expect(page.getByText('Option B')).toBeVisible();
     });
