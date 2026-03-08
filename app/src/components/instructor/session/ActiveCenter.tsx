@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 
-import { Badge } from '@/components/ui/badge';
+
 import * as React from 'react';
 import type { GeneratedPrompt } from '@/types/ai';
 import type { PromptType } from '@/types/discussion';

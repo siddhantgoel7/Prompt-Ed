@@ -20,7 +20,7 @@ import type { SessionVM } from '@/hooks/useSessionPage';
 
 // We mock the internals except ConnectionStatus to test the integration of connection state
 jest.mock('@/components/instructor/session/SessionHeaderActive', () => ({
-    SessionHeaderActive: (props: any) => <div>SessionHeaderActive</div>,
+    SessionHeaderActive: () => <div>SessionHeaderActive</div>,
 }));
 jest.mock('@/components/instructor/session/SplitView', () => ({
     SplitView: () => <div>SplitView</div>,
