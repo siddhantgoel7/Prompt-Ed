@@ -191,7 +191,7 @@ Sprint 3 delivers **AI integration** of the system with authentication upgrades,
 | Question formats & student interaction    | 1.23, 1.26, 2.04, 2.08             | Sid             | Mar 1        |
 | Feedback & results                        | 2.10                               | Sid                   | Mar 5        |
 | End-to-end testing for AI lesson workflow | All                                | Team                     | Mar 8        |
-| UI and docs                               | All                                | Aldo                     | Mar 8        |
+| UI and documentation                               | All                                | Aldo/Nikita                     | Mar 8        |
 
 ### Completed User Stories (15 total)
 
@@ -256,19 +256,19 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 
 | **Task**                                | **Related US**   | **Assignee** | **Due Date** |
 | --------------------------------------- | ---------------- | ------------ | ------------ |
-| Error message standardization           | 1.15             | Fullstack    | Mar 22       |
-| AI prompt editing UI + save flow        | 1.20             | Frontend     | Mar 22       |
-| AI preference settings + persistence    | 1.22             | Fullstack    | Mar 22       |
-| Response timer + time-limit enforcement | 1.29, 2.11       | Backend      | Mar 22       |
-| QR display and scan flow improvements   | 1.32, 2.05       | Fullstack    | Mar 22       |
-| Response highlight interactions         | 1.36             | Frontend     | Mar 22       |
-| List-view response panel                | 1.39             | Frontend     | Mar 22       |
-| Engagement metrics calculations         | 1.40             | Backend      | Mar 22       |
-| Export responses (CSV/PDF/JSON)         | 1.41             | Backend      | Mar 22       |
-| Export prompts + responses              | 1.42             | Backend      | Mar 22       |
-| Export lesson statistics                | 1.43             | Backend      | Mar 22       |
-| Leave/rejoin/ended-session stability    | 2.12, 2.13, 2.14 | Fullstack    | Mar 22       |
-| End-to-end testing for export/metrics   | All              | Team         | Mar 22       |
+| Error message standardization           | 1.15             | All    | Mar 17       |
+| AI prompt editing UI + save flow        | 1.20             | Kris/Sid/Nikita     | Mar 17       |
+| AI preference settings + persistence    | 1.22             | Kris/Sid/Nikita   | Mar 17       |
+| Response timer + time-limit enforcement | 1.29, 2.11       | Muaadh      | Mar 15       |
+| QR display and scan flow improvements   | 1.32, 2.05       | Aldo    | Mar 11       |
+| Response highlight interactions         | 1.36             | Aldo     | Mar 14       |
+| List-view response panel                | 1.39             | Shabaz     | Mar 13       |
+| Engagement metrics calculations         | 1.40             | Shabaz      | Mar 11       |
+| Export responses (CSV/PDF/JSON)         | 1.41             | Tomiwa      | Mar 12       |
+| Export prompts + responses              | 1.42             | Tomiwa      | Mar 11       |
+| Export lesson statistics                | 1.43             | Sid      | Mar 10       |
+| Leave/rejoin/ended-session stability    | 2.12, 2.13, 2.14 | Nikita    | Mar 18       |
+| End-to-end testing for export/metrics   | All              | Team         | Mar 20       |
 
 ---
 
