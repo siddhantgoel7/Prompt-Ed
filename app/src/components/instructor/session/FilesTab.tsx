@@ -1,3 +1,4 @@
+// Tab content panel for managing lesson file uploads (PDF/PPTX) in the active session sidebar.
 'use client';
 
 import * as React from 'react';
@@ -5,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import type { LessonFile, UploadStatus } from '@/types/ai';
 
+/** Renders a file upload button, upload error display, and a list of uploaded files with status badges. */
 export function FilesTab({
     files,
     isUploading,

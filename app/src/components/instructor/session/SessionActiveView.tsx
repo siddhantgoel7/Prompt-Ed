@@ -1,3 +1,5 @@
+// Active session layout — composes the header, sidebar, center panel, right panel,
+// join code overlay, and connection status indicator into the full instructor session UI.
 'use client';
 // MERGED: wires all AI props from VM to components
 
@@ -12,6 +14,7 @@ import { ConnectionStatus } from '@/components/instructor/session/ConnectionStat
 import { SessionProvider, SessionContext } from '@/components/instructor/session/SessionContext';
 import type { SessionVM } from '@/hooks/useSessionPage';
 
+/** Renders the full active session layout; switches to SplitView when the split view toggle is active. */
 export function SessionActiveView(props: { vm?: SessionVM }) {
   const context = React.useContext(SessionContext);
   const vm = context || props.vm!;

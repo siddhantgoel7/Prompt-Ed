@@ -1,8 +1,10 @@
+// Responsive grid layout for lesson cards, including the create-new-lesson card as the first item.
 'use client';
 
 import type { Lesson } from '@/types/lesson';
 import { LessonCard } from './LessonCard';
 
+/** Renders the lessons grid with a "Start a New Lesson" card followed by existing lesson cards. */
 export function LessonsGrid({
   lessons,
   onCreate,

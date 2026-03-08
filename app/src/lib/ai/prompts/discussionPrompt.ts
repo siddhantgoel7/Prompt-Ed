@@ -1,3 +1,5 @@
+// Prompt templates and configuration for AI-powered discussion question generation.
+// Edit CANDIDATE_COUNT and the prompt text here to tune AI behavior without touching pipeline code.
 import type { PromptType } from '@/types/discussion';
 
 /**
@@ -87,6 +89,7 @@ ${transcriptBlock}
 </transcript>`;
 }
 
+/** Returns per-type generation rules injected into the user prompt. */
 function getTypeInstructions(promptType: PromptType): string {
   switch (promptType) {
     case 'multiple_choice':
@@ -98,6 +101,7 @@ function getTypeInstructions(promptType: PromptType): string {
   }
 }
 
+/** Returns a compact JSON example for the given prompt type, included in the prompt for few-shot guidance. */
 function getExampleJson(promptType: PromptType): string {
   if (promptType === 'multiple_choice') {
     return `[{"promptText": "Which receptor does drug X primarily target?", "promptType": "multiple_choice", "mcOptions": [{"label": "A", "text": "Beta-1 adrenergic", "is_correct": false}, {"label": "B", "text": "Muscarinic M2", "is_correct": true}, {"label": "C", "text": "Alpha-1 adrenergic", "is_correct": false}, {"label": "D", "text": "Nicotinic", "is_correct": false}]}]`;

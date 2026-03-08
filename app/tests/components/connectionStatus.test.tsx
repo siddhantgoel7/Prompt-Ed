@@ -14,6 +14,7 @@ describe('ConnectionStatus', () => {
   });
 
   // 1. Shows "Connected" with green dot when connected
+  // 33.1
   it('[US 1.12][AT1] shows Connected status when isConnected=true', () => {
     render(<ConnectionStatus isConnected={true} onReconnect={jest.fn()} />);
 
@@ -24,6 +25,7 @@ describe('ConnectionStatus', () => {
   });
 
   // 2. Shows "Disconnected" with red dot and Reconnect button when disconnected
+  // 33.2
   it('[US 1.12][AT2] shows Disconnected status with Reconnect button when isConnected=false', () => {
     render(<ConnectionStatus isConnected={false} onReconnect={jest.fn()} />);
 
@@ -35,6 +37,7 @@ describe('ConnectionStatus', () => {
   });
 
   // 3. Clicking Reconnect calls onReconnect and shows "Reconnecting…"
+  // 33.3
   it('[US 1.12][AT3] clicking Reconnect calls onReconnect and shows Reconnecting state', () => {
     const onReconnect = jest.fn();
     render(<ConnectionStatus isConnected={false} onReconnect={onReconnect} />);
@@ -47,6 +50,7 @@ describe('ConnectionStatus', () => {
   });
 
   // 4. After reconnecting, status goes back to "Connected" (not "Reconnected")
+  // 33.4
   it('[US 1.12][AT4] returns to Connected after successful reconnect', () => {
     const { rerender } = render(
       <ConnectionStatus isConnected={false} onReconnect={jest.fn()} />
@@ -65,6 +69,7 @@ describe('ConnectionStatus', () => {
   });
 
   // 5. Dots have pulse animation in all states
+  // 33.5
   it('[US 1.12][AT5] dots have animate-pulse class in both connected and disconnected states', () => {
     const { rerender } = render(
       <ConnectionStatus isConnected={true} onReconnect={jest.fn()} />
@@ -83,6 +88,7 @@ describe('ConnectionStatus', () => {
   });
 
   // 6. No Reconnect button when connected
+  // 33.6
   it('[US 1.12][AT6] no Reconnect button when connected', () => {
     render(<ConnectionStatus isConnected={true} onReconnect={jest.fn()} />);
 
@@ -90,6 +96,7 @@ describe('ConnectionStatus', () => {
   });
 
   // 7. Transition from connected to disconnected
+  // 33.7
   it('[US 1.12][AT7] transitions from Connected to Disconnected when connection drops', () => {
     const { rerender } = render(
       <ConnectionStatus isConnected={true} onReconnect={jest.fn()} />

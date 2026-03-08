@@ -1,3 +1,5 @@
+// Parses PDF files into text using pdfjs-serverless, then optionally sends the whole
+// PDF to GPT-4o for a single-pass visual description of any pages with diagrams or images.
 import type { AIProvider } from '@/lib/ai/providers';
 import { createCanvas, Path2D } from '@napi-rs/canvas';
 
@@ -5,6 +7,7 @@ const NO_VISUAL_CONTENT = 'NO_VISUAL_CONTENT';
 const VISION_DEBUG = process.env.VISION_DEBUG === 'true';
 function dlog(msg: string) { if (VISION_DEBUG) console.log(msg); }
 
+/** Polyfills globalThis.Path2D and globalThis.createCanvas needed by pdfjs-serverless. */
 function registerCanvasGlobals() {
   const g = globalThis as unknown as Record<string, unknown>;
   if (typeof g.Path2D === 'undefined') {
@@ -17,6 +20,10 @@ function registerCanvasGlobals() {
   }
 }
 
+/**
+ * Extracts text and visual content from a PDF buffer.
+ * Returns a page-annotated string with [Page N Text] and optional [Page N Visual Content] sections.
+ */
 export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise<string> {
   registerCanvasGlobals();
 

@@ -1,5 +1,8 @@
+// AI provider abstraction layer. Defines the AIProvider interface and the
+// OpenAIProvider implementation used for chat, embeddings, and vision calls.
 import OpenAI from 'openai';
 
+/** Represents a single message in the chat history passed to the LLM. */
 export type AIMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
 export interface AIProvider {
@@ -54,6 +57,7 @@ export interface AIProvider {
     ): Promise<string>;
 }
 
+/** Concrete AI provider backed by the OpenAI API (gpt-4o-mini for chat, text-embedding-3-small for embeddings). */
 export class OpenAIProvider implements AIProvider {
     private openai: OpenAI;
 
@@ -61,6 +65,7 @@ export class OpenAIProvider implements AIProvider {
         this.openai = new OpenAI({ apiKey: apiKey || process.env.OPENAI_API_KEY });
     }
 
+    /** Calls gpt-4o-mini with the given messages and returns the response text. */
     async generateChatCompletion(
         messages: AIMessage[],
         options?: { temperature?: number; jsonMode?: boolean }
@@ -74,6 +79,7 @@ export class OpenAIProvider implements AIProvider {
         return response.choices[0]?.message?.content ?? '';
     }
 
+    /** Generates embeddings for one or more text strings using text-embedding-3-small. */
     async generateEmbedding(text: string | string[]): Promise<number[][]> {
         const input = Array.isArray(text) ? text.map(t => t.trim()) : text.trim();
         const response = await this.openai.embeddings.create({
@@ -83,6 +89,7 @@ export class OpenAIProvider implements AIProvider {
         return response.data.map(d => d.embedding);
     }
 
+    /** Sends a single image to gpt-4o and returns a factual text description of visual content. */
     async generateVisionDescription(
         base64Image: string,
         mimeType: 'image/png' | 'image/jpeg' | 'image/webp',

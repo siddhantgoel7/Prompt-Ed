@@ -1,8 +1,10 @@
+// Response submission form used by students for both free-text and multiple-choice discussions.
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
+/** Renders a textarea for free-text responses, a character counter, and a Submit button. */
 export function StudentResponseForm({
   value,
   onChange,

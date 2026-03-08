@@ -1,3 +1,4 @@
+// Covers US 1.04, 1.06, 1.09, 1.14, 1.25, 1.34, 1.41
 import '@testing-library/jest-dom';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { SessionPage } from '@/components/instructor/SessionPage';
@@ -14,10 +15,9 @@ jest.mock('@/lib/realtime/useRealtime');
 
 const mockPush = jest.fn();
 
-// Combine all next/navigation mocks into one object
 jest.mock('next/navigation', () => ({
   useParams: () => ({
-    lessonId: 'lesson-456', // Match the ID used in your render calls
+    lessonId: 'lesson-456',
   }),
   useRouter: () => ({
     push: mockPush,
@@ -28,7 +28,6 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-// Suppress console logs/errors for cleaner test output
 const originalConsoleError = console.error;
 const originalConsoleLog = console.log;
 beforeAll(() => {
@@ -49,16 +48,13 @@ describe('SessionPage - Real-time Integration Tests', () => {
     jest.clearAllMocks();
     mockPush.mockClear();
 
-    // Create mock channel
     mockChannel = createMockRealtimeChannel();
 
-    // Mock useRealtime hook to return connected channel
     (useRealtime as jest.Mock).mockReturnValue({
       channel: mockChannel,
       isConnected: true
     });
 
-    // Mock Supabase client with proper query builder pattern
     mockSupabase = {
       auth: {
         getUser: jest.fn()
@@ -70,7 +66,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
   describe('Component Initialization', () => {
     // 17.1
-    it('should call useRealtime with correct lesson ID', async () => {
+    it('[US 1.06] should call useRealtime with correct lesson ID', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
         error: null
@@ -110,12 +106,11 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
       render(<SessionPage lessonId="lesson-456" />);
 
-      // Verify useRealtime was called with correct parameters
       expect(useRealtime).toHaveBeenCalledWith('lesson-456', 'instructor');
     });
 
     // 17.2
-    it('should redirect to home if user not authenticated', async () => {
+    it('[US 1.04] should redirect to home if user not authenticated', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: null },
         error: { message: 'Not authenticated' }
@@ -129,7 +124,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
     });
 
     // 17.3
-    it('should redirect if user does not own the lesson', async () => {
+    it('[US 1.04] should redirect if user does not own the lesson', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
         error: null
@@ -164,7 +159,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
   describe('Real-time Channel Integration', () => {
     // 17.4
-    it('should register response:new event listener on channel', async () => {
+    it('[US 1.34] should register response:new event listener on channel', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
         error: null
@@ -211,7 +206,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
     });
 
     // 17.5
-    it('should handle response:new broadcasts', async () => {
+    it('[US 1.34] should handle response:new broadcasts', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
         error: null
@@ -256,22 +251,18 @@ describe('SessionPage - Real-time Integration Tests', () => {
         expect(subscriptions['response:new']).toBeDefined();
       });
 
-      // Simulate student response broadcast
       mockChannel._trigger('response:new', { response: mockResponse });
 
-      // Verify no errors occurred (listener handled the broadcast)
       expect(console.error).not.toHaveBeenCalledWith(
         expect.stringContaining('error')
       );
     });
 
     // 17.6
-    it('should handle both nested and flat payload structures', () => {
-      // Test the defensive payload extraction pattern
+    it('[US 1.34] should handle both nested and flat payload structures', () => {
       const nestedPayload = { payload: { response: mockResponse } };
       const flatPayload = { response: mockResponse };
 
-      // Simulate the extraction logic used in the component
       const extractNested = (nestedPayload as any).payload?.response || (nestedPayload as any).response;
       const extractFlat = (flatPayload as any).payload?.response || flatPayload.response;
 
@@ -282,7 +273,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
   describe('Database Integration', () => {
     // 17.7
-    it('should fetch discussions on mount', async () => {
+    it('[US 1.25] should fetch discussions on mount', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
         error: null
@@ -340,7 +331,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
     });
 
     // 17.8
-    it('should initialize lesson with PIN if status is draft', async () => {
+    it('[US 1.06] should initialize lesson with PIN if status is draft', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
         error: null
@@ -348,7 +339,6 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
       mockSupabase.from.mockImplementation((table: string) => {
         if (table === 'lessons') {
-          // Return an object with both select and update methods
           return {
             select: jest.fn().mockReturnValue({
               eq: jest.fn().mockReturnValue({
@@ -412,7 +402,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
     });
 
     // 17.9
-    it('should update lesson status to ended when End button is clicked', async () => {
+    it('[US 1.09] should update lesson status to ended when End button is clicked', async () => {
       const lessonsUpdateEqMock = jest.fn().mockResolvedValue({ error: null });
 
       mockSupabase.auth.getUser.mockResolvedValue({
@@ -464,7 +454,6 @@ describe('SessionPage - Real-time Integration Tests', () => {
         return {};
       });
 
-
       render(<SessionPage lessonId="lesson-456" />);
 
       await waitFor(() => {
@@ -483,7 +472,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
   describe('Broadcast Functionality', () => {
     // 17.10
-    it('should have channel available for broadcasting', async () => {
+    it('[US 1.34] should have channel available for broadcasting', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
         error: null
@@ -527,14 +516,12 @@ describe('SessionPage - Real-time Integration Tests', () => {
         expect(useRealtime).toHaveBeenCalled();
       });
 
-      // Verify channel has send method for broadcasts
       expect(mockChannel.send).toBeDefined();
       expect(typeof mockChannel.send).toBe('function');
     });
 
     // 17.11
-    it('should handle connection state changes', () => {
-      // Test with disconnected state
+    it('[US 1.34] should handle connection state changes', () => {
       (useRealtime as jest.Mock).mockReturnValue({
         channel: null,
         isConnected: false
@@ -579,14 +566,13 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
       render(<SessionPage lessonId="lesson-456" />);
 
-      // Component should handle null channel gracefully
       expect(useRealtime).toHaveBeenCalledWith('lesson-456', 'instructor');
     });
   });
 
   describe('Export Feature', () => {
     // 17.12
-    it('should export lesson data as a .txt file when Export Txt is clicked', async () => {
+    it('[US 1.41] should export lesson data as a .txt file when Export Txt is clicked', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
         error: null
@@ -600,7 +586,6 @@ describe('SessionPage - Real-time Integration Tests', () => {
       URL.revokeObjectURL = mockRevokeObjectURL;
 
       const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
-
 
       mockSupabase.from.mockImplementation((table: string) => {
         if (table === 'lessons') {
@@ -672,13 +657,12 @@ describe('SessionPage - Real-time Integration Tests', () => {
       clickSpy.mockRestore();
       URL.createObjectURL = originalCreateObjectURL;
       URL.revokeObjectURL = originalRevokeObjectURL;
-
     });
   });
 
   describe('Saved Lesson View', () => {
     // 17.13
-    it('should display preserved discussions and responses when instructor accesses a saved lesson', async () => {
+    it('[US 1.14] should display preserved discussions and responses when instructor accesses a saved lesson', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
         error: null
@@ -749,21 +733,12 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
       render(<SessionPage lessonId="lesson-456" />);
 
-      // Saved lesson header
       expect(await screen.findByText('Saved Lesson')).toBeInTheDocument();
-
-      // Preserved discussion prompt
       expect(await screen.findByText('What is 2+2?')).toBeInTheDocument();
-
-      // Preserved responses
       expect(screen.getByText('4')).toBeInTheDocument();
       expect(screen.getByText('5')).toBeInTheDocument();
-
-      // Timestamp labels present in saved-data view
       expect(screen.getByText(/Prompt time:/i)).toBeInTheDocument();
       expect(screen.getAllByText(/Response time:/i).length).toBeGreaterThan(0);
     });
   });
-
-
 });

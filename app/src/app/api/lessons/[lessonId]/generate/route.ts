@@ -1,3 +1,5 @@
+// API route for generating AI discussion prompt candidates using RAG.
+// Supports mock mode (MOCK_AI=true) for development without an OpenAI key.
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { OpenAIProvider } from '@/lib/ai/providers';

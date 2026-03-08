@@ -1,3 +1,6 @@
+// Type definitions for instructor accounts and sign-up form data.
+
+/** An instructor's profile record. */
 export interface Instructor {
   id: string;
   email: string;
@@ -6,6 +9,7 @@ export interface Instructor {
   // Add other fields as needed
 }
 
+/** Form fields collected during instructor sign-up. */
 export interface SignUpFormData {
   fullName: string;
   email: string;

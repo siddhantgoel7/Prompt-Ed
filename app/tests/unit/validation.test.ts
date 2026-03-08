@@ -1,7 +1,3 @@
-// MUST READ THIS BEFORE READING CODE
-// The real functionality will be implemented
-// in sprint 3 when validation functions will be added
-
 describe('Validation Logic [US 1.01][US 1.49]', () => {
   describe('Email Validation [US 1.01]', () => {
     // 27.1

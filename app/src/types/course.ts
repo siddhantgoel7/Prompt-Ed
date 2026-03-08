@@ -1,3 +1,6 @@
+// Type definitions for courses owned by instructors.
+
+/** A course record as stored in the database. */
 export interface Course {
   id: string;
   title: string;
@@ -6,6 +9,7 @@ export interface Course {
   instructor_id: string;
 }
 
+/** Fields required to create a new course. */
 export interface CreateCourseInput {
   title: string;
   image_url?: string;

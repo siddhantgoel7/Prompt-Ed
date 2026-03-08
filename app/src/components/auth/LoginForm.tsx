@@ -1,3 +1,4 @@
+// Email/password login form for instructors, with Google OAuth as an alternative option.
 'use client';
 
 import { useState } from 'react';
@@ -16,6 +17,7 @@ type LoginFormData = {
   password: string;
 };
 
+/** Renders the sign-in form with email/password fields and a Google OAuth button. */
 export function LoginForm() {
   const router = useRouter();
 

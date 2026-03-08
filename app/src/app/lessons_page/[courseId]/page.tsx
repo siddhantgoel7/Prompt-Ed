@@ -1,3 +1,4 @@
+// Dynamic route for a course's lessons page, extracts courseId from URL params.
 import { LessonsPage } from '@/components/instructor/LessonsPage';
 
 export default async function Page({

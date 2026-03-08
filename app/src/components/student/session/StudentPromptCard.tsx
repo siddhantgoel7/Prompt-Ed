@@ -1,3 +1,5 @@
+// Card that displays the active discussion prompt to a student.
+// For MC questions, renders selectable answer option buttons.
 // src/components/student/session/StudentPromptCard.tsx
 'use client';
 
@@ -7,6 +9,7 @@ import type { MCOptionSafe } from '@/types/ai';
 
 // SECURITY: mc_options here never contains is_correct — stripped server-side.
 // @see US 2.10
+/** Displays the discussion prompt text and, for MC questions, clickable option buttons. */
 export function StudentPromptCard({
   discussion,
   selectedOption,

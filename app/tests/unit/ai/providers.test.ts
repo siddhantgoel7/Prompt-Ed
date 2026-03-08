@@ -28,6 +28,7 @@ describe('[US 1.16] OpenAIProvider.generatePdfVisualDescriptions', () => {
     provider = new OpenAIProvider('test-key');
   });
 
+  // 38.1
   it('success: returns a map of pageNumber → description for pages with visual content', async () => {
     const jsonResponse = JSON.stringify({
       pages: [
@@ -50,6 +51,7 @@ describe('[US 1.16] OpenAIProvider.generatePdfVisualDescriptions', () => {
     expect(result.has(3)).toBe(false);
   });
 
+  // 38.2
   it('success: calls GPT-4o (not gpt-4o-mini) with PDF file input and json_object mode', async () => {
     mockCreate.mockResolvedValue(makeCompletion('{"pages":[]}'));
 
@@ -65,6 +67,7 @@ describe('[US 1.16] OpenAIProvider.generatePdfVisualDescriptions', () => {
     expect(filePart.file.file_data).toMatch(/^data:application\/pdf;base64,/);
   });
 
+  // 38.3
   it('success: returns empty map when all pages are text-only (NO_VISUAL_CONTENT)', async () => {
     const jsonResponse = JSON.stringify({
       pages: [
@@ -78,6 +81,7 @@ describe('[US 1.16] OpenAIProvider.generatePdfVisualDescriptions', () => {
     expect(result.size).toBe(0);
   });
 
+  // 38.4
   it('failure: returns empty map (not throws) when GPT-4o returns malformed JSON', async () => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
     mockCreate.mockResolvedValue(makeCompletion('this is not json at all'));
@@ -88,6 +92,7 @@ describe('[US 1.16] OpenAIProvider.generatePdfVisualDescriptions', () => {
     (console.warn as jest.Mock).mockRestore();
   });
 
+  // 38.5
   it('failure: propagates API errors (network failure, 429, 500)', async () => {
     mockCreate.mockRejectedValue(new Error('OpenAI 429 Rate Limit'));
 
@@ -108,6 +113,7 @@ describe('[US 1.16] OpenAIProvider.generatePptxSlideVisualDescription', () => {
 
   const singleImage = [{ base64: 'aGVsbG8=', mimeType: 'image/png' as const }];
 
+  // 38.6
   it('success: returns visual description string for slide with images', async () => {
     mockCreate.mockResolvedValue(
       makeCompletion('Receptor pathway diagram: GPCR on left, G-protein activation, adenylyl cyclase, cAMP production')
@@ -120,6 +126,7 @@ describe('[US 1.16] OpenAIProvider.generatePptxSlideVisualDescription', () => {
     expect(result).toContain('Receptor pathway diagram');
   });
 
+  // 38.7
   it('success: sends slide text and notes as context in user message', async () => {
     mockCreate.mockResolvedValue(makeCompletion('NO_VISUAL_CONTENT'));
 
@@ -136,6 +143,7 @@ describe('[US 1.16] OpenAIProvider.generatePptxSlideVisualDescription', () => {
     expect(textPart.text).toContain('Notes here');
   });
 
+  // 38.8
   it('success: sends all images as image_url parts in the user message', async () => {
     mockCreate.mockResolvedValue(makeCompletion('Two diagrams described'));
 
@@ -153,6 +161,7 @@ describe('[US 1.16] OpenAIProvider.generatePptxSlideVisualDescription', () => {
     expect(imageParts[1].image_url.url).toMatch(/^data:image\/jpeg;base64,/);
   });
 
+  // 38.9
   it('success: uses GPT-4o (not gpt-4o-mini) for vision quality', async () => {
     mockCreate.mockResolvedValue(makeCompletion('description'));
 
@@ -161,6 +170,7 @@ describe('[US 1.16] OpenAIProvider.generatePptxSlideVisualDescription', () => {
     expect(mockCreate.mock.calls[0][0].model).toBe('gpt-4o');
   });
 
+  // 38.10
   it('success: returns "NO_VISUAL_CONTENT" string when model determines no visual info to add', async () => {
     mockCreate.mockResolvedValue(makeCompletion('NO_VISUAL_CONTENT'));
 
@@ -168,6 +178,7 @@ describe('[US 1.16] OpenAIProvider.generatePptxSlideVisualDescription', () => {
     expect(result).toBe('NO_VISUAL_CONTENT');
   });
 
+  // 38.11
   it('failure: propagates API errors to caller (caller handles gracefully in parsePptx)', async () => {
     mockCreate.mockRejectedValue(new Error('OpenAI 500'));
 
@@ -186,6 +197,7 @@ describe('[US 1.18 + 1.23] OpenAIProvider.generateChatCompletion', () => {
     provider = new OpenAIProvider('test-key');
   });
 
+  // 38.12
   it('success: returns content string from model response', async () => {
     mockCreate.mockResolvedValue(makeCompletion('{"candidates": []}'));
 
@@ -197,6 +209,7 @@ describe('[US 1.18 + 1.23] OpenAIProvider.generateChatCompletion', () => {
     expect(result).toBe('{"candidates": []}');
   });
 
+  // 38.13
   it('[US 1.23] success: enables json_object mode when jsonMode=true', async () => {
     mockCreate.mockResolvedValue(makeCompletion('{}'));
 
@@ -208,6 +221,7 @@ describe('[US 1.18 + 1.23] OpenAIProvider.generateChatCompletion', () => {
     expect(mockCreate.mock.calls[0][0].response_format).toEqual({ type: 'json_object' });
   });
 
+  // 38.14
   it('success: uses gpt-4o-mini (not gpt-4o) for cost efficiency', async () => {
     mockCreate.mockResolvedValue(makeCompletion('response'));
 
@@ -216,6 +230,7 @@ describe('[US 1.18 + 1.23] OpenAIProvider.generateChatCompletion', () => {
     expect(mockCreate.mock.calls[0][0].model).toBe('gpt-4o-mini');
   });
 
+  // 38.15
   it('success: applies custom temperature when provided', async () => {
     mockCreate.mockResolvedValue(makeCompletion('response'));
 
@@ -227,6 +242,7 @@ describe('[US 1.18 + 1.23] OpenAIProvider.generateChatCompletion', () => {
     expect(mockCreate.mock.calls[0][0].temperature).toBe(0.2);
   });
 
+  // 38.16
   it('failure: returns empty string when API response has no content', async () => {
     mockCreate.mockResolvedValue({ choices: [{ message: { content: null } }] });
 
@@ -250,6 +266,7 @@ describe('[US 1.18] OpenAIProvider.generateEmbedding', () => {
     });
   });
 
+  // 38.17
   it('success: returns array of embeddings for batch string input', async () => {
     const result = await provider.generateEmbedding(['chunk one', 'chunk two']);
 
@@ -258,6 +275,7 @@ describe('[US 1.18] OpenAIProvider.generateEmbedding', () => {
     expect(result[1]).toEqual([0.4, 0.5, 0.6]);
   });
 
+  // 38.18
   it('success: accepts single string input (wraps in array internally)', async () => {
     mockEmbeddingsCreate.mockResolvedValue({ data: [{ embedding: [0.1, 0.2] }] });
 
@@ -266,12 +284,14 @@ describe('[US 1.18] OpenAIProvider.generateEmbedding', () => {
     expect(result[0]).toEqual([0.1, 0.2]);
   });
 
+  // 38.19
   it('success: uses text-embedding-3-small model', async () => {
     await provider.generateEmbedding(['text']);
 
     expect(mockEmbeddingsCreate.mock.calls[0][0].model).toBe('text-embedding-3-small');
   });
 
+  // 38.20
   it('failure: propagates API errors to caller', async () => {
     mockEmbeddingsCreate.mockRejectedValue(new Error('OpenAI 401 Invalid API key'));
 

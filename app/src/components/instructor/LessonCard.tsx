@@ -1,3 +1,4 @@
+// Card component for a single lesson in the lessons grid; also renders the "create new lesson" variant.
 'use client';
 
 import * as React from 'react';
@@ -15,6 +16,7 @@ function formatDate(dateIso?: string) {
   });
 }
 
+/** Maps a lesson status string to a badge label and CSS class. */
 function statusToBadge(status?: string) {
   switch (status) {
     case 'active':
@@ -36,6 +38,10 @@ type LessonMeta = {
 
 type LessonWithMeta = Lesson & LessonMeta;
 
+/**
+ * Polymorphic card component — renders either a "Start a New Lesson" button card
+ * (kind: 'create') or a lesson info card with access and delete actions (kind: 'lesson').
+ */
 export function LessonCard(
   props:
     | { kind: 'create'; onCreate: () => void }

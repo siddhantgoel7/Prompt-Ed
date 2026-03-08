@@ -126,39 +126,39 @@ describe('[US 2.10] MC Feedback — Correct Answer (Acceptance)', () => {
 
     beforeEach(() => jest.clearAllMocks());
 
-    // 31.1
+    // 29.1
     it('[US 2.10][AC1-AT1] success: submitting correct option shows ✅ Correct! headline', () => {
         renderAndSubmit('A'); // A is the correct_option in fixture
         expect(screen.getByText('✅ Correct!')).toBeInTheDocument();
     });
 
-    // 31.2
+    // 29.2
     it('[US 2.10][AC1-AT2] success: correct answer shows "You selected the correct answer." detail', () => {
         renderAndSubmit('A');
         expect(screen.getByText(/You selected the correct answer/i)).toBeInTheDocument();
     });
 
-    // 31.3
+    // 29.3
     it('[US 2.10][AC1-AT3] success: correct feedback block has green styling class', () => {
         renderAndSubmit('A');
         const feedbackBlock = screen.getByText('✅ Correct!').closest('div[class*="p-4"]') as HTMLElement;
         expect(feedbackBlock?.className).toMatch(/green/);
     });
 
-    // 31.4
+    // 29.4
     it('[US 2.10][AC1-AT4] success: "Response submitted" alert is also shown alongside correct feedback', () => {
         renderAndSubmit('A');
         expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
         expect(screen.getByText('✅ Correct!')).toBeInTheDocument();
     });
 
-    // 31.5
+    // 29.5
     it('[US 2.10][AC1-AT5] success: correct answer feedback does NOT show any incorrect icon', () => {
         renderAndSubmit('A');
         expect(screen.queryByText(/❌ Incorrect/i)).not.toBeInTheDocument();
     });
 
-    // 31.6
+    // 29.6
     it('[US 2.10][AC1-AT6] success: correct answer feedback does NOT reveal "Correct Answer: Option X"', () => {
         renderAndSubmit('A');
         expect(screen.queryByText(/Correct Answer:/i)).not.toBeInTheDocument();
@@ -170,32 +170,32 @@ describe('[US 2.10] MC Feedback — Incorrect Answer (Acceptance)', () => {
 
     beforeEach(() => jest.clearAllMocks());
 
-    // 31.7
+    // 29.7
     it('[US 2.10][AC2-AT1] failure: submitting wrong option shows ❌ Incorrect headline', () => {
         renderAndSubmit('B'); // correct is A
         expect(screen.getByText(/❌ Incorrect/i)).toBeInTheDocument();
     });
 
-    // 31.8
+    // 29.8
     it('[US 2.10][AC2-AT2] failure: incorrect answer reveals correct option label', () => {
         renderAndSubmit('B'); // correct is A
         expect(screen.getByText(/Correct Answer: Option A/i)).toBeInTheDocument();
     });
 
-    // 31.9
+    // 29.9
     it('[US 2.10][AC2-AT3] failure: incorrect feedback block has red styling class', () => {
         renderAndSubmit('C'); // correct is A
         const feedbackBlock = screen.getByText(/❌ Incorrect/i).closest('div[class*="p-4"]') as HTMLElement;
         expect(feedbackBlock?.className).toMatch(/red/);
     });
 
-    // 31.10
+    // 29.10
     it('[US 2.10][AC2-AT4] failure: wrong answer does NOT show ✅ Correct! icon', () => {
         renderAndSubmit('D'); // correct is A
         expect(screen.queryByText('✅ Correct!')).not.toBeInTheDocument();
     });
 
-    // 31.11
+    // 29.11
     it('[US 2.10][AC2-AT5] failure: correct answer revealed matches actual correct_option in discussion', () => {
         renderAndSubmit('C'); // correct is A, selecting C
         // Confirms the revealed answer is A, not the wrong selection C
@@ -203,7 +203,7 @@ describe('[US 2.10] MC Feedback — Incorrect Answer (Acceptance)', () => {
         expect(screen.queryByText(/Correct Answer: Option C/i)).not.toBeInTheDocument();
     });
 
-    // 31.12
+    // 29.12
     it('[US 2.10][AC2-AT6] failure: "Response submitted" alert is still shown alongside incorrect feedback', () => {
         renderAndSubmit('B');
         expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
@@ -216,27 +216,27 @@ describe('[US 2.10] MC Feedback — Feedback Disabled (Acceptance)', () => {
 
     beforeEach(() => jest.clearAllMocks());
 
-    // 31.13
+    // 29.13
     it('[US 2.10][AC3-AT1] success: no feedback shown when feedback_enabled=false and answer is correct', () => {
         renderAndSubmit('A', MC_DISCUSSION_FEEDBACK_OFF);
         expect(screen.queryByText('✅ Correct!')).not.toBeInTheDocument();
         expect(screen.queryByText(/❌ Incorrect/i)).not.toBeInTheDocument();
     });
 
-    // 31.14
+    // 29.14
     it('[US 2.10][AC3-AT2] success: no feedback shown when feedback_enabled=false and answer is incorrect', () => {
         renderAndSubmit('B', MC_DISCUSSION_FEEDBACK_OFF);
         expect(screen.queryByText('✅ Correct!')).not.toBeInTheDocument();
         expect(screen.queryByText(/❌ Incorrect/i)).not.toBeInTheDocument();
     });
 
-    // 31.15
+    // 29.15
     it('[US 2.10][AC3-AT3] success: "Response submitted" still appears even when feedback is disabled', () => {
         renderAndSubmit('A', MC_DISCUSSION_FEEDBACK_OFF);
         expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
     });
 
-    // 31.16
+    // 29.16
     it('[US 2.10][AC3-AT4] success: correct option label is NOT revealed when feedback is disabled', () => {
         renderAndSubmit('B', MC_DISCUSSION_FEEDBACK_OFF);
         expect(screen.queryByText(/Correct Answer:/i)).not.toBeInTheDocument();
@@ -248,7 +248,7 @@ describe('[US 2.10] MC Feedback — Non-MC Questions (Edge Cases)', () => {
 
     beforeEach(() => jest.clearAllMocks());
 
-    // 31.17
+    // 29.17
     it('[US 2.10][SC3] success: short-answer submission does NOT show MC feedback block', () => {
         mockHook.mockReturnValue(makeSubmittedHookValue(SHORT_ANSWER_DISCUSSION as any));
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -263,7 +263,7 @@ describe('[US 2.08] MC Option Selection', () => {
 
     beforeEach(() => jest.clearAllMocks());
 
-    // 31.18
+    // 29.18
     it('[US 2.08][AC1-AT1] success: all MC options are rendered and visible', () => {
         mockHook.mockReturnValue(makeActiveHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -273,7 +273,7 @@ describe('[US 2.08] MC Option Selection', () => {
         expect(screen.getByText('D.')).toBeInTheDocument();
     });
 
-    // 31.19
+    // 29.19
     it('[US 2.08][AC1-AT2] success: option text is displayed beside each label', () => {
         mockHook.mockReturnValue(makeActiveHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -281,7 +281,7 @@ describe('[US 2.08] MC Option Selection', () => {
         expect(screen.getByText('A text editor')).toBeInTheDocument();
     });
 
-    // 31.20
+    // 29.20
     it('[US 2.08][UI3] success: selecting an option populates the response textarea', () => {
         mockHook.mockReturnValue(makeActiveHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -290,7 +290,7 @@ describe('[US 2.08] MC Option Selection', () => {
         expect((textarea as HTMLTextAreaElement).value).toMatch(/Option A/);
     });
 
-    // 31.21
+    // 29.21
     it('[US 2.08][AC4-AT1] failure: submit button is disabled before any option is selected', () => {
         mockHook.mockReturnValue(makeActiveHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -300,7 +300,7 @@ describe('[US 2.08] MC Option Selection', () => {
         expect(screen.getByRole('alert')).toHaveTextContent('Please select an answer');
     });
 
-    // 31.22
+    // 29.22
     it('[US 2.08][AC4-AT2] failure: validation error clears once an option is selected', () => {
         mockHook.mockReturnValue(makeActiveHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -312,7 +312,7 @@ describe('[US 2.08] MC Option Selection', () => {
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 
-    // 31.23
+    // 29.23
     it('[US 2.08][UI6] success: MC options are not rendered for short-answer discussions', () => {
         mockHook.mockReturnValue(makeActiveHookValue(SHORT_ANSWER_DISCUSSION as any));
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -325,7 +325,7 @@ describe('[US 2.10] MC Feedback — Discussion Reset Between Questions', () => {
 
     beforeEach(() => jest.clearAllMocks());
 
-    // 31.24
+    // 29.24
     it('[US 2.10][SC4] success: feedback state clears when discussion ID changes', () => {
         // First render with discussion d-mc-1
         mockHook.mockReturnValue(makeActiveHookValue(MC_DISCUSSION_FEEDBACK_ON));

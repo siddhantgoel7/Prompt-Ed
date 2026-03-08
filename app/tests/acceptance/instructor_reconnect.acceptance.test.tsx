@@ -83,6 +83,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
 
 describe('[US 1.12] Instructor Reconnect (Acceptance)', () => {
 
+    // 36.1
     it('[US 1.12][AC1-AT1] success: can click Reconnect when connection is lost', () => {
         // Render with 3 actual components and mocked children
         const vm = makeVM({ isConnected: false });
@@ -95,6 +96,7 @@ describe('[US 1.12] Instructor Reconnect (Acceptance)', () => {
         expect(vm.handleReconnect).toHaveBeenCalled();
     });
 
+    // 36.2
     it('[US 1.12][AC2-AT1] success: lesson state (discussion) is preserved when reconnected', () => {
         // Initial disconnect state
         let vm = makeVM({ isConnected: false });
@@ -111,6 +113,7 @@ describe('[US 1.12] Instructor Reconnect (Acceptance)', () => {
         expect(screen.getByTestId('center-panel')).toHaveTextContent('activeDiscussionId=disc-1');
     });
 
+    // 36.3
     it('[US 1.12][AC3-AT1] success: responses submitted during disconnect are visible upon reconnect', () => {
         let vm = makeVM({ isConnected: false, responses: [] });
         const { rerender } = render(<SessionActiveView vm={vm} />);

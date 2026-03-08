@@ -1,3 +1,5 @@
+// Post-session review page showing all discussions with responses, transcript segments,
+// and uploaded lecture files. Includes a Split View and export controls.
 'use client';
 
 import * as React from 'react';
@@ -7,6 +9,7 @@ import type { SessionVM } from '@/hooks/useSessionPage';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 import { SessionContext, SessionProvider } from './SessionContext';
 
+/** Renders the ended-session summary layout with discussions, transcripts, and lecture material sections. */
 export function SessionEndedView(props: { vm?: SessionVM }) {
   const context = React.useContext(SessionContext);
   const vm = context || props.vm!;

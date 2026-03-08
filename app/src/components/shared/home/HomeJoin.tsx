@@ -1,3 +1,5 @@
+// Home page component for students to join a live session by entering a 6-digit PIN.
+// Also displays instructor Log in / Sign up navigation in the header.
 'use client';
 
 import { useHomeJoin } from '@/hooks/useHomeJoin';
@@ -9,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 
+/** Renders the student home page with a PIN entry card and instructor navigation links. */
 export function HomeJoin() {
   const { code, onChangeCode, join, goSignUp, goLogIn, view, error, pinOk } = useHomeJoin();
 

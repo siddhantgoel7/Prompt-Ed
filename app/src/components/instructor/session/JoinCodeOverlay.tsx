@@ -1,3 +1,4 @@
+// Modal dialog that displays the lesson join code in large text for students to see on screen.
 'use client';
 
 import * as React from 'react';
@@ -5,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 
 import { SessionContext } from './SessionContext';
 
+/** Renders a dialog overlay showing the PIN code in large font for in-class projection. */
 export function JoinCodeOverlay(props: {
   open?: boolean;
   code?: string | null;

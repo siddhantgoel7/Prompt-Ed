@@ -55,7 +55,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
 
     // AC1 — Correct answer
 
-    // 34.1
+    // 32.1
     test('[US 2.10][UI-AT1] success: selecting correct option shows ✅ Correct! after submit', async ({ page }) => {
         await joinAndWaitForMC(page);
 
@@ -77,7 +77,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await expect(page.getByText('✅ Correct!')).toBeVisible({ timeout: 5_000 });
     });
 
-    // 34.2
+    // 32.2
     test('[US 2.10][UI-AT2] success: correct answer shows detail "You selected the correct answer."', async ({ page }) => {
         await joinAndWaitForMC(page);
 
@@ -93,7 +93,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await expect(page.getByText(/You selected the correct answer/i)).toBeVisible({ timeout: 5_000 });
     });
 
-    // 34.3
+    // 32.3
     test('[US 2.10][UI-AT3] success: correct feedback block is green', async ({ page }) => {
         await joinAndWaitForMC(page);
 
@@ -113,7 +113,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
 
     // AC2 — Incorrect answer  (requires a fresh session — new page context below)
 
-    // 34.4
+    // 32.4
     test('[US 2.10][UI-AT4] failure: selecting wrong option shows ❌ Incorrect after submit', async ({ page }) => {
         await joinAndWaitForMC(page);
 
@@ -130,7 +130,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await expect(page.getByText(/❌ Incorrect/i)).toBeVisible({ timeout: 5_000 });
     });
 
-    // 34.5
+    // 32.5
     test('[US 2.10][UI-AT5] failure: incorrect answer reveals the correct option label', async ({ page }) => {
         await joinAndWaitForMC(page);
 
@@ -147,7 +147,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await expect(page.getByText(/Correct Answer: Option A/i)).toBeVisible({ timeout: 5_000 });
     });
 
-    // 34.6
+    // 32.6
     test('[US 2.10][UI-AT6] failure: incorrect feedback block is red', async ({ page }) => {
         await joinAndWaitForMC(page);
 
@@ -164,7 +164,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await expect(feedbackCard).toBeVisible();
     });
 
-    // 34.7
+    // 32.7
     test('[US 2.10][UI-AT7] failure: "❌ Correct!" is NOT shown when answer is wrong', async ({ page }) => {
         await joinAndWaitForMC(page);
 
@@ -182,7 +182,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
 
     // Validation: submit without selecting an option
 
-    // 34.8
+    // 32.8
     test('[US 2.08][AC4-AT1] failure: clicking Submit without selecting an option shows validation message', async ({ page }) => {
         await joinAndWaitForMC(page);
 
@@ -198,7 +198,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await expect(page.getByText('Please select an answer')).toBeVisible({ timeout: 5_000 });
     });
 
-    // 34.9
+    // 32.9
     test('[US 2.08][AC4-AT2] failure: validation error clears after selecting an option', async ({ page }) => {
         await joinAndWaitForMC(page);
 
@@ -220,7 +220,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
 
     // General: feedback block absent when waiting
 
-    // 34.10
+    // 32.10
     test('[US 2.10][UI-AT10] success: no feedback block shown while waiting for discussion', async ({ page }) => {
         await joinAndWaitForMC(page);
 

@@ -41,6 +41,7 @@ test.describe('Instructor Past Lessons', () => {
     });
 
     // [US 1.04] 
+    // 42.1
     test('[US 1.04] success: dashboard shows only own past lessons', async ({ page }) => {
         await page.route('**/rest/v1/lessons*', async (route) => {
             await route.fulfill({
@@ -81,6 +82,7 @@ test.describe('Instructor Past Lessons', () => {
     });
 
     // [US 1.14]
+    // 42.2
     test('[US 1.14] success: view past lesson records details', async ({ page }) => {
         await page.route('**/rest/v1/lessons*id=eq.past-lesson-xyz*', async (route) => {
             await route.fulfill({

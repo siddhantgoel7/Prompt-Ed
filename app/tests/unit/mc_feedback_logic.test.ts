@@ -74,38 +74,38 @@ describe('MC Feedback Logic — Unit Tests [US 2.10]', () => {
     // -------------------------------------------------------------------------
     describe('isMCAnswerCorrect()', () => {
 
-        // 30.1
+        // 28.1
         it('[US 2.10][UT1] success: returns true when selected option matches correct_option', () => {
             expect(isMCAnswerCorrect('B', 'B')).toBe(true);
         });
 
-        // 30.2
+        // 28.2
         it('[US 2.10][UT2] failure: returns false when selected option does not match correct_option', () => {
             expect(isMCAnswerCorrect('A', 'B')).toBe(false);
         });
 
-        // 30.3
+        // 28.3
         it('[US 2.10][UT3] failure: returns false when correct_option is null (no answer key set)', () => {
             expect(isMCAnswerCorrect('A', null)).toBe(false);
         });
 
-        // 30.4
+        // 28.4
         it('[US 2.10][UT4] failure: returns false when selectedOption is null (nothing selected)', () => {
             expect(isMCAnswerCorrect(null, 'A')).toBe(false);
         });
 
-        // 30.5
+        // 28.5
         it('[US 2.10][UT5] failure: returns false when both arguments are null', () => {
             expect(isMCAnswerCorrect(null, null)).toBe(false);
         });
 
-        // 30.6
+        // 28.6
         it('[US 2.10][UT6] success: comparison is case-sensitive — A vs a are different', () => {
             // Option labels from the DB are always uppercase single letters
             expect(isMCAnswerCorrect('a', 'A')).toBe(false);
         });
 
-        // 30.7
+        // 28.7
         it('[US 2.10][UT7] success: evaluates all four typical option labels correctly', () => {
             const correctOption = 'C';
             expect(isMCAnswerCorrect('A', correctOption)).toBe(false);
@@ -126,22 +126,22 @@ describe('MC Feedback Logic — Unit Tests [US 2.10]', () => {
             { label: 'D', text: 'A CI service' },
         ];
 
-        // 30.8
+        // 28.8
         it('[US 2.10][UT8] success: builds correct response string for option A', () => {
             expect(buildMCResponseText('A', options)).toBe('Option A: Browser testing');
         });
 
-        // 30.9
+        // 28.9
         it('[US 2.10][UT9] success: builds correct response string for option B', () => {
             expect(buildMCResponseText('B', options)).toBe('Option B: A text editor');
         });
 
-        // 30.10
+        // 28.10
         it('[US 2.10][UT10] failure: falls back to empty string if option label not found', () => {
             expect(buildMCResponseText('Z', options)).toBe('Option Z: ');
         });
 
-        // 30.11
+        // 28.11
         it('[US 2.10][UT11] success: returns correct format with empty options array', () => {
             expect(buildMCResponseText('A', [])).toBe('Option A: ');
         });
@@ -152,29 +152,29 @@ describe('MC Feedback Logic — Unit Tests [US 2.10]', () => {
     // -------------------------------------------------------------------------
     describe('shouldShowFeedback()', () => {
 
-        // 30.12
+        // 28.12
         it('[US 2.10][UT12] success: shows feedback when enabled, MC, and result is known', () => {
             expect(shouldShowFeedback(true, true, true)).toBe(true);
             expect(shouldShowFeedback(true, true, false)).toBe(true);
         });
 
-        // 30.13
+        // 28.13
         it('[US 2.10][UT13] failure: hides feedback when feedback_enabled is false', () => {
             expect(shouldShowFeedback(false, true, true)).toBe(false);
             expect(shouldShowFeedback(false, true, false)).toBe(false);
         });
 
-        // 30.14
+        // 28.14
         it('[US 2.10][UT14] failure: hides feedback when question is not MC (isMC=false)', () => {
             expect(shouldShowFeedback(true, false, true)).toBe(false);
         });
 
-        // 30.15
+        // 28.15
         it('[US 2.10][UT15] failure: hides feedback when result is null (not yet submitted)', () => {
             expect(shouldShowFeedback(true, true, null)).toBe(false);
         });
 
-        // 30.16
+        // 28.16
         it('[US 2.10][UT16] failure: all three conditions false means no feedback', () => {
             expect(shouldShowFeedback(false, false, null)).toBe(false);
         });
@@ -185,26 +185,26 @@ describe('MC Feedback Logic — Unit Tests [US 2.10]', () => {
     // -------------------------------------------------------------------------
     describe('getFeedbackMessage()', () => {
 
-        // 30.17
+        // 28.17
         it('[US 2.10][UT17] success: correct answer shows confirmation headline', () => {
             const { headline, detail } = getFeedbackMessage(true, 'B');
             expect(headline).toBe('✅ Correct!');
             expect(detail).toBe('You selected the correct answer.');
         });
 
-        // 30.18
+        // 28.18
         it('[US 2.10][UT18] failure: incorrect answer shows error headline', () => {
             const { headline } = getFeedbackMessage(false, 'B');
             expect(headline).toBe('❌ Incorrect');
         });
 
-        // 30.19
+        // 28.19
         it('[US 2.10][UT19] failure: incorrect answer reveals the correct option label', () => {
             const { detail } = getFeedbackMessage(false, 'B');
             expect(detail).toBe('Correct Answer: Option B');
         });
 
-        // 30.20
+        // 28.20
         it('[US 2.10][UT20] failure: correct option label varies with the actual correct answer', () => {
             expect(getFeedbackMessage(false, 'D').detail).toBe('Correct Answer: Option D');
             expect(getFeedbackMessage(false, 'A').detail).toBe('Correct Answer: Option A');

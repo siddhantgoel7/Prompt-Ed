@@ -1,3 +1,5 @@
+// Lessons page component for a specific course — lists existing lessons and handles
+// create/delete actions via dialogs, driven by the useLessonsPage hook.
 'use client';
 
 import * as React from 'react';
@@ -9,6 +11,7 @@ import { LessonsGrid } from './LessonsGrid';
 import { LessonCreateDialog } from './LessonCreateDialog';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 
+/** Renders the lessons page for a course, with loading/not-found states and lesson management dialogs. */
 export function LessonsPage({ courseId }: { courseId: string }) {
   const page = useLessonsPage(courseId);
 

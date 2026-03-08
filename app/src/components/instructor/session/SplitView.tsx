@@ -14,6 +14,9 @@ import type { Response } from '@/types/response';
 import { truncateText } from '@/lib/utils';
 import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 
+// Full-screen split view overlay that renders two independent discussion-browsing panes
+// side by side, each with its own realtime response subscription.
+
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
@@ -40,6 +43,7 @@ interface PaneState {
 /*  DiscussionList – reusable list shown inside each pane              */
 /* ------------------------------------------------------------------ */
 
+/** Lists discussions grouped into Active and Closed tabs; clicking one selects it. */
 function DiscussionList({
   discussions,
   onSelect,
@@ -111,6 +115,7 @@ function DiscussionList({
 /*  DiscussionDetail – shows prompt + responses for a selected disc.   */
 /* ------------------------------------------------------------------ */
 
+/** Shows the prompt text, status badge, and scrollable response list for a selected discussion. */
 function DiscussionDetail({
   discussion,
   responses,
@@ -164,6 +169,7 @@ function DiscussionDetail({
 /*  Pane – manages selection + detail state for one side               */
 /* ------------------------------------------------------------------ */
 
+/** One half of the split view — manages its own selected discussion and realtime responses. */
 function Pane({
   label,
   discussions,
@@ -261,6 +267,7 @@ function Pane({
 /*  SplitView – full-screen overlay                                    */
 /* ------------------------------------------------------------------ */
 
+/** Full-screen overlay rendering two Panes side by side for simultaneous discussion monitoring. */
 export function SplitView({ discussions, lessonId, onBack }: SplitViewProps) {
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
