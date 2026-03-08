@@ -2,123 +2,19 @@
 
 import { Button } from '@/components/ui/button';
 
-import { Badge } from '@/components/ui/badge';
+
 import * as React from 'react';
 import type { GeneratedPrompt } from '@/types/ai';
 import type { PromptType } from '@/types/discussion';
+import { SessionContext } from './SessionContext';
+import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { CandidateCard } from './CandidateCard';
+import { transcribeAudioApi } from '@/lib/api/aiApi';
 
-// ─── Audio recorder hook (US 1.17) ───────────────────────────────────────────
 
-function useAudioRecorder() {
-  const [isRecording, setIsRecording] = React.useState(false);
-  const [elapsed, setElapsed] = React.useState(0);
-  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
-  const chunksRef = React.useRef<Blob[]>([]);
-  const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const start = React.useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-        ? 'audio/webm;codecs=opus'
-        : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
-      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
-      chunksRef.current = [];
-      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-      recorder.start(500);
-      mediaRecorderRef.current = recorder;
-      setIsRecording(true);
-      setElapsed(0);
-      timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
-    } catch {
-      alert('Microphone access denied. Please allow microphone access and try again.');
-    }
-  }, []);
-
-  const stop = React.useCallback((): Promise<Blob> => {
-    return new Promise((resolve) => {
-      const recorder = mediaRecorderRef.current;
-      if (!recorder) { resolve(new Blob([])); return; }
-      recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
-        recorder.stream.getTracks().forEach((t) => t.stop());
-        resolve(blob);
-      };
-      recorder.stop();
-      setIsRecording(false);
-      if (timerRef.current) clearInterval(timerRef.current);
-    });
-  }, []);
-
-  const fmt = (s: number) =>
-    `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
-
-  return { isRecording, elapsed, fmt, start, stop };
-}
-
-// ─── Candidate card (teammate's design) ──────────────────────────────────────
-
-function CandidateCard({
-  candidate,
-  isSelected,
-  onSelect,
-}: {
-  candidate: GeneratedPrompt;
-  isSelected: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <button
-      onClick={onSelect}
-      className={[
-        'w-full text-left p-3 rounded-lg border-2 text-sm transition-colors',
-        isSelected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400 bg-white',
-      ].join(' ')}
-    >
-      <div className="flex items-center gap-2 mb-1">
-        <Badge variant="secondary" className="text-xs capitalize">
-          {candidate.promptType.replace('_', ' ')}
-        </Badge>
-        {isSelected && <span className="text-xs text-green-600 font-medium">Selected</span>}
-      </div>
-      <p className="leading-snug">{candidate.promptText}</p>
-      {candidate.mcOptions && candidate.mcOptions.length > 0 && (
-        <ul className="mt-2 space-y-1">
-          {candidate.mcOptions.map((opt) => (
-            <li key={opt.label} className="text-xs text-muted-foreground">
-              <span className="font-semibold">{opt.label}.</span> {opt.text}
-            </li>
-          ))}
-        </ul>
-      )}
-    </button>
-  );
-}
 
 // ─── Main component ───────────────────────────────────────────────────────────
-
-export function ActiveCenter({
-  lessonId,
-  promptInput,
-  setPromptInput,
-  isConnected,
-  activeDiscussionId,
-  onPublish,
-  onClose,
-  // AI generation props (from teammate's design)
-  transcriptText,
-  setTranscriptText,
-  promptType,
-  setPromptType,
-  candidates,
-  isGenerating,
-  generationWarning,
-  onGenerate,
-  onSelectCandidate,
-  onRegenerate,
-  // Direct publish (our addition — skips text input)
-  onPublishAiCandidate,
-}: {
+export function ActiveCenter(props: Partial<{
   lessonId: string;
   promptInput: string;
   setPromptInput: (v: string) => void;
@@ -137,7 +33,26 @@ export function ActiveCenter({
   onSelectCandidate: (p: GeneratedPrompt) => void;
   onRegenerate: () => void;
   onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => void;
-}) {
+}>) {
+  const context = React.useContext(SessionContext);
+  const promptInput = context ? context.promptInput : props.promptInput!;
+  const setPromptInput = context ? context.setPromptInput : props.setPromptInput!;
+  const isConnected = context ? context.isConnected : props.isConnected!;
+  const onPublish = context ? context.handlePublishDiscussion : props.onPublish!;
+  const onClose = context ? context.handleCloseDiscussion : props.onClose!;
+  const transcriptText = context ? context.transcriptText : props.transcriptText!;
+  const setTranscriptText = context ? context.setTranscriptText : props.setTranscriptText!;
+  const promptType = context ? context.promptType : props.promptType!;
+  const setPromptType = context ? context.setPromptType : props.setPromptType!;
+  const candidates = context ? context.candidates : props.candidates!;
+  const isGenerating = context ? context.isGenerating : props.isGenerating!;
+  const generationWarning = context ? context.generationWarning : props.generationWarning!;
+  const onGenerate = context ? context.generateCandidates : props.onGenerate!;
+  const onSelectCandidate = context ? context.selectCandidate : props.onSelectCandidate!;
+  const onRegenerate = context ? context.regenerateCandidates : props.onRegenerate!;
+  const onPublishAiCandidate = context ? context.handlePublishAiCandidate : props.onPublishAiCandidate;
+  const lessonId = context ? context.lesson.id : props.lessonId!;
+  const activeDiscussionId = context ? (context.activeDiscussion?.id ?? null) : props.activeDiscussionId!;
   const recorder = useAudioRecorder();
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
   const [sttStatus, setSttStatus] = React.useState<'idle' | 'transcribing' | 'error'>('idle');
@@ -175,19 +90,9 @@ export function ActiveCenter({
     }
 
     try {
-      const form = new FormData();
-      form.append('audio', audioBlob, 'recording.webm');
-      const res = await fetch(`/api/lessons/${lessonId}/transcript`, {
-        method: 'POST',
-        body: form,
-      });
-      if (!res.ok) {
-        const e = await res.json() as { error?: string };
-        throw new Error(e.error ?? 'Transcription failed');
-      }
-      const data = await res.json() as { transcript: string };
-      setTranscriptText(data.transcript ?? '');
-      setPromptInput(data.transcript ?? '');
+      const transcript = await transcribeAudioApi(lessonId, audioBlob);
+      setTranscriptText(transcript ?? '');
+      setPromptInput(transcript ?? '');
       setSttStatus('idle');
       // Auto-trigger generation after successful transcription
       // Small delay so setTranscriptText flushes before onGenerate reads it
@@ -310,7 +215,7 @@ export function ActiveCenter({
         {/* Candidate cards */}
         {candidates.length > 0 && (
           <div className="space-y-2">
-            {candidates.map((c, i) => (
+            {candidates.map((c: GeneratedPrompt, i: number) => (
               <div key={i}>
                 <CandidateCard
                   candidate={c}
@@ -318,11 +223,11 @@ export function ActiveCenter({
                   onSelect={() => handleSelectCandidate(c, i)}
                 />
 
-                {selectedIndex === i && c.promptType === 'multiple_choice' && onPublishAiCandidate && (
+                {selectedIndex === i && c.promptType === 'multiple_choice' && (
                   <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200">
                     <p className="text-xs font-semibold mb-2">Correct Answer</p>
                     <div className="space-y-1">
-                      {c.mcOptions?.map((opt) => (
+                      {c.mcOptions?.map((opt: { label: string; text: string; is_correct?: boolean }) => (
                         <label key={opt.label} className="flex items-center gap-2 text-xs cursor-pointer">
                           <input
                             type="radio"
@@ -351,7 +256,7 @@ export function ActiveCenter({
                   </div>
                 )}
 
-                {selectedIndex === i && onPublishAiCandidate && (
+                {selectedIndex === i && (
                   <Button
                     size="sm"
                     onClick={() => handlePublishSelected(c)}

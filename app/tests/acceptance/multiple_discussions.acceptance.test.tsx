@@ -7,14 +7,18 @@ import { SessionEndedView } from '@/components/instructor/session/SessionEndedVi
 import type { SessionVM } from '@/hooks/useSessionPage';
 
 jest.mock('@/components/instructor/session/SessionHeaderActive', () => ({
-  SessionHeaderActive: (props: any) => (
-    <div>
-      <div>Title: {props.title}</div>
-      <div>PIN: {props.pinCode}</div>
-      <button onClick={props.onDisplay}>Display</button>
-      <button onClick={props.onEnd}>End</button>
-    </div>
-  ),
+  SessionHeaderActive: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <div>Title: {vm.lesson.title}</div>
+        <div>PIN: {vm.lesson.pin_code}</div>
+        <button onClick={vm.handleDisplay}>Display</button>
+        <button onClick={vm.handleEnd}>End</button>
+      </div>
+    );
+  },
 }));
 
 jest.mock('@/components/instructor/session/JoinCodeOverlay', () => ({
@@ -26,25 +30,31 @@ jest.mock('@/components/instructor/session/ActiveSidebar', () => ({
 }));
 
 jest.mock('@/components/instructor/session/ActiveRightPanel', () => ({
-  ActiveRightPanel: (props: any) => (
-    <div>RightPanel count={props.responses?.length ?? 0}</div>
-  ),
+  ActiveRightPanel: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return <div>RightPanel count={vm.responses?.length ?? 0}</div>;
+  },
 }));
 
 jest.mock('@/components/instructor/session/ActiveCenter', () => ({
-  ActiveCenter: (props: any) => (
-    <div>
-      <div>Center</div>
-      <div>activeDiscussionId={String(props.activeDiscussionId)}</div>
-      <input
-        aria-label="Prompt"
-        value={props.promptInput}
-        onChange={(e) => props.setPromptInput(e.target.value)}
-      />
-      <button onClick={props.onPublish}>Publish</button>
-      <button onClick={props.onClose}>Close</button>
-    </div>
-  ),
+  ActiveCenter: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <div>Center</div>
+        <div>activeDiscussionId={String(vm.activeDiscussion?.id ?? null)}</div>
+        <input
+          aria-label="Prompt"
+          value={vm.promptInput}
+          onChange={(e: any) => vm.setPromptInput(e.target.value)}
+        />
+        <button onClick={vm.handlePublishDiscussion}>Publish</button>
+        <button onClick={vm.handleCloseDiscussion}>Close</button>
+      </div>
+    );
+  },
 }));
 
 jest.mock('@/components/instructor/session/SessionHeaderEnded', () => ({

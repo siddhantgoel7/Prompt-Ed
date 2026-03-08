@@ -3,16 +3,20 @@ import { SessionEndedView } from '@/components/instructor/session/SessionEndedVi
 import type { SessionVM } from '@/hooks/useSessionPage';
 
 jest.mock('@/components/instructor/session/SessionHeaderEnded', () => ({
-  SessionHeaderEnded: (props: any) => (
-    <div>
-      <div>Ended Header: {props.title}</div>
-      <button onClick={props.onExport}>Export Txt</button>
-      <button onClick={props.onActivate}>Activate</button>
-      <button onClick={props.onSplitView}>Split View</button>
-      <div>exporting={String(props.exporting)}</div>
-      <div>activating={String(props.activating)}</div>
-    </div>
-  ),
+  SessionHeaderEnded: (props: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <div>Ended Header: {vm.lesson.title}</div>
+        <button onClick={vm.handleExportLessonData}>Export Txt</button>
+        <button onClick={vm.handleActivate}>Activate</button>
+        <button onClick={props.onSplitView}>Split View</button>
+        <div>exporting={String(vm.exportingData)}</div>
+        <div>activating={String(vm.activatingLesson)}</div>
+      </div>
+    );
+  },
 }));
 
 jest.mock('@/components/instructor/session/SplitView', () => ({
@@ -136,16 +140,16 @@ describe('SessionEndedView (Acceptance)', () => {
   });
 
   it('[US 1.14][AT5] success: renders transcript segments when present', () => {
-  const vm = makeVM({
-    transcripts: [
-      { id: 't1', content: 'First transcript chunk', created_at: '2026-03-06T10:00:00Z' },
-      { id: 't2', content: 'Second transcript chunk', created_at: '2026-03-06T10:05:00Z' },
-    ],
-  });
+    const vm = makeVM({
+      transcripts: [
+        { id: 't1', content: 'First transcript chunk', created_at: '2026-03-06T10:00:00Z' },
+        { id: 't2', content: 'Second transcript chunk', created_at: '2026-03-06T10:05:00Z' },
+      ],
+    });
 
-  render(<SessionEndedView vm={vm} />);
-  expect(screen.getByText(/First transcript chunk/i)).toBeInTheDocument();
-  expect(screen.getByText(/Second transcript chunk/i)).toBeInTheDocument();
+    render(<SessionEndedView vm={vm} />);
+    expect(screen.getByText(/First transcript chunk/i)).toBeInTheDocument();
+    expect(screen.getByText(/Second transcript chunk/i)).toBeInTheDocument();
   });
 
   it('[US 1.14] success: renders uploaded lecture materials', () => {

@@ -72,7 +72,7 @@ describe('Student Session Page (Acceptance)', () => {
   });
 
   // 12.5
-  it('[US 1.52][AT1] success: shows green Active badge when discussion is open', () => {
+  it('[US 2.15][AT1] success: shows green Active badge when discussion is open', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: { title: 'Lesson' },
       activeDiscussion: { id: 'd1', status: 'active', prompt_text: 'What is 2+2?' },
@@ -92,7 +92,7 @@ describe('Student Session Page (Acceptance)', () => {
   });
 
   // 12.6
-  it('[US 1.52][AT1] success: shows green Active badge when waiting (no open discussion)', () => {
+  it('[US 2.15][AT1] success: shows green Active badge when waiting (no open discussion)', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: { title: 'Lesson' },
       activeDiscussion: null,
@@ -113,7 +113,7 @@ describe('Student Session Page (Acceptance)', () => {
   });
 
   // 12.7
-  it('[US 1.52][AT1] success: shows green Active badge on submitted view', () => {
+  it('[US 2.15][AT1] success: shows green Active badge on submitted view', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: { title: 'Lesson' },
       activeDiscussion: { id: 'd1', status: 'active', prompt_text: 'Question' },
@@ -134,7 +134,7 @@ describe('Student Session Page (Acceptance)', () => {
   });
 
   // 12.8
-  it('[US 1.52][AT2] success: shows red Ended badge when lesson has ended', () => {
+  it('[US 2.15][AT2] success: shows red Ended badge when lesson has ended', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: { title: 'Lesson' },
       activeDiscussion: null,
@@ -155,7 +155,7 @@ describe('Student Session Page (Acceptance)', () => {
   });
 
   // 12.9
-  it('[US 1.52][AT3] success: no status badge shown during loading', () => {
+  it('[US 2.15][AT3] success: no status badge shown during loading', () => {
     useStudentSessionMock.mockReturnValue({
       lesson: null,
       activeDiscussion: null,

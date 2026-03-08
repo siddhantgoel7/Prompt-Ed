@@ -7,10 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+
 import { useRealtime } from '@/lib/realtime/useRealtime';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
+import { truncateText } from '@/lib/utils';
+import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -32,10 +34,7 @@ interface PaneState {
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-function truncateText(text: string, maxLength = 80) {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + '...';
-}
+
 
 /* ------------------------------------------------------------------ */
 /*  DiscussionList – reusable list shown inside each pane              */
@@ -189,17 +188,20 @@ function Pane({
     let cancelled = false;
     setState((prev) => ({ ...prev, loading: true }));
 
-    const supabase = createClient();
-    supabase
-      .from('responses')
-      .select('*')
-      .eq('discussion_id', state.selectedDiscussionId)
-      .order('created_at', { ascending: true })
-      .then(({ data, error }) => {
+    fetchResponsesApi(state.selectedDiscussionId, true)
+      .then((data) => {
         if (cancelled) return;
         setState((prev) => ({
           ...prev,
-          responses: error ? [] : (data as Response[]),
+          responses: data,
+          loading: false,
+        }));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setState((prev) => ({
+          ...prev,
+          responses: [],
           loading: false,
         }));
       });

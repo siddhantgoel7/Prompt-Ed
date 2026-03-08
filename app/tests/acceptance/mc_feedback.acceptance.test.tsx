@@ -258,13 +258,13 @@ describe('[US 2.10] MC Feedback — Non-MC Questions (Edge Cases)', () => {
     });
 });
 
-// [US 2.10] MC option selection UI behaviours
-describe('[US 2.10] MC Option Selection — UI Behaviours', () => {
+// [US 2.08] Select an option for multiple choice questions
+describe('[US 2.08] MC Option Selection', () => {
 
     beforeEach(() => jest.clearAllMocks());
 
     // 31.18
-    it('[US 2.10][UI1] success: all MC options are rendered and visible', () => {
+    it('[US 2.08][AC1-AT1] success: all MC options are rendered and visible', () => {
         mockHook.mockReturnValue(makeActiveHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByText('A.')).toBeInTheDocument();
@@ -274,7 +274,7 @@ describe('[US 2.10] MC Option Selection — UI Behaviours', () => {
     });
 
     // 31.19
-    it('[US 2.10][UI2] success: option text is displayed beside each label', () => {
+    it('[US 2.08][AC1-AT2] success: option text is displayed beside each label', () => {
         mockHook.mockReturnValue(makeActiveHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByText('Browser testing')).toBeInTheDocument();
@@ -282,7 +282,7 @@ describe('[US 2.10] MC Option Selection — UI Behaviours', () => {
     });
 
     // 31.20
-    it('[US 2.10][UI3] success: selecting an option populates the response textarea', () => {
+    it('[US 2.08][UI3] success: selecting an option populates the response textarea', () => {
         mockHook.mockReturnValue(makeActiveHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
         fireEvent.click(screen.getByText('A.'));
@@ -291,7 +291,7 @@ describe('[US 2.10] MC Option Selection — UI Behaviours', () => {
     });
 
     // 31.21
-    it('[US 2.10][UI4] failure: submit button is disabled before any option is selected', () => {
+    it('[US 2.08][AC4-AT1] failure: submit button is disabled before any option is selected', () => {
         mockHook.mockReturnValue(makeActiveHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
         // No option selected — effectiveCanSubmit is true but handleSubmit guards with setSubmitAttempted
@@ -301,7 +301,7 @@ describe('[US 2.10] MC Option Selection — UI Behaviours', () => {
     });
 
     // 31.22
-    it('[US 2.10][UI5] failure: validation error clears once an option is selected', () => {
+    it('[US 2.08][AC4-AT2] failure: validation error clears once an option is selected', () => {
         mockHook.mockReturnValue(makeActiveHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
         // Trigger validation
@@ -313,7 +313,7 @@ describe('[US 2.10] MC Option Selection — UI Behaviours', () => {
     });
 
     // 31.23
-    it('[US 2.10][UI6] success: MC options are not rendered for short-answer discussions', () => {
+    it('[US 2.08][UI6] success: MC options are not rendered for short-answer discussions', () => {
         mockHook.mockReturnValue(makeActiveHookValue(SHORT_ANSWER_DISCUSSION as any));
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.queryByText('A.')).not.toBeInTheDocument();

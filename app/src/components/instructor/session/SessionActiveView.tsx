@@ -9,82 +9,43 @@ import { ActiveCenter } from '@/components/instructor/session/ActiveCenter';
 import { ActiveRightPanel } from '@/components/instructor/session/ActiveRightPanel';
 import { SplitView } from '@/components/instructor/session/SplitView';
 import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
+import { SessionProvider, SessionContext } from '@/components/instructor/session/SessionContext';
 import type { SessionVM } from '@/hooks/useSessionPage';
 
-export function SessionActiveView({ vm }: { vm: SessionVM }) {
+export function SessionActiveView(props: { vm?: SessionVM }) {
+  const context = React.useContext(SessionContext);
+  const vm = context || props.vm!;
   const lesson = vm.lesson;
   const [splitView, setSplitView] = React.useState(false);
 
   if (splitView) {
-    return (
+    const splitContent = (
       <SplitView
         discussions={vm.discussions}
         lessonId={lesson.id}
         onBack={() => setSplitView(false)}
       />
     );
+    return context ? splitContent : <SessionProvider vm={vm}>{splitContent}</SessionProvider>;
   }
 
-  return (
+  const content = (
     <div className="min-h-screen bg-white flex flex-col">
-      <SessionHeaderActive
-        title={lesson.title}
-        pinCode={lesson.pin_code}
-        endingLesson={vm.endingLesson}
-        onDisplay={vm.handleDisplay}
-        onEnd={vm.handleEnd}
-        onSplitView={() => setSplitView(true)}
-      />
+      <SessionHeaderActive onSplitView={() => setSplitView(true)} />
 
       {vm.endError ? <p className="text-sm text-red-600 px-6 py-2">{vm.endError}</p> : null}
 
-      <JoinCodeOverlay
-        open={vm.displayState}
-        code={lesson.pin_code}
-        onClose={() => { if (vm.displayState) vm.handleDisplay(); }}
-      />
+      <JoinCodeOverlay />
 
       <div className="flex-1 flex flex-col md:flex-row">
-        {/* Sidebar: discussions + file upload (US 1.16) */}
-        <ActiveSidebar
-          discussions={vm.discussions}
-          activeDiscussionId={vm.activeDiscussion?.id ?? null}
-          responses={vm.responses}
-          files={vm.files}
-          isUploading={vm.isUploading}
-          onUploadFile={vm.uploadFile}
-          onDeleteFile={vm.deleteFile}
-        />
-
-        {/* Center: AI generation + STT (US 1.17, 1.18, 1.19) */}
-        <ActiveCenter
-          lessonId={lesson.id}
-          promptInput={vm.promptInput}
-          setPromptInput={vm.setPromptInput}
-          isConnected={vm.isConnected}
-          activeDiscussionId={vm.activeDiscussion?.id ?? null}
-          onPublish={vm.handlePublishDiscussion}
-          onClose={vm.handleCloseDiscussion}
-          transcriptText={vm.transcriptText}
-          setTranscriptText={vm.setTranscriptText}
-          promptType={vm.promptType}
-          setPromptType={vm.setPromptType}
-          candidates={vm.candidates}
-          isGenerating={vm.isGenerating}
-          generationWarning={vm.generationWarning}
-          onGenerate={vm.generateCandidates}
-          onSelectCandidate={vm.selectCandidate}
-          onRegenerate={vm.regenerateCandidates}
-          onPublishAiCandidate={vm.handlePublishAiCandidate}
-        />
-
-        <ActiveRightPanel
-          responses={vm.responses}
-          activeDiscussion={vm.activeDiscussion}
-        />
+        <ActiveSidebar />
+        <ActiveCenter />
+        <ActiveRightPanel />
       </div>
 
-      <ConnectionStatus isConnected={vm.isConnected} onReconnect={vm.handleReconnect} />
+      <ConnectionStatus />
     </div>
   );
+
+  return context ? content : <SessionProvider vm={vm}>{content}</SessionProvider>;
 }

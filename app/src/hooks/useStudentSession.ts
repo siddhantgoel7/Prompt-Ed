@@ -4,12 +4,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { createClient } from '@/lib/supabase/client';
+
 import { useRealtime } from '@/lib/realtime/useRealtime';
 
 import type { Discussion } from '@/types/discussion';
 import type { Lesson } from '@/types/lesson';
 import type { Response } from '@/types/response';
+import { fetchLessonByIdApi } from '@/lib/api/lessonApi';
+import { fetchStudentActiveDiscussionApi, submitStudentResponseApi } from '@/lib/api/discussionsApi';
 
 type ViewState = 'loading' | 'waiting' | 'active' | 'submitted' | 'ended' | 'error';
 
@@ -64,13 +66,9 @@ export function useStudentSession(lessonId: string) {
       setView('loading');
       setErrorMessage(null);
 
-      const supabase = createClient();
 
-      const { data: lessonData, error: lessonError } = await supabase
-        .from('lessons')
-        .select('*')
-        .eq('id', lessonId)
-        .single();
+
+      const { data: lessonData, error: lessonError } = await fetchLessonByIdApi(lessonId);
 
       if (lessonError || !lessonData || (lessonData as { status?: string }).status !== 'active') {
         router.push('/');
@@ -80,12 +78,7 @@ export function useStudentSession(lessonId: string) {
       if (cancelled) return;
       setLesson(lessonData as Lesson);
 
-      const { data: discussionData, error: discussionError } = await supabase
-        .from('discussions')
-        .select('*')
-        .eq('lesson_id', lessonId)
-        .eq('status', 'active')
-        .maybeSingle();
+      const { data: discussionData, error: discussionError } = await fetchStudentActiveDiscussionApi(lessonId);
 
       if (cancelled) return;
 
@@ -172,20 +165,12 @@ export function useStudentSession(lessonId: string) {
     setSubmitting(true);
     setErrorMessage(null);
 
-    const supabase = createClient();
-
-    const { data, error } = await supabase
-      .from('responses')
-      .insert([
-        {
-          discussion_id: activeDiscussion.id,
-          response_text: text,
-          selected_option: selectedOptionOverride ?? null,
-          is_correct: isCorrectOverride ?? null,
-        },
-      ])
-      .select()
-      .single();
+    const { data, error } = await submitStudentResponseApi(
+      activeDiscussion.id,
+      text,
+      selectedOptionOverride ?? null,
+      isCorrectOverride ?? null,
+    );
 
     const newResponse = data as Response | null;
 

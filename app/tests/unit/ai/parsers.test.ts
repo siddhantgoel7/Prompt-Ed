@@ -54,7 +54,7 @@ jest.mock('pdfjs-serverless', () => ({
 // @napi-rs/canvas mock
 jest.mock('@napi-rs/canvas', () => ({
   createCanvas: jest.fn(),
-  Path2D: class {},
+  Path2D: class { },
 }));
 
 // Shared mock AIProvider factory
@@ -119,6 +119,7 @@ describe('[US 1.16] parsePdf', () => {
     });
 
     it('failure: falls back to text-only result when vision API call fails', async () => {
+      jest.spyOn(console, 'warn').mockImplementation(() => { });
       const provider = makeMockProvider({
         generatePdfVisualDescriptions: jest.fn().mockRejectedValue(new Error('OpenAI 500')),
       });
@@ -126,6 +127,7 @@ describe('[US 1.16] parsePdf', () => {
       // Must not throw — vision failure is non-fatal
       const result = await parsePdf(Buffer.from('fake pdf content'), provider);
       expect(result).toBe('[Page 1 Text] Hello PDF content');
+      (console.warn as jest.Mock).mockRestore();
     });
 
     it('success: visual content alone satisfies non-empty result when page has no text', async () => {
@@ -306,6 +308,7 @@ describe('[US 1.16] parsePptx', () => {
     });
 
     it('failure: continues processing remaining slides when vision fails on one slide', async () => {
+      jest.spyOn(console, 'warn').mockImplementation(() => { });
       let callCount = 0;
       const provider = makeMockProvider({
         generatePptxSlideVisualDescription: jest.fn().mockImplementation(() => {
@@ -326,6 +329,7 @@ describe('[US 1.16] parsePptx', () => {
       expect(result).not.toContain('[Slide 1 Visual Content]');
       // Slide 2: vision succeeded
       expect(result).toContain('[Slide 2 Visual Content] Slide 2 diagram');
+      (console.warn as jest.Mock).mockRestore();
     });
 
     it('success: no vision calls when aiProvider is not supplied', async () => {

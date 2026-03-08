@@ -3,15 +3,19 @@ import { SessionActiveView } from '@/components/instructor/session/SessionActive
 import type { SessionVM } from '@/hooks/useSessionPage';
 
 jest.mock('@/components/instructor/session/SessionHeaderActive', () => ({
-  SessionHeaderActive: (props: any) => (
-    <div>
-      <div>Title: {props.title}</div>
-      <div>PIN: {props.pinCode}</div>
-      <button onClick={props.onDisplay}>Display</button>
-      <button onClick={props.onEnd}>End</button>
-      <button onClick={props.onSplitView}>Split View</button>
-    </div>
-  ),
+  SessionHeaderActive: (props: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <div>Title: {vm.lesson.title}</div>
+        <div>PIN: {vm.lesson.pin_code}</div>
+        <button onClick={vm.handleDisplay}>Display</button>
+        <button onClick={vm.handleEnd}>End</button>
+        <button onClick={props.onSplitView}>Split View</button>
+      </div>
+    );
+  },
 }));
 
 jest.mock('@/components/instructor/session/SplitView', () => ({
@@ -24,14 +28,17 @@ jest.mock('@/components/instructor/session/SplitView', () => ({
 }));
 
 jest.mock('@/components/instructor/session/JoinCodeOverlay', () => ({
-  JoinCodeOverlay: (props: any) =>
-    props.open ? (
+  JoinCodeOverlay: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return vm.displayState ? (
       <div>
         <div>Join Code Overlay</div>
-        <div>CODE: {props.code}</div>
-        <button onClick={props.onClose}>Close Overlay</button>
+        <div>CODE: {vm.lesson.pin_code}</div>
+        <button onClick={vm.handleDisplay}>Close Overlay</button>
       </div>
-    ) : null,
+    ) : null;
+  },
 }));
 
 jest.mock('@/components/instructor/session/ActiveSidebar', () => ({
@@ -39,33 +46,45 @@ jest.mock('@/components/instructor/session/ActiveSidebar', () => ({
 }));
 
 jest.mock('@/components/instructor/session/ConnectionStatus', () => ({
-  ConnectionStatus: (props: any) => (
-    <div>
-      <div>Connection: {props.isConnected ? 'connected' : 'disconnected'}</div>
-      <button onClick={props.onReconnect}>Reconnect</button>
-    </div>
-  ),
+  ConnectionStatus: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <div>Connection: {vm.isConnected ? 'connected' : 'disconnected'}</div>
+        <button onClick={vm.handleReconnect}>Reconnect</button>
+      </div>
+    );
+  },
 }));
 
 jest.mock('@/components/instructor/session/ActiveRightPanel', () => ({
-  ActiveRightPanel: (props: any) => <div>RightPanel count={props.responses?.length ?? 0}</div>,
+  ActiveRightPanel: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return <div>RightPanel count={vm.responses?.length ?? 0}</div>;
+  },
 }));
 
 jest.mock('@/components/instructor/session/ActiveCenter', () => ({
-  ActiveCenter: (props: any) => (
-    <div>
-      <div>Center</div>
-      <div>connected={String(props.isConnected)}</div>
-      <div>activeDiscussionId={String(props.activeDiscussionId)}</div>
-      <input
-        aria-label="Prompt"
-        value={props.promptInput}
-        onChange={(e) => props.setPromptInput(e.target.value)}
-      />
-      <button onClick={props.onPublish}>Publish</button>
-      <button onClick={props.onClose}>Close</button>
-    </div>
-  ),
+  ActiveCenter: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <div>Center</div>
+        <div>connected={String(vm.isConnected)}</div>
+        <div>activeDiscussionId={String(vm.activeDiscussion?.id ?? null)}</div>
+        <input
+          aria-label="Prompt"
+          value={vm.promptInput}
+          onChange={(e) => vm.setPromptInput(e.target.value)}
+        />
+        <button onClick={vm.handlePublishDiscussion}>Publish</button>
+        <button onClick={vm.handleCloseDiscussion}>Close</button>
+      </div>
+    );
+  },
 }));
 
 function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
