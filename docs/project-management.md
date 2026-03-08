@@ -151,19 +151,19 @@ Sprint 3 delivers **AI integration** of the system with authentication upgrades,
 | -------------- | ----------------------------------------- | ---------------- | ------------ | ------------ |
 | 1.02           | Login via UAlberta SSO                    | 3                | Must         | Nikita       |
 | 1.04           | Private lesson viewing                    | 3                | Should       | Muaadh       |
-| 1.12           | Reconnect after connection loss           | 5                | Must         | Muaadh       |
+| 1.12           | Reconnect after connection loss           | 5                | Must         | Muaadh, Sid  |
 | 1.13           | Auto-save at intervals                    | 5                | Must         | Shabaz       |
 | 1.14           | View past lesson details                  | 3                | Must         | Shabaz       |
-| 1.16           | Upload files                              | 5                | Must         | Nikita/Muaadh |
-| 1.17           | STT transcript capture                    | 5                | Must         | Aldo         |
-| 1.18           | Trigger AI prompt generation              | 5                | Must         | Aldo         |
+| 1.16           | Upload files                              | 5                | Must         | Sid, Kris    |
+| 1.17           | STT transcript capture                    | 5                | Must         | Sid          |
+| 1.18           | Trigger AI prompt generation              | 5                | Must         | Sid, Kris    |
 | 1.19           | Review/select AI prompts                  | 3                | Must         | Sid          |
-| 1.23           | Multiple choice/short/long answer formats | 3                | Must         | Muaadh       |
+| 1.23           | Multiple choice/short/long answer formats | 3                | Must         | Sid, Kris    |
 | 1.24           | Regenerate AI prompts                     | 3                | Must         | Sid          |
 | 1.26           | Only students in lesson see prompts       | 2                | Should       | Tommy (already implemented) |
 | 2.04           | See only current lesson prompts           | 1                | Must         | Tommy (already implemented) |
-| 2.08           | Select multiple choice options            | 2                | Must         | Tommy        |
-| 2.10           | See MC question feedback                  | 1                | Must         | Tommy        |
+| 2.08           | Select multiple choice options            | 2                | Must         | Tommy, Sid        |
+| 2.10           | See MC question feedback                  | 1                | Must         | Sid        |
 
 **Estimated Sprint Velocity:** ~48–52 points
 
@@ -171,26 +171,27 @@ Sprint 3 delivers **AI integration** of the system with authentication upgrades,
 
 | **Task**                                  | **Related US**                     | **Assignee**             | **Due Date** |
 | ----------------------------------------- | ---------------------------------- | ------------------------ | ------------ |
-| AI backend research and design            | 1.16, 1.17, 1.18, 1.19, 1.23, 1.24 | Kristian                 | Feb 22       |
+| AI backend research and design            | 1.16, 1.17, 1.18, 1.19, 1.23, 1.24 | Sid, Kris                | Feb 22       |
 | Past lesson details retrieval/UI          | 1.14                               | Shabaz                   | Feb 25       |
 | File upload pipeline                      | 1.16                               | Kris/Sid            | Feb 25       |
 | Lesson-isolation checks for student view  | 2.04, 1.26                         | Tommy                    | Feb 25       |
 | Private lesson access control             | 1.04, 1.26                         | Muaadh                   | Feb 28       |
-| Reconnection flow and session recovery    | 1.12                               | Muaadh                   | Feb 28       |
+| Reconnection flow and session recovery    | 1.12                               | Muaadh, Sid                   | Feb 28       |
 | Periodic auto-save implementation         | 1.13                               | Shabaz                   | Feb 28       |
 | Authentication and access control         | 1.02                               | Nikita                   | Feb 28       |
 | Reliability and session continuity        | 1.12, 1.13                         | Shabz/Muaadh             | Feb 28       |
 | Lesson persistence & history              | 1.14                               | Shabz                    | Feb 28       |
-| STT capture pipeline                      | 1.17                               | Aldo                     | Mar 1        |
+| STT capture pipeline                      | 1.17                               | Sid                     | Mar 1        |
 | AI prompt generation service              | 1.18, 1.24                         | Sid/Kris     | Mar 1        |
-| MCQ + short/long answer support           | 1.23, 2.08, 2.10                   | Muaadh/Tommy             | Mar 3        |
+| MCQ + short/long answer support           | 1.23, 2.08, 2.10                   | Tommy, Sid             | Mar 3        |
 | UAlberta SSO integration                  | 1.02                               | Nikita                   | Mar 3        |
 | Live transcription pipeline               | 1.17, 1.18, 1.19, 1.24             | Sid                 | Mar 3        |
 | Prompt review/selection UI                | 1.19                               | Sid                      | Mar 3        |
-| AI backend creation (HUGE)                | 1.16, 1.17, 1.18, 1.19, 1.23, 1.24 | Kristian/Siddhant | Mar 1        |
-| Question formats & student interaction    | 1.23, 1.26, 2.04, 2.08             | Tommy/Muaadh             | Mar 1        |
-| Feedback & results                        | 2.10                               | Tommy                    | Mar 5        |
+| AI backend creation (HUGE)                | 1.16, 1.17, 1.18, 1.19, 1.23, 1.24 | Kris/Sid | Mar 1        |
+| Question formats & student interaction    | 1.23, 1.26, 2.04, 2.08             | Sid             | Mar 1        |
+| Feedback & results                        | 2.10                               | Sid                   | Mar 5        |
 | End-to-end testing for AI lesson workflow | All                                | Team                     | Mar 8        |
+| UI and docs                               | All                                | Aldo                     | Mar 8        |
 
 ### Completed User Stories (15 total)
 
@@ -198,19 +199,19 @@ Sprint 3 delivers **AI integration** of the system with authentication upgrades,
 | -------------- | ----------------------------------------- | ---------------- | -------------- |
 | 1.02           | Login via UAlberta SSO                    | 3                | Nikita         |
 | 1.04           | Private lesson viewing                    | 3                | Muaadh         |
-| 1.12           | Reconnect after connection loss           | 5                | Muaadh         |
+| 1.12           | Reconnect after connection loss           | 5                | Muaadh, Sid         |
 | 1.13           | Auto-save at intervals                    | 5                | Shabaz         |
 | 1.14           | View past lesson details                  | 3                | Shabaz         |
-| 1.16           | Upload files                              | 5                | Muaadh  |
-| 1.17           | STT transcript capture                    | 5                | Aldo           |
-| 1.18           | Trigger AI prompt generation              | 5                | Aldo           |
-| 1.19           | Review/select AI prompts                  | 3                | Sid            |
-| 1.23           | Multiple choice/short/long answer formats | 3                | Muaadh         |
-| 1.24           | Regenerate AI prompts                     | 3                | Sid            |
+| 1.16           | Upload files                              | 5                | Kris, Sid  |
+| 1.17           | STT transcript capture                    | 5                | Sid           |
+| 1.18           | Trigger AI prompt generation              | 5                | Sid, Kris           |
+| 1.19           | Review/select AI prompts                  | 3                | Sid, Kris           |
+| 1.23           | Multiple choice/short/long answer formats | 3                | Sid        |
+| 1.24           | Regenerate AI prompts                     | 3                | Sid, Kris           |
 | 1.26           | Only students in lesson see prompts       | 2                | Tommy          |
 | 2.04           | See only current lesson prompts           | 1                | Tommy          |
-| 2.08           | Select multiple choice options            | 2                | Tommy          |
-| 2.10           | See MC question feedback                  | 1                | Tommy          |
+| 2.08           | Select multiple choice options            | 2                | Tommy, Sid          |
+| 2.10           | See MC question feedback                  | 1                | Tommy, Sid          |
 
 **Sprint 3 Velocity:** ~49 story points completed
 
