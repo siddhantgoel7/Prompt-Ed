@@ -1,3 +1,5 @@
+// Hook that manages all state and actions for the instructor dashboard page,
+// including loading courses, and handling add/edit/delete modals.
 'use client';
 
 import * as React from 'react';
@@ -20,6 +22,7 @@ type ModalState =
   | { type: 'edit'; course: Course }
   | { type: 'delete'; course: Course };
 
+/** Provides all state and handlers needed by the InstructorDashboard component. */
 export function useInstructorDashboard() {
   const router = useRouter();
 
@@ -36,6 +39,7 @@ export function useInstructorDashboard() {
   const [saving, setSaving] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
 
+  /** Fetches the latest course list for the given instructor from the API. */
   const refreshCourses = React.useCallback(async (instructorId: string) => {
     const { data, error } = await listInstructorCourses(instructorId);
 
@@ -109,6 +113,7 @@ export function useInstructorDashboard() {
     return null;
   }, [form.title]);
 
+  /** Signs the instructor out and redirects to the home page. */
   const logout = React.useCallback(async () => {
     setLoggingOut(true);
 
@@ -130,6 +135,7 @@ export function useInstructorDashboard() {
     [router]
   );
 
+  /** Validates and submits the add-course form, then prepends the new course to state. */
   const submitAdd = React.useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -159,6 +165,7 @@ export function useInstructorDashboard() {
     [form, userId, validate, closeModal]
   );
 
+  /** Validates and submits the edit-course form, then updates the course in local state. */
   const submitEdit = React.useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -193,6 +200,7 @@ export function useInstructorDashboard() {
     [modal, form, validate, closeModal]
   );
 
+  /** Deletes the course (and its lessons cascade) then removes it from local state. */
   const confirmDelete = React.useCallback(async () => {
     if (modal.type !== 'delete') return;
 

@@ -1,3 +1,4 @@
+// Instructor sign-up page — wraps SignUpForm in a Suspense boundary (required for useSearchParams).
 'use client';
 
 import { Suspense } from 'react';

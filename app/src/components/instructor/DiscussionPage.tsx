@@ -1,3 +1,5 @@
+// Client component for the instructor's discussion detail page.
+// Shows the prompt, MC option distribution (if applicable), and a live-updating response list.
 'use client';
 
 import { useRealtime } from '@/lib/realtime/useRealtime';
@@ -16,6 +18,10 @@ interface DiscussionClientProps {
   initialIsActive: boolean;
 }
 
+/**
+ * Displays a discussion's prompt, MC answer distribution, realtime connection status,
+ * and a scrollable list of student responses that updates via Supabase Realtime.
+ */
 export function DiscussionPage({
   lessonId,
   discussionId,

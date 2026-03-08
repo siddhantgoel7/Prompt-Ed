@@ -1,9 +1,16 @@
+// API route for transcribing instructor audio using OpenAI Whisper.
+// Returns the transcript text immediately, then stores it as an embedded chunk in the background.
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import OpenAI from 'openai';
 
 const MAX_AUDIO_SIZE = 25 * 1024 * 1024;
 
+/**
+ * POST /api/lessons/[lessonId]/transcript
+ * Transcribes an audio recording via Whisper and stores the result as a lesson chunk.
+ * Returns { transcript } on success.
+ */
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ lessonId: string }> }

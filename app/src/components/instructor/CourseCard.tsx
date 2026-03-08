@@ -1,3 +1,4 @@
+// Card component that displays a single course with access, edit, and delete actions.
 'use client';
 
 import * as React from 'react';
@@ -12,10 +13,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+/** Formats an ISO date string to a locale date string for display. */
 function formatDate(dateIso: string) {
   return new Date(dateIso).toLocaleDateString();
 }
 
+/** Displays a course thumbnail, creation date, title, and action buttons (access, edit, delete). */
 export function CourseCard({
   course,
   onAccess,

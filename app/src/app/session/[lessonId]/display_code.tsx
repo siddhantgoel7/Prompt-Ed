@@ -1,3 +1,5 @@
+// Overlay component that shows the join code in large text when state is true.
+// Used for projector/display-mode presentation of the session PIN.
 'use client';
 import './display_code.css'
 
@@ -6,6 +8,7 @@ type Props = {
   state: boolean 
 }
 
+/** Renders the join code overlay div; visible when state is true, hidden otherwise. */
 export default function DisplayCodeState({ code, state } : Props) {
   if (!code) {
     console.log("Error: There is no code to display!")

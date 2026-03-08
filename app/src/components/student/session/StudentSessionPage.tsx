@@ -1,3 +1,5 @@
+// Main student session page component — coordinates all student-facing session views
+// (loading, waiting, active prompt, submitted, ended) and handles MC submission logic.
 // src/components/student/session/StudentSessionPage.tsx
 'use client';
 
@@ -12,6 +14,7 @@ import { StudentWaitingCard } from './StudentWaitingCard';
 
 import { useStudentSession } from '@/hooks/useStudentSession';
 
+/** Renders the student session UI, routing between waiting/active/submitted/ended states. */
 export function StudentSessionPage({ lessonId }: { lessonId: string }) {
   const {
     lesson,

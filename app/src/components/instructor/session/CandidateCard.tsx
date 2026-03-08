@@ -1,3 +1,4 @@
+// Selectable card for a single AI-generated discussion prompt candidate in the generation panel.
 'use client';
 
 import * as React from 'react';
@@ -6,6 +7,7 @@ import type { GeneratedPrompt } from '@/types/ai';
 
 // ─── Candidate card (teammate's design) ──────────────────────────────────────
 
+/** Renders a clickable card for an AI-generated prompt candidate, showing the question and MC options. */
 export function CandidateCard({
     candidate,
     isSelected,

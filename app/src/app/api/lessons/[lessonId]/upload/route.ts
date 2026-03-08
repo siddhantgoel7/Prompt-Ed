@@ -1,3 +1,6 @@
+// API route for uploading PDF/PPTX lecture files to a lesson.
+// Validates file type by magic bytes, stores to Supabase storage, then parses and embeds
+// chunks in the background (fire-and-forget) while immediately returning a processing status.
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { parseFile } from '@/lib/ai/parsers';
@@ -13,12 +16,18 @@ const MAGIC = {
   pptx: Buffer.from([0x50, 0x4b, 0x03, 0x04]),
 };
 
+/** Detects file type by inspecting the first 4 magic bytes of the buffer. */
 function detectFileType(buffer: Buffer): 'pdf' | 'pptx' | null {
   if (buffer.subarray(0, 4).equals(MAGIC.pdf)) return 'pdf';
   if (buffer.subarray(0, 4).equals(MAGIC.pptx)) return 'pptx';
   return null;
 }
 
+/**
+ * POST /api/lessons/[lessonId]/upload
+ * Uploads a lecture file, then parses and embeds it in the background.
+ * Returns immediately with status 'processing' while background work continues.
+ */
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ lessonId: string }> }

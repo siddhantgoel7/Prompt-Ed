@@ -1,3 +1,5 @@
+// Central panel of the instructor session view: AI prompt generation, STT recording,
+// candidate selection, and the Start/Close Discussion button.
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +15,11 @@ import { transcribeAudioApi } from '@/lib/api/aiApi';
 
 
 
+/**
+ * Central panel of the active session view.
+ * Hosts AI prompt generation (with STT recording), candidate selection, and the
+ * Start/Close Discussion toggle. Reads from SessionContext or explicit props.
+ */
 // ─── Main component ───────────────────────────────────────────────────────────
 export function ActiveCenter(props: Partial<{
   lessonId: string;

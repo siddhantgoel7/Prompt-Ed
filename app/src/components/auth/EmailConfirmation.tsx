@@ -1,3 +1,4 @@
+// Success screen shown after email sign-up, prompting the user to check their inbox.
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ type EmailConfirmationProps = {
   onGoToLogin: () => void;
 };
 
+/** Displays a confirmation message with the user's email and a button to navigate to login. */
 export function EmailConfirmation({ email, onGoToLogin }: EmailConfirmationProps) {
   return (
     <div className="text-center space-y-6">

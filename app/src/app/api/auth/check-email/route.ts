@@ -1,7 +1,13 @@
+// API route for checking whether an email address already has an account.
+// Uses the Supabase service-role key to access the admin user list.
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+/**
+ * POST /api/auth/check-email
+ * Returns { exists: boolean } indicating whether the given email already has an account.
+ */
 export async function POST(request: NextRequest) {
   const { email } = await request.json();
 

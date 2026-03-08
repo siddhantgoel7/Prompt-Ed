@@ -1,3 +1,4 @@
+// Generates and stores vector embeddings for lesson_chunks rows after file upload or transcription.
 import type { AIProvider } from './providers';
 import type { SupabaseClient } from '@supabase/supabase-js';
 

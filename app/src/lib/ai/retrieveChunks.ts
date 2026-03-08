@@ -1,3 +1,5 @@
+// Retrieval functions for the RAG pipeline — fetches relevant lesson content chunks
+// from the database, either by semantic similarity or by recency.
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**

@@ -1,3 +1,5 @@
+// Instructor sign-up form with email/password fields, UAlberta domain enforcement,
+// duplicate-account checking, and Google OAuth as an alternative.
 'use client';
 
 import { useState } from 'react';
@@ -20,6 +22,7 @@ type SignUpFormData = {
   agreeToTerms: boolean;
 };
 
+/** Renders the instructor registration form; switches to EmailConfirmation after successful sign-up. */
 export function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
