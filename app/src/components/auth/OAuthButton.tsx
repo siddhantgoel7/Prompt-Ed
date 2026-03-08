@@ -1,3 +1,4 @@
+// Generic OAuth sign-in button used on both login and sign-up forms.
 import { Button } from '@/components/ui/button';
 
 type OAuthButtonProps = {
@@ -6,6 +7,7 @@ type OAuthButtonProps = {
   providerLabel: string; // e.g. "Google"
 };
 
+/** Renders an outline button labeled "Continue with {providerLabel}" for OAuth sign-in. */
 export function OAuthButton({ loading, onClick, providerLabel }: OAuthButtonProps) {
   return (
     <Button

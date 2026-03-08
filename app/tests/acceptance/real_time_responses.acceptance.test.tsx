@@ -25,25 +25,33 @@ jest.mock('@/components/instructor/session/ActiveSidebar', () => ({
 }));
 
 jest.mock('@/components/instructor/session/ActiveRightPanel', () => ({
-  ActiveRightPanel: (props: any) => (
-    <div>
-      <div>Responses Panel</div>
-      {props.responses?.map((r: any) => (
-        <div key={r.id}>
-          <span>{r.response_text}</span>
-        </div>
-      ))}
-    </div>
-  ),
+  ActiveRightPanel: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <div>Responses Panel</div>
+        {vm.responses?.map((r: any) => (
+          <div key={r.id}>
+            <span>{r.response_text}</span>
+          </div>
+        ))}
+      </div>
+    );
+  },
 }));
 
 jest.mock('@/components/instructor/session/ActiveCenter', () => ({
-  ActiveCenter: (props: any) => (
-    <div>
-      <div>Center</div>
-      <button onClick={props.onPublish}>Publish</button>
-    </div>
-  ),
+  ActiveCenter: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <div>Center</div>
+        <button onClick={vm.handlePublishDiscussion}>Publish</button>
+      </div>
+    );
+  },
 }));
 
 jest.mock('@/components/instructor/session/SessionHeaderEnded', () => ({
@@ -87,7 +95,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     handleExportLessonData: jest.fn(),
     handleActivate: jest.fn(),
     ...overrides,
-  };
+  } as unknown as SessionVM;
 }
 
 describe('Real-time Responses (Acceptance) [US 1.34]', () => {

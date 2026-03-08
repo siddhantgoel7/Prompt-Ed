@@ -1,3 +1,4 @@
+// Reusable confirmation dialog for destructive delete actions (courses, lessons, etc.).
 'use client';
 
 import * as React from 'react';
@@ -10,10 +11,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+/** Renders a modal dialog asking the user to confirm a delete action, with Cancel and Delete buttons. */
 export function ConfirmDeleteDialog({
   open,
   onOpenChange,
   title,
+  description,
   error,
   deleting,
   onCancel,
@@ -22,6 +25,7 @@ export function ConfirmDeleteDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
+  description?: React.ReactNode;
   error: string | null;
   deleting: boolean;
   onCancel: () => void;
@@ -29,15 +33,12 @@ export function ConfirmDeleteDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
-        <p className="text-gray-600">
-          Are you sure you want to delete this course? This will also delete all lessons associated with this course.
-          This action cannot be undone.
-        </p>
+        {description && <p className="text-gray-600">{description}</p>}
 
         {error && (
           <Alert className="border-red-200 bg-red-50">

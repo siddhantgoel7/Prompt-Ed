@@ -1,8 +1,11 @@
+// Placeholder Socket.io route — not in active use; real-time is handled via Supabase Realtime.
+// Kept as a reference stub should a custom server be adopted in the future.
 import { Server as SocketIOServer } from 'socket.io';
 import { NextResponse } from 'next/server';
 
 let io: SocketIOServer | undefined;
 
+/** Returns a status message explaining that Socket.io requires a custom server setup. */
 export async function GET() {
   if (!io) {
     // Socket.io will be initialized on first request

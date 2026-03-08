@@ -35,6 +35,12 @@ test.describe('Student Submit Response', () => {
     // Active discussion: prompt visible + response form usable
     await expect(responseBox).toBeVisible();
 
+    // If it's a multiple choice, select an option to bypass validation
+    const mcOption = page.locator('button', { hasText: /^(A\.|B\.|C\.|D\.)/ }).first();
+    if (await mcOption.isVisible()) {
+      await mcOption.click();
+    }
+
     await responseBox.fill('My response from Playwright');
     await page.getByRole('button', { name: 'Submit response' }).click();
 
@@ -54,8 +60,17 @@ test.describe('Student Submit Response', () => {
 
     test.skip(await waiting.isVisible(), 'No active discussion in this environment.');
 
-    // Submit should be disabled when blank (disabled={!canSubmit})
-    await expect(page.getByRole('button', { name: 'Submit response' })).toBeDisabled();
+    // For MC, the button is left enabled to allow clicking -> validation message
+    const mcOption = page.locator('button', { hasText: /^(A\.|B\.|C\.|D\.)/ }).first();
+    if (await mcOption.isVisible()) {
+      const submitBtn = page.getByRole('button', { name: 'Submit response' });
+      await expect(submitBtn).toBeEnabled();
+      await submitBtn.click();
+      await expect(page.getByText('Please select an answer')).toBeVisible();
+    } else {
+      // For text response, it should be disabled when empty
+      await expect(page.getByRole('button', { name: 'Submit response' })).toBeDisabled();
+    }
   });
 
   // 24.3
@@ -69,6 +84,12 @@ test.describe('Student Submit Response', () => {
     ]);
 
     test.skip(await waiting.isVisible(), 'No active discussion in this environment.');
+
+    const mcOption = page.locator('button', { hasText: /^(A\.|B\.|C\.|D\.)/ }).first();
+    if (await mcOption.isVisible()) {
+      // Whitespace-only blocking is handled by text fields, not MC selections
+      return;
+    }
 
     // Fill with only whitespace
     await responseBox.fill('   ');

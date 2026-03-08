@@ -1,3 +1,5 @@
+// Lessons page component for a specific course — lists existing lessons and handles
+// create/delete actions via dialogs, driven by the useLessonsPage hook.
 'use client';
 
 import * as React from 'react';
@@ -7,8 +9,9 @@ import { useLessonsPage } from '@/hooks/useLessonsPage';
 import { LessonsPageHeader } from './LessonsPageHeader';
 import { LessonsGrid } from './LessonsGrid';
 import { LessonCreateDialog } from './LessonCreateDialog';
-import { ConfirmDeleteLessonDialog } from './ConfirmDeleteLessonDialog';
+import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 
+/** Renders the lessons page for a course, with loading/not-found states and lesson management dialogs. */
 export function LessonsPage({ courseId }: { courseId: string }) {
   const page = useLessonsPage(courseId);
 
@@ -66,11 +69,13 @@ export function LessonsPage({ courseId }: { courseId: string }) {
         saving={page.saving}
       />
 
-      <ConfirmDeleteLessonDialog
+      <ConfirmDeleteDialog
         open={page.modal.type === 'delete'}
         onOpenChange={(open) => {
           if (!open) page.closeModal();
         }}
+        title="Delete Lesson?"
+        description="Are you sure you want to delete this lesson? This action cannot be undone."
         deleting={page.deleting}
         error={page.error}
         onCancel={page.closeModal}

@@ -1,3 +1,5 @@
+// Root instructor dashboard component — composes the header, courses section,
+// and add/edit/delete dialogs, all driven by the useInstructorDashboard hook.
 'use client';
 
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,6 +11,7 @@ import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 
 import { useInstructorDashboard } from '@/hooks/useInstructorDashboard';
 
+/** Renders the full instructor dashboard page with course management and modals. */
 export function InstructorDashboard() {
   const dashboard = useInstructorDashboard();
 
@@ -61,6 +64,7 @@ export function InstructorDashboard() {
       <ConfirmDeleteDialog
         open={dashboard.modal.type === 'delete'}
         title="Delete Course?"
+        description="Are you sure you want to delete this course? This will also delete all lessons associated with this course. This action cannot be undone."
         error={dashboard.error}
         deleting={dashboard.deleting}
         onOpenChange={(open) => {

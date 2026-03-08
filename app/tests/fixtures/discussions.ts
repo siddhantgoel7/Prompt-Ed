@@ -18,7 +18,12 @@ export const mockDiscussion: Discussion = {
   created_at: '2026-02-10T14:05:23Z',
   published_at: '2026-02-10T14:05:25Z',
   closed_at: null,
-  display_order: 0
+  display_order: 0,
+  source: null,
+  mc_options: null,
+  correct_option: null,
+  feedback_enabled: false,
+  ai_generated_correct_option: null,
 };
 
 // 18.2
@@ -31,7 +36,12 @@ export const mockClosedDiscussion: Discussion = {
   created_at: '2026-02-10T13:50:00Z',
   published_at: '2026-02-10T13:50:05Z',
   closed_at: '2026-02-10T13:58:30Z',
-  display_order: 0
+  display_order: 0,
+  source: null,
+  mc_options: null,
+  correct_option: null,
+  feedback_enabled: false,
+  ai_generated_correct_option: null,
 };
 
 // 18.3
@@ -44,7 +54,12 @@ export const mockMultipleChoiceDiscussion: Discussion = {
   created_at: '2026-02-10T14:10:00Z',
   published_at: '2026-02-10T14:10:02Z',
   closed_at: null,
-  display_order: 1
+  display_order: 1,
+  source: null,
+  mc_options: null,
+  correct_option: null,
+  feedback_enabled: false,
+  ai_generated_correct_option: null,
 };
 
 // 18.4
@@ -52,7 +67,9 @@ export const mockResponse: Response = {
   id: 'response-789',
   discussion_id: 'discussion-123',
   response_text: 'The WWW Consortium sets web standards to ensure interoperability.',
-  created_at: '2026-02-10T14:06:15Z'
+  created_at: '2026-02-10T14:06:15Z',
+  selected_option: null,
+  is_correct: null,
 };
 
 // 18.5
@@ -60,7 +77,9 @@ export const mockResponse2: Response = {
   id: 'response-790',
   discussion_id: 'discussion-123',
   response_text: 'They maintain HTML, CSS, and other web technologies.',
-  created_at: '2026-02-10T14:06:45Z'
+  created_at: '2026-02-10T14:06:45Z',
+  selected_option: null,
+  is_correct: null,
 };
 
 // 18.6
@@ -68,7 +87,9 @@ export const mockResponse3: Response = {
   id: 'response-791',
   discussion_id: 'discussion-123',
   response_text: 'The W3C ensures cross-browser compatibility.',
-  created_at: '2026-02-10T14:07:12Z'
+  created_at: '2026-02-10T14:07:12Z',
+  selected_option: null,
+  is_correct: null,
 };
 
 // 18.7
@@ -107,7 +128,12 @@ export function createMockDiscussions(count: number): Discussion[] {
     created_at: new Date(2026, 1, 10, 14, index, 0).toISOString(),
     published_at: new Date(2026, 1, 10, 14, index, 2).toISOString(),
     closed_at: index === count - 1 ? null : new Date(2026, 1, 10, 14, index, 30).toISOString(),
-    display_order: index
+    display_order: index,
+    source: null,
+    mc_options: null,
+    correct_option: null,
+    feedback_enabled: false,
+    ai_generated_correct_option: null,
   }));
 }
 
@@ -124,7 +150,9 @@ export function createMockResponses(discussionId: string, count: number): Respon
     id: `response-${index}`,
     discussion_id: discussionId,
     response_text: `Student response #${index + 1} to the discussion prompt.`,
-    created_at: new Date(2026, 1, 10, 14, 6, index * 10).toISOString()
+    created_at: new Date(2026, 1, 10, 14, 6, index * 10).toISOString(),
+    selected_option: null,
+    is_correct: null,
   }));
 }
 

@@ -1,7 +1,9 @@
+// Top navigation header for the lessons page with a title and a Back button.
 'use client';
 
 import { Button } from '@/components/ui/button';
 
+/** Renders the lessons page header bar with the provided title and a Back navigation button. */
 export function LessonsPageHeader({
   title,
   onBack,

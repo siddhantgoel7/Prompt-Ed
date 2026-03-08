@@ -1,3 +1,4 @@
+// Instructor login page — wraps the LoginForm in the AuthShell centered card layout.
 import { AuthShell } from '@/components/auth/AuthShell';
 import { LoginForm } from '@/components/auth/LoginForm';
 

@@ -1,7 +1,9 @@
+// Top navigation bar for the instructor dashboard with the app title and logout button.
 'use client';
 
 import { Button } from '@/components/ui/button';
 
+/** Renders the dashboard header bar with app branding and a Log-Out button. */
 export function InstructorDashboardHeader({
   loggingOut,
   onLogout,

@@ -50,7 +50,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     handleExportLessonData: jest.fn(),
     handleActivate: jest.fn(),
     ...overrides,
-  };
+  } as unknown as SessionVM;
 }
 
 describe('Auto-Save on End (Acceptance) [US 1.10]', () => {

@@ -1,3 +1,5 @@
+// Server-side page that fetches discussion details and responses, then passes them
+// as initial props to the DiscussionPage client component.
 import { DiscussionPage } from '@/components/instructor/DiscussionPage';
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
@@ -7,6 +9,7 @@ interface PageParams {
   discussionId: string;
 }
 
+/** Fetches discussion and response data server-side, then renders the client DiscussionPage component. */
 export default async function InstructorDiscussionPage({
   params
 }: {

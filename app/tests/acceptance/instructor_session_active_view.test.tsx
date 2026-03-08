@@ -3,50 +3,88 @@ import { SessionActiveView } from '@/components/instructor/session/SessionActive
 import type { SessionVM } from '@/hooks/useSessionPage';
 
 jest.mock('@/components/instructor/session/SessionHeaderActive', () => ({
-  SessionHeaderActive: (props: any) => (
+  SessionHeaderActive: (props: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <div>Title: {vm.lesson.title}</div>
+        <div>PIN: {vm.lesson.pin_code}</div>
+        <button onClick={vm.handleDisplay}>Display</button>
+        <button onClick={vm.handleEnd}>End</button>
+        <button onClick={props.onSplitView}>Split View</button>
+      </div>
+    );
+  },
+}));
+
+jest.mock('@/components/instructor/session/SplitView', () => ({
+  SplitView: (props: any) => (
     <div>
-      <div>Title: {props.title}</div>
-      <div>PIN: {props.pinCode}</div>
-      <button onClick={props.onDisplay}>Display</button>
-      <button onClick={props.onEnd}>End</button>
+      <div>Split View Overlay</div>
+      <button onClick={props.onBack}>Back to Session</button>
     </div>
   ),
 }));
 
 jest.mock('@/components/instructor/session/JoinCodeOverlay', () => ({
-  JoinCodeOverlay: (props: any) =>
-    props.open ? (
+  JoinCodeOverlay: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return vm.displayState ? (
       <div>
         <div>Join Code Overlay</div>
-        <div>CODE: {props.code}</div>
-        <button onClick={props.onClose}>Close Overlay</button>
+        <div>CODE: {vm.lesson.pin_code}</div>
+        <button onClick={vm.handleDisplay}>Close Overlay</button>
       </div>
-    ) : null,
+    ) : null;
+  },
 }));
 
 jest.mock('@/components/instructor/session/ActiveSidebar', () => ({
   ActiveSidebar: () => <div>Sidebar</div>,
 }));
 
+jest.mock('@/components/instructor/session/ConnectionStatus', () => ({
+  ConnectionStatus: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <div>Connection: {vm.isConnected ? 'connected' : 'disconnected'}</div>
+        <button onClick={vm.handleReconnect}>Reconnect</button>
+      </div>
+    );
+  },
+}));
+
 jest.mock('@/components/instructor/session/ActiveRightPanel', () => ({
-  ActiveRightPanel: (props: any) => <div>RightPanel count={props.responses?.length ?? 0}</div>,
+  ActiveRightPanel: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return <div>RightPanel count={vm.responses?.length ?? 0}</div>;
+  },
 }));
 
 jest.mock('@/components/instructor/session/ActiveCenter', () => ({
-  ActiveCenter: (props: any) => (
-    <div>
-      <div>Center</div>
-      <div>connected={String(props.isConnected)}</div>
-      <div>activeDiscussionId={String(props.activeDiscussionId)}</div>
-      <input
-        aria-label="Prompt"
-        value={props.promptInput}
-        onChange={(e) => props.setPromptInput(e.target.value)}
-      />
-      <button onClick={props.onPublish}>Publish</button>
-      <button onClick={props.onClose}>Close</button>
-    </div>
-  ),
+  ActiveCenter: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    return (
+      <div>
+        <div>Center</div>
+        <div>connected={String(vm.isConnected)}</div>
+        <div>activeDiscussionId={String(vm.activeDiscussion?.id ?? null)}</div>
+        <input
+          aria-label="Prompt"
+          value={vm.promptInput}
+          onChange={(e) => vm.setPromptInput(e.target.value)}
+        />
+        <button onClick={vm.handlePublishDiscussion}>Publish</button>
+        <button onClick={vm.handleCloseDiscussion}>Close</button>
+      </div>
+    );
+  },
 }));
 
 function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
@@ -62,6 +100,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     loading: false,
     notFound: false,
     isConnected: true,
+    handleReconnect: jest.fn(),
     discussions: [],
     activeDiscussion: null,
     responses: [],
@@ -82,7 +121,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     handleExportLessonData: jest.fn(),
     handleActivate: jest.fn(),
     ...overrides,
-  };
+  } as unknown as SessionVM;
 }
 
 describe('SessionActiveView (Acceptance)', () => {
@@ -149,5 +188,57 @@ describe('SessionActiveView (Acceptance)', () => {
     render(<SessionActiveView vm={vm} />);
 
     expect(screen.getByText(/Failed to end lesson/i)).toBeInTheDocument();
+  });
+
+  // 5.8
+  it('success: clicking Split View button opens the split view overlay', () => {
+    const vm = makeVM();
+    render(<SessionActiveView vm={vm} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Split View/i }));
+
+    expect(screen.getByText('Split View Overlay')).toBeInTheDocument();
+    // Normal session content should not be visible
+    expect(screen.queryByText('Sidebar')).not.toBeInTheDocument();
+  });
+
+  // 5.9
+  it('success: clicking Back to Session in split view returns to normal view', () => {
+    const vm = makeVM();
+    render(<SessionActiveView vm={vm} />);
+
+    // Enter split view
+    fireEvent.click(screen.getByRole('button', { name: /Split View/i }));
+    expect(screen.getByText('Split View Overlay')).toBeInTheDocument();
+
+    // Exit split view
+    fireEvent.click(screen.getByRole('button', { name: /Back to Session/i }));
+    expect(screen.queryByText('Split View Overlay')).not.toBeInTheDocument();
+    expect(screen.getByText('Sidebar')).toBeInTheDocument();
+  });
+
+  // 5.10
+  it('success: shows connected status when isConnected=true', () => {
+    const vm = makeVM({ isConnected: true });
+    render(<SessionActiveView vm={vm} />);
+
+    expect(screen.getByText('Connection: connected')).toBeInTheDocument();
+  });
+
+  // 5.11
+  it('success: shows disconnected status when isConnected=false', () => {
+    const vm = makeVM({ isConnected: false });
+    render(<SessionActiveView vm={vm} />);
+
+    expect(screen.getByText('Connection: disconnected')).toBeInTheDocument();
+  });
+
+  // 5.12
+  it('success: clicking Reconnect calls vm.handleReconnect', () => {
+    const vm = makeVM({ isConnected: false });
+    render(<SessionActiveView vm={vm} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Reconnect/i }));
+    expect(vm.handleReconnect).toHaveBeenCalled();
   });
 });

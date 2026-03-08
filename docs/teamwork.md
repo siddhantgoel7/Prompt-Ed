@@ -6,7 +6,7 @@
 ---
 
 ## Scrum Roles
-- **Scrum Master:** Kristian Perez
+- **Scrum Master:** Siddhant Goel
 - **Product Owner:** Nikita Ishanov
 
 ---

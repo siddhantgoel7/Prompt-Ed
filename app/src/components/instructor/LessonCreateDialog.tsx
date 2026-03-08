@@ -1,3 +1,4 @@
+// Modal dialog for creating a new lesson with a title input field.
 'use client';
 
 import * as React from 'react';
@@ -7,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
+/** Renders a dialog with a lesson title input and Create/Cancel buttons. */
 export function LessonCreateDialog({
   open,
   onOpenChange,
@@ -28,7 +30,7 @@ export function LessonCreateDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>

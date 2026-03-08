@@ -1,25 +1,50 @@
-import { createClient } from '@/lib/supabase/server'; // ← Changed from client to server
+// OAuth callback handler for Google sign-in.
+// Exchanges the authorization code for a session, enforces the @ualberta.ca domain restriction,
+// and deletes unauthorized accounts before redirecting.
+import { createClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+/**
+ * GET /api/auth/callback
+ * Handles the OAuth redirect: exchanges the code for a session, enforces @ualberta.ca email,
+ * and redirects to the dashboard or back to sign-up with an error.
+ */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const origin = requestUrl.origin;
 
   if (code) {
-    const supabase = await createClient(); // ← Add await
-    
-    // Replace with code exchange logic here
+    const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    
+
     if (error) {
       console.error('OAuth error:', error);
-      return NextResponse.redirect(`${origin}/create_instructor?error=${error.message}`);
+      return NextResponse.redirect(`${origin}/create_instructor?error=${encodeURIComponent(error.message)}`);
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user?.email?.endsWith('@ualberta.ca')) {
+      const userId = user?.id;
+
+      await supabase.auth.signOut();
+
+      if (userId) {
+        const adminClient = createAdminClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+        await adminClient.auth.admin.deleteUser(userId);
+      }
+
+      return NextResponse.redirect(
+        `${origin}/create_instructor?error=${encodeURIComponent('You must use a UAlberta email address (@ualberta.ca)')}`
+      );
     }
   }
 
-  // Replace with redirect logic here
   return NextResponse.redirect(`${origin}/instructor_dashboard`);
 }
-

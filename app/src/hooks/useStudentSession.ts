@@ -4,18 +4,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { createClient } from '@/lib/supabase/client';
+
 import { useRealtime } from '@/lib/realtime/useRealtime';
 
 import type { Discussion } from '@/types/discussion';
 import type { Lesson } from '@/types/lesson';
 import type { Response } from '@/types/response';
+import { fetchLessonByIdApi } from '@/lib/api/lessonApi';
+import { fetchStudentActiveDiscussionApi, submitStudentResponseApi } from '@/lib/api/discussionsApi';
 
 type ViewState = 'loading' | 'waiting' | 'active' | 'submitted' | 'ended' | 'error';
 
 type BroadcastEnvelope<T> = { payload?: T } & Partial<T>;
 function unwrapBroadcast<T>(payload: BroadcastEnvelope<T>): T | undefined {
-  // Supabase sometimes wraps at payload.payload
   return (payload?.payload as T) ?? (payload as unknown as T);
 }
 
@@ -24,7 +25,6 @@ type DiscussionPublishedPayload = { discussion: Discussion };
 type DiscussionClosedPayload = { discussionId: string };
 type ResponseNewPayload = { response: Response };
 
-// Minimal shape we need from Supabase realtime channel (no `any`)
 type RealtimeLikeChannel = {
   on: (
     type: 'broadcast',
@@ -66,15 +66,10 @@ export function useStudentSession(lessonId: string) {
       setView('loading');
       setErrorMessage(null);
 
-      const supabase = createClient();
 
-      const { data: lessonData, error: lessonError } = await supabase
-        .from('lessons')
-        .select('*')
-        .eq('id', lessonId)
-        .single();
 
-      // Not active or not found -> send home
+      const { data: lessonData, error: lessonError } = await fetchLessonByIdApi(lessonId);
+
       if (lessonError || !lessonData || (lessonData as { status?: string }).status !== 'active') {
         router.push('/');
         return;
@@ -83,17 +78,11 @@ export function useStudentSession(lessonId: string) {
       if (cancelled) return;
       setLesson(lessonData as Lesson);
 
-      const { data: discussionData, error: discussionError } = await supabase
-        .from('discussions')
-        .select('*')
-        .eq('lesson_id', lessonId)
-        .eq('status', 'active')
-        .maybeSingle();
+      const { data: discussionData, error: discussionError } = await fetchStudentActiveDiscussionApi(lessonId);
 
       if (cancelled) return;
 
       if (discussionError) {
-        // keep UX: don’t hard-fail, just show waiting + log
         console.error('Error fetching active discussion:', discussionError);
       }
 
@@ -164,34 +153,29 @@ export function useStudentSession(lessonId: string) {
     };
   }, [channel]);
 
-  // 3) Submit response (REMOVE useCallback to satisfy react-hooks/preserve-manual-memoization)
-  const submitResponse = async () => {
+  // 3) Submit response
+  // responseTextOverride: for MC questions, the page passes the formatted option string directly so we don't race against the setState for responseText.
+  const submitResponse = async (responseTextOverride?: string, selectedOptionOverride?: string, isCorrectOverride?: boolean) => {
     if (!activeDiscussion?.id) return;
     if (view !== 'active') return;
 
-    const text = responseText.trim();
+    const text = (responseTextOverride ?? responseText).trim();
     if (!text) return;
 
     setSubmitting(true);
     setErrorMessage(null);
 
-    const supabase = createClient();
-
-    const { data, error } = await supabase
-      .from('responses')
-      .insert([
-        {
-          discussion_id: activeDiscussion.id,
-          response_text: text,
-        },
-      ])
-      .select()
-      .single();
+    const { data, error } = await submitStudentResponseApi(
+      activeDiscussion.id,
+      text,
+      selectedOptionOverride ?? null,
+      isCorrectOverride ?? null,
+    );
 
     const newResponse = data as Response | null;
 
     if (error || !newResponse) {
-      console.error('Error submitting response:', error);
+      console.error('Error submitting response to Supabase:', error);
       setErrorMessage('Could not submit your response. Please try again.');
       setSubmitting(false);
       return;
@@ -212,7 +196,6 @@ export function useStudentSession(lessonId: string) {
     setView('submitted');
   };
 
-  // If we’re submitted and a new discussion is not active, keep waiting
   useEffect(() => {
     if (view !== 'submitted') return;
   }, [view]);

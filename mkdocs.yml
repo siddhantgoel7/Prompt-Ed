@@ -16,3 +16,9 @@ nav:
       - Interactions: interface-interactions.md
       - Workflow: ci-cd.md
       - Testing: testing.md
+      - AI Pipeline: ai.md
+  
+  - UX/UI Guidelines:
+      - Product & Audience: audience.md
+      - UX Principles: principles.md
+      - Accessibility & Style: accessibility.md

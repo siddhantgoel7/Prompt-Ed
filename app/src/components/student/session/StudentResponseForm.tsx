@@ -1,21 +1,24 @@
-// src/components/student/session/StudentResponseForm.tsx
+// Response submission form used by students for both free-text and multiple-choice discussions.
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
+/** Renders a textarea for free-text responses, a character counter, and a Submit button. */
 export function StudentResponseForm({
   value,
   onChange,
   onSubmit,
   disabled,
   submitting,
+  validationMessage,
 }: {
   value: string;
   onChange: (v: string) => void;
   onSubmit: () => void;
   disabled: boolean;
   submitting: boolean;
+  validationMessage?: string;
 }) {
   const chars = value.length;
 
@@ -32,7 +35,12 @@ export function StudentResponseForm({
         <span>{chars} characters</span>
         <span className="hidden sm:inline">Be concise and specific</span>
       </div>
-      <Button className="w-full" onClick={onSubmit} disabled={disabled}>
+      {validationMessage ? (
+        <p role="alert" className="text-sm font-medium text-destructive">
+          {validationMessage}
+        </p>
+      ) : null}
+      <Button className="w-full" onClick={onSubmit} disabled={disabled || submitting}>
         {submitting ? 'Submitting…' : 'Submit response'}
       </Button>
     </div>

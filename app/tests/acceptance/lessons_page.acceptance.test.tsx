@@ -51,8 +51,8 @@ jest.mock('@/components/instructor/LessonCreateDialog', () => ({
     ) : null,
 }));
 
-jest.mock('@/components/instructor/ConfirmDeleteLessonDialog', () => ({
-  ConfirmDeleteLessonDialog: ({ open, error, deleting, onCancel, onConfirm, onOpenChange }: any) =>
+jest.mock('@/components/instructor/ConfirmDeleteDialog', () => ({
+  ConfirmDeleteDialog: ({ open, error, deleting, onCancel, onConfirm, onOpenChange }: any) =>
     open ? (
       <div>
         <h3>Delete Lesson?</h3>

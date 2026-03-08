@@ -1,21 +1,29 @@
+// Header bar for an active lesson session with the lesson title, join code, and control buttons.
 'use client';
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
+import { SessionContext } from './SessionContext';
 
-export function SessionHeaderActive({
-  title,
-  pinCode,
-  endingLesson,
-  onDisplay,
-  onEnd,
-}: {
-  title: string;
-  pinCode: string | null;
-  endingLesson: boolean;
-  onDisplay: () => void;
-  onEnd: () => void;
+/**
+ * Active-session header with lesson title, join PIN code, Display/End/Split View/Settings buttons.
+ * Reads values from SessionContext when available, falling back to explicit props for testing.
+ */
+export function SessionHeaderActive(props: {
+  title?: string;
+  pinCode?: string | null;
+  endingLesson?: boolean;
+  onDisplay?: () => void;
+  onEnd?: () => void;
+  onSplitView: () => void;
 }) {
+  const context = React.useContext(SessionContext);
+  const title = context ? context.lesson.title : props.title!;
+  const pinCode = context ? context.lesson.pin_code : props.pinCode!;
+  const endingLesson = context ? context.endingLesson : props.endingLesson!;
+  const onDisplay = context ? context.handleDisplay : props.onDisplay!;
+  const onEnd = context ? context.handleEnd : props.onEnd!;
+  const onSplitView = props.onSplitView;
   return (
     <header className="border-b border-gray-300 px-4 md:px-6 py-3 md:py-4 flex flex-wrap items-center justify-between gap-2">
       <h1 className="text-lg md:text-xl font-semibold truncate">{title}</h1>
@@ -34,6 +42,8 @@ export function SessionHeaderActive({
         <Button size="sm" onClick={onEnd} disabled={endingLesson} variant="destructive">
           {endingLesson ? 'Ending...' : 'End'}
         </Button>
+
+        <Button size="sm" variant="outline" onClick={onSplitView}>Split View</Button>
 
         <Button size="sm" variant="secondary">Settings</Button>
       </div>

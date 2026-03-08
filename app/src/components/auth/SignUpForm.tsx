@@ -1,3 +1,5 @@
+// Instructor sign-up form with email/password fields, UAlberta domain enforcement,
+// duplicate-account checking, and Google OAuth as an alternative.
 'use client';
 
 import { useState } from 'react';
@@ -11,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { OAuthButton } from './OAuthButton';
 import { EmailConfirmation } from './EmailConfirmation';
+import {useSearchParams } from 'next/navigation';
 
 type SignUpFormData = {
   fullName: string;
@@ -19,9 +22,10 @@ type SignUpFormData = {
   agreeToTerms: boolean;
 };
 
+/** Renders the instructor registration form; switches to EmailConfirmation after successful sign-up. */
 export function SignUpForm() {
   const router = useRouter();
-
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState<SignUpFormData>({
     fullName: '',
     email: '',
@@ -29,7 +33,7 @@ export function SignUpForm() {
     agreeToTerms: false,
   });
 
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(searchParams.get('error'));
   const [loading, setLoading] = useState(false);
   const [confirmedEmail, setConfirmedEmail] = useState<string | null>(null);
 
@@ -53,6 +57,25 @@ export function SignUpForm() {
 
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.email.endsWith('@ualberta.ca')) {
+      setError('You must use a UAlberta email address (@ualberta.ca)');
+      setLoading(false);
+      return;
+    }
+
+    const checkRes = await fetch('/api/auth/check-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: formData.email }),
+    });
+    const checkData = await checkRes.json();
+
+    if (checkData.exists) {
+      setError('An account with this email already exists. Please sign in with Google instead.');
       setLoading(false);
       return;
     }
