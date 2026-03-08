@@ -1,9 +1,13 @@
+// Hook that wraps the MediaRecorder API for in-browser audio capture.
+// Used to record instructor speech for Whisper transcription (US 1.17).
 'use client';
 
 import * as React from 'react';
 
-// ─── Audio recorder hook (US 1.17) ───────────────────────────────────────────
-
+/**
+ * Provides start/stop controls for recording microphone audio.
+ * Returns the recorded audio as a Blob when stop() resolves.
+ */
 export function useAudioRecorder() {
     const [isRecording, setIsRecording] = React.useState(false);
     const [elapsed, setElapsed] = React.useState(0);
@@ -11,6 +15,7 @@ export function useAudioRecorder() {
     const chunksRef = React.useRef<Blob[]>([]);
     const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
+    /** Requests microphone access and starts recording audio in webm/opus format. */
     const start = React.useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -30,6 +35,7 @@ export function useAudioRecorder() {
         }
     }, []);
 
+    /** Stops recording and resolves with the complete audio Blob. */
     const stop = React.useCallback((): Promise<Blob> => {
         return new Promise((resolve) => {
             const recorder = mediaRecorderRef.current;
@@ -45,6 +51,7 @@ export function useAudioRecorder() {
         });
     }, []);
 
+    /** Formats elapsed seconds as MM:SS for the recording timer display. */
     const fmt = (s: number) =>
         `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 

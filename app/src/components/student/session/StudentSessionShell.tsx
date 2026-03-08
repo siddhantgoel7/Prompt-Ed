@@ -1,9 +1,11 @@
+// Centered card wrapper used by all student session views to maintain consistent layout.
 // src/components/student/session/StudentSessionShell.tsx
 'use client';
 
 import { PropsWithChildren } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+/** Renders a full-screen centered card with the lesson title as the header. */
 export function StudentSessionShell({
   title,
   children,

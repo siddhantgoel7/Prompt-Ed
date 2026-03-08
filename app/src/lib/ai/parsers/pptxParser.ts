@@ -1,3 +1,5 @@
+// Parses PPTX files into plain text by extracting slide body, speaker notes,
+// and optionally describing embedded images via GPT-4o vision (one call per slide).
 import JSZip from 'jszip';
 import type { AIProvider } from '@/lib/ai/providers';
 
@@ -159,6 +161,7 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
 
 // ── XML helpers ────────────────────────────────────────────────────────────────
 
+/** Extracts all text node values from PPTX/OOXML and joins them with spaces. */
 function extractTextNodes(xml: string): string {
   const matches = xml.match(/<a:t[^>]*>([^<]*)<\/a:t>/g) ?? [];
   return matches
@@ -168,6 +171,7 @@ function extractTextNodes(xml: string): string {
     .trim();
 }
 
+/** Finds the notes slide path from a slide's .rels file, with fallback to the default naming convention. */
 function findNotesSlideTarget(relsXml: string, slideNumber: number): string | null {
   const pattern = /Type="[^"]*notesSlide"[^>]*Target="([^"]+)"/g;
   let match;
@@ -180,6 +184,7 @@ function findNotesSlideTarget(relsXml: string, slideNumber: number): string | nu
   return `ppt/notesSlides/notesSlide${slideNumber}.xml`;
 }
 
+/** Extracts all image relationship targets from a slide's .rels file. */
 function findImageTargets(relsXml: string): string[] {
   if (!relsXml) return [];
   const pattern = /Type="[^"]*\/image"[^>]*Target="([^"]+)"/g;
@@ -191,6 +196,7 @@ function findImageTargets(relsXml: string): string[] {
   return targets;
 }
 
+/** Resolves a relative image target from a slide .rels entry to its absolute zip path. */
 function resolveMediaPath(target: string): string | null {
   if (!target) return null;
   if (target.startsWith('../')) return `ppt/${target.slice(3)}`;
@@ -198,10 +204,12 @@ function resolveMediaPath(target: string): string | null {
   return `ppt/slides/${target}`;
 }
 
+/** Removes control characters and Unicode bidi overrides that can corrupt chunk storage. */
 function stripControlChars(text: string): string {
   return text.replace(/[\u0000-\u0008\u000B-\u001F\u202A-\u202E\u2066-\u2069]/g, '');
 }
 
+/** Extracts the numeric slide index from a ppt/slides/slideN.xml path. */
 function slideNum(path: string): number {
   return parseInt(path.match(/\d+/)?.[0] ?? '0', 10);
 }

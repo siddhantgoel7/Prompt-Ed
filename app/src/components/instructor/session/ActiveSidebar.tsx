@@ -1,3 +1,4 @@
+// Left sidebar for the active session view with tabbed panels for discussions, files, and analytics.
 'use client';
 
 import * as React from 'react';
@@ -13,6 +14,7 @@ import { FilesTab } from './FilesTab';
 
 
 
+/** Renders the session sidebar with Discussions, Files, and Analytics tabs. */
 export function ActiveSidebar(props: {
   discussions?: DiscussionWithResponseCount[];
   activeDiscussionId?: string | null;

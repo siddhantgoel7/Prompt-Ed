@@ -1,3 +1,5 @@
+// API route handlers for a specific lesson file: DELETE removes chunks and storage object,
+// GET returns a short-lived signed download URL for the file.
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
@@ -74,6 +76,10 @@ export async function DELETE(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+/**
+ * GET /api/lessons/[lessonId]/files/[fileId]
+ * Returns a signed URL and original filename for downloading the file.
+ */
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ lessonId: string; fileId: string }> }

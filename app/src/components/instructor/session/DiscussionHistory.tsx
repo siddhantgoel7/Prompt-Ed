@@ -1,3 +1,5 @@
+// Scrollable list of past discussions shown in the sidebar, newest first, with response counts.
+// Each card links to the discussion detail page for the current lesson.
 'use client';
 
 import * as React from 'react';
@@ -9,6 +11,7 @@ import { useParams } from 'next/navigation';
 import { formatTime, truncateText } from '@/lib/utils';
 
 
+/** Renders a reverse-chronological list of discussion cards, highlighting the currently active one. */
 export function DiscussionHistory({
     discussions,
     activeDiscussionId,

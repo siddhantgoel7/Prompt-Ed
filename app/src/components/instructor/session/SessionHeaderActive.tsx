@@ -1,9 +1,14 @@
+// Header bar for an active lesson session with the lesson title, join code, and control buttons.
 'use client';
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { SessionContext } from './SessionContext';
 
+/**
+ * Active-session header with lesson title, join PIN code, Display/End/Split View/Settings buttons.
+ * Reads values from SessionContext when available, falling back to explicit props for testing.
+ */
 export function SessionHeaderActive(props: {
   title?: string;
   pinCode?: string | null;

@@ -1,3 +1,4 @@
+// Type definitions for the AI pipeline: file uploads, chunk metadata, generated prompts, and MC options.
 // @see US 1.16, 1.18, 1.23, 2.08, 2.10
 
 import { PromptType } from './discussion';

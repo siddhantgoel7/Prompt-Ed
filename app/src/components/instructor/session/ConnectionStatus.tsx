@@ -1,3 +1,4 @@
+// Fixed bottom-right realtime connection status indicator with a Reconnect button when disconnected.
 'use client';
 
 import * as React from 'react';
@@ -5,6 +6,7 @@ import { Button } from '@/components/ui/button';
 
 import { SessionContext } from './SessionContext';
 
+/** Displays a green "Connected" badge or a red "Disconnected" badge with a Reconnect button. */
 export function ConnectionStatus(props: {
   isConnected?: boolean;
   onReconnect?: () => void;

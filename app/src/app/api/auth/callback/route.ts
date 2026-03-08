@@ -1,8 +1,16 @@
+// OAuth callback handler for Google sign-in.
+// Exchanges the authorization code for a session, enforces the @ualberta.ca domain restriction,
+// and deletes unauthorized accounts before redirecting.
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+/**
+ * GET /api/auth/callback
+ * Handles the OAuth redirect: exchanges the code for a session, enforces @ualberta.ca email,
+ * and redirects to the dashboard or back to sign-up with an error.
+ */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');

@@ -1,3 +1,4 @@
+// Student session route — resolves lessonId from URL params and renders the student session page.
 // src/app/student/[lessonId]/page.tsx
 'use client';
 

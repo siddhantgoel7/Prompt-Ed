@@ -1,3 +1,4 @@
+// Header bar for an ended lesson session with Export, Activate, and Split View buttons.
 'use client';
 
 import * as React from 'react';
@@ -5,6 +6,10 @@ import { Button } from '@/components/ui/button';
 
 import { SessionContext } from './SessionContext';
 
+/**
+ * Ended-session header with lesson title and Export Txt / Activate / Split View buttons.
+ * Reads from SessionContext when available, falling back to explicit props for testing.
+ */
 export function SessionHeaderEnded(props: {
   title?: string;
   exporting?: boolean;

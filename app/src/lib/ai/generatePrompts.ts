@@ -1,3 +1,5 @@
+// Main RAG → generate pipeline for discussion prompt creation.
+// Retrieves relevant lesson chunks, builds prompts, calls the LLM, and parses the response.
 import type { AIProvider } from './providers';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PromptType } from '@/types/discussion';
@@ -109,6 +111,7 @@ function parseAIResponse(raw: string, promptType: PromptType): GeneratedPrompt[]
   });
 }
 
+/** Returns placeholder candidates when the AI response cannot be parsed. */
 function getFallbackCandidates(promptType: PromptType): GeneratedPrompt[] {
   return Array.from({ length: CANDIDATE_COUNT }, (_, i) => ({
     promptText: `Discussion question ${i + 1} — AI response could not be parsed. Please regenerate.`,

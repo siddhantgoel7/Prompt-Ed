@@ -1,3 +1,5 @@
+// Hook for the home join page — handles PIN entry, auth-gate redirect, and
+// session lookup before navigating the student into a live lesson.
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -7,10 +9,12 @@ import { fetchLessonByPinApi } from '@/lib/api/lessonApi';
 
 type ViewState = 'checking-auth' | 'ready' | 'joining';
 
+/** Returns true if the pin is exactly 6 digits. */
 function isValidPin(pin: string) {
   return /^\d{6}$/.test(pin);
 }
 
+/** Provides state and handlers for the home join form (PIN entry and session navigation). */
 export function useHomeJoin() {
   const router = useRouter();
 
@@ -67,6 +71,7 @@ export function useHomeJoin() {
   const goSignUp = useCallback(() => router.push('/create_instructor'), [router]);
   const goLogIn = useCallback(() => router.push('/login_instructor'), [router]);
 
+  /** Looks up the lesson by PIN and navigates to the student session if active. */
   const join = useCallback(async () => {
     setError(null);
 

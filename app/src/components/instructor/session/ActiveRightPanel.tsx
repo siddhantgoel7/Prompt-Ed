@@ -1,3 +1,4 @@
+// Right panel of the active session view: live student responses and MC answer distribution.
 'use client';
 
 import * as React from 'react';
@@ -7,6 +8,7 @@ import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 import { SessionContext } from './SessionContext';
 
+/** Displays live student responses and, for MC questions, per-option response counts. */
 export function ActiveRightPanel(props: {
   responses?: Response[];
   activeDiscussion?: Discussion | null;

@@ -1,3 +1,4 @@
+// Modal dialog for adding or editing a course (title and optional image URL).
 'use client';
 
 import * as React from 'react';
@@ -14,6 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+/** Renders an add/edit course dialog with a title field and a placeholder image upload button. */
 export function CourseDialog({
   open,
   onOpenChange,

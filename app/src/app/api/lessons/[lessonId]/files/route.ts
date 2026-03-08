@@ -1,3 +1,4 @@
+// API route for listing all uploaded files for a lesson, with ownership verification.
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { LessonFile } from '@/types/ai';

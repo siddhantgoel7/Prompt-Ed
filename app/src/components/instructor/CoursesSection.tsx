@@ -1,3 +1,4 @@
+// Section component that displays the instructor's course grid with an "Add a course" button.
 'use client';
 
 import * as React from 'react';
@@ -6,6 +7,7 @@ import type { Course } from '@/types/course';
 import { Button } from '@/components/ui/button';
 import { CourseCard } from '@/components/instructor/CourseCard';
 
+/** Renders the courses section heading, add button, and a responsive grid of CourseCard items. */
 export function CoursesSection({
   courses,
   onAdd,

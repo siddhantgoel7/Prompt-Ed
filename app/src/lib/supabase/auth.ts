@@ -1,7 +1,10 @@
+// Client-side Supabase auth helpers for email/password and Google OAuth flows.
+// All functions run in the browser and use the browser Supabase client.
 'use client';
 
 import { createClient } from './client';
 
+/** Registers a new instructor account and sends a confirmation email. */
 export async function signUpWithEmail(email: string, password: string, fullName: string) {
   const supabase = createClient();
   
@@ -19,6 +22,7 @@ export async function signUpWithEmail(email: string, password: string, fullName:
   return { data, error };
 }
 
+/** Signs in an existing instructor with email and password. */
 export async function signInWithEmail(email: string, password: string) {
   const supabase = createClient();
   
@@ -31,6 +35,7 @@ export async function signInWithEmail(email: string, password: string) {
   return { data, error };
 }
 
+/** Initiates Google OAuth sign-in and redirects to the auth callback route. */
 export async function signInWithGoogle() {
   const supabase = createClient();
   
@@ -45,6 +50,7 @@ export async function signInWithGoogle() {
   return { data, error };
 }
 
+/** Signs the current user out and clears the session. */
 export async function signOut() {
   const supabase = createClient();
   
