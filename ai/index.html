@@ -1,0 +1,2951 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../testing/">
+      
+      
+        <link rel="next" href="../audience/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>AI Pipeline - PMCOL Teaching Tool</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pmcol-teaching-tool-sprint-3-ai-pipeline-technical-documentation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PMCOL Teaching Tool" class="md-header__button md-logo" aria-label="PMCOL Teaching Tool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PMCOL Teaching Tool
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AI Pipeline
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PMCOL Teaching Tool" class="md-nav__button md-logo" aria-label="PMCOL Teaching Tool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PMCOL Teaching Tool
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../project-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../teamwork/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Teamwork
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../meetings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meetings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Details
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Technical Details
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API & Supabase
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../run-local/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run Locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../interface-interactions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interactions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Pipeline
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-system-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. System Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. System Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-end-to-end-instructor-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 End-to-End Instructor Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-technology-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Technology Stack
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-file-upload-parsing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. File Upload &amp; Parsing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. File Upload &amp; Parsing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-upload-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Upload Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-magic-byte-file-type-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Magic-Byte File Type Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-parser-dispatcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Parser Dispatcher
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-pdf-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 PDF Parser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-pptx-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 PPTX Parser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-chunking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Chunking
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-embeddings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Embeddings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Embeddings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-batch-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Batch Strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Error Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-speech-to-text-whisper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Speech-to-Text — Whisper
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Speech-to-Text — Whisper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-useaudiorecorder-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 useAudioRecorder Hook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-transcript-route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Transcript Route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-auto-generate-after-transcription" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Auto-Generate After Transcription
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-rag-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. RAG Generation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. RAG Generation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-generate-route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Generate Route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-uselessonai-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 useLessonAI Hook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-candidate-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Candidate Count
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-prompt-assembly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Prompt Assembly
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-gpt-4o-mini-call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 GPT-4o-mini Call
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-two-step-ownership-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Two-Step Ownership Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-is_correct-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 is_correct Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-lesson_id-isolation-in-pgvector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 lesson_id Isolation in pgvector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-magic-byte-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Magic-Byte Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65-prompt-injection-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.5 Prompt Injection Guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ui-components-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. UI Components &amp; Hooks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. UI Components &amp; Hooks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-activecenter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 ActiveCenter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-sessioncontext" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 SessionContext
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-uselessonfiles-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 useLessonFiles Hook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-uselessondiscussions-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 useLessonDiscussions Hook
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-provider-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Provider Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Provider Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-aiprovider-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 AIProvider Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-openaiprovider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 OpenAIProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-known-inconsistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Known Inconsistency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-switching-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Switching Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-image-pdf-vision-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Image &amp; PDF Vision Pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Image &amp; PDF Vision Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-what-is-now-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 What Is Now Supported
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-vision-cost-estimates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Vision Cost Estimates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-debug-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Debug Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-database-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Database Schema
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Database Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-lesson_files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 lesson_files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-lesson_chunks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 lesson_chunks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-match_lesson_chunks-rpc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 match_lesson_chunks RPC
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-configuration-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Configuration Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Configuration Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-nextconfigts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 next.config.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-required-npm-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Required npm Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#appendix-key-file-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Appendix: Key File Locations
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UX/UI Guidelines
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    UX/UI Guidelines
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../audience/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product & Audience
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../principles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UX Principles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../accessibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accessibility & Style
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-system-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. System Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. System Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-end-to-end-instructor-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 End-to-End Instructor Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-technology-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Technology Stack
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-file-upload-parsing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. File Upload &amp; Parsing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. File Upload &amp; Parsing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-upload-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Upload Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-magic-byte-file-type-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Magic-Byte File Type Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-parser-dispatcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Parser Dispatcher
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-pdf-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 PDF Parser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-pptx-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 PPTX Parser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-chunking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Chunking
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-embeddings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Embeddings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Embeddings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-batch-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Batch Strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Error Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-speech-to-text-whisper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Speech-to-Text — Whisper
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Speech-to-Text — Whisper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-useaudiorecorder-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 useAudioRecorder Hook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-transcript-route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Transcript Route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-auto-generate-after-transcription" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Auto-Generate After Transcription
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-rag-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. RAG Generation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. RAG Generation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-generate-route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Generate Route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-uselessonai-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 useLessonAI Hook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-candidate-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Candidate Count
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-prompt-assembly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Prompt Assembly
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-gpt-4o-mini-call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 GPT-4o-mini Call
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-two-step-ownership-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Two-Step Ownership Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-is_correct-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 is_correct Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-lesson_id-isolation-in-pgvector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 lesson_id Isolation in pgvector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-magic-byte-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Magic-Byte Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65-prompt-injection-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.5 Prompt Injection Guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ui-components-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. UI Components &amp; Hooks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. UI Components &amp; Hooks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-activecenter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 ActiveCenter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-sessioncontext" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 SessionContext
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-uselessonfiles-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 useLessonFiles Hook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-uselessondiscussions-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 useLessonDiscussions Hook
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-provider-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Provider Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Provider Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-aiprovider-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 AIProvider Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-openaiprovider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 OpenAIProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-known-inconsistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Known Inconsistency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-switching-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Switching Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-image-pdf-vision-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Image &amp; PDF Vision Pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Image &amp; PDF Vision Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-what-is-now-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 What Is Now Supported
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-vision-cost-estimates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Vision Cost Estimates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-debug-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Debug Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-database-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Database Schema
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Database Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-lesson_files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 lesson_files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-lesson_chunks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 lesson_chunks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-match_lesson_chunks-rpc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 match_lesson_chunks RPC
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-configuration-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Configuration Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Configuration Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-nextconfigts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 next.config.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-required-npm-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Required npm Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#appendix-key-file-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Appendix: Key File Locations
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="pmcol-teaching-tool-sprint-3-ai-pipeline-technical-documentation"><strong>PMCOL Teaching Tool — Sprint 3: AI Pipeline Technical Documentation</strong></h1>
+<h2 id="table-of-contents"><strong>Table of Contents</strong></h2>
+<ol>
+<li>System Overview  </li>
+<li>File Upload &amp; Parsing  </li>
+<li>Embeddings  </li>
+<li>Speech-to-Text (Whisper)  </li>
+<li>RAG Generation  </li>
+<li>Security  </li>
+<li>UI Components &amp; Hooks  </li>
+<li>Provider Architecture  </li>
+<li>Image &amp; PDF Vision Pipeline  </li>
+<li>Database Schema  </li>
+<li>Configuration Reference</li>
+</ol>
+<hr />
+<h2 id="1-system-overview"><strong>1. System Overview</strong></h2>
+<p>Sprint 3 adds a full Retrieval-Augmented Generation (RAG) pipeline to the PMCOL teaching tool. Instructors upload PDF or PPTX lecture slides before class; the system chunks, embeds, and stores them in a pgvector store. During class, the instructor records a spoken segment, which is transcribed by OpenAI Whisper. That transcript is embedded and used for semantic similarity search, retrieving the most relevant slide chunks before GPT-4o-mini generates discussion question candidates. The instructor selects one and publishes it to students via Supabase Realtime.</p>
+<h3 id="11-end-to-end-instructor-workflow"><strong>1.1 End-to-End Instructor Workflow</strong></h3>
+<p>Before class:  Upload PDF/PPTX via Files tab in session sidebar<br />
+System:        Detect file type → parse text + visual content → chunk → embed → store in lesson_chunks (status \= ready)<br />
+During class:  Click "Start Recording" while explaining a concept<br />
+               Click "Stop &amp; Transcribe" → audio POST → /api/lessons/[lessonId]/transcript → Whisper returns text<br />
+System:        Embed transcript → vector similarity search → retrieve top-8 chunks → GPT-4o-mini → N candidates<br />
+Instructor:    Click candidate card → click "Publish This Question" → handlePublishAiCandidate()<br />
+Realtime:      Discussion broadcast to all students (is_correct stripped before broadcast)</p>
+<h3 id="12-technology-stack"><strong>1.2 Technology Stack</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PDF parsing</td>
+<td><code>pdfjs-serverless</code> with <code>@napi-rs/canvas</code> polyfill</td>
+</tr>
+<tr>
+<td>PDF vision</td>
+<td>GPT-4o native PDF file input (whole-document, one API call)</td>
+</tr>
+<tr>
+<td>PPTX parsing</td>
+<td>JSZip + OOXML <code>&lt;a:t&gt;</code> regex + rels chain for speaker notes</td>
+</tr>
+<tr>
+<td>PPTX vision</td>
+<td>GPT-4o per-slide image pass (body + notes + images in one call)</td>
+</tr>
+<tr>
+<td>Chunking</td>
+<td><code>@langchain/textsplitters</code> RecursiveCharacterTextSplitter (500 chars / 200 overlap)</td>
+</tr>
+<tr>
+<td>Embeddings</td>
+<td>OpenAI <code>text-embedding-3-small</code> — 1536 dimensions — batched 100/request</td>
+</tr>
+<tr>
+<td>Vector store</td>
+<td>Supabase pgvector, <code>match_lesson_chunks</code> RPC with HNSW index</td>
+</tr>
+<tr>
+<td>Speech-to-Text</td>
+<td>OpenAI Whisper <code>whisper-1</code> — <code>audio/webm;codecs=opus</code> preferred</td>
+</tr>
+<tr>
+<td>Generation</td>
+<td>OpenAI <code>gpt-4o-mini</code> — <code>json_object</code> mode — temperature 0.7</td>
+</tr>
+<tr>
+<td>Realtime</td>
+<td>Supabase Broadcast Channel (<code>discussion:published</code> event)</td>
+</tr>
+<tr>
+<td>AI Provider Layer</td>
+<td><code>OpenAIProvider</code> class in <code>src/lib/ai/providers.ts</code> (interface-based)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-file-upload-parsing"><strong>2. File Upload &amp; Parsing</strong></h2>
+<p><strong>Route:</strong> <code>src/app/api/lessons/[lessonId]/upload/route.ts</code></p>
+<h3 id="21-upload-pipeline"><strong>2.1 Upload Pipeline</strong></h3>
+<p>The POST handler orchestrates the full ingest pipeline <strong>with background processing</strong>. The file record is inserted immediately with <code>status = 'processing'</code> and the HTTP response is returned to the client before parsing begins. Processing runs in a fire-and-forget async function.</p>
+<p><strong>Foreground (blocking, returns HTTP response):</strong></p>
+<ol>
+<li>Auth — <code>supabase.auth.getUser()</code>  </li>
+<li>Ownership — two-step query: <code>lessons → courses</code> (see §6.1)  </li>
+<li>File validation — 25 MB size limit + magic-byte type detection  </li>
+<li>File cap — maximum 5 files per lesson (COUNT query)  </li>
+<li>Storage upload — <code>lesson-files</code> bucket at <code>{lessonId}/{uuid}-{name}</code>  </li>
+<li>DB insert — <code>lesson_files</code> row with <code>status = 'processing'</code>  </li>
+<li>Return HTTP 200 immediately with the file record</li>
+</ol>
+<p><strong>Background (non-blocking, fire-and-forget):</strong></p>
+<ol>
+<li>Parse — <code>parseFile(buffer, detectedType, aiProvider)</code> dispatches to PDF or PPTX parser (including vision pass if <code>aiProvider</code> provided)  </li>
+<li>Chunk — <code>RecursiveCharacterTextSplitter</code>, max 500 chunks  </li>
+<li>Insert chunks — <code>lesson_chunks</code> rows (no embeddings yet)  </li>
+<li>Embed — <code>embedChunks(chunkIds, supabase, aiProvider)</code> batches at 100  </li>
+<li>Mark ready — <code>UPDATE lesson_files SET status = 'ready'</code>  </li>
+<li>On any error — <code>UPDATE lesson_files SET status = 'failed'</code></li>
+</ol>
+<p><strong>Key change from old doc:</strong> Processing is now fully non-blocking. The client receives <code>status: 'processing'</code> immediately and polls every 2 seconds (via <code>useLessonFiles</code> polling hook) until <code>status</code> transitions to <code>ready</code> or <code>failed</code>.</p>
+<h3 id="22-magic-byte-file-type-detection"><strong>2.2 Magic-Byte File Type Detection</strong></h3>
+<p>File type is detected from the first 4 bytes of the buffer — not the <code>Content-Type</code> header or file extension, which can be spoofed:</p>
+<p>PDF:  0x25 0x50 0x44 0x46  (%PDF)<br />
+PPTX: 0x50 0x4B 0x03 0x04  (PK ZIP header — PPTX is a ZIP archive)</p>
+<p>Files not matching either signature are rejected with HTTP 400 before any parsing or storage occurs.</p>
+<h3 id="23-parser-dispatcher"><strong>2.3 Parser Dispatcher</strong></h3>
+<p><strong>File:</strong> <code>src/lib/ai/parsers/index.ts</code></p>
+<p>export async function parseFile(<br />
+    buffer: Buffer,<br />
+    fileType: 'pdf' | 'pptx',<br />
+    aiProvider?: AIProvider<br />
+): Promise\&lt;string&gt;</p>
+<p>The <code>aiProvider</code> parameter is optional. When provided, vision passes run for both PDF and PPTX. When omitted, parsing is text-only (used in tests and mock mode).</p>
+<h3 id="24-pdf-parser"><strong>2.4 PDF Parser</strong></h3>
+<p><strong>File:</strong> <code>src/lib/ai/parsers/pdfParser.ts</code></p>
+<p>Uses <code>pdfjs-serverless</code> (not the standard <code>pdfjs-dist</code> legacy build as documented previously). The serverless build avoids worker thread requirements in Next.js App Router.</p>
+<p><strong>Important:</strong> <code>@napi-rs/canvas</code> is required as a polyfill. <code>globalThis.Path2D</code> and <code>globalThis.createCanvas</code> are patched before pdfjs initialises, because the bundled pdfjs scope checks these globals directly.</p>
+<p><strong>Three-phase pipeline per document:</strong></p>
+<ol>
+<li><strong>Text extraction</strong> — iterate every page, call <code>page.getTextContent()</code>, join <code>item.str</code> values  </li>
+<li><strong>Vision pass</strong> — send the entire PDF buffer to GPT-4o as a native file input (<code>type: 'file'</code>) in a single API call. Returns a <code>Map&lt;pageNumber, description&gt;</code> for pages with visual content. Text-only pages return <code>NO_VISUAL_CONTENT</code> and are excluded.  </li>
+<li><strong>Merge</strong> — combine <code>[Page N Text]</code> and <code>[Page N Visual Content]</code> blocks per page</li>
+</ol>
+<p><strong>Why whole-PDF vision instead of per-page rendering:</strong></p>
+<ul>
+<li><code>pdfjs-serverless</code>'s internal canvas factory fails on image-bearing pages (<code>@napi-rs/canvas is not available</code>) regardless of globalThis polyfills, because the check is inside the pre-bundled module scope.  </li>
+<li>GPT-4o natively parses PDFs including all embedded images/diagrams, preserving layout context (captions stay with their figures).  </li>
+<li>One API call vs N page renders: faster and cheaper.</li>
+</ul>
+<h3 id="25-pptx-parser"><strong>2.5 PPTX Parser</strong></h3>
+<p><strong>File:</strong> <code>src/lib/ai/parsers/pptxParser.ts</code></p>
+<p>PPTX files are ZIP archives. JSZip unpacks them. The parser processes every slide in slide-number order.</p>
+<p><strong>Per-slide pipeline:</strong></p>
+<ol>
+<li><strong>Body text</strong> — parse <code>ppt/slides/slideN.xml</code>, extract all <code>&lt;a:t&gt;</code> text run nodes  </li>
+<li><strong>Speaker notes</strong> — follow OOXML relationship chain:  </li>
+<li>Rels file: <code>ppt/slides/_rels/slideN.xml.rels</code> → find <code>Type</code> ending in <code>notesSlide</code>  </li>
+<li>Resolve relative target path → e.g. <code>ppt/notesSlides/notesSlide1.xml</code>  </li>
+<li>Fallback: <code>ppt/notesSlides/notesSlideN.xml</code> if no rels entry  </li>
+<li><strong>Vision pass</strong> — collect all image refs from rels (PNG, JPG, WEBP only; EMF/WMF/SVG/GIF excluded — GPT-4o does not accept them), send body text + notes + ALL images together in <strong>one</strong> GPT-4o call per slide</li>
+</ol>
+<p><strong>Why one call per slide (not one call per image):</strong></p>
+<ul>
+<li>GPT-4o sees body text, notes, and all images simultaneously, enabling cross-reference of diagram labels with slide text  </li>
+<li>Reduces API calls from <code>(images × slides)</code> to <code>(slides with images)</code>  </li>
+<li>Model is instructed not to repeat what's already in text/notes, so descriptions are additive</li>
+</ul>
+<p><strong>Output format:</strong></p>
+<p>[Slide N Body] ...slide text...<br />
+[Slide N Notes] ...speaker notes...<br />
+[Slide N Visual Content] ...GPT-4o vision description...</p>
+<p><strong>Prompt injection guard:</strong> A final pass strips Unicode BiDi control characters (U+202A–U+202E, U+2066–U+2069) and control chars (U+0000–U+001F except <code>\t</code> and <code>\n</code>).</p>
+<p><strong>Debug logging:</strong> Set <code>VISION_DEBUG=true</code> in <code>.env.local</code> to enable verbose per-slide logs including image counts, text lengths, and vision call results.</p>
+<h3 id="26-chunking"><strong>2.6 Chunking</strong></h3>
+<p>Uses <code>@langchain/textsplitters</code> <code>RecursiveCharacterTextSplitter</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chunkSize</code></td>
+<td>500 characters</td>
+<td>\~80–100 words; fits within embedding token limits</td>
+</tr>
+<tr>
+<td><code>chunkOverlap</code></td>
+<td>200 characters</td>
+<td>Prevents sentences from being cut at boundaries</td>
+</tr>
+<tr>
+<td><code>MAX_CHUNKS_PER_FILE</code></td>
+<td>500</td>
+<td>Safety cap to prevent runaway costs on large files</td>
+</tr>
+</tbody>
+</table>
+<p>Empty/whitespace-only chunks are filtered after splitting. Chunks are inserted into <code>lesson_chunks</code> with <code>content_type = 'slide'</code> and metadata containing <code>file_name</code> and <code>chunk_index</code>.</p>
+<hr />
+<h2 id="3-embeddings"><strong>3. Embeddings</strong></h2>
+<p><strong>File:</strong> <code>src/lib/ai/embedChunks.ts</code></p>
+<p><code>embedChunks(chunkIds, supabase, aiProvider)</code> is called after chunks are inserted. It fetches chunk content from the DB, generates embeddings, and writes them back.</p>
+<h3 id="31-batch-strategy"><strong>3.1 Batch Strategy</strong></h3>
+<p>Batched at 100 per request (conservative vs the OpenAI limit of \~2048):</p>
+<p>for (let i \= 0; i \&lt; chunks.length; i += BATCH_SIZE) {<br />
+  const batch \= chunks.slice(i, i + BATCH_SIZE);<br />
+  embeddings \= await aiProvider.generateEmbedding(batch.map(c \=&gt; c.content));<br />
+  // update each chunk row individually<br />
+}</p>
+<p><code>generateEmbedding</code> accepts <code>string | string[]</code> and returns <code>number[][]</code>. Each embedding is a 1536-dimension float array stored as <code>JSON.stringify(embedding)</code> in the <code>lesson_chunks.embedding</code> column (<code>vector(1536)</code> type).</p>
+<h3 id="32-error-handling"><strong>3.2 Error Handling</strong></h3>
+<p>If a batch fails, <code>embedChunks</code> throws back to the caller (upload background task). The background handler catches it and sets <code>status = 'failed'</code>. Chunk rows remain in the DB with <code>null</code> embeddings — re-uploading the file triggers re-embedding.</p>
+<hr />
+<h2 id="4-speech-to-text-whisper"><strong>4. Speech-to-Text — Whisper</strong></h2>
+<p><strong>User Story:</strong> US 1.17</p>
+<h3 id="41-useaudiorecorder-hook"><strong>4.1 useAudioRecorder Hook</strong></h3>
+<p><strong>File:</strong> <code>src/hooks/useAudioRecorder.ts</code></p>
+<p>A standalone React hook (extracted from <code>ActiveCenter</code> into its own file) that wraps the browser <code>MediaRecorder</code> API.</p>
+<p><strong>Codec selection:</strong> Three-tier preference: <code>audio/webm;codecs=opus</code> → <code>audio/webm</code> → browser default. Checked via <code>MediaRecorder.isTypeSupported()</code> before instantiation.</p>
+<p><strong>Data collection:</strong> <code>recorder.start(500)</code> fires <code>ondataavailable</code> every 500ms. Chunks collected in <code>chunksRef</code>. On <code>stop()</code>, assembled into a single <code>Blob</code> immediately.</p>
+<p><strong>Exposed API:</strong></p>
+<p>{ isRecording, elapsed, fmt, start, stop }</p>
+<h3 id="42-transcript-route"><strong>4.2 Transcript Route</strong></h3>
+<p><strong>File:</strong> <code>src/app/api/lessons/[lessonId]/transcript/route.ts</code></p>
+<p>POST handler accepts audio as <code>multipart/form-data</code> with field name <code>audio</code>. Max size 25MB. Auth and ownership use the same two-step pattern.</p>
+<p><strong>Note:</strong> This route currently uses a direct <code>new OpenAI(...)</code> construction (not via the <code>OpenAIProvider</code> class). It embeds the transcript and stores the chunk in a background IIFE after returning the transcript to the client. This is a known inconsistency — <code>OpenAIProvider</code> adoption here is a Sprint 4 candidate.</p>
+<p><strong>Whisper call:</strong></p>
+<p>await openai.audio.transcriptions.create({<br />
+  file: audioFile,<br />
+  model: 'whisper-1',<br />
+  language: 'en',<br />
+})</p>
+<p><strong>Background embedding:</strong> After returning the transcript, a fire-and-forget IIFE embeds the transcript text and inserts a <code>lesson_chunks</code> row with <code>content_type = 'transcript'</code>, <code>lesson_file_id = null</code>, and metadata <code>{ source: 'transcript', recordedAt: ISO timestamp }</code>.</p>
+<h3 id="43-auto-generate-after-transcription"><strong>4.3 Auto-Generate After Transcription</strong></h3>
+<p>In <code>ActiveCenter.tsx</code>, <code>handleStopAndTranscribe()</code>:</p>
+<p>const transcript \= await transcribeAudioApi(lessonId, audioBlob);<br />
+setTranscriptText(transcript ?? '');<br />
+setPromptInput(transcript ?? '');<br />
+setSttStatus('idle');<br />
+setTimeout(() \=&gt; onGenerate(), 50);</p>
+<p>The 50ms timeout is required because React batches state updates — without it, <code>generateCandidates()</code> would read the previous (empty) <code>transcriptText</code> from the closure.</p>
+<hr />
+<h2 id="5-rag-generation"><strong>5. RAG Generation</strong></h2>
+<p><strong>User Stories:</strong> US 1.18, 1.19, 1.23</p>
+<h3 id="51-generate-route"><strong>5.1 Generate Route</strong></h3>
+<p><strong>File:</strong> <code>src/app/api/lessons/[lessonId]/generate/route.ts</code></p>
+<p>POST body: <code>{ promptType: 'short_answer' | 'long_answer' | 'multiple_choice', transcriptText?: string }</code></p>
+<p>Returns: <code>CandidateSet</code> (N candidates — see <code>CANDIDATE_COUNT</code> in <code>discussionPrompt.ts</code>)</p>
+<p><strong>Security note (updated from Sprint 2 behaviour):</strong> <code>is_correct</code> is <strong>no longer stripped</strong> at this route. The instructor UI requires it to auto-select the correct option when publishing. Stripping for student safety happens exclusively in <code>handlePublishAiCandidate()</code> inside <code>useSessionPage</code> before the <code>channel.send()</code> broadcast.</p>
+<p><strong>Mock mode:</strong> <code>MOCK_AI=true</code> in <code>.env.local</code> imports <code>src/lib/ai/__mocks__/generatePrompts.ts</code> — returns hardcoded pharmacology questions for all three prompt types with no API call.</p>
+<h3 id="52-uselessonai-hook"><strong>5.2 useLessonAI Hook</strong></h3>
+<p><strong>File:</strong> <code>src/hooks/useSessionPage/useLessonAI.ts</code></p>
+<p>Encapsulates all AI state for the session page:</p>
+<p>{ transcriptText, setTranscriptText, promptType, setPromptType,<br />
+  candidates, isGenerating, generationWarning,<br />
+  generateCandidates, selectCandidate, regenerateCandidates, clearAIState }</p>
+<p><code>generateCandidates</code> calls <code>generateCandidatesApi</code> (POST to generate route). <code>clearAIState</code> resets candidates, transcript, and prompt input — called after a candidate is published.</p>
+<h3 id="53-candidate-count"><strong>5.3 Candidate Count</strong></h3>
+<p><strong>File:</strong> <code>src/lib/ai/prompts/discussionPrompt.ts</code></p>
+<p>export const CANDIDATE_COUNT \= 5;</p>
+<p>The generate route returns 5 candidates by default (changed from 3 in the original spec). To change: edit only <code>CANDIDATE_COUNT</code> — the prompt and parser both reference this constant.</p>
+<h3 id="54-retrieval"><strong>5.4 Retrieval</strong></h3>
+<p><strong>File:</strong> <code>src/lib/ai/retrieveChunks.ts</code></p>
+<p><strong><code>retrieveChunksBySimilarity</code> (primary path):</strong> When <code>transcriptText</code> is non-empty, <code>generatePrompts</code> embeds it via <code>aiProvider.generateEmbedding()</code> and calls the <code>match_lesson_chunks</code> Postgres RPC:</p>
+<p>await supabase.rpc('match_lesson_chunks', {<br />
+  p_lesson_id: lessonId,<br />
+  p_embedding: queryEmbedding,<br />
+  p_match_count: 8,<br />
+})</p>
+<p>Returns top-8 chunks ordered by cosine similarity (<code>&lt;=&gt;</code> operator).</p>
+<p><strong><code>retrieveRecentChunks</code> (fallback path):</strong> If <code>transcriptText</code> is empty OR similarity retrieval returns 0 results:</p>
+<p>SELECT content FROM lesson_chunks WHERE lesson_id \= ? ORDER BY created_at DESC LIMIT 8</p>
+<p>A warning string is included in the <code>CandidateSet</code> to inform the instructor.</p>
+<p><strong>Future (Sprint 4):</strong> Replace with weighted blended retrieval — 40% file chunks (semantic), 40% current transcript, 20% prior transcript.</p>
+<h3 id="55-prompt-assembly"><strong>5.5 Prompt Assembly</strong></h3>
+<p><strong>File:</strong> <code>src/lib/ai/prompts/discussionPrompt.ts</code></p>
+<p><code>buildUserPrompt()</code> wraps retrieved chunks and transcript in XML delimiters:</p>
+<p>\&lt;instructions&gt;<br />
+  \&lt;question_type_rules&gt;...\&lt;/question_type_rules&gt;<br />
+  \&lt;output_format&gt;...\&lt;/output_format&gt;<br />
+  \&lt;example&gt;...\&lt;/example&gt;<br />
+\&lt;/instructions&gt;</p>
+<p>\&lt;context&gt;<br />
+[Chunk 1]<br />
+{content}<br />
+...<br />
+\&lt;/context&gt;</p>
+<p>\&lt;transcript&gt;<br />
+{transcriptText or '(No transcript provided)'}<br />
+\&lt;/transcript&gt;</p>
+<p>XML delimiters prevent prompt injection — adversarial text inside a chunk cannot escape the <code>&lt;context&gt;</code> block and override system instructions.</p>
+<p>To change AI persona, style, or pharmacology-specific instructions: edit <code>buildSystemPrompt()</code>. To change candidate count: change <code>CANDIDATE_COUNT</code>. No other files need to be touched.</p>
+<h3 id="56-gpt-4o-mini-call"><strong>5.6 GPT-4o-mini Call</strong></h3>
+<p><strong>File:</strong> <code>src/lib/ai/generatePrompts.ts</code></p>
+<p>Called via <code>aiProvider.generateChatCompletion(messages, { jsonMode: true, temperature: 0.7 })</code>.</p>
+<p><code>json_object</code> mode forces GPT-4o-mini to always return valid JSON. Temperature 0.7 balances creativity with accuracy.</p>
+<p><strong>Response parsing:</strong> GPT-4o-mini occasionally wraps the array in an object (e.g. <code>{ "questions": [...] }</code>). The parser handles both shapes:</p>
+<ul>
+<li>If <code>JSON.parse</code> returns an <code>Array</code>: use directly  </li>
+<li>If it returns an <code>Object</code>: find the first key whose value is an <code>Array</code>  </li>
+<li>On any parse failure: return <code>CANDIDATE_COUNT</code> fallback candidates with an error message</li>
+</ul>
+<hr />
+<h2 id="6-security"><strong>6. Security</strong></h2>
+<h3 id="61-two-step-ownership-check"><strong>6.1 Two-Step Ownership Check</strong></h3>
+<p>All 5 routes (upload, files GET, files DELETE, generate, transcript) use the same two-query ownership pattern:</p>
+<p>// Step 1: get lesson (and its course_id)<br />
+const { data: lesson } \= await supabase.from('lessons')<br />
+  .select('id, course_id').eq('id', lessonId).single();</p>
+<p>// Step 2: get course and check instructor_id<br />
+const { data: course } \= await supabase.from('courses')<br />
+  .select('instructor_id').eq('id', lesson.course_id).single();</p>
+<p>if (course.instructor_id !== user.id) return 403;</p>
+<p>This avoids Supabase <code>!inner</code> join TypeScript type issues (<code>TS2352</code> cast errors).</p>
+<h3 id="62-is_correct-handling"><strong>6.2 is_correct Handling</strong></h3>
+<p><strong>Updated from Sprint 2:</strong> <code>is_correct</code> is now retained in the <code>/generate</code> response sent to the instructor client. It is stripped in exactly <strong>one</strong> place:</p>
+<p><code>handlePublishAiCandidate()</code> in <code>useLessonDiscussions.ts</code> — <code>mc_options</code> is stripped before <code>channel.send()</code>:<br />
+ mc_options: candidate.mcOptions  ? candidate.mcOptions.map(({ label, text }) \=&gt; ({ label, text }))  : null,</p>
+<ul>
+<li></li>
+</ul>
+<p>The <code>MCOptionSafe</code> TypeScript type explicitly excludes <code>is_correct</code>, making accidental inclusion a compile error on the student side. The <code>mc_options</code> column in <code>discussions</code> stores full options including <code>is_correct</code> for server-side validation.</p>
+<h3 id="63-lesson_id-isolation-in-pgvector"><strong>6.3 lesson_id Isolation in pgvector</strong></h3>
+<p>The <code>match_lesson_chunks</code> RPC includes a mandatory <code>WHERE lesson_id = p_lesson_id</code> clause. Without this, the cosine similarity search would operate across all instructors' lesson chunks. This clause is enforced in the SQL function and documented as a required code review gate in <code>retrieveChunks.ts</code>.</p>
+<h3 id="64-magic-byte-validation"><strong>6.4 Magic-Byte Validation</strong></h3>
+<p>File type is validated by reading the first 4 bytes of the actual buffer. Files not matching PDF or PPTX signatures are rejected before any parsing or storage occurs.</p>
+<h3 id="65-prompt-injection-guard"><strong>6.5 Prompt Injection Guard</strong></h3>
+<p>Both parsers apply a final <code>stripControlChars()</code> pass removing Unicode BiDi control characters and other control chars that could be embedded in slide text to override the AI system prompt.</p>
+<hr />
+<h2 id="7-ui-components-hooks"><strong>7. UI Components &amp; Hooks</strong></h2>
+<h3 id="71-activecenter"><strong>7.1 ActiveCenter</strong></h3>
+<p><strong>File:</strong> <code>src/components/instructor/session/ActiveCenter.tsx</code></p>
+<p>The main instructor panel during a live session. Combines recording, transcript, generation, and publish flows.</p>
+<p><strong>Context integration:</strong> Reads from <code>SessionContext</code> (provided by <code>SessionProvider</code>) with prop fallback for standalone usage. This allows the component to be used both inside the full session page and in isolation for testing.</p>
+<p><strong>Key state:</strong></p>
+<ul>
+<li><code>selectedIndex</code> — which candidate card is selected  </li>
+<li><code>sttStatus</code> — <code>'idle' | 'transcribing' | 'error'</code>  </li>
+<li><code>overrideCorrectOption</code> — instructor-selected correct option for MC questions (overrides AI suggestion)  </li>
+<li><code>feedbackEnabled</code> — whether to show correctness feedback to students</li>
+</ul>
+<p><strong>Correct answer override (new in Sprint 3):</strong> When an MC candidate is selected, a radio group appears showing all four options. The AI's suggested correct answer is pre-selected but the instructor can change it before publishing. This is passed as <code>overrideCorrectOption</code> to <code>handlePublishAiCandidate</code>.</p>
+<p><strong>Feedback toggle (new in Sprint 3):</strong> A checkbox lets the instructor enable/disable per-student correctness feedback for MC questions.</p>
+<h3 id="72-sessioncontext"><strong>7.2 SessionContext</strong></h3>
+<p><strong>File:</strong> <code>src/components/instructor/session/SessionContext.tsx</code></p>
+<p>export const SessionContext \= React.createContext\&lt;SessionVM | null&gt;(null);<br />
+export function SessionProvider({ vm, children })<br />
+export function useSessionContext()</p>
+<p>Wraps the full <code>SessionVM</code> (from <code>useSessionPage</code>) in context, allowing deeply nested components to access session state without prop drilling.</p>
+<h3 id="73-uselessonfiles-hook"><strong>7.3 useLessonFiles Hook</strong></h3>
+<p><strong>File:</strong> <code>src/hooks/useSessionPage/useLessonFiles.ts</code></p>
+<p>Manages file upload state with optimistic UI updates:</p>
+<ul>
+<li>On upload: adds an optimistic <code>LessonFile</code> with <code>status = 'uploading'</code> immediately, then removes it and re-fetches after the API call resolves  </li>
+<li><strong>Polling:</strong> If any file has <code>status = 'processing'</code>, a <code>setInterval</code> runs every 2 seconds calling <code>fetchFiles()</code> until all files reach a terminal state</li>
+</ul>
+<p><strong>Exposed API:</strong></p>
+<p>{ files, isUploading, fetchFiles, uploadFile, deleteFile, openFile }</p>
+<p><code>openFile</code> fetches a signed URL from <code>/api/lessons/[lessonId]/files/[fileId]</code> (GET) and triggers a browser download.</p>
+<h3 id="74-uselessondiscussions-hook"><strong>7.4 useLessonDiscussions Hook</strong></h3>
+<p><strong>File:</strong> <code>src/hooks/useSessionPage/useLessonDiscussions.ts</code></p>
+<p>Manages all discussion lifecycle: fetch, publish (manual and AI), close, and realtime response ingestion.</p>
+<p><strong><code>handlePublishAiCandidate</code></strong> (updated):</p>
+<ul>
+<li>Accepts <code>overrideCorrectOption</code> and <code>feedbackEnabled</code> parameters  </li>
+<li>Determines final correct option: <code>overrideCorrectOption || aiSuggestedCorrectOption</code>  </li>
+<li>Stores full <code>mc_options</code> (with <code>is_correct</code>) in the <code>discussions</code> table  </li>
+<li>Strips <code>is_correct</code> from the Realtime broadcast payload  </li>
+<li>Stores <code>ai_generated_correct_option</code> separately for analytics</li>
+</ul>
+<hr />
+<h2 id="8-provider-architecture"><strong>8. Provider Architecture</strong></h2>
+<p><strong>File:</strong> <code>src/lib/ai/providers.ts</code></p>
+<p>All AI functionality is encapsulated behind the <code>AIProvider</code> interface. There is a single implementation: <code>OpenAIProvider</code>.</p>
+<h3 id="81-aiprovider-interface"><strong>8.1 AIProvider Interface</strong></h3>
+<p>export interface AIProvider {<br />
+  generateChatCompletion(messages: AIMessage[], options?: { temperature?: number; jsonMode?: boolean }): Promise\&lt;string&gt;;<br />
+  generateEmbedding(text: string | string[]): Promise\&lt;number[][]&gt;;<br />
+  generateVisionDescription(base64Image, mimeType, contextHint?): Promise\&lt;string&gt;;<br />
+  generatePdfVisualDescriptions(pdfBuffer: Buffer, numPages: number): Promise\&lt;Map\&lt;number, string&gt;&gt;;<br />
+  generatePptxSlideVisualDescription(slideNumber, bodyText, notesText, images): Promise\&lt;string&gt;;<br />
+}</p>
+<h3 id="82-openaiprovider"><strong>8.2 OpenAIProvider</strong></h3>
+<p>Models used per method:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generateChatCompletion</code></td>
+<td><code>gpt-4o-mini</code></td>
+</tr>
+<tr>
+<td><code>generateEmbedding</code></td>
+<td><code>text-embedding-3-small</code></td>
+</tr>
+<tr>
+<td><code>generateVisionDescription</code></td>
+<td><code>gpt-4o</code> (max 500 tokens)</td>
+</tr>
+<tr>
+<td><code>generatePdfVisualDescriptions</code></td>
+<td><code>gpt-4o</code> (max 4096 tokens, native PDF input)</td>
+</tr>
+<tr>
+<td><code>generatePptxSlideVisualDescription</code></td>
+<td><code>gpt-4o</code> (max 600 tokens)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-known-inconsistency"><strong>8.3 Known Inconsistency</strong></h3>
+<p>The transcript route (<code>/api/lessons/[lessonId]/transcript/route.ts</code>) currently constructs <code>new OpenAI(...)</code> directly rather than using <code>OpenAIProvider</code>. This is the only call site not using the provider layer. Planned for Sprint 4 cleanup.</p>
+<h3 id="84-switching-providers"><strong>8.4 Switching Providers</strong></h3>
+<p>To switch to an OpenAI-compatible provider (OpenRouter, Azure OpenAI, Groq, Together AI), only environment variables need to change — the <code>OpenAIProvider</code> constructor accepts a <code>baseURL</code> via <code>process.env.AI_BASE_URL</code>.</p>
+<p>Before switching, verify:</p>
+<ul>
+<li><strong>Embedding dimensions:</strong> System assumes 1536. If the replacement model differs, <code>lesson_chunks.embedding</code> column and <code>match_lesson_chunks</code> RPC must be updated.  </li>
+<li><strong>Whisper availability:</strong> Most providers do not expose <code>audio/transcriptions</code>. May need to keep Whisper on OpenAI separately.  </li>
+<li><strong><code>json_object</code> mode:</strong> Not universally supported. If unavailable, the system prompt must instruct JSON-only output and the response parser must strip markdown fences.</li>
+</ul>
+<p>For non-compatible providers (Anthropic Claude, Google Gemini), implement a new class conforming to <code>AIProvider</code> and swap at the construction site.</p>
+<hr />
+<h2 id="9-image-pdf-vision-pipeline"><strong>9. Image &amp; PDF Vision Pipeline</strong></h2>
+<p>The pipeline now has <strong>full vision support</strong> via GPT-4o. This supersedes the "Current Limitations" section from earlier documentation.</p>
+<h3 id="91-what-is-now-supported"><strong>9.1 What Is Now Supported</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Content Type</th>
+<th>Support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PDF embedded text</td>
+<td>✅ Full (pdfjs-serverless)</td>
+</tr>
+<tr>
+<td>PDF images, diagrams, figures</td>
+<td>✅ Full (GPT-4o native PDF input)</td>
+</tr>
+<tr>
+<td>PDF chemical structures</td>
+<td>✅ Full</td>
+</tr>
+<tr>
+<td>PDF scanned pages</td>
+<td>✅ Full (GPT-4o vision)</td>
+</tr>
+<tr>
+<td>PPTX text body</td>
+<td>✅ Full</td>
+</tr>
+<tr>
+<td>PPTX speaker notes</td>
+<td>✅ Full</td>
+</tr>
+<tr>
+<td>PPTX embedded PNG/JPG/WEBP</td>
+<td>✅ Full (GPT-4o per-slide)</td>
+</tr>
+<tr>
+<td>PPTX EMF/WMF/SVG/GIF</td>
+<td>❌ Excluded (GPT-4o does not accept these formats)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-vision-cost-estimates"><strong>9.2 Vision Cost Estimates</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Approximate Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Per PPTX slide with images</td>
+<td>\~$0.002–$0.005 (gpt-4o, high detail)</td>
+</tr>
+<tr>
+<td>Per PDF (whole document)</td>
+<td>\~$0.01–$0.05 depending on page count and image density</td>
+</tr>
+</tbody>
+</table>
+<p>Vision passes are non-blocking (run in the background processing task). They do not affect upload response time.</p>
+<h3 id="93-debug-mode"><strong>9.3 Debug Mode</strong></h3>
+<p>Set <code>VISION_DEBUG=true</code> in <code>.env.local</code> to enable verbose logging of:</p>
+<ul>
+<li>Number of slides found  </li>
+<li>Per-slide: body text length, notes length, image refs found, zip paths resolved, vision call result</li>
+</ul>
+<hr />
+<h2 id="10-database-schema"><strong>10. Database Schema</strong></h2>
+<h3 id="101-lesson_files"><strong>10.1 lesson_files</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>UUID PK</td>
+<td></td>
+</tr>
+<tr>
+<td><code>lesson_id</code></td>
+<td>UUID FK → lessons.id</td>
+<td></td>
+</tr>
+<tr>
+<td><code>file_name</code></td>
+<td>text</td>
+<td>Original filename as uploaded</td>
+</tr>
+<tr>
+<td><code>file_type</code></td>
+<td>varchar(10)</td>
+<td><code>'pdf'</code> or <code>'pptx'</code> — detected via magic bytes</td>
+</tr>
+<tr>
+<td><code>file_size_bytes</code></td>
+<td>int8</td>
+<td></td>
+</tr>
+<tr>
+<td><code>storage_path</code></td>
+<td>text</td>
+<td><code>{lessonId}/{uuid}-{name}</code> in <code>lesson-files</code> bucket</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>varchar(20)</td>
+<td><code>'uploading' | 'processing' | 'ready' | 'failed'</code></td>
+</tr>
+<tr>
+<td><code>uploaded_at</code></td>
+<td>timestamptz</td>
+<td>default <code>now()</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="102-lesson_chunks"><strong>10.2 lesson_chunks</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>UUID PK</td>
+<td></td>
+</tr>
+<tr>
+<td><code>lesson_id</code></td>
+<td>UUID FK</td>
+<td>Indexed; used in all retrieval queries</td>
+</tr>
+<tr>
+<td><code>lesson_file_id</code></td>
+<td>UUID FK → lesson_files.id</td>
+<td>NULL for transcript chunks</td>
+</tr>
+<tr>
+<td><code>content_type</code></td>
+<td>varchar(20)</td>
+<td><code>'slide'</code> (from file)</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>text</td>
+<td>Raw chunk text</td>
+</tr>
+<tr>
+<td><code>embedding</code></td>
+<td>vector(1536)</td>
+<td>Float array from <code>text-embedding-3-small</code></td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td>jsonb</td>
+<td><code>{ file_name, chunk_index }</code> for slides; <code>{ source, recordedAt }</code> for transcripts</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamptz</td>
+<td>default <code>now()</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Chunk metadata types</strong> (see <code>src/types/ai.ts</code>):</p>
+<p>export type ChunkSource \= 'slide_body' | 'slide_notes' | 'transcript' | 'prior_transcript';<br />
+export interface ChunkMetadata {<br />
+  source: ChunkSource;<br />
+  slideNumber?: number;<br />
+  fileName?: string;<br />
+  segmentIndex?: number;<br />
+  recordedAt?: string;<br />
+}</p>
+<p>These types are defined in anticipation of Sprint 4 weighted retrieval.</p>
+<h3 id="103-match_lesson_chunks-rpc"><strong>10.3 match_lesson_chunks RPC</strong></h3>
+<p>CREATE FUNCTION match_lesson_chunks(<br />
+  p_lesson_id   UUID,<br />
+  p_embedding   vector(1536),<br />
+  p_match_count INT DEFAULT 8<br />
+) RETURNS TABLE (<br />
+  id            UUID,<br />
+  lesson_id     UUID,<br />
+  content       TEXT,<br />
+  content_type  VARCHAR(20),  -- must match column type exactly<br />
+  metadata      JSONB,<br />
+  similarity    FLOAT<br />
+) AS $$<br />
+  SELECT id, lesson_id, content, content_type, metadata,<br />
+         1 - (embedding \&lt;=&gt; p_embedding) AS similarity<br />
+  FROM lesson_chunks<br />
+  WHERE lesson_id \= p_lesson_id<br />
+  ORDER BY embedding \&lt;=&gt; p_embedding<br />
+  LIMIT p_match_count<br />
+$$ LANGUAGE SQL STABLE;</p>
+<p><strong>CRITICAL:</strong> <code>content_type</code> must be <code>VARCHAR(20)</code> in <code>RETURNS TABLE</code>, not <code>TEXT</code>. Using <code>TEXT</code> causes Postgres error <code>42804</code> (type mismatch) at runtime.</p>
+<hr />
+<h2 id="11-configuration-reference"><strong>11. Configuration Reference</strong></h2>
+<h3 id="111-environment-variables"><strong>11.1 Environment Variables</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Required</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td>Yes</td>
+<td>Used for <code>text-embedding-3-small</code>, <code>whisper-1</code>, <code>gpt-4o-mini</code>, <code>gpt-4o</code></td>
+</tr>
+<tr>
+<td><code>MOCK_AI</code></td>
+<td>No</td>
+<td>Set to <code>'true'</code> for hardcoded responses — no API key required</td>
+</tr>
+<tr>
+<td><code>VISION_DEBUG</code></td>
+<td>No</td>
+<td>Set to <code>'true'</code> for verbose per-slide/per-page vision logging</td>
+</tr>
+<tr>
+<td><code>NEXT_PUBLIC_SUPABASE_URL</code></td>
+<td>Yes</td>
+<td>Supabase project URL</td>
+</tr>
+<tr>
+<td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td>
+<td>Yes</td>
+<td>Supabase anon key</td>
+</tr>
+</tbody>
+</table>
+<h3 id="112-nextconfigts"><strong>11.2 next.config.ts</strong></h3>
+<p>experimental: {<br />
+  serverActions: { bodySizeLimit: '26mb' }  // allows 25MB file/audio uploads<br />
+},<br />
+serverExternalPackages: ['pdf-parse']  // prevents CJS bundler wrapping</p>
+<p>The default <code>serverActions.bodySizeLimit</code> is 1MB. Without the override, uploads silently fail with a 413-class error.</p>
+<h3 id="113-required-npm-packages"><strong>11.3 Required npm Packages</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>openai</code></td>
+<td>OpenAI SDK — embeddings, Whisper, GPT-4o-mini, GPT-4o vision</td>
+</tr>
+<tr>
+<td><code>pdfjs-serverless</code></td>
+<td>PDF text extraction — serverless build for Next.js App Router</td>
+</tr>
+<tr>
+<td><code>@napi-rs/canvas</code></td>
+<td>Canvas polyfill required by pdfjs-serverless</td>
+</tr>
+<tr>
+<td><code>jszip</code></td>
+<td>PPTX ZIP unpacking — OOXML container parsing</td>
+</tr>
+<tr>
+<td><code>@langchain/textsplitters</code></td>
+<td><code>RecursiveCharacterTextSplitter</code> for chunking</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendix-key-file-locations"><strong>Appendix: Key File Locations</strong></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/app/api/lessons/[lessonId]/upload/route.ts</code></td>
+<td>File upload + background parse/embed pipeline</td>
+</tr>
+<tr>
+<td><code>src/app/api/lessons/[lessonId]/files/route.ts</code></td>
+<td>List lesson files (GET)</td>
+</tr>
+<tr>
+<td><code>src/app/api/lessons/[lessonId]/files/[fileId]/route.ts</code></td>
+<td>Get signed URL (GET), delete file (DELETE)</td>
+</tr>
+<tr>
+<td><code>src/app/api/lessons/[lessonId]/generate/route.ts</code></td>
+<td>RAG generation endpoint</td>
+</tr>
+<tr>
+<td><code>src/app/api/lessons/[lessonId]/transcript/route.ts</code></td>
+<td>Whisper STT endpoint</td>
+</tr>
+<tr>
+<td><code>src/lib/ai/providers.ts</code></td>
+<td><code>AIProvider</code> interface + <code>OpenAIProvider</code> implementation</td>
+</tr>
+<tr>
+<td><code>src/lib/ai/parsers/index.ts</code></td>
+<td>Parser dispatcher</td>
+</tr>
+<tr>
+<td><code>src/lib/ai/parsers/pdfParser.ts</code></td>
+<td>PDF text + GPT-4o vision</td>
+</tr>
+<tr>
+<td><code>src/lib/ai/parsers/pptxParser.ts</code></td>
+<td>PPTX text + speaker notes + GPT-4o vision</td>
+</tr>
+<tr>
+<td><code>src/lib/ai/embedChunks.ts</code></td>
+<td>Batch embedding via <code>aiProvider.generateEmbedding</code></td>
+</tr>
+<tr>
+<td><code>src/lib/ai/generatePrompts.ts</code></td>
+<td>RAG orchestration (retrieve → prompt → generate → parse)</td>
+</tr>
+<tr>
+<td><code>src/lib/ai/retrieveChunks.ts</code></td>
+<td>Similarity and recent-fallback chunk retrieval</td>
+</tr>
+<tr>
+<td><code>src/lib/ai/prompts/discussionPrompt.ts</code></td>
+<td>System prompt, user prompt builder, <code>CANDIDATE_COUNT</code></td>
+</tr>
+<tr>
+<td><code>src/lib/ai/__mocks__/generatePrompts.ts</code></td>
+<td>Mock mode — hardcoded pharmacology questions</td>
+</tr>
+<tr>
+<td><code>src/hooks/useAudioRecorder.ts</code></td>
+<td>Browser <code>MediaRecorder</code> hook for STT</td>
+</tr>
+<tr>
+<td><code>src/hooks/useSessionPage/useLessonAI.ts</code></td>
+<td>AI state management for session page</td>
+</tr>
+<tr>
+<td><code>src/hooks/useSessionPage/useLessonFiles.ts</code></td>
+<td>File state + polling + optimistic upload</td>
+</tr>
+<tr>
+<td><code>src/hooks/useSessionPage/useLessonDiscussions.ts</code></td>
+<td>Discussion lifecycle + Realtime + publish</td>
+</tr>
+<tr>
+<td><code>src/components/instructor/session/ActiveCenter.tsx</code></td>
+<td>Main instructor session UI</td>
+</tr>
+<tr>
+<td><code>src/components/instructor/session/SessionContext.tsx</code></td>
+<td>React context for session VM</td>
+</tr>
+<tr>
+<td><code>src/types/ai.ts</code></td>
+<td>TypeScript types: <code>LessonFile</code>, <code>GeneratedPrompt</code>, <code>CandidateSet</code>, <code>MCOption</code>, <code>ChunkMetadata</code></td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
