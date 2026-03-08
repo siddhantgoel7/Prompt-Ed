@@ -57,13 +57,13 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
     // Rendering MC options
     describe('MC option rendering', () => {
 
-        // 32.1
+        // 30.1
         it('[US 2.10][CT1] success: renders the prompt text', () => {
             render(<StudentPromptCard discussion={mcDiscussion} />);
             expect(screen.getByText('What does PMCOL stand for?')).toBeInTheDocument();
         });
 
-        // 32.2
+        // 30.2
         it('[US 2.10][CT2] success: renders all four option buttons', () => {
             render(<StudentPromptCard discussion={mcDiscussion} />);
             expect(screen.getByText('A.')).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
             expect(screen.getByText('D.')).toBeInTheDocument();
         });
 
-        // 32.3
+        // 30.3
         it('[US 2.10][CT3] success: renders option text alongside each option label', () => {
             render(<StudentPromptCard discussion={mcDiscussion} />);
             expect(screen.getByText('Pharmacology')).toBeInTheDocument();
@@ -81,13 +81,13 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
             expect(screen.getByText('Physiology')).toBeInTheDocument();
         });
 
-        // 32.4
+        // 30.4
         it('[US 2.10][CT4] failure: renders no option buttons for short-answer question', () => {
             render(<StudentPromptCard discussion={shortAnswerDiscussion} />);
             expect(screen.queryByText('A.')).not.toBeInTheDocument();
         });
 
-        // 32.5
+        // 30.5
         it('[US 2.10][CT5] failure: renders no option buttons when mc_options is empty array', () => {
             const emptyOptionsMC = { ...mcDiscussion, mc_options: [] };
             render(<StudentPromptCard discussion={emptyOptionsMC} />);
@@ -98,7 +98,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
     // Option selection
     describe('Option selection callbacks', () => {
 
-        // 32.6
+        // 30.6
         it('[US 2.10][CT6] success: clicking an option calls onSelectOption with correct label', () => {
             const onSelectOption = jest.fn();
             render(<StudentPromptCard discussion={mcDiscussion} onSelectOption={onSelectOption} />);
@@ -106,7 +106,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
             expect(onSelectOption).toHaveBeenCalledWith('B');
         });
 
-        // 32.7
+        // 30.7
         it('[US 2.10][CT7] success: clicking a different option calls onSelectOption with that label', () => {
             const onSelectOption = jest.fn();
             render(<StudentPromptCard discussion={mcDiscussion} onSelectOption={onSelectOption} />);
@@ -114,7 +114,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
             expect(onSelectOption).toHaveBeenCalledWith('D');
         });
 
-        // 32.8
+        // 30.8
         it('[US 2.10][CT8] success: does not throw when onSelectOption is not provided', () => {
             render(<StudentPromptCard discussion={mcDiscussion} />);
             // No callback provided — should not throw
@@ -125,7 +125,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
     // Visual selected-state
     describe('Selected option styling', () => {
 
-        // 32.9
+        // 30.9
         it('[US 2.10][CT9] success: selected option button has dark background class', () => {
             render(
                 <StudentPromptCard
@@ -142,7 +142,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
             expect(selectedBtn?.className).toMatch(/bg-black/);
         });
 
-        // 32.10
+        // 30.10
         it('[US 2.10][CT10] success: non-selected options do NOT have dark background class', () => {
             render(
                 <StudentPromptCard
@@ -156,7 +156,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
             expect(unselectedBtn?.className).not.toMatch(/bg-black/);
         });
 
-        // 32.11
+        // 30.11
         it('[US 2.10][CT11] success: no option has highlight when selectedOption is null', () => {
             render(
                 <StudentPromptCard
@@ -175,7 +175,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
     // Security — correct_option is not exposed in the rendered HTML
     describe('Security: correct answer not leaked to the DOM [US 2.10]', () => {
 
-        // 32.12
+        // 30.12
         it('[US 2.10][SEC1] success: correct_option value ("A") not rendered as text with "correct" label', () => {
             const { container } = render(
                 <StudentPromptCard discussion={mcDiscussion} />
@@ -185,7 +185,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
             expect(container.innerHTML).not.toMatch(/Correct Option/i);
         });
 
-        // 32.13
+        // 30.13
         it('[US 2.10][SEC2] success: card renders identically for all options — no answer hint in DOM', () => {
             const { container } = render(
                 <StudentPromptCard discussion={mcDiscussion} />

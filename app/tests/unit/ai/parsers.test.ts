@@ -73,17 +73,20 @@ function makeMockProvider(overrides: Partial<AIProvider> = {}): AIProvider {
 describe('[US 1.16] parsePdf', () => {
 
   describe('text extraction', () => {
+    // 37.1
     it('success: returns labelled page text when PDF has text content', async () => {
       const result = await parsePdf(Buffer.from('fake pdf content'));
       expect(result).toBe('[Page 1 Text] Hello PDF content');
     });
 
+    // 37.2
     it('success: returns text for all pages in a multi-page PDF', async () => {
       const result = await parsePdf(Buffer.from('MULTI'));
       expect(result).toContain('[Page 1 Text] Page 1 text');
       expect(result).toContain('[Page 2 Text] Page 2 text');
     });
 
+    // 37.3
     it('failure: throws when PDF yields no text and no aiProvider for vision', async () => {
       await expect(parsePdf(Buffer.from('EMPTY'))).rejects.toThrow(
         'No text or visual content found in this PDF.'
@@ -92,6 +95,7 @@ describe('[US 1.16] parsePdf', () => {
   });
 
   describe('vision pass (generatePdfVisualDescriptions)', () => {
+    // 37.4
     it('success: merges visual description alongside page text', async () => {
       const descMap = new Map([[1, 'Diagram showing DNA double helix and RNAi pathway']]);
       const provider = makeMockProvider({
@@ -107,6 +111,7 @@ describe('[US 1.16] parsePdf', () => {
       );
     });
 
+    // 37.5
     it('success: omits Visual Content label when provider returns empty map (text-only page)', async () => {
       const provider = makeMockProvider({
         generatePdfVisualDescriptions: jest.fn().mockResolvedValue(new Map()),
@@ -118,6 +123,7 @@ describe('[US 1.16] parsePdf', () => {
       expect(result).not.toContain('Visual Content');
     });
 
+    // 37.6
     it('failure: falls back to text-only result when vision API call fails', async () => {
       jest.spyOn(console, 'warn').mockImplementation(() => { });
       const provider = makeMockProvider({
@@ -130,6 +136,7 @@ describe('[US 1.16] parsePdf', () => {
       (console.warn as jest.Mock).mockRestore();
     });
 
+    // 37.7
     it('success: visual content alone satisfies non-empty result when page has no text', async () => {
       const descMap = new Map([[1, 'Scanned chemical structure: benzene ring with OH group']]);
       const provider = makeMockProvider({
@@ -141,6 +148,7 @@ describe('[US 1.16] parsePdf', () => {
       expect(result).toContain('[Page 1 Visual Content] Scanned chemical structure');
     });
 
+    // 37.8
     it('success: no vision call is made when aiProvider is not supplied', async () => {
       const result = await parsePdf(Buffer.from('fake pdf content'));
       expect(result).toBe('[Page 1 Text] Hello PDF content');
@@ -217,17 +225,20 @@ const FAKE_JPEG = Buffer.from([0xff, 0xd8, 0xff]);       // JPEG magic bytes
 describe('[US 1.16] parsePptx', () => {
 
   describe('text extraction', () => {
+    // 37.9
     it('success: extracts slide body text with correct label', async () => {
       const buf = await buildPptx([{ num: 1, bodyText: 'Slide body text' }]);
       expect(await parsePptx(buf)).toContain('[Slide 1 Body] Slide body text');
     });
 
+    // 37.10
     it('success: extracts speaker notes with correct label', async () => {
       const buf = await buildPptx([{ num: 1, bodyText: 'Body', notesText: 'Speaker notes text' }]);
       const result = await parsePptx(buf);
       expect(result).toContain('[Slide 1 Notes] Speaker notes text');
     });
 
+    // 37.11
     it('success: processes multiple slides in slide-number order', async () => {
       const buf = await buildPptx([
         { num: 1, bodyText: 'First slide' },
@@ -237,6 +248,7 @@ describe('[US 1.16] parsePptx', () => {
       expect(result.indexOf('[Slide 1 Body]')).toBeLessThan(result.indexOf('[Slide 2 Body]'));
     });
 
+    // 37.12
     it('success: returns empty string for PPTX with no text nodes anywhere', async () => {
       const buf = await buildPptx([{ num: 1 }]);
       expect((await parsePptx(buf)).trim()).toBe('');
@@ -244,6 +256,7 @@ describe('[US 1.16] parsePptx', () => {
   });
 
   describe('vision pass (generatePptxSlideVisualDescription)', () => {
+    // 37.13
     it('success: calls vision with body, notes, and image — appends Visual Content label', async () => {
       const provider = makeMockProvider({
         generatePptxSlideVisualDescription: jest.fn().mockResolvedValue(
@@ -266,6 +279,7 @@ describe('[US 1.16] parsePptx', () => {
       expect(result).toContain('[Slide 1 Visual Content] RNAi pathway');
     });
 
+    // 37.14
     it('success: omits Visual Content label when vision returns NO_VISUAL_CONTENT', async () => {
       const provider = makeMockProvider({
         generatePptxSlideVisualDescription: jest.fn().mockResolvedValue('NO_VISUAL_CONTENT'),
@@ -279,6 +293,7 @@ describe('[US 1.16] parsePptx', () => {
       expect(result).toContain('[Slide 1 Body] Text only');
     });
 
+    // 37.15
     it('success: skips vision entirely for slides with no supported image formats (EMF/WMF)', async () => {
       const provider = makeMockProvider();
       const buf = await buildPptx([{
@@ -291,6 +306,7 @@ describe('[US 1.16] parsePptx', () => {
       expect(provider.generatePptxSlideVisualDescription).not.toHaveBeenCalled();
     });
 
+    // 37.16
     it('success: handles JPEG images with correct mime type', async () => {
       const provider = makeMockProvider({
         generatePptxSlideVisualDescription: jest.fn().mockResolvedValue('JPEG diagram'),
@@ -307,6 +323,7 @@ describe('[US 1.16] parsePptx', () => {
       );
     });
 
+    // 37.17
     it('failure: continues processing remaining slides when vision fails on one slide', async () => {
       jest.spyOn(console, 'warn').mockImplementation(() => { });
       let callCount = 0;
@@ -332,6 +349,7 @@ describe('[US 1.16] parsePptx', () => {
       (console.warn as jest.Mock).mockRestore();
     });
 
+    // 37.18
     it('success: no vision calls when aiProvider is not supplied', async () => {
       const buf = await buildPptx([{
         num: 1, bodyText: 'Body text',
@@ -346,16 +364,19 @@ describe('[US 1.16] parsePptx', () => {
 
 // parseFile dispatcher
 describe('[US 1.16] parseFile dispatcher', () => {
+  // 37.19
   it('success: routes "pdf" type to parsePdf', async () => {
     const result = await parseFile(Buffer.from('fake pdf'), 'pdf');
     expect(result).toBe('[Page 1 Text] Hello PDF content');
   });
 
+  // 37.20
   it('success: routes "pptx" type to parsePptx', async () => {
     const buf = await (new JSZip()).generateAsync({ type: 'nodebuffer' }) as Buffer;
     expect(await parseFile(buf, 'pptx')).toBe('');
   });
 
+  // 37.21
   it('success: passes aiProvider through to parsePdf vision path', async () => {
     const descMap = new Map([[1, 'Visual description from provider']]);
     const provider = makeMockProvider({
@@ -365,6 +386,7 @@ describe('[US 1.16] parseFile dispatcher', () => {
     expect(result).toContain('[Page 1 Visual Content] Visual description from provider');
   });
 
+  // 37.22
   it('success: passes aiProvider through to parsePptx vision path', async () => {
     const provider = makeMockProvider({
       generatePptxSlideVisualDescription: jest.fn().mockResolvedValue('Diagram via dispatcher'),

@@ -108,6 +108,7 @@ describe('Auto-save interval + recovery [US 1.13]', () => {
     jest.restoreAllMocks();
   });
 
+  // 35.1
   it('[US 1.13][AT1] auto-sync runs at regular intervals', async () => {
     const setIntervalSpy = jest.spyOn(global, 'setInterval');
     const { unmount } = renderHook(() => useSessionPage('lesson-456'));
@@ -120,6 +121,7 @@ describe('Auto-save interval + recovery [US 1.13]', () => {
     unmount();
   }, 10000);
 
+  // 35.2
   it('[US 1.13][AT4] reconnect triggers recovery sync', async () => {
     const { rerender, unmount } = renderHook(() => useSessionPage('lesson-456'));
 

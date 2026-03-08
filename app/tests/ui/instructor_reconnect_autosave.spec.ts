@@ -28,6 +28,7 @@ test.describe('Instructor Reconnect & Autosave Resilience', () => {
         });
     });
 
+    // 41.1
     test('[US 1.12][US 1.13] success: instructor auto-connects to an active lesson on refresh and data is restored', async ({ page }) => {
         await page.route('**/rest/v1/lessons*', async (route) => {
             // Dashboard `.listLessons()` expects array, Session view `fetchLessonById` expects single object
