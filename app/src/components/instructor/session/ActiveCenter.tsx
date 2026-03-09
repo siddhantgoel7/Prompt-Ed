@@ -13,6 +13,7 @@ import type { PromptType } from '@/types/discussion';
 import { SessionContext } from './SessionContext';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { CandidateCard } from './CandidateCard';
+import { MultipleChoiceEditor } from './MultipleChoiceEditor';
 import { transcribeAudioApi } from '@/lib/api/aiApi';
 
 
@@ -290,42 +291,18 @@ export function ActiveCenter(props: Partial<{
                     )}
 
                     {selectedIndex === i && c.promptType === 'multiple_choice' && (
-                      <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200">
-                        <p className="text-xs font-semibold mb-2">Options & Correct Answer</p>
-                        <div className="space-y-2">
-                          {c.mcOptions?.map((opt: { label: string; text: string; is_correct?: boolean }) => (
-                            <div key={opt.label} className="flex items-center gap-2 text-xs">
-                              <input
-                                type="radio"
-                                name={`correct-option-${i}`}
-                                value={opt.label}
-                                checked={overrideCorrectOption === opt.label}
-                                onChange={() => setOverrideCorrectOption(opt.label)}
-                                className="cursor-pointer"
-                              />
-                              <span className="font-semibold text-gray-700 w-4">{opt.label}.</span>
-                              <input
-                                type="text"
-                                value={editingOptions[opt.label] ?? opt.text}
-                                onChange={(e) => setEditingOptions({ ...editingOptions, [opt.label]: e.target.value })}
-                                className={`flex-1 px-2 py-1.5 border rounded focus:outline-none focus:border-black ${overrideCorrectOption === opt.label ? 'border-black font-medium bg-gray-50' : 'border-gray-300'}`}
-                                placeholder={`Option ${opt.label}`}
-                              />
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="mt-3 pt-3 border-t border-gray-100">
-                          <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={feedbackEnabled}
-                              onChange={(e) => setFeedbackEnabled(e.target.checked)}
-                            />
-                            Show correctness feedback to students
-                          </label>
-                        </div>
-                      </div>
+                      <MultipleChoiceEditor
+                        nameGroup={`correct-option-${i}`}
+                        options={c.mcOptions?.map((opt: { label: string; text: string; is_correct?: boolean }) => ({
+                          label: opt.label,
+                          text: editingOptions[opt.label] ?? opt.text
+                        })) || []}
+                        correctOption={overrideCorrectOption}
+                        onCorrectOptionChange={setOverrideCorrectOption}
+                        onOptionTextChange={(label, text) => setEditingOptions({ ...editingOptions, [label]: text })}
+                        feedbackEnabled={feedbackEnabled}
+                        onFeedbackChange={setFeedbackEnabled}
+                      />
                     )}
 
                     {selectedIndex === i && (
@@ -381,42 +358,18 @@ export function ActiveCenter(props: Partial<{
             />
 
             {promptType === 'multiple_choice' && (
-              <div className="mt-2 p-4 border rounded-lg bg-white border-gray-200">
-                <h3 className="text-sm font-semibold mb-3">Options & Correct Answer</h3>
-                <div className="space-y-2">
-                  {['A', 'B', 'C', 'D'].map((label) => (
-                    <div key={label} className="flex items-center gap-2 text-xs">
-                      <input
-                        type="radio"
-                        name="manual-correct-option"
-                        value={label}
-                        checked={overrideCorrectOption === label}
-                        onChange={() => setOverrideCorrectOption(label)}
-                        className="cursor-pointer"
-                      />
-                      <span className="font-semibold text-gray-700 w-4">{label}.</span>
-                      <input
-                        type="text"
-                        value={manualOptions[label] || ''}
-                        onChange={(e) => setManualOptions({ ...manualOptions, [label]: e.target.value })}
-                        className={`flex-1 px-2 py-1.5 border rounded focus:outline-none focus:border-black ${overrideCorrectOption === label ? 'border-black font-medium bg-gray-50' : 'border-gray-300'}`}
-                        placeholder={`Option ${label}`}
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={feedbackEnabled}
-                      onChange={(e) => setFeedbackEnabled(e.target.checked)}
-                    />
-                    Show correctness feedback to students
-                  </label>
-                </div>
-              </div>
+              <MultipleChoiceEditor
+                nameGroup="manual-correct-option"
+                options={['A', 'B', 'C', 'D'].map((label) => ({
+                  label,
+                  text: manualOptions[label] || ''
+                }))}
+                correctOption={overrideCorrectOption}
+                onCorrectOptionChange={setOverrideCorrectOption}
+                onOptionTextChange={(label, text) => setManualOptions({ ...manualOptions, [label]: text })}
+                feedbackEnabled={feedbackEnabled}
+                onFeedbackChange={setFeedbackEnabled}
+              />
             )}
           </TabsContent>
         </Tabs>
