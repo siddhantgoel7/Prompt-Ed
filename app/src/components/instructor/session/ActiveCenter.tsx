@@ -68,6 +68,9 @@ export function ActiveCenter(props: Partial<{
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
   const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
   const [editingOptions, setEditingOptions] = React.useState<Record<string, string>>({});
+  const [manualOptions, setManualOptions] = React.useState<Record<string, string>>({
+    A: '', B: '', C: '', D: ''
+  });
 
   const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -84,6 +87,7 @@ export function ActiveCenter(props: Partial<{
     setOverrideCorrectOption(null);
     setFeedbackEnabled(false);
     setEditingOptions({});
+    setManualOptions({ A: '', B: '', C: '', D: '' });
   }, [candidates]);
 
   // Stop recording → Whisper → populate transcriptText → trigger generate
@@ -342,6 +346,46 @@ export function ActiveCenter(props: Partial<{
           </div>
         )}
 
+        {/* Manual Multiple Choice Creation Block */}
+        {promptType === 'multiple_choice' && candidates.length === 0 && (
+          <div className="mt-2 p-4 border rounded-lg bg-white border-gray-200">
+            <h3 className="text-sm font-semibold mb-3">Manual Multiple Choice Options</h3>
+            <div className="space-y-2">
+              {['A', 'B', 'C', 'D'].map((label) => (
+                <div key={label} className="flex items-center gap-2 text-xs">
+                  <input
+                    type="radio"
+                    name="manual-correct-option"
+                    value={label}
+                    checked={overrideCorrectOption === label}
+                    onChange={() => setOverrideCorrectOption(label)}
+                    className="cursor-pointer"
+                  />
+                  <span className="font-semibold text-gray-700 w-4">{label}.</span>
+                  <input
+                    type="text"
+                    value={manualOptions[label] || ''}
+                    onChange={(e) => setManualOptions({ ...manualOptions, [label]: e.target.value })}
+                    className={`flex-1 px-2 py-1.5 border rounded focus:outline-none focus:border-black ${overrideCorrectOption === label ? 'border-black font-medium bg-gray-50' : 'border-gray-300'}`}
+                    placeholder={`Option ${label}`}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={feedbackEnabled}
+                  onChange={(e) => setFeedbackEnabled(e.target.checked)}
+                />
+                Show correctness feedback to students
+              </label>
+            </div>
+          </div>
+        )}
+
         {/* Start / Close Discussion Toggle */}
         <div className="pt-2">
           {activeDiscussionId ? (
@@ -359,7 +403,36 @@ export function ActiveCenter(props: Partial<{
                     handlePublishSelected(candidates[selectedIndex]);
                     return;
                   }
-                  alert('Manual creation of multiple-choice questions is not supported. Please generate AI prompts and select one to publish, or change the type to Short/Long Answer.');
+
+                  if (candidates.length === 0) {
+                    if (!overrideCorrectOption) {
+                      alert('Please select a correct answer for your multiple-choice question.');
+                      return;
+                    }
+                    if (onPublishAiCandidate) {
+                      const mcOptions = (['A', 'B', 'C', 'D'] as const).map(label => ({
+                        label,
+                        text: manualOptions[label] || `Option ${label}`
+                      }));
+
+                      onPublishAiCandidate(
+                        {
+                          promptText: promptInput,
+                          promptType: 'multiple_choice',
+                          mcOptions
+                        },
+                        overrideCorrectOption,
+                        feedbackEnabled
+                      );
+
+                      setManualOptions({ A: '', B: '', C: '', D: '' });
+                      setOverrideCorrectOption(null);
+                      setFeedbackEnabled(false);
+                    }
+                    return;
+                  }
+
+                  alert('Please select a generated AI prompt to publish, or change the question type to Short/Long Answer.');
                   return;
                 }
                 onPublish();
