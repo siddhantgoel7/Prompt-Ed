@@ -1,5 +1,7 @@
 import type { PromptType } from '@/types/discussion';
-import type { CandidateSet } from '@/types/ai';
+import type { CandidateSet, AIPromptPreferences } from '@/types/ai';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AIProvider } from '../providers';
 
 /**
  * Mock for development without OpenAI API key and demo-day fallback.
@@ -10,7 +12,10 @@ import type { CandidateSet } from '@/types/ai';
 export async function generatePrompts(
   _lessonId: string,
   _transcriptText: string,
-  promptType: PromptType
+  promptType: PromptType,
+  _supabase?: SupabaseClient | null,
+  _aiProvider?: AIProvider | null,
+  _preferences?: AIPromptPreferences
 ): Promise<CandidateSet> {
   if (promptType === 'multiple_choice') {
     return {
