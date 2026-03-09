@@ -3,6 +3,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 
 import * as React from 'react';
@@ -66,6 +67,7 @@ export function ActiveCenter(props: Partial<{
   const [sttError, setSttError] = React.useState<string | null>(null);
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
   const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
+  const [editingOptions, setEditingOptions] = React.useState<Record<string, string>>({});
 
   const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -81,6 +83,7 @@ export function ActiveCenter(props: Partial<{
     setSelectedIndex(null);
     setOverrideCorrectOption(null);
     setFeedbackEnabled(false);
+    setEditingOptions({});
   }, [candidates]);
 
   // Stop recording → Whisper → populate transcriptText → trigger generate
@@ -121,14 +124,38 @@ export function ActiveCenter(props: Partial<{
     if (p.promptType === 'multiple_choice' && p.mcOptions) {
       const correctOpt = p.mcOptions.find(o => o.is_correct);
       setOverrideCorrectOption(correctOpt ? correctOpt.label : null);
+
+      const initialOpts = p.mcOptions.reduce((acc, opt) => {
+        acc[opt.label] = opt.text;
+        return acc;
+      }, {} as Record<string, string>);
+      setEditingOptions(initialOpts);
     } else {
       setOverrideCorrectOption(null);
+      setEditingOptions({});
     }
   };
 
   const handlePublishSelected = (p: GeneratedPrompt) => {
+    let publishedCandidate = p;
+    if (p.promptType === 'multiple_choice' && p.mcOptions) {
+      publishedCandidate = {
+        ...p,
+        promptText: promptInput,
+        mcOptions: p.mcOptions.map(opt => ({
+          ...opt,
+          text: editingOptions[opt.label] ?? opt.text
+        }))
+      };
+    } else {
+      publishedCandidate = {
+        ...p,
+        promptText: promptInput
+      };
+    }
+
     if (onPublishAiCandidate) {
-      onPublishAiCandidate(p, overrideCorrectOption, feedbackEnabled);
+      onPublishAiCandidate(publishedCandidate, overrideCorrectOption, feedbackEnabled);
       setSelectedIndex(null);
     }
   };
@@ -224,29 +251,55 @@ export function ActiveCenter(props: Partial<{
           <div className="space-y-2">
             {candidates.map((c: GeneratedPrompt, i: number) => (
               <div key={i}>
-                <CandidateCard
-                  candidate={c}
-                  isSelected={selectedIndex === i}
-                  onSelect={() => handleSelectCandidate(c, i)}
-                />
+                {selectedIndex === i ? (
+                  <div className="p-3 bg-gray-50 border-2 border-black rounded-lg text-sm transition-colors">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="secondary" className="text-xs capitalize">
+                        {c.promptType.replace('_', ' ')}
+                      </Badge>
+                      <span className="text-xs text-green-600 font-medium">Selected (Editing)</span>
+                    </div>
+                    <textarea
+                      value={promptInput}
+                      onChange={(e) => {
+                        setPromptInput(e.target.value);
+                        setTranscriptText(e.target.value);
+                      }}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-black min-h-[80px] resize-y leading-snug bg-white"
+                      placeholder="Edit this prompt..."
+                    />
+                  </div>
+                ) : (
+                  <CandidateCard
+                    candidate={c}
+                    isSelected={false}
+                    onSelect={() => handleSelectCandidate(c, i)}
+                  />
+                )}
 
                 {selectedIndex === i && c.promptType === 'multiple_choice' && (
                   <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200">
-                    <p className="text-xs font-semibold mb-2">Correct Answer</p>
-                    <div className="space-y-1">
+                    <p className="text-xs font-semibold mb-2">Options & Correct Answer</p>
+                    <div className="space-y-2">
                       {c.mcOptions?.map((opt: { label: string; text: string; is_correct?: boolean }) => (
-                        <label key={opt.label} className="flex items-center gap-2 text-xs cursor-pointer">
+                        <div key={opt.label} className="flex items-center gap-2 text-xs">
                           <input
                             type="radio"
                             name={`correct-option-${i}`}
                             value={opt.label}
                             checked={overrideCorrectOption === opt.label}
                             onChange={() => setOverrideCorrectOption(opt.label)}
+                            className="cursor-pointer"
                           />
-                          <span className={overrideCorrectOption === opt.label ? 'font-medium' : ''}>
-                            Option {opt.label}
-                          </span>
-                        </label>
+                          <span className="font-semibold text-gray-700 w-4">{opt.label}.</span>
+                          <input
+                            type="text"
+                            value={editingOptions[opt.label] ?? opt.text}
+                            onChange={(e) => setEditingOptions({ ...editingOptions, [opt.label]: e.target.value })}
+                            className={`flex-1 px-2 py-1.5 border rounded focus:outline-none focus:border-black ${overrideCorrectOption === opt.label ? 'border-black font-medium bg-gray-50' : 'border-gray-300'}`}
+                            placeholder={`Option ${opt.label}`}
+                          />
+                        </div>
                       ))}
                     </div>
 
@@ -303,14 +356,7 @@ export function ActiveCenter(props: Partial<{
               onClick={() => {
                 if (promptType === 'multiple_choice') {
                   if (selectedIndex !== null && candidates[selectedIndex]) {
-                    if (onPublishAiCandidate) {
-                      onPublishAiCandidate(
-                        { ...candidates[selectedIndex], promptText: promptInput },
-                        overrideCorrectOption,
-                        feedbackEnabled
-                      );
-                      setSelectedIndex(null);
-                    }
+                    handlePublishSelected(candidates[selectedIndex]);
                     return;
                   }
                   alert('Manual creation of multiple-choice questions is not supported. Please generate AI prompts and select one to publish, or change the type to Short/Long Answer.');
