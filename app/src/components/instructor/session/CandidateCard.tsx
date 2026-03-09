@@ -25,11 +25,13 @@ export function CandidateCard({
                 isSelected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400 bg-white',
             ].join(' ')}
         >
-            <div className="flex items-center gap-2 mb-1">
-                <Badge variant="secondary" className="text-xs capitalize">
-                    {candidate.promptType.replace('_', ' ')}
-                </Badge>
-                {isSelected && <span className="text-xs text-green-600 font-medium">Selected</span>}
+            <div className="flex items-start justify-between mb-1">
+                <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs capitalize">
+                        {candidate.promptType.replace('_', ' ')}
+                    </Badge>
+                    {isSelected && <span className="text-xs text-green-600 font-medium">Selected</span>}
+                </div>
             </div>
             <p className="leading-snug">{candidate.promptText}</p>
             {candidate.mcOptions && candidate.mcOptions.length > 0 && (
