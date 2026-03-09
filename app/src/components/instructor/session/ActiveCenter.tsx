@@ -4,6 +4,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 import * as React from 'react';
@@ -71,6 +72,7 @@ export function ActiveCenter(props: Partial<{
   const [manualOptions, setManualOptions] = React.useState<Record<string, string>>({
     A: '', B: '', C: '', D: ''
   });
+  const [creationMode, setCreationMode] = React.useState<'ai' | 'manual'>('ai');
 
   const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -167,227 +169,260 @@ export function ActiveCenter(props: Partial<{
   return (
     <div className="flex-1 p-6 space-y-4 overflow-y-auto">
 
-      {/* ── AI generation section ── */}
       <div className="space-y-3 border rounded-lg p-4 bg-gray-50">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold">AI Prompt Generation</span>
+        <Tabs value={creationMode} onValueChange={(v) => setCreationMode(v as 'ai' | 'manual')} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="ai">AI Generation</TabsTrigger>
+            <TabsTrigger value="manual">Manual Creation</TabsTrigger>
+          </TabsList>
 
-          {/* STT recording button (US 1.17) */}
-          <div className="flex items-center gap-2">
-            {recorder.isRecording && (
-              <span className="flex items-center gap-1 text-xs text-red-600 font-medium">
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
-                {recorder.fmt(recorder.elapsed)}
-              </span>
-            )}
-            {!recorder.isRecording ? (
-              <Button
-                onClick={recorder.start}
-                disabled={isGenerating || sttStatus === 'transcribing'}
-                size="sm"
-                variant="outline"
-                className="text-xs h-7 px-3 border-red-300 text-red-700 hover:bg-red-50"
-              >
-                🎙 Start Recording
-              </Button>
-            ) : (
-              <Button
-                onClick={handleStopAndTranscribe}
-                size="sm"
-                className="text-xs h-7 px-3 bg-gray-900 text-white hover:bg-gray-800"
-              >
-                ⏹ Stop &amp; Transcribe
-              </Button>
-            )}
-          </div>
-        </div>
+          <TabsContent value="ai" className="space-y-3 mt-0">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">Generate with AI</span>
 
-        {sttStatus === 'transcribing' && (
-          <p className="text-xs text-gray-500 animate-pulse">Transcribing audio…</p>
-        )}
-        {sttStatus === 'error' && sttError && (
-          <p className="text-xs text-red-600">{sttError}</p>
-        )}
-
-        {/* Prompt / context input */}
-        <textarea
-          ref={transcriptRef}
-          value={promptInput}
-          onChange={(e) => {
-            setPromptInput(e.target.value);
-            setTranscriptText(e.target.value); // Keep in sync for STT context
-          }}
-          placeholder="Spoken content will appear here after recording, or type a topic manually"
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none overflow-hidden min-h-[50px]"
-          rows={2}
-        />
-
-        {/* Prompt type + generate */}
-        <div className="flex items-center gap-2">
-          <select
-            value={promptType}
-            onChange={(e) => setPromptType(e.target.value as PromptType)}
-            className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-black"
-          >
-            <option value="long_answer">Long Answer</option>
-            <option value="short_answer">Short Answer</option>
-            <option value="multiple_choice">Multiple Choice</option>
-          </select>
-
-          <Button
-            onClick={onGenerate}
-            disabled={isGenerating || recorder.isRecording}
-            size="sm"
-            className="px-4 py-1.5 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
-          >
-            {isGenerating ? 'Generating…' : 'Generate Prompts'}
-          </Button>
-        </div>
-
-        {generationWarning && (
-          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
-            {generationWarning}
-          </p>
-        )}
-
-        {/* Candidate cards */}
-        {candidates.length > 0 && (
-          <div className="space-y-2">
-            {candidates.map((c: GeneratedPrompt, i: number) => (
-              <div key={i}>
-                {selectedIndex === i ? (
-                  <div className="p-3 bg-gray-50 border-2 border-black rounded-lg text-sm transition-colors">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="secondary" className="text-xs capitalize">
-                        {c.promptType.replace('_', ' ')}
-                      </Badge>
-                      <span className="text-xs text-green-600 font-medium">Selected (Editing)</span>
-                    </div>
-                    <textarea
-                      value={promptInput}
-                      onChange={(e) => {
-                        setPromptInput(e.target.value);
-                        setTranscriptText(e.target.value);
-                      }}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-black min-h-[80px] resize-y leading-snug bg-white"
-                      placeholder="Edit this prompt..."
-                    />
-                  </div>
-                ) : (
-                  <CandidateCard
-                    candidate={c}
-                    isSelected={false}
-                    onSelect={() => handleSelectCandidate(c, i)}
-                  />
+              {/* STT recording button (US 1.17) */}
+              <div className="flex items-center gap-2">
+                {recorder.isRecording && (
+                  <span className="flex items-center gap-1 text-xs text-red-600 font-medium">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
+                    {recorder.fmt(recorder.elapsed)}
+                  </span>
                 )}
-
-                {selectedIndex === i && c.promptType === 'multiple_choice' && (
-                  <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200">
-                    <p className="text-xs font-semibold mb-2">Options & Correct Answer</p>
-                    <div className="space-y-2">
-                      {c.mcOptions?.map((opt: { label: string; text: string; is_correct?: boolean }) => (
-                        <div key={opt.label} className="flex items-center gap-2 text-xs">
-                          <input
-                            type="radio"
-                            name={`correct-option-${i}`}
-                            value={opt.label}
-                            checked={overrideCorrectOption === opt.label}
-                            onChange={() => setOverrideCorrectOption(opt.label)}
-                            className="cursor-pointer"
-                          />
-                          <span className="font-semibold text-gray-700 w-4">{opt.label}.</span>
-                          <input
-                            type="text"
-                            value={editingOptions[opt.label] ?? opt.text}
-                            onChange={(e) => setEditingOptions({ ...editingOptions, [opt.label]: e.target.value })}
-                            className={`flex-1 px-2 py-1.5 border rounded focus:outline-none focus:border-black ${overrideCorrectOption === opt.label ? 'border-black font-medium bg-gray-50' : 'border-gray-300'}`}
-                            placeholder={`Option ${opt.label}`}
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={feedbackEnabled}
-                          onChange={(e) => setFeedbackEnabled(e.target.checked)}
-                        />
-                        Show correctness feedback to students
-                      </label>
-                    </div>
-                  </div>
-                )}
-
-                {selectedIndex === i && (
+                {!recorder.isRecording ? (
                   <Button
+                    onClick={recorder.start}
+                    disabled={isGenerating || sttStatus === 'transcribing'}
                     size="sm"
-                    onClick={() => handlePublishSelected(c)}
-                    className="mt-2 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800"
+                    variant="outline"
+                    className="text-xs h-7 px-3 border-red-300 text-red-700 hover:bg-red-50"
                   >
-                    Publish This Question →
+                    🎙 Start Recording
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleStopAndTranscribe}
+                    size="sm"
+                    className="text-xs h-7 px-3 bg-gray-900 text-white hover:bg-gray-800"
+                  >
+                    ⏹ Stop &amp; Transcribe
                   </Button>
                 )}
               </div>
-            ))}
+            </div>
 
-            <div className="flex gap-2 pt-1">
-              <Button
-                onClick={onRegenerate}
-                disabled={isGenerating}
-                variant="outline"
-                size="sm"
-                className="text-xs"
+            {sttStatus === 'transcribing' && (
+              <p className="text-xs text-gray-500 animate-pulse">Transcribing audio…</p>
+            )}
+            {sttStatus === 'error' && sttError && (
+              <p className="text-xs text-red-600">{sttError}</p>
+            )}
+
+            {/* Prompt / context input */}
+            <textarea
+              ref={transcriptRef}
+              value={promptInput}
+              onChange={(e) => {
+                setPromptInput(e.target.value);
+                setTranscriptText(e.target.value); // Keep in sync for STT context
+              }}
+              placeholder="Spoken content will appear here after recording, or type a topic manually"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none overflow-hidden min-h-[50px]"
+              rows={2}
+            />
+
+            {/* Prompt type + generate */}
+            <div className="flex items-center gap-2">
+              <select
+                value={promptType}
+                onChange={(e) => setPromptType(e.target.value as PromptType)}
+                className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-black"
               >
-                {isGenerating ? 'Regenerating…' : 'Regenerate'}
+                <option value="long_answer">Long Answer</option>
+                <option value="short_answer">Short Answer</option>
+                <option value="multiple_choice">Multiple Choice</option>
+              </select>
+
+              <Button
+                onClick={onGenerate}
+                disabled={isGenerating || recorder.isRecording}
+                size="sm"
+                className="px-4 py-1.5 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
+              >
+                {isGenerating ? 'Generating…' : 'Generate Prompts'}
               </Button>
             </div>
-          </div>
-        )}
 
-        {/* Manual Multiple Choice Creation Block */}
-        {promptType === 'multiple_choice' && candidates.length === 0 && (
-          <div className="mt-2 p-4 border rounded-lg bg-white border-gray-200">
-            <h3 className="text-sm font-semibold mb-3">Manual Multiple Choice Options</h3>
-            <div className="space-y-2">
-              {['A', 'B', 'C', 'D'].map((label) => (
-                <div key={label} className="flex items-center gap-2 text-xs">
-                  <input
-                    type="radio"
-                    name="manual-correct-option"
-                    value={label}
-                    checked={overrideCorrectOption === label}
-                    onChange={() => setOverrideCorrectOption(label)}
-                    className="cursor-pointer"
-                  />
-                  <span className="font-semibold text-gray-700 w-4">{label}.</span>
-                  <input
-                    type="text"
-                    value={manualOptions[label] || ''}
-                    onChange={(e) => setManualOptions({ ...manualOptions, [label]: e.target.value })}
-                    className={`flex-1 px-2 py-1.5 border rounded focus:outline-none focus:border-black ${overrideCorrectOption === label ? 'border-black font-medium bg-gray-50' : 'border-gray-300'}`}
-                    placeholder={`Option ${label}`}
-                  />
+            {generationWarning && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                {generationWarning}
+              </p>
+            )}
+
+            {/* Candidate cards */}
+            {candidates.length > 0 && (
+              <div className="space-y-2">
+                {candidates.map((c: GeneratedPrompt, i: number) => (
+                  <div key={i}>
+                    {selectedIndex === i ? (
+                      <div className="p-3 bg-gray-50 border-2 border-black rounded-lg text-sm transition-colors">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="secondary" className="text-xs capitalize">
+                            {c.promptType.replace('_', ' ')}
+                          </Badge>
+                          <span className="text-xs text-green-600 font-medium">Selected (Editing)</span>
+                        </div>
+                        <textarea
+                          value={promptInput}
+                          onChange={(e) => {
+                            setPromptInput(e.target.value);
+                            setTranscriptText(e.target.value);
+                          }}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-black min-h-[80px] resize-y leading-snug bg-white"
+                          placeholder="Edit this prompt..."
+                        />
+                      </div>
+                    ) : (
+                      <CandidateCard
+                        candidate={c}
+                        isSelected={false}
+                        onSelect={() => handleSelectCandidate(c, i)}
+                      />
+                    )}
+
+                    {selectedIndex === i && c.promptType === 'multiple_choice' && (
+                      <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200">
+                        <p className="text-xs font-semibold mb-2">Options & Correct Answer</p>
+                        <div className="space-y-2">
+                          {c.mcOptions?.map((opt: { label: string; text: string; is_correct?: boolean }) => (
+                            <div key={opt.label} className="flex items-center gap-2 text-xs">
+                              <input
+                                type="radio"
+                                name={`correct-option-${i}`}
+                                value={opt.label}
+                                checked={overrideCorrectOption === opt.label}
+                                onChange={() => setOverrideCorrectOption(opt.label)}
+                                className="cursor-pointer"
+                              />
+                              <span className="font-semibold text-gray-700 w-4">{opt.label}.</span>
+                              <input
+                                type="text"
+                                value={editingOptions[opt.label] ?? opt.text}
+                                onChange={(e) => setEditingOptions({ ...editingOptions, [opt.label]: e.target.value })}
+                                className={`flex-1 px-2 py-1.5 border rounded focus:outline-none focus:border-black ${overrideCorrectOption === opt.label ? 'border-black font-medium bg-gray-50' : 'border-gray-300'}`}
+                                placeholder={`Option ${opt.label}`}
+                              />
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={feedbackEnabled}
+                              onChange={(e) => setFeedbackEnabled(e.target.checked)}
+                            />
+                            Show correctness feedback to students
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedIndex === i && (
+                      <Button
+                        size="sm"
+                        onClick={() => handlePublishSelected(c)}
+                        className="mt-2 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800"
+                      >
+                        Publish This Question →
+                      </Button>
+                    )}
+                  </div>
+                ))}
+
+                <div className="flex gap-2 pt-1">
+                  <Button
+                    onClick={onRegenerate}
+                    disabled={isGenerating}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                  >
+                    {isGenerating ? 'Regenerating…' : 'Regenerate'}
+                  </Button>
                 </div>
-              ))}
+              </div>
+            )}
+
+          </TabsContent>
+
+          <TabsContent value="manual" className="space-y-3 mt-0">
+            <div className="flex items-center gap-2 mb-2">
+              <select
+                value={promptType}
+                onChange={(e) => setPromptType(e.target.value as PromptType)}
+                className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-black"
+              >
+                <option value="long_answer">Long Answer</option>
+                <option value="short_answer">Short Answer</option>
+                <option value="multiple_choice">Multiple Choice</option>
+              </select>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={feedbackEnabled}
-                  onChange={(e) => setFeedbackEnabled(e.target.checked)}
-                />
-                Show correctness feedback to students
-              </label>
-            </div>
-          </div>
-        )}
+            <textarea
+              value={promptInput}
+              onChange={(e) => {
+                setPromptInput(e.target.value);
+                setTranscriptText(e.target.value);
+              }}
+              placeholder="Type your question here manually..."
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none overflow-hidden min-h-[80px]"
+              rows={3}
+            />
+
+            {promptType === 'multiple_choice' && (
+              <div className="mt-2 p-4 border rounded-lg bg-white border-gray-200">
+                <h3 className="text-sm font-semibold mb-3">Options & Correct Answer</h3>
+                <div className="space-y-2">
+                  {['A', 'B', 'C', 'D'].map((label) => (
+                    <div key={label} className="flex items-center gap-2 text-xs">
+                      <input
+                        type="radio"
+                        name="manual-correct-option"
+                        value={label}
+                        checked={overrideCorrectOption === label}
+                        onChange={() => setOverrideCorrectOption(label)}
+                        className="cursor-pointer"
+                      />
+                      <span className="font-semibold text-gray-700 w-4">{label}.</span>
+                      <input
+                        type="text"
+                        value={manualOptions[label] || ''}
+                        onChange={(e) => setManualOptions({ ...manualOptions, [label]: e.target.value })}
+                        className={`flex-1 px-2 py-1.5 border rounded focus:outline-none focus:border-black ${overrideCorrectOption === label ? 'border-black font-medium bg-gray-50' : 'border-gray-300'}`}
+                        placeholder={`Option ${label}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-gray-100">
+                  <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={feedbackEnabled}
+                      onChange={(e) => setFeedbackEnabled(e.target.checked)}
+                    />
+                    Show correctness feedback to students
+                  </label>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
 
         {/* Start / Close Discussion Toggle */}
-        <div className="pt-2">
+        <div className="pt-4 border-t border-gray-200">
           {activeDiscussionId ? (
             <Button
               onClick={() => onClose(activeDiscussionId)}
@@ -398,13 +433,8 @@ export function ActiveCenter(props: Partial<{
           ) : (
             <Button
               onClick={() => {
-                if (promptType === 'multiple_choice') {
-                  if (selectedIndex !== null && candidates[selectedIndex]) {
-                    handlePublishSelected(candidates[selectedIndex]);
-                    return;
-                  }
-
-                  if (candidates.length === 0) {
+                if (creationMode === 'manual') {
+                  if (promptType === 'multiple_choice') {
                     if (!overrideCorrectOption) {
                       alert('Please select a correct answer for your multiple-choice question.');
                       return;
@@ -428,13 +458,34 @@ export function ActiveCenter(props: Partial<{
                       setManualOptions({ A: '', B: '', C: '', D: '' });
                       setOverrideCorrectOption(null);
                       setFeedbackEnabled(false);
+                      setPromptInput('');
                     }
                     return;
                   }
 
-                  alert('Please select a generated AI prompt to publish, or change the question type to Short/Long Answer.');
+                  // For long/short answer in manual mode
+                  onPublish();
                   return;
                 }
+
+                // AI Mode
+                if (selectedIndex !== null && candidates[selectedIndex]) {
+                  handlePublishSelected(candidates[selectedIndex]);
+                  return;
+                }
+
+                if (promptType === 'multiple_choice' && candidates.length > 0) {
+                  alert('Please select a generated AI prompt to publish.');
+                  return;
+                }
+
+                if (promptType === 'multiple_choice') {
+                  alert('Please generate AI prompts and select one to publish, or switch to Manual Creation mode.');
+                  return;
+                }
+
+                // fallback for short/long answer when no candidate selected 
+                // publishes the STT input as the prompt
                 onPublish();
               }}
               disabled={!promptInput.trim() || !isConnected}
