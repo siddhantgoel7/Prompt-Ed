@@ -309,7 +309,8 @@ export function ActiveCenter(props: Partial<{
                       <Button
                         size="sm"
                         onClick={() => handlePublishSelected(c)}
-                        className="mt-2 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800"
+                        disabled={!promptInput.trim() || !isConnected}
+                        className="mt-2 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800 disabled:opacity-50"
                       >
                         Publish This Question →
                       </Button>

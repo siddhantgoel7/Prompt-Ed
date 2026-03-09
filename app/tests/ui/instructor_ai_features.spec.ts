@@ -113,7 +113,7 @@ test.describe('Instructor AI Features & Tools', () => {
 
         await expect(page.getByText('AI MOCKED: Short Answer Question?')).toBeVisible({ timeout: 15000 });
 
-        const producedPromptCard = page.locator('div').filter({ hasText: 'AI MOCKED: Short Answer Question?' }).first();
+        const producedPromptCard = page.locator('button').filter({ hasText: 'AI MOCKED: Short Answer Question?' }).first();
         await producedPromptCard.click();
 
         const selectDropdown = page.locator('select');
@@ -153,7 +153,7 @@ test.describe('Instructor AI Features & Tools', () => {
         await expect(page.getByText('AI MOCKED: Short Answer Question?')).toBeVisible({ timeout: 15000 });
 
         // Select the candidate
-        const producedPromptCard = page.locator('div').filter({ hasText: 'AI MOCKED: Short Answer Question?' }).first();
+        const producedPromptCard = page.locator('button').filter({ hasText: 'AI MOCKED: Short Answer Question?' }).first();
         await producedPromptCard.click();
 
         // When selected, it becomes an editable textarea. The value should be the prompt text.
@@ -187,5 +187,45 @@ test.describe('Instructor AI Features & Tools', () => {
         expect(publishedPayload).toBeTruthy();
         expect(Array.isArray(publishedPayload)).toBe(true);
         expect(publishedPayload[0].prompt_text).toBe('EDITED: Short Answer Question!');
+    });
+
+    test('[US 1.20] failure: cannot publish an empty edited prompt', async ({ page }) => {
+        test.skip(!!process.env.CI, 'Flaky in CI');
+
+        await page.route('**/api/lessons/ai-lesson-id/generate', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    candidates: [{
+                        promptText: 'AI MOCKED: Question?',
+                        promptType: 'short_answer'
+                    }]
+                }),
+            });
+        });
+
+        const contextBox = page.locator('textarea[placeholder*="Spoken content"]');
+        await expect(contextBox).toBeVisible({ timeout: 15000 });
+        await contextBox.fill('Generate me a short answer question.');
+        await page.getByRole('button', { name: /Generate Prompt/i }).click();
+
+        const producedPromptCard = page.locator('button').filter({ hasText: 'AI MOCKED: Question?' }).first();
+        await expect(producedPromptCard).toBeVisible({ timeout: 15000 });
+        await producedPromptCard.click();
+
+        const editableTextarea = page.locator('textarea[placeholder="Edit this prompt..."]');
+        await expect(editableTextarea).toBeVisible({ timeout: 5000 });
+
+        // Clear the text
+        await editableTextarea.fill('');
+
+        // Verify the inner publish button is disabled
+        const innerPublishButton = page.getByRole('button', { name: /Publish This Question/i });
+        await expect(innerPublishButton).toBeDisabled();
+
+        // Verify the outer discussion button is also disabled
+        const outerStartDiscussionBtn = page.getByRole('button', { name: /Start Discussion/i, exact: true });
+        await expect(outerStartDiscussionBtn).toBeDisabled();
     });
 });
