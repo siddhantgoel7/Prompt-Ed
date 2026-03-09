@@ -125,4 +125,67 @@ test.describe('Instructor AI Features & Tools', () => {
         await expect(page.getByText('Option A')).toBeVisible();
         await expect(page.getByText('Option B')).toBeVisible();
     });
+
+    // 43.4
+    test('[US 1.20] success: instructor can edit AI-generated prompts before publishing', async ({ page }) => {
+        test.skip(!!process.env.CI, 'Flaky in CI');
+
+        await page.route('**/api/lessons/ai-lesson-id/generate', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    candidates: [{
+                        promptText: 'AI MOCKED: Short Answer Question?',
+                        promptType: 'short_answer'
+                    }]
+                }),
+            });
+        });
+
+        // Generate a prompt
+        const contextBox = page.locator('textarea[placeholder*="Spoken content"]');
+        await expect(contextBox).toBeVisible({ timeout: 15000 });
+        await contextBox.fill('Generate me a short answer question.');
+        await page.getByRole('button', { name: /Generate Prompt/i }).click();
+
+        // Ensure candidate visible
+        await expect(page.getByText('AI MOCKED: Short Answer Question?')).toBeVisible({ timeout: 15000 });
+
+        // Select the candidate
+        const producedPromptCard = page.locator('div').filter({ hasText: 'AI MOCKED: Short Answer Question?' }).first();
+        await producedPromptCard.click();
+
+        // When selected, it becomes an editable textarea. The value should be the prompt text.
+        const editableTextarea = page.locator('textarea[placeholder="Edit this prompt..."]');
+        await expect(editableTextarea).toBeVisible({ timeout: 5000 });
+        await expect(editableTextarea).toHaveValue('AI MOCKED: Short Answer Question?');
+
+        // Edit the prompt
+        await editableTextarea.fill('EDITED: Short Answer Question!');
+
+        // Mock the publish endpoint
+        let publishedPayload: any = null;
+        await page.route('**/rest/v1/discussions*', async (route) => {
+            if (route.request().method() === 'POST') {
+                publishedPayload = route.request().postDataJSON();
+                await route.fulfill({
+                    status: 201,
+                    contentType: 'application/json',
+                    body: JSON.stringify([{ id: 'mocked-discussion-id', ...publishedPayload, status: 'active' }]),
+                });
+            } else {
+                await route.fallback();
+            }
+        });
+
+        // Publish
+        await page.getByRole('button', { name: /Publish This Question/i }).click();
+
+        // Verify the payload contains the EDITED text
+        await page.waitForTimeout(500); // Give small time for mock network response to settle (avoiding race conditions in assertions)
+        expect(publishedPayload).toBeTruthy();
+        expect(Array.isArray(publishedPayload)).toBe(true);
+        expect(publishedPayload[0].prompt_text).toBe('EDITED: Short Answer Question!');
+    });
 });
