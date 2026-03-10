@@ -263,11 +263,11 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 | QR display and scan flow improvements   | 1.32, 2.05       | Aldo    | Mar 11       |
 | Response highlight interactions         | 1.36             | Aldo     | Mar 14       |
 | List-view response panel                | 1.39             | Shabaz     | Mar 13       |
-| Engagement metrics calculations         | 1.40             | Shabaz      | Mar 11       |
+| Engagement metrics calculations         | 1.40             | Nikita      | Mar 11       |
 | Export responses (CSV/PDF/JSON)         | 1.41             | Nikita      | Mar 12       |
-| Export prompts + responses              | 1.42             | Tomiwa      | Mar 11       |
+| Export prompts + responses              | 1.42             | Nikita     | Mar 11       |
 | Export lesson statistics                | 1.43             | Sid      | Mar 10       |
-| Leave/rejoin/ended-session stability    | 2.12, 2.13, 2.14 | Mo, Nikita, Mo   | Mar 18       |
+| Leave/rejoin/ended-session stability    | 2.12, 2.13, 2.14 | Mo & Nikita   | Mar 18       |
 | End-to-end testing for export/metrics   | All              | Team         | Mar 20       |
 
 ---
