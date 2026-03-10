@@ -1,3 +1,5 @@
+// Centered card wrapper used by all student session views to maintain consistent layout.
+// src/components/student/session/StudentSessionShell.tsx
 'use client';
 
 import { PropsWithChildren } from 'react';
