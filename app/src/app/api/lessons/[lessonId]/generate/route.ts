@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { OpenAIProvider } from '@/lib/ai/providers';
 import type { PromptType } from '@/types/discussion';
-import type { CandidateSet } from '@/types/ai';
+import type { CandidateSet, AIPromptPreferences } from '@/types/ai';
 
 /**
  * POST /api/lessons/[lessonId]/generate
@@ -64,15 +64,32 @@ export async function POST(
       return NextResponse.json({ error: 'Invalid promptType' }, { status: 400 });
     }
 
+    // Fetch AI preferences for the instructor
+    let preferences: AIPromptPreferences | undefined;
+    const { data: prefData } = await supabase
+      .from('instructor_ai_preferences')
+      .select('difficulty, style, length, focus_areas')
+      .eq('user_id', user.id)
+      .single();
+
+    if (prefData) {
+      preferences = {
+        difficulty: prefData.difficulty as AIPromptPreferences['difficulty'],
+        style: prefData.style as AIPromptPreferences['style'],
+        length: prefData.length as AIPromptPreferences['length'],
+        focusAreas: prefData.focus_areas,
+      };
+    }
+
     let result: CandidateSet;
 
     if (process.env.MOCK_AI === 'true') {
       const { generatePrompts: mockGenerate } = await import('@/lib/ai/__mocks__/generatePrompts');
-      result = await mockGenerate(lessonId, transcriptText, promptType);
+      result = await mockGenerate(lessonId, transcriptText, promptType, supabase, null, preferences);
     } else {
       const aiProvider = new OpenAIProvider();
       const { generatePrompts } = await import('@/lib/ai/generatePrompts');
-      result = await generatePrompts(lessonId, transcriptText, promptType, supabase, aiProvider);
+      result = await generatePrompts(lessonId, transcriptText, promptType, supabase, aiProvider, preferences);
     }
 
     // SECURITY EXCLUSION: We no longer strip is_correct here because the Instructor UI 

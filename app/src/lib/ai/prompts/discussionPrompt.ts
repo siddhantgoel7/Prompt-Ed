@@ -1,6 +1,7 @@
 // Prompt templates and configuration for AI-powered discussion question generation.
 // Edit CANDIDATE_COUNT and the prompt text here to tune AI behavior without touching pipeline code.
 import type { PromptType } from '@/types/discussion';
+import type { AIPromptPreferences } from '@/types/ai';
 
 /**
  * ============================================================
@@ -17,15 +18,28 @@ export const CANDIDATE_COUNT = 5;
  * Edit to change how the AI frames discussion questions,
  * style, pharmacology-specific handling, etc.
  */
-export function buildSystemPrompt(): string {
+export function buildSystemPrompt(preferences?: AIPromptPreferences): string {
+  const styleInstruction = preferences?.style === 'factual'
+    ? 'Focus on direct recall and foundational facts.'
+    : preferences?.style === 'clinical_scenario'
+      ? 'Frame questions around clinical scenarios, patient cases, or real-world application.'
+      : 'Use a Socratic approach, encouraging questioning and reasoning rather than just direct answers.';
+
+  const difficultyInstruction = preferences?.difficulty === 'basic'
+    ? 'Keep questions simple, testing basic understanding and core concepts.'
+    : preferences?.difficulty === 'advanced'
+      ? 'Make questions challenging, testing critical analysis, nuanced comparisons, and deep mechanisms.'
+      : 'Make questions intermediate level, focusing on practical application and moderate complexity.';
+
   return `You are an expert teaching assistant helping a university instructor generate discussion questions for a live lecture.
 
 <rules>
 1. Grounding: Questions must be strictly grounded in the provided lecture content and transcript.
-2. Cognitive Level: Encourage critical thinking, application, and deeper understanding (Bloom's Taxonomy: Apply, Analyze, Evaluate).
-3. Audience: Appropriate for university-level students in medical/pharmacology disciplines.
-4. Format: Clear, specific, and answerable within a 2-3 minute class discussion.
-5. Output: Always respond with valid JSON only. Do not wrap in backticks or include any conversational text.
+2. Cognitive Level: Encourage critical thinking, application, and deeper understanding. ${difficultyInstruction}
+3. Style: ${styleInstruction}
+4. Audience: Appropriate for university-level students in medical/pharmacology disciplines.
+5. Format: Clear, specific, and answerable within a 2-3 minute class discussion.
+6. Output: Always respond with valid JSON only. Do not wrap in backticks or include any conversational text.
 </rules>`;
 }
 
@@ -44,8 +58,9 @@ export function buildUserPrompt(params: {
   chunks: string[];
   transcriptText: string;
   promptType: PromptType;
+  preferences?: AIPromptPreferences;
 }): string {
-  const { chunks, transcriptText, promptType } = params;
+  const { chunks, transcriptText, promptType, preferences } = params;
 
   const contextBlock = chunks.length > 0
     ? chunks.map((c, i) => `[Chunk ${i + 1}]\n${c}`).join('\n\n')
@@ -55,10 +70,14 @@ export function buildUserPrompt(params: {
     ? transcriptText.trim()
     : '(No transcript provided)';
 
-  const typeInstructions = getTypeInstructions(promptType);
+  const typeInstructions = getTypeInstructions(promptType, preferences);
+
+  const focusAreasBlock = preferences?.focusAreas?.trim()
+    ? `\n<focus_areas>\nThe instructor specifically requested to focus on: ${preferences.focusAreas.trim()}\n</focus_areas>\n`
+    : '';
 
   return `<instructions>
-Based on the provided <context> and <transcript> from the lecture, generate exactly ${CANDIDATE_COUNT} discussion questions.
+Based on the provided <context> and <transcript> from the lecture, generate exactly ${CANDIDATE_COUNT} discussion questions.${focusAreasBlock}
 
 <question_type_rules>
 ${typeInstructions}
@@ -90,14 +109,20 @@ ${transcriptBlock}
 }
 
 /** Returns per-type generation rules injected into the user prompt. */
-function getTypeInstructions(promptType: PromptType): string {
+function getTypeInstructions(promptType: PromptType, preferences?: AIPromptPreferences): string {
+  const lengthInstruction = preferences?.length === 'brief'
+    ? ' Keep the question itself very brief and punchy.'
+    : preferences?.length === 'detailed'
+      ? ' The question should be detailed and provide substantial context before asking the core question.'
+      : '';
+
   switch (promptType) {
     case 'multiple_choice':
-      return 'Each question must have exactly 4 answer options (A, B, C, D) with exactly one correct answer.';
+      return `Each question must have exactly 4 answer options (A, B, C, D) with exactly one correct answer.${lengthInstruction}`;
     case 'short_answer':
-      return 'Each question should be answerable in 1-2 sentences. Focus on key concepts, definitions, or brief explanations.';
+      return `Each question should be answerable in 1-2 sentences. Focus on key concepts, definitions, or brief explanations.${lengthInstruction}`;
     case 'long_answer':
-      return 'Each question should invite a 2-5 sentence response. Focus on mechanisms, comparisons, reasoning, or analysis.';
+      return `Each question should invite a 2-5 sentence response. Focus on mechanisms, comparisons, reasoning, or analysis.${lengthInstruction}`;
   }
 }
 
