@@ -33,7 +33,9 @@ export function useLessonDiscussions(
     clearAIState: () => void,
     promptInput: string,
     setPromptInput: (value: string) => void,
-    promptType: PromptType
+    promptType: PromptType,
+    // Current number of students present in the session — snapshotted on publish
+    studentCount: number = 0
 ) {
     const [discussions, setDiscussions] = useState<DiscussionWithResponseCount[]>([]);
     const [activeDiscussion, setActiveDiscussion] = useState<Discussion | null>(null);
@@ -123,6 +125,8 @@ export function useLessonDiscussions(
             published_at: new Date().toISOString(),
             display_order: discussions.length,
             source: 'manual',
+            // Snapshot how many students are present at the moment of publishing
+            participant_snapshot: studentCount > 0 ? studentCount : null,
         };
 
         const newDiscussion = await insertDiscussionApi(payload);
@@ -141,7 +145,7 @@ export function useLessonDiscussions(
         setResponses([]);
         setPromptInput('');
         setPublishing(false);
-    }, [promptInput, publishing, promptType, activeDiscussion, discussions.length, lessonId, channel, handleCloseDiscussion, setPromptInput]);
+    }, [promptInput, publishing, promptType, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, setPromptInput]);
 
     const handlePublishAiCandidate = useCallback(async (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled: boolean = false) => {
         if (publishing) return;
@@ -177,6 +181,8 @@ export function useLessonDiscussions(
             correct_option: finalCorrectOption,
             feedback_enabled: feedbackEnabled,
             ai_generated_correct_option: aiSuggestedCorrectOption,
+            // Snapshot how many students are present at the moment of publishing
+            participant_snapshot: studentCount > 0 ? studentCount : null,
         };
 
         const newDiscussion = await insertDiscussionApi(payload);
@@ -201,7 +207,7 @@ export function useLessonDiscussions(
         setResponses([]);
         clearAIState();
         setPublishing(false);
-    }, [publishing, activeDiscussion, discussions.length, lessonId, channel, handleCloseDiscussion, clearAIState]);
+    }, [publishing, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, clearAIState]);
 
     return {
         discussions,
