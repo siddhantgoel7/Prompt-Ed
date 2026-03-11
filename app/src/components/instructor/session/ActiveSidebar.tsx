@@ -4,15 +4,121 @@
 import * as React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
 import type { LessonFile } from '@/types/ai';
 import { SessionContext } from './SessionContext';
 import { DiscussionHistory } from './DiscussionHistory';
 import { FilesTab } from './FilesTab';
+import { DiscussionAnalyticsModal } from './ActiveRightPanel';
+import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 
+// ---------------------------------------------------------------------------
+// Analytics Tab
+// ---------------------------------------------------------------------------
 
+/** Renders all discussions as clickable cards; clicking one opens the analytics modal. */
+function AnalyticsTab({
+  discussions,
+  studentCount,
+}: {
+  discussions: DiscussionWithResponseCount[];
+  studentCount: number;
+}) {
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [modalResponses, setModalResponses] = React.useState<Response[]>([]);
+  const [loadingResponses, setLoadingResponses] = React.useState(false);
+
+  const selectedDiscussion = discussions.find((d) => d.id === selectedId) ?? null;
+
+  async function openAnalytics(discussionId: string) {
+    setSelectedId(discussionId);
+    setLoadingResponses(true);
+    const data = await fetchResponsesApi(discussionId, true);
+    setModalResponses(data);
+    setLoadingResponses(false);
+  }
+
+  function closeModal() {
+    setSelectedId(null);
+    setModalResponses([]);
+  }
+
+  if (discussions.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground py-4">
+        No discussions yet. Publish a prompt to get started.
+      </p>
+    );
+  }
+
+  return (
+    <>
+      <div className="space-y-2">
+        {[...discussions].reverse().map((d, i) => {
+          const promptNumber = discussions.length - i;
+          const isActive = d.status === 'active';
+          const snapshot = d.participant_snapshot ?? studentCount;
+          const responseRate =
+            snapshot > 0 ? Math.round((d.response_count / snapshot) * 100) : null;
+
+          return (
+            <Button
+              key={d.id}
+              variant="outline"
+              className="w-full h-auto p-3 flex flex-col items-start gap-1 text-left"
+              onClick={() => openAnalytics(d.id)}
+            >
+              {/* Top row: number + status badge */}
+              <div className="flex items-center justify-between w-full">
+                <span className="text-xs font-semibold text-gray-500">
+                  Prompt #{promptNumber}
+                </span>
+                <Badge
+                  variant="secondary"
+                  className={
+                    isActive
+                      ? 'bg-green-100 text-green-800 text-[10px]'
+                      : 'bg-gray-100 text-gray-600 text-[10px]'
+                  }
+                >
+                  {isActive ? 'Active' : 'Closed'}
+                </Badge>
+              </div>
+
+              {/* Prompt text */}
+              <p className="text-sm text-gray-800 line-clamp-2 w-full">
+                {d.prompt_text}
+              </p>
+
+              {/* Headline stats */}
+              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                <span>{d.response_count} responses</span>
+                {responseRate !== null && <span>{responseRate}% rate</span>}
+                {snapshot > 0 && <span>{snapshot} students</span>}
+              </div>
+            </Button>
+          );
+        })}
+      </div>
+
+      {/* Analytics modal — shared component also used by the right panel */}
+      <DiscussionAnalyticsModal
+        open={Boolean(selectedId) && !loadingResponses}
+        onClose={closeModal}
+        discussion={selectedDiscussion}
+        responses={modalResponses}
+        studentCount={studentCount}
+      />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ActiveSidebar
+// ---------------------------------------------------------------------------
 
 /** Renders the session sidebar with Discussions, Files, and Analytics tabs. */
 export function ActiveSidebar(props: {
@@ -23,15 +129,17 @@ export function ActiveSidebar(props: {
   isUploading?: boolean;
   onUploadFile?: (file: File) => Promise<void>;
   onDeleteFile?: (fileId: string) => Promise<void>;
+  studentCount?: number;
 }) {
   const context = React.useContext(SessionContext);
   const discussions = context ? context.discussions : props.discussions!;
   const activeDiscussionId = context ? (context.activeDiscussion?.id ?? null) : props.activeDiscussionId!;
-  const responses = context ? context.responses : props.responses!;
   const files = context ? context.files : props.files!;
   const isUploading = context ? context.isUploading : props.isUploading!;
   const onUploadFile = context ? context.uploadFile : props.onUploadFile!;
   const onDeleteFile = context ? context.deleteFile : props.onDeleteFile!;
+  const studentCount = context ? context.studentCount : (props.studentCount ?? 0);
+
   return (
     <aside className="w-full md:w-72 border-r bg-white">
       <div className="p-4">
@@ -67,31 +175,12 @@ export function ActiveSidebar(props: {
           </TabsContent>
 
           <TabsContent value="analytics" className="mt-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-semibold">Student Responses</div>
-                <div className="text-xs text-muted-foreground">{responses.length}</div>
-              </div>
-
-              <ScrollArea className="h-[calc(100vh-230px)] pr-2">
-                {responses.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4">Waiting for student responses...</p>
-                ) : (
-                  <div className="space-y-2">
-                    {responses.map((r) => (
-                      <Card key={r.id}>
-                        <CardContent className="p-3">
-                          <p className="text-sm">{r.response_text}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(r.created_at).toLocaleTimeString()}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
-            </div>
+            <ScrollArea className="h-[calc(100vh-170px)] pr-2">
+              <AnalyticsTab
+                discussions={discussions}
+                studentCount={studentCount}
+              />
+            </ScrollArea>
           </TabsContent>
 
         </Tabs>

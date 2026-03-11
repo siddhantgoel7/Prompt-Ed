@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
 import type { GeneratedPrompt } from '@/types/ai';
@@ -8,8 +8,9 @@ import {
     fetchDiscussionsApi,
     insertDiscussionApi,
     closeDiscussionApi,
-    fetchResponsesApi
+    fetchResponsesApi,
 } from '@/lib/api/discussionsApi';
+import { createClient } from '@/lib/supabase/client';
 
 interface RealtimeLikeChannel {
     send: (message: unknown) => Promise<unknown>;
@@ -34,13 +35,24 @@ export function useLessonDiscussions(
     promptInput: string,
     setPromptInput: (value: string) => void,
     promptType: PromptType,
-    // Current number of students present in the session — snapshotted on publish
+    // Live student count from Realtime Presence — used to track peak during a discussion
     studentCount: number = 0
 ) {
     const [discussions, setDiscussions] = useState<DiscussionWithResponseCount[]>([]);
     const [activeDiscussion, setActiveDiscussion] = useState<Discussion | null>(null);
     const [responses, setResponses] = useState<Response[]>([]);
     const [publishing, setPublishing] = useState(false);
+
+    // Tracks the highest student count seen while the current discussion is active.
+    // Reset to 0 when a new discussion is published, saved as participant_snapshot on close.
+    const peakStudentCountRef = useRef<number>(0);
+
+    // Whenever studentCount changes and a discussion is active, update the peak if higher
+    useEffect(() => {
+        if (activeDiscussion && studentCount > peakStudentCountRef.current) {
+            peakStudentCountRef.current = studentCount;
+        }
+    }, [studentCount, activeDiscussion]);
 
     const fetchDiscussions = useCallback(async () => {
         const data = await fetchDiscussionsApi(lessonId);
@@ -96,6 +108,19 @@ export function useLessonDiscussions(
     }, [channel]);
 
     const handleCloseDiscussion = useCallback(async (discussionId: string) => {
+        // Save the peak student count seen during this discussion as participant_snapshot
+        const peak = peakStudentCountRef.current;
+        if (peak > 0) {
+            const supabase = createClient();
+            await supabase
+                .from('discussions')
+                .update({ participant_snapshot: peak })
+                .eq('id', discussionId);
+        }
+
+        // Reset peak for the next discussion
+        peakStudentCountRef.current = 0;
+
         await closeDiscussionApi(discussionId);
 
         if (channel) {
@@ -117,6 +142,9 @@ export function useLessonDiscussions(
             await handleCloseDiscussion(activeDiscussion.id);
         }
 
+        // Reset peak for the new discussion, seeding it with current count
+        peakStudentCountRef.current = studentCount;
+
         const payload = {
             lesson_id: lessonId,
             prompt_text: promptInput,
@@ -125,7 +153,7 @@ export function useLessonDiscussions(
             published_at: new Date().toISOString(),
             display_order: discussions.length,
             source: 'manual',
-            // Snapshot how many students are present at the moment of publishing
+            // Seed with current count; will be updated to peak on close
             participant_snapshot: studentCount > 0 ? studentCount : null,
         };
 
@@ -155,6 +183,9 @@ export function useLessonDiscussions(
             await handleCloseDiscussion(activeDiscussion.id);
         }
 
+        // Reset peak for the new discussion, seeding it with current count
+        peakStudentCountRef.current = studentCount;
+
         let aiSuggestedCorrectOption = null;
         if (candidate.mcOptions) {
             const correctOpt = candidate.mcOptions.find(o => o.is_correct);
@@ -181,7 +212,7 @@ export function useLessonDiscussions(
             correct_option: finalCorrectOption,
             feedback_enabled: feedbackEnabled,
             ai_generated_correct_option: aiSuggestedCorrectOption,
-            // Snapshot how many students are present at the moment of publishing
+            // Seed with current count; will be updated to peak on close
             participant_snapshot: studentCount > 0 ? studentCount : null,
         };
 
