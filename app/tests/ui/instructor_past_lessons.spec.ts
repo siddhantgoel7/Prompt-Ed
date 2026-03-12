@@ -124,14 +124,28 @@ test.describe('Instructor Past Lessons', () => {
             await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
         });
 
+        // 1. Navigate and wait for the lesson title
         await page.goto('/session/past-lesson-xyz');
-
         await expect(page.getByText('Historical Lesson')).toBeVisible({ timeout: 15000 });
-        await expect(page.locator('h2:has-text("Discussions")')).toBeVisible();await expect(page.getByText('What is 2+2?')).toBeVisible();
-        // 2. CLICK the toggle to reveal the answers
-        // We use a regex to handle the "(1)" count that appears in the button text
-        await page.getByRole('button', { name: /Show Responses/i }).click();
-        await expect(page.getByText('Four')).toBeVisible();
-        await expect(page.getByText('4')).toBeVisible();
+
+        // 2. Identify the specific Discussion Card containing our question
+        // This ensures we are interacting with the correct block even if the list is reversed
+        const discussionCard = page.locator('div[data-slot="card"], .border').filter({ 
+            hasText: 'What is 2+2?' 
+        });
+
+        // 3. Verify the heading exists (this confirms the section is rendered)
+        await expect(page.locator('h2:has-text("Discussions")')).toBeVisible();
+
+        // 4. Find the button INSIDE that specific card
+        const showResponsesBtn = discussionCard.getByRole('button', { name: /Show Responses/i });
+
+        // 5. Wait for the button to be visible (handles CI lag) and click it
+        await expect(showResponsesBtn).toBeVisible({ timeout: 10000 });
+        await showResponsesBtn.click();
+
+        // 6. Verify the answers revealed INSIDE that same card
+        await expect(discussionCard.getByText('Four')).toBeVisible();
+        await expect(discussionCard.getByText('4')).toBeVisible();
     });
 });
