@@ -10,6 +10,7 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^recharts$': '<rootDir>/__mocks__/recharts.tsx',
   },
   testMatch: [
     '<rootDir>/tests/**/*.test.ts',
