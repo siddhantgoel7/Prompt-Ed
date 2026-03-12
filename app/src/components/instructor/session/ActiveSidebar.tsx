@@ -12,7 +12,7 @@ import type { LessonFile } from '@/types/ai';
 import { SessionContext } from './SessionContext';
 import { DiscussionHistory } from './DiscussionHistory';
 import { FilesTab } from './FilesTab';
-import { DiscussionAnalyticsModal } from './ActiveRightPanel';
+import { DiscussionAnalyticsModal } from './DiscussionAnalyticsModal';
 import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 
 // ---------------------------------------------------------------------------
@@ -75,7 +75,6 @@ function AnalyticsTab({
               className="w-full h-auto p-3 flex flex-col items-start gap-1 text-left"
               onClick={() => openAnalytics(d.id)}
             >
-              {/* Top row: number + status badge */}
               <div className="flex items-center justify-between w-full">
                 <span className="text-xs font-semibold text-gray-500">
                   Prompt #{promptNumber}
@@ -92,12 +91,10 @@ function AnalyticsTab({
                 </Badge>
               </div>
 
-              {/* Prompt text */}
               <p className="text-sm text-gray-800 line-clamp-2 w-full">
                 {d.prompt_text}
               </p>
 
-              {/* Headline stats */}
               <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                 <span>{d.response_count} responses</span>
                 {responseRate !== null && <span>{responseRate}% rate</span>}
@@ -108,7 +105,6 @@ function AnalyticsTab({
         })}
       </div>
 
-      {/* Analytics modal — shared component also used by the right panel */}
       <DiscussionAnalyticsModal
         open={Boolean(selectedId) && !loadingResponses}
         onClose={closeModal}

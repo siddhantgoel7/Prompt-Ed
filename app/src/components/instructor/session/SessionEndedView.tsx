@@ -13,7 +13,7 @@ import type { DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
 import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 import { SessionContext, SessionProvider } from './SessionContext';
-import { DiscussionAnalyticsModal } from './ActiveRightPanel';
+import { DiscussionAnalyticsModal } from './DiscussionAnalyticsModal';
 
 // ---------------------------------------------------------------------------
 // Summary bar
@@ -194,7 +194,6 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
 
   const [splitView, setSplitView] = React.useState(false);
 
-  // Convert lessonDiscussions (with embedded responses) to DiscussionWithResponseCount
   const discussionsForSplit: DiscussionWithResponseCount[] = React.useMemo(
     () =>
       vm.lessonDiscussions.map((d) => ({
@@ -209,7 +208,6 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
     [vm.lessonDiscussions],
   );
 
-  // Reversed so newest discussion is at top
   const reversedDiscussions = React.useMemo(
     () => [...vm.lessonDiscussions].reverse(),
     [vm.lessonDiscussions],
@@ -230,7 +228,6 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SessionHeaderEnded onSplitView={() => setSplitView(true)} />
 
-      {/* Summary bar */}
       <SummaryBar
         totalDiscussions={vm.lessonDiscussions.length}
         totalResponses={totalResponses}
@@ -273,7 +270,6 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
         {/* Right — Transcript + Lecture Material */}
         <div className="grid grid-rows-2 gap-6 min-h-0">
 
-          {/* Transcript */}
           <section className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col min-h-0 shadow-sm">
             <h2 className="text-base font-semibold text-gray-900 mb-3 shrink-0">Transcript</h2>
             <div className="flex-1 overflow-y-auto space-y-2">
@@ -299,7 +295,6 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
             </div>
           </section>
 
-          {/* Lecture Material */}
           <section className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col min-h-0 shadow-sm">
             <h2 className="text-base font-semibold text-gray-900 mb-3 shrink-0">Lecture Material</h2>
             <div className="flex-1 overflow-y-auto space-y-2">
