@@ -144,14 +144,24 @@ test.describe('Instructor Past Lessons', () => {
             await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
         });
 
-        // Register waitForResponse before navigation so the intercept is in place
-        const discussionsLoaded = page.waitForResponse('**/rest/v1/discussions*');
+        // Register all waitForResponse promises before navigation.
+        // setLoading(false) only fires after ALL four requests below complete, so we must
+        // wait for each one before asserting on the rendered SessionEndedView.
+        const endedDiscussionsLoaded = page.waitForResponse(
+            r => r.url().includes('/rest/v1/discussions') && !r.url().includes('count'));
+        const activeDiscussionsLoaded = page.waitForResponse(
+            r => r.url().includes('/rest/v1/discussions') && r.url().includes('count'));
+        const filesLoaded = page.waitForResponse('**/rest/v1/lesson_files*');
+        const chunksLoaded = page.waitForResponse('**/rest/v1/lesson_chunks*');
 
-        // 1. Navigate and wait for the lesson title
+        // 1. Navigate
         await page.goto('/session/past-lesson-xyz');
 
-        // Wait for discussions API to respond (deterministic, works in both dev and prod build)
-        await discussionsLoaded;
+        // Wait for all requests that gate setLoading(false) → SessionEndedView mount
+        await endedDiscussionsLoaded;
+        await activeDiscussionsLoaded;
+        await filesLoaded;
+        await chunksLoaded;
 
         // Use a longer timeout for CI environments
         await expect(page.getByText('Historical Lesson')).toBeVisible({ timeout: 15000 });
