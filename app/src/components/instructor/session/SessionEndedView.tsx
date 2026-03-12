@@ -42,7 +42,7 @@ function SummaryBar({
     <div className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-gray-100 bg-gray-50">
       <div className="flex flex-col items-center justify-center py-2">
         <span className="text-2xl font-bold text-gray-900">{totalDiscussions}</span>
-        <span className="text-xs text-gray-500 mt-0.5">Discussions</span>
+        <span className="text-xs text-gray-500 mt-0.5">Discussions Created</span>
       </div>
       <div className="flex flex-col items-center justify-center py-2 border-x border-gray-200">
         <span className="text-2xl font-bold text-gray-900">{totalResponses}</span>
