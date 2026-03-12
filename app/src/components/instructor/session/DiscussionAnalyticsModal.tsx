@@ -180,7 +180,7 @@ export function DiscussionAnalyticsContent({
               <Card key={r.id} className="border-gray-100">
                 <CardContent className="p-3">
                   <p className="text-sm whitespace-pre-wrap break-words">{r.response_text}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-1" suppressHydrationWarning>
                     {new Date(r.created_at).toLocaleTimeString()}
                   </p>
                 </CardContent>
