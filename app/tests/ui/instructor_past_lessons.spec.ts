@@ -100,24 +100,40 @@ test.describe('Instructor Past Lessons', () => {
             });
         });
 
-        // Mock discussions and responses - Ensure participant_snapshot is present for response rate calculation
+        const discussionData = [{
+            id: 'd1',
+            prompt_text: 'What is 2+2?',
+            prompt_type: 'short_answer',
+            status: 'closed',
+            created_at: '2026-03-11T10:05:00Z',
+            participant_snapshot: 10,
+        }];
+
+        // Mock discussions - return correct shape based on which query is being made:
+        // fetchDiscussionsApi uses responses(count), fetchEndedDiscussionsApi uses nested response objects
         await page.route('**/rest/v1/discussions*', async (route) => {
-            await route.fulfill({
-                status: 200,
-                contentType: 'application/json',
-                body: JSON.stringify([{
-                    id: 'd1',
-                    prompt_text: 'What is 2+2?',
-                    prompt_type: 'short_answer',
-                    status: 'closed',
-                    created_at: '2026-03-11T10:05:00Z',
-                    participant_snapshot: 10,
-                    responses: [
-                        { id: 'r1', response_text: 'Four', created_at: '2026-03-11T10:06:00Z' },
-                        { id: 'r2', response_text: '4', created_at: '2026-03-11T10:07:00Z' }
-                    ]
-                }]),
-            });
+            const url = route.request().url();
+            if (url.includes('count')) {
+                // fetchDiscussionsApi: returns response_count shape
+                await route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify([{ ...discussionData[0], responses: [{ count: 2 }] }]),
+                });
+            } else {
+                // fetchEndedDiscussionsApi: returns nested response objects
+                await route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify([{
+                        ...discussionData[0],
+                        responses: [
+                            { id: 'r1', response_text: 'Four', created_at: '2026-03-11T10:06:00Z' },
+                            { id: 'r2', response_text: '4', created_at: '2026-03-11T10:07:00Z' }
+                        ]
+                    }]),
+                });
+            }
         });
 
         // Mock lesson files and transcripts to prevent crashes
@@ -128,15 +144,17 @@ test.describe('Instructor Past Lessons', () => {
             await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
         });
 
-       // 1. Navigate and wait for the lesson title
+        // Register waitForResponse before navigation so the intercept is in place
+        const discussionsLoaded = page.waitForResponse('**/rest/v1/discussions*');
+
+        // 1. Navigate and wait for the lesson title
         await page.goto('/session/past-lesson-xyz');
-        
+
+        // Wait for discussions API to respond (deterministic, works in both dev and prod build)
+        await discussionsLoaded;
+
         // Use a longer timeout for CI environments
         await expect(page.getByText('Historical Lesson')).toBeVisible({ timeout: 15000 });
-
-        // 2. Resolve the GitHub/CI Failure:
-        // Wait for the network to be idle to ensure the discussions are actually fetched and rendered
-        await page.waitForLoadState('networkidle');
 
         // Identify the card first
         const discussionCard = page.locator('div.rounded-xl.border', { hasText: 'What is 2+2?' });

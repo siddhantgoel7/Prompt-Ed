@@ -41,15 +41,18 @@ const MC_DISCUSSION: Discussion = {
     { label: 'C', text: 'Defines function call order' },
   ],
   correct_option: 'B',
-} as unknown as Discussion;
+  source: 'manual',
+  feedback_enabled: false,
+  ai_generated_correct_option: null,
+};
 
 const FREE_TEXT_DISCUSSION: Discussion = {
   ...MC_DISCUSSION,
   id: 'disc-2',
-  prompt_type: 'free_text',
+  prompt_type: 'short_answer',
   mc_options: null,
   correct_option: null,
-} as unknown as Discussion;
+};
 
 function makeResponse(id: string, selectedOption: string | null = null): Response {
   return {

@@ -3,7 +3,6 @@
 // Reusable analytics modal for a single discussion.
 // Used by ActiveRightPanel (live view), ActiveSidebar analytics tab, and SessionEndedView.
 
-import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
@@ -11,8 +10,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+} from 'recharts';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
+
+const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+const CORRECT_COLOR = '#22c55e';
 
 /** Full metrics modal for a single discussion. */
 export function DiscussionAnalyticsModal({
@@ -37,62 +51,40 @@ export function DiscussionAnalyticsModal({
     : (discussion.participant_snapshot ?? studentCount);
   const responseRate = snapshot > 0 ? Math.round((total / snapshot) * 100) : null;
 
-  // Average response length (chars) for text responses
-  const textResponses = responses.filter(
-    (r) => discussion.prompt_type !== 'multiple_choice' && r.response_text
-  );
-  const avgLength =
-    textResponses.length > 0
-      ? Math.round(
-          textResponses.reduce((sum, r) => sum + r.response_text.length, 0) /
-            textResponses.length
-        )
-      : null;
-
-  // Time from published_at to first response
-  const firstResponseTime = (() => {
-    if (!discussion.published_at || responses.length === 0) return null;
-    const sorted = [...responses].sort(
-      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    );
-    const diffMs =
-      new Date(sorted[0].created_at).getTime() -
-      new Date(discussion.published_at).getTime();
-    const secs = Math.round(diffMs / 1000);
-    return secs >= 60 ? `${Math.floor(secs / 60)}m ${secs % 60}s` : `${secs}s`;
-  })();
-
   // MC distribution
   const isMC = discussion.prompt_type === 'multiple_choice';
-  const distribution: Record<string, number> = {};
-  if (isMC && discussion.mc_options) {
-    discussion.mc_options.forEach((opt) => { distribution[opt.label] = 0; });
+  const mcChartData = (() => {
+    if (!isMC || !discussion.mc_options) return [];
+    const dist: Record<string, number> = {};
+    discussion.mc_options.forEach((opt) => { dist[opt.label] = 0; });
     responses.forEach((r) => {
-      if (r.selected_option && distribution[r.selected_option] !== undefined) {
-        distribution[r.selected_option]++;
+      if (r.selected_option && dist[r.selected_option] !== undefined) {
+        dist[r.selected_option]++;
       }
     });
-  }
+    return discussion.mc_options.map((opt) => ({
+      label: opt.label,
+      text: opt.text,
+      count: dist[opt.label] ?? 0,
+      isCorrect: discussion.correct_option === opt.label,
+    }));
+  })();
 
   // Timestamp buckets — group responses into 1-minute windows
-  const timeBuckets = (() => {
+  const timelineData = (() => {
     if (responses.length === 0 || !discussion.published_at) return [];
     const base = new Date(discussion.published_at).getTime();
     const buckets: Record<number, number> = {};
     responses.forEach((r) => {
-      const bucket = Math.floor(
-        (new Date(r.created_at).getTime() - base) / 60000
-      );
+      const bucket = Math.floor((new Date(r.created_at).getTime() - base) / 60000);
       buckets[bucket] = (buckets[bucket] ?? 0) + 1;
     });
     const maxBucket = Math.max(...Object.keys(buckets).map(Number));
     return Array.from({ length: maxBucket + 1 }, (_, i) => ({
-      label: `+${i}m`,
-      count: buckets[i] ?? 0,
+      name: `+${i}m`,
+      Responses: buckets[i] ?? 0,
     }));
   })();
-
-  const maxBucketCount = Math.max(...timeBuckets.map((b) => b.count), 1);
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
@@ -104,76 +96,93 @@ export function DiscussionAnalyticsModal({
         </DialogHeader>
 
         {/* ── Headline stats ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+        <div className="grid grid-cols-2 gap-3 mt-2">
           <StatCard label="Responses" value={String(total)} />
           <StatCard
             label="Response Rate"
             value={responseRate !== null ? `${responseRate}%` : '—'}
             sub={snapshot > 0 ? `${total} / ${snapshot} students` : undefined}
           />
-          {avgLength !== null && (
-            <StatCard label="Avg Length" value={`${avgLength} chars`} />
-          )}
-          {firstResponseTime && (
-            <StatCard label="First Response" value={firstResponseTime} sub="after publish" />
-          )}
         </div>
 
-        {/* ── MC distribution ── */}
-        {isMC && discussion.mc_options && (
-          <div className="mt-4">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+        {/* ── MC pie chart ── */}
+        {isMC && mcChartData.length > 0 && (
+          <div className="mt-5">
+            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
               Answer Distribution
             </p>
-            <div className="space-y-2">
-              {discussion.mc_options.map((opt) => {
-                const count = distribution[opt.label] ?? 0;
-                const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                const isCorrect = discussion.correct_option === opt.label;
-                return (
-                  <div key={opt.label} className="space-y-0.5">
-                    <div className="flex justify-between text-xs">
-                      <span className={isCorrect ? 'font-semibold text-green-700' : ''}>
-                        {opt.label}. {opt.text}
-                        {isCorrect && <span className="ml-1 text-[10px] bg-green-100 text-green-800 px-1 py-0.5 rounded">Correct</span>}
-                      </span>
-                      <span className="text-gray-500">{count} ({pct}%)</span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-1.5">
-                      <div
-                        className={`h-1.5 rounded-full ${isCorrect ? 'bg-green-500' : 'bg-blue-400'}`}
-                        style={{ width: `${pct}%` }}
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={mcChartData}
+                    dataKey="count"
+                    nameKey="label"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={75}
+                    label={({ name, percent }) =>
+                      `${name} (${Math.round((percent ?? 0) * 100)}%)`
+                    }
+                    labelLine={false}
+                  >
+                    {mcChartData.map((entry, i) => (
+                      <Cell
+                        key={entry.label}
+                        fill={entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]}
                       />
-                    </div>
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value, name) => [`${value} votes`, `Option ${name}`]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+
+              {/* Legend table */}
+              <div className="w-full sm:w-48 shrink-0 space-y-1.5">
+                {mcChartData.map((entry, i) => (
+                  <div key={entry.label} className="flex items-start gap-2 text-xs">
+                    <span
+                      className="mt-0.5 h-2.5 w-2.5 rounded-full shrink-0"
+                      style={{ background: entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length] }}
+                    />
+                    <span className={entry.isCorrect ? 'font-semibold text-green-700' : 'text-gray-700'}>
+                      {entry.label}. {entry.text}
+                      {entry.isCorrect && (
+                        <span className="ml-1 text-[10px] bg-green-100 text-green-800 px-1 py-0.5 rounded">Correct</span>
+                      )}
+                    </span>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
           </div>
         )}
 
-        {/* ── Timestamp distribution ── */}
-        {timeBuckets.length > 0 && (
-          <div className="mt-4">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+        {/* ── Response timeline bar chart ── */}
+        {timelineData.length > 0 && (
+          <div className="mt-5">
+            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
               Response Timeline (per minute)
             </p>
-            <div className="flex items-end gap-1 h-16">
-              {timeBuckets.map((b) => (
-                <div key={b.label} className="flex flex-col items-center flex-1 gap-0.5">
-                  <div
-                    className="w-full bg-blue-400 rounded-sm"
-                    style={{ height: `${Math.round((b.count / maxBucketCount) * 48)}px` }}
-                  />
-                  <span className="text-[9px] text-gray-400">{b.label}</span>
-                </div>
-              ))}
-            </div>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={timelineData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
+                <Tooltip
+                  contentStyle={{ fontSize: 12 }}
+                  formatter={(v) => [`${v} responses`, 'Count']}
+                />
+                <Bar dataKey="Responses" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         )}
 
         {/* ── All responses ── */}
-        <div className="mt-4">
+        <div className="mt-5">
           <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
             All Responses ({total})
           </p>

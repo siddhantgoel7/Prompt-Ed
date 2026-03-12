@@ -9,8 +9,8 @@ import {
     insertDiscussionApi,
     closeDiscussionApi,
     fetchResponsesApi,
+    updateParticipantSnapshotApi,
 } from '@/lib/api/discussionsApi';
-import { createClient } from '@/lib/supabase/client';
 
 interface RealtimeLikeChannel {
     send: (message: unknown) => Promise<unknown>;
@@ -53,10 +53,14 @@ export function useLessonDiscussions(
     useEffect(() => {
         if (activeDiscussion && studentCount > peakStudentCountRef.current) {
             peakStudentCountRef.current = studentCount;
-            // queueMicrotask schedules the update after the current task finishes
-        queueMicrotask(() => {
-            setPeakStudentCount(prev => Math.max(prev, studentCount));
-        });
+            // queueMicrotask defers the setState call to after the current effect finishes,
+            // preventing React strict-mode from flagging a state update triggered during
+            // an effect that itself was caused by a state change (ref update + setState in
+            // the same synchronous frame). The ref is already updated above so the peak
+            // value is consistent regardless of when the re-render occurs.
+            queueMicrotask(() => {
+                setPeakStudentCount(prev => Math.max(prev, studentCount));
+            });
         }
     }, [studentCount, activeDiscussion]);
 
@@ -65,14 +69,7 @@ export function useLessonDiscussions(
         setDiscussions(data);
         const active = data.find((d) => d.status === 'active');
         setActiveDiscussion(active || null);
-
-        // Auto-fetch responses for the active discussion
-        if (active) {
-            const resData = await fetchResponsesApi(active.id);
-            setResponses(resData);
-        } else {
-            setResponses([]);
-        }
+        // Responses are fetched by the activeDiscussion?.id useEffect below
     }, [lessonId]);
 
     const fetchResponses = useCallback(async () => {
@@ -117,11 +114,7 @@ export function useLessonDiscussions(
         // Save the peak student count seen during this discussion as participant_snapshot
         const peak = peakStudentCountRef.current;
         if (peak > 0) {
-            const supabase = createClient();
-            await supabase
-                .from('discussions')
-                .update({ participant_snapshot: peak })
-                .eq('id', discussionId);
+            await updateParticipantSnapshotApi(discussionId, peak);
         }
 
         // Reset peak for the next discussion

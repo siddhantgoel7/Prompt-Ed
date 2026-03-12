@@ -36,9 +36,12 @@ function AnalyticsTab({
   async function openAnalytics(discussionId: string) {
     setSelectedId(discussionId);
     setLoadingResponses(true);
-    const data = await fetchResponsesApi(discussionId, true);
-    setModalResponses(data);
-    setLoadingResponses(false);
+    try {
+      const data = await fetchResponsesApi(discussionId, true);
+      setModalResponses(data);
+    } finally {
+      setLoadingResponses(false);
+    }
   }
 
   function closeModal() {

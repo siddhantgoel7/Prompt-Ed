@@ -83,10 +83,13 @@ function EndedDiscussionCard({
 
   async function openAnalytics() {
     setLoadingResponses(true);
-    const data = await fetchResponsesApi(discussion.id, true);
-    setModalResponses(data);
-    setLoadingResponses(false);
-    setAnalyticsOpen(true);
+    try {
+      const data = await fetchResponsesApi(discussion.id, true);
+      setModalResponses(data);
+      setAnalyticsOpen(true);
+    } finally {
+      setLoadingResponses(false);
+    }
   }
 
   return (

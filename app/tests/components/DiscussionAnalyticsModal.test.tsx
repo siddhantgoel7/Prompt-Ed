@@ -14,7 +14,7 @@ const BASE_DISCUSSION: Discussion = {
   id: 'disc-1',
   lesson_id: 'lesson-1',
   prompt_text: 'What is a closure?',
-  prompt_type: 'free_text',
+  prompt_type: 'short_answer',
   status: 'closed',
   created_at: '2024-01-01T10:00:00Z',
   published_at: '2024-01-01T10:00:00Z',
@@ -23,7 +23,10 @@ const BASE_DISCUSSION: Discussion = {
   participant_snapshot: 4,
   mc_options: null,
   correct_option: null,
-} as unknown as Discussion;
+  source: 'manual',
+  feedback_enabled: false,
+  ai_generated_correct_option: null,
+};
 
 const ACTIVE_DISCUSSION: Discussion = {
   ...BASE_DISCUSSION,
@@ -31,7 +34,7 @@ const ACTIVE_DISCUSSION: Discussion = {
   status: 'active',
   closed_at: null,
   participant_snapshot: 3,
-} as unknown as Discussion;
+};
 
 function makeResponse(id: string, overrides: Partial<Response> = {}): Response {
   return {
@@ -62,7 +65,7 @@ const MC_DISCUSSION: Discussion = {
     { label: 'C', text: 'Compiles functions' },
   ],
   correct_option: 'B',
-} as unknown as Discussion;
+};
 
 const MC_RESPONSES: Response[] = [
   makeResponse('r4', { response_text: '', selected_option: 'A', created_at: '2024-01-01T10:00:05Z' }),
@@ -143,7 +146,7 @@ describe('[US 1.40] Response metrics', () => {
   });
 
   it('[AT2] success: participation rate uses studentCount when snapshot is null', () => {
-    const noSnapshot = { ...BASE_DISCUSSION, participant_snapshot: null } as unknown as Discussion;
+    const noSnapshot: Discussion = { ...BASE_DISCUSSION, participant_snapshot: null };
     // 3 responses / 4 students = 75%
     renderModal(noSnapshot, RESPONSES, 4);
 
@@ -159,28 +162,25 @@ describe('[US 1.40] Response metrics', () => {
   });
 
   it('[AT4] failure: participation rate shows — when no student count available', () => {
-    const noSnapshot = { ...BASE_DISCUSSION, participant_snapshot: null } as unknown as Discussion;
+    const noSnapshot: Discussion = { ...BASE_DISCUSSION, participant_snapshot: null };
     renderModal(noSnapshot, RESPONSES, 0);
 
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
-  it('[AT5] success: average response length is shown', () => {
-    // "First response here." = 20 chars
-    // "Second response here." = 21 chars
-    // "Third response here." = 20 chars
-    // avg = 20 (Math.round)
+  it('[AT5] success: response timeline chart is rendered when responses exist', () => {
     renderModal(BASE_DISCUSSION, RESPONSES);
 
-    expect(screen.getByText(/\d+ chars/i)).toBeInTheDocument();
+    expect(screen.getByText(/Response Timeline/i)).toBeInTheDocument();
   });
 
-  it('[AT6] success: time-to-first-response shown after publish', () => {
-    // published_at 10:00:00, first response at 10:00:09 → 9s
+  it('[AT6] success: only Responses and Response Rate stat cards are shown (avg length and first response removed)', () => {
     renderModal(BASE_DISCUSSION, RESPONSES);
 
-    expect(screen.getByText('9s')).toBeInTheDocument();
-    expect(screen.getByText(/after publish/i)).toBeInTheDocument();
+    expect(screen.getByText('Responses')).toBeInTheDocument();
+    expect(screen.getByText('Response Rate')).toBeInTheDocument();
+    expect(screen.queryByText(/chars/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/after publish/i)).not.toBeInTheDocument();
   });
 
   it('[AT7] success: response timeline section is rendered', () => {
