@@ -127,9 +127,12 @@ test.describe('Instructor Past Lessons', () => {
         await page.goto('/session/past-lesson-xyz');
 
         await expect(page.getByText('Historical Lesson')).toBeVisible({ timeout: 15000 });
-        await expect(page.getByText('Discussions and Responses')).toBeVisible();
-
+        // With this (Targets the <h2> specifically):
+        await expect(page.getByRole('heading', { name: 'Discussions', exact: true })).toBeVisible();
         await expect(page.getByText('What is 2+2?')).toBeVisible();
+        // 2. CLICK the toggle to reveal the answers
+        // We use a regex to handle the "(1)" count that appears in the button text
+        await page.getByRole('button', { name: /Show Responses/i }).click();
         await expect(page.getByText('Four')).toBeVisible();
         await expect(page.getByText('4')).toBeVisible();
     });
