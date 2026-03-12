@@ -36,14 +36,14 @@ export async function embedChunks(
       throw err;
     }
 
-    // Parallel updates instead of sequential
-    await Promise.all(
-      batch.map((chunk, j) =>
-        supabase
-          .from('lesson_chunks')
-          .update({ embedding: JSON.stringify(embeddings[j]) })
-          .eq('id', chunk.id)
-      )
-    );
+    // Single upsert per batch instead of N individual updates
+    await supabase
+      .from('lesson_chunks')
+      .upsert(
+        batch.map((chunk, j) => ({
+          id: chunk.id,
+          embedding: JSON.stringify(embeddings[j]),
+        }))
+      );
   }
 }
