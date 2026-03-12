@@ -30,7 +30,7 @@ export async function embedChunks(
   }
 
   // Process in batches of 100
-  const BATCH_SIZE = 100;
+  const BATCH_SIZE = 500;
   for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
     const batch = chunks.slice(i, i + BATCH_SIZE);
     const inputs = batch.map((c: { id: string; content: string }) => c.content);

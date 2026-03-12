@@ -123,7 +123,7 @@ export async function POST(
         const rawText = await parseFile(buffer, detectedType, aiProvider);
 
         // Chunk
-        const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1024, chunkOverlap: 128 });
+        const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1024, chunkOverlap: 64 });
         const chunks = (await splitter.splitText(rawText)).filter((c) => c.trim()).slice(0, MAX_CHUNKS_PER_FILE);
 
         if (chunks.length === 0) {
