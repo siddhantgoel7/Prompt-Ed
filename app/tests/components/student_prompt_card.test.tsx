@@ -39,6 +39,7 @@ const mcDiscussion: Discussion = {
     correct_option: 'A',     // Exists in the DB object...
     feedback_enabled: true,
     ai_generated_correct_option: null,
+    participant_snapshot: 0,
 };
 
 const shortAnswerDiscussion: Discussion = {
