@@ -53,7 +53,10 @@ export function useLessonDiscussions(
     useEffect(() => {
         if (activeDiscussion && studentCount > peakStudentCountRef.current) {
             peakStudentCountRef.current = studentCount;
-            setPeakStudentCount(studentCount);
+            // queueMicrotask schedules the update after the current task finishes
+        queueMicrotask(() => {
+            setPeakStudentCount(prev => Math.max(prev, studentCount));
+        });
         }
     }, [studentCount, activeDiscussion]);
 

@@ -14,6 +14,12 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
 
+    ".venv/**",
+    "venv/**",
+    "env/**",
+    "python_env/**",
+    "**/.venv/**", // Catch it even if it's nested
+
     // Common generated folders:
     "coverage/**",
     "dist/**",
