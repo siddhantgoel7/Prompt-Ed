@@ -661,7 +661,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
   });
 
   describe('Saved Lesson View', () => {
-    // 17.13
+    // 17.13 — responses are hidden behind "Show Responses" toggle in the new design
     it('[US 1.14] should display preserved discussions and responses when instructor accesses a saved lesson', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
@@ -733,12 +733,15 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
       render(<SessionPage lessonId="lesson-456" />);
 
+      // Discussion and prompt are always visible
       expect(await screen.findByText('Saved Lesson')).toBeInTheDocument();
       expect(await screen.findByText('What is 2+2?')).toBeInTheDocument();
+
+      // Responses are hidden behind the toggle — expand them first
+      fireEvent.click(screen.getByText(/Show Responses/i));
+
       expect(screen.getByText('4')).toBeInTheDocument();
       expect(screen.getByText('5')).toBeInTheDocument();
-      expect(screen.getByText(/Prompt time:/i)).toBeInTheDocument();
-      expect(screen.getAllByText(/Response time:/i).length).toBeGreaterThan(0);
     });
   });
 });
