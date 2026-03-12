@@ -45,9 +45,10 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
 
   dlog(`[pptxParser] slidesFound=${slideFiles.length} aiProvider=${!!aiProvider}`);
 
-  const parts: string[] = [];
-
-  for (const slideFile of slideFiles) {
+  // Process all slides in parallel — vision calls (one per slide) are the bottleneck,
+  // so running them concurrently reduces total time from O(slides) to O(1) round-trips.
+  // Promise.all preserves input order so slide numbering stays correct.
+  const parts = (await Promise.all(slideFiles.map(async (slideFile) => {
     const n = slideNum(slideFile);
     const slideParts: string[] = [];
 
@@ -147,12 +148,9 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
       }
     }
 
-    if (slideParts.length > 0) {
-      parts.push(slideParts.join('\n'));
-    }
-
     dlog(`[pptxParser] slide=${n} done — parts emitted: ${slideParts.length}`);
-  }
+    return slideParts.length > 0 ? slideParts.join('\n') : null;
+  }))).filter((p): p is string => p !== null);
 
   const combined = parts.join('\n');
   dlog(`[pptxParser] COMPLETE — total chars=${combined.length}`);
