@@ -1,7 +1,7 @@
 // [US 1.39] View Analytics button presence
 // [US 1.40] Student count header, MC response distribution counts
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ActiveRightPanel } from '@/components/instructor/session/ActiveRightPanel';
 import type { Discussion } from '@/types/discussion';
 import type { Response } from '@/types/response';
@@ -13,6 +13,7 @@ import type { Response } from '@/types/response';
 jest.mock('@/components/instructor/session/DiscussionAnalyticsModal', () => ({
   DiscussionAnalyticsModal: ({ open }: { open: boolean }) =>
     open ? <div>Analytics Modal Open</div> : null,
+  DiscussionAnalyticsContent: () => <div>Analytics Content</div>,
 }));
 
 // ActiveRightPanel reads from SessionContext if available — supply props directly instead
@@ -79,33 +80,25 @@ function renderPanel({
   );
 }
 
-// ---------------------------------------------------------------------------
-// US 1.39 — View Analytics button
+// US 1.39 — List and Metrics Tabs
 // ---------------------------------------------------------------------------
 
-describe('[US 1.39] View Analytics button', () => {
+describe('[US 1.39] List and Metrics tabs', () => {
 
-  it('[AT1] success: "View Analytics" button shown when discussion is active', () => {
+  it('[AT1] success: "List format" and "Metrics" tabs shown when discussion is active', () => {
     renderPanel({ activeDiscussion: FREE_TEXT_DISCUSSION });
 
-    expect(screen.getByRole('button', { name: /View Analytics/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /List format/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Metrics/i })).toBeInTheDocument();
   });
 
-  it('[AT2] failure: "View Analytics" button not shown when no active discussion', () => {
+  it('[AT2] failure: tabs not shown when no active discussion', () => {
     renderPanel({ activeDiscussion: null });
 
-    expect(screen.queryByRole('button', { name: /View Analytics/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /Metrics/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/No active discussion selected/i)).toBeInTheDocument();
   });
 
-  it('[AT3] success: clicking "View Analytics" opens the analytics modal', () => {
-    renderPanel({ activeDiscussion: FREE_TEXT_DISCUSSION });
-
-    expect(screen.queryByText('Analytics Modal Open')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /View Analytics/i }));
-
-    expect(screen.getByText('Analytics Modal Open')).toBeInTheDocument();
-  });
 });
 
 // ---------------------------------------------------------------------------

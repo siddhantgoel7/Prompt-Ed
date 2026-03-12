@@ -1,7 +1,7 @@
 'use client';
 
-// Reusable analytics modal for a single discussion.
-// Used by ActiveRightPanel (live view), ActiveSidebar analytics tab, and SessionEndedView.
+// Reusable analytics content and modal for a single discussion.
+// Used by ActiveRightPanel (live view inline) and SessionEndedView (modal).
 
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -28,22 +28,15 @@ import type { Discussion } from '@/types/discussion';
 const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 const CORRECT_COLOR = '#22c55e';
 
-/** Full metrics modal for a single discussion. */
-export function DiscussionAnalyticsModal({
-  open,
-  onClose,
+export function DiscussionAnalyticsContent({
   discussion,
   responses,
   studentCount,
 }: {
-  open: boolean;
-  onClose: () => void;
-  discussion: Discussion | null;
+  discussion: Discussion;
   responses: Response[];
   studentCount: number;
 }) {
-  if (!discussion) return null;
-
   const total = responses.length;
   const isActive = discussion.status === 'active';
   const snapshot = isActive
@@ -87,6 +80,136 @@ export function DiscussionAnalyticsModal({
   })();
 
   return (
+    <div className="flex flex-col gap-5 pb-4">
+      {/* ── Headline stats ── */}
+      <div className="grid grid-cols-2 gap-3 mt-2 pr-1">
+        <StatCard label="Responses" value={String(total)} />
+        <StatCard
+          label="Response Rate"
+          value={responseRate !== null ? `${responseRate}%` : '—'}
+          sub={snapshot > 0 ? `${total} / ${snapshot} students` : undefined}
+        />
+      </div>
+
+      {/* ── MC pie chart ── */}
+      {isMC && mcChartData.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
+            Answer Distribution
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={mcChartData}
+                  dataKey="count"
+                  nameKey="label"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={75}
+                  label={({ name, percent }) =>
+                    `${name} (${Math.round((percent ?? 0) * 100)}%)`
+                  }
+                  labelLine={false}
+                >
+                  {mcChartData.map((entry, i) => (
+                    <Cell
+                      key={entry.label}
+                      fill={entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value, name) => [`${value} votes`, `Option ${name}`]}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+
+            {/* Legend table */}
+            <div className="w-full sm:w-48 shrink-0 space-y-1.5">
+              {mcChartData.map((entry, i) => (
+                <div key={entry.label} className="flex items-start gap-2 text-xs">
+                  <span
+                    className="mt-0.5 h-2.5 w-2.5 rounded-full shrink-0"
+                    style={{ background: entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length] }}
+                  />
+                  <span className={entry.isCorrect ? 'font-semibold text-green-700' : 'text-gray-700'}>
+                    {entry.label}. {entry.text}
+                    {entry.isCorrect && (
+                      <span className="ml-1 text-[10px] bg-green-100 text-green-800 px-1 py-0.5 rounded">Correct</span>
+                    )}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Response timeline bar chart ── */}
+      {timelineData.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
+            Response Timeline (per minute)
+          </p>
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart data={timelineData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
+              <Tooltip
+                contentStyle={{ fontSize: 12 }}
+                formatter={(v) => [`${v} responses`, 'Count']}
+              />
+              <Bar dataKey="Responses" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* ── All responses ── */}
+      <div>
+        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+          All Responses ({total})
+        </p>
+        {total === 0 ? (
+          <p className="text-sm text-muted-foreground">No responses yet.</p>
+        ) : (
+          <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+            {responses.map((r) => (
+              <Card key={r.id} className="border-gray-100">
+                <CardContent className="p-3">
+                  <p className="text-sm whitespace-pre-wrap break-words">{r.response_text}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {new Date(r.created_at).toLocaleTimeString()}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Full metrics modal for a single discussion. */
+export function DiscussionAnalyticsModal({
+  open,
+  onClose,
+  discussion,
+  responses,
+  studentCount,
+}: {
+  open: boolean;
+  onClose: () => void;
+  discussion: Discussion | null;
+  responses: Response[];
+  studentCount: number;
+}) {
+  if (!discussion) return null;
+
+  return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
@@ -95,114 +218,11 @@ export function DiscussionAnalyticsModal({
           </DialogTitle>
         </DialogHeader>
 
-        {/* ── Headline stats ── */}
-        <div className="grid grid-cols-2 gap-3 mt-2">
-          <StatCard label="Responses" value={String(total)} />
-          <StatCard
-            label="Response Rate"
-            value={responseRate !== null ? `${responseRate}%` : '—'}
-            sub={snapshot > 0 ? `${total} / ${snapshot} students` : undefined}
-          />
-        </div>
-
-        {/* ── MC pie chart ── */}
-        {isMC && mcChartData.length > 0 && (
-          <div className="mt-5">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
-              Answer Distribution
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={mcChartData}
-                    dataKey="count"
-                    nameKey="label"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={75}
-                    label={({ name, percent }) =>
-                      `${name} (${Math.round((percent ?? 0) * 100)}%)`
-                    }
-                    labelLine={false}
-                  >
-                    {mcChartData.map((entry, i) => (
-                      <Cell
-                        key={entry.label}
-                        fill={entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value, name) => [`${value} votes`, `Option ${name}`]}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-
-              {/* Legend table */}
-              <div className="w-full sm:w-48 shrink-0 space-y-1.5">
-                {mcChartData.map((entry, i) => (
-                  <div key={entry.label} className="flex items-start gap-2 text-xs">
-                    <span
-                      className="mt-0.5 h-2.5 w-2.5 rounded-full shrink-0"
-                      style={{ background: entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length] }}
-                    />
-                    <span className={entry.isCorrect ? 'font-semibold text-green-700' : 'text-gray-700'}>
-                      {entry.label}. {entry.text}
-                      {entry.isCorrect && (
-                        <span className="ml-1 text-[10px] bg-green-100 text-green-800 px-1 py-0.5 rounded">Correct</span>
-                      )}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Response timeline bar chart ── */}
-        {timelineData.length > 0 && (
-          <div className="mt-5">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
-              Response Timeline (per minute)
-            </p>
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={timelineData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
-                <Tooltip
-                  contentStyle={{ fontSize: 12 }}
-                  formatter={(v) => [`${v} responses`, 'Count']}
-                />
-                <Bar dataKey="Responses" fill="#3b82f6" radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-
-        {/* ── All responses ── */}
-        <div className="mt-5">
-          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-            All Responses ({total})
-          </p>
-          {total === 0 ? (
-            <p className="text-sm text-muted-foreground">No responses yet.</p>
-          ) : (
-            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-              {responses.map((r) => (
-                <Card key={r.id} className="border-gray-100">
-                  <CardContent className="p-3">
-                    <p className="text-sm whitespace-pre-wrap break-words">{r.response_text}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(r.created_at).toLocaleTimeString()}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
+        <DiscussionAnalyticsContent 
+          discussion={discussion} 
+          responses={responses} 
+          studentCount={studentCount} 
+        />
       </DialogContent>
     </Dialog>
   );
