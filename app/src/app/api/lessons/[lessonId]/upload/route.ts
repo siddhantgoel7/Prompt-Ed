@@ -150,9 +150,12 @@ export async function POST(
           return;
         }
 
-        // Embed using our new adapter layer
-        const chunkIds = (insertedChunks as { id: string }[]).map((c) => c.id);
-        await embedChunks(chunkIds, supabase, aiProvider);
+        // Pass chunks directly to avoid a redundant DB fetch — content is already in memory
+        const chunksToEmbed = (insertedChunks as { id: string }[]).map((c, i) => ({
+          id: c.id,
+          content: chunks[i],
+        }));
+        await embedChunks(chunksToEmbed, supabase, aiProvider);
 
         // Mark as ready
         await supabase.from('lesson_files').update({ status: 'ready' }).eq('id', fileRecord.id);
