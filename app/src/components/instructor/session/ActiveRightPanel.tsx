@@ -229,6 +229,8 @@ export function ActiveRightPanel(props: {
   const responses = context ? context.responses : props.responses!;
   const activeDiscussion = context ? context.activeDiscussion : props.activeDiscussion!;
   const studentCount = context ? context.studentCount : (props.studentCount ?? 0);
+  // Peak student count seen during the current discussion — only goes up, never down
+  const peakStudentCount = context ? context.peakStudentCount : studentCount;
 
   const [analyticsOpen, setAnalyticsOpen] = React.useState(false);
 
@@ -253,8 +255,8 @@ export function ActiveRightPanel(props: {
         <div className="font-semibold">Live Responses</div>
         <div className="flex items-center gap-2">
           <div className="text-sm text-gray-500">{responses.length}</div>
-          {studentCount > 0 && (
-            <div className="text-xs text-gray-400">/ {studentCount} students</div>
+          {peakStudentCount > 0 && (
+            <div className="text-xs text-gray-400">/ {peakStudentCount} students</div>
           )}
           {activeDiscussion && (
             <Button
@@ -327,7 +329,7 @@ export function ActiveRightPanel(props: {
         onClose={() => setAnalyticsOpen(false)}
         discussion={activeDiscussion ?? null}
         responses={responses}
-        studentCount={studentCount}
+        studentCount={peakStudentCount}
       />
     </aside>
   );

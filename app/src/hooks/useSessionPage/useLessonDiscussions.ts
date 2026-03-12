@@ -46,11 +46,14 @@ export function useLessonDiscussions(
     // Tracks the highest student count seen while the current discussion is active.
     // Reset to 0 when a new discussion is published, saved as participant_snapshot on close.
     const peakStudentCountRef = useRef<number>(0);
+    // Reactive state mirror of the ref — triggers re-renders so UI stays in sync
+    const [peakStudentCount, setPeakStudentCount] = useState<number>(0);
 
     // Whenever studentCount changes and a discussion is active, update the peak if higher
     useEffect(() => {
         if (activeDiscussion && studentCount > peakStudentCountRef.current) {
             peakStudentCountRef.current = studentCount;
+            setPeakStudentCount(studentCount);
         }
     }, [studentCount, activeDiscussion]);
 
@@ -120,6 +123,7 @@ export function useLessonDiscussions(
 
         // Reset peak for the next discussion
         peakStudentCountRef.current = 0;
+        setPeakStudentCount(0);
 
         await closeDiscussionApi(discussionId);
 
@@ -142,8 +146,9 @@ export function useLessonDiscussions(
             await handleCloseDiscussion(activeDiscussion.id);
         }
 
-        // Reset peak for the new discussion, seeding it with current count
+        // Seed peak with current count for the new discussion
         peakStudentCountRef.current = studentCount;
+        setPeakStudentCount(studentCount);
 
         const payload = {
             lesson_id: lessonId,
@@ -183,8 +188,9 @@ export function useLessonDiscussions(
             await handleCloseDiscussion(activeDiscussion.id);
         }
 
-        // Reset peak for the new discussion, seeding it with current count
+        // Seed peak with current count for the new discussion
         peakStudentCountRef.current = studentCount;
+        setPeakStudentCount(studentCount);
 
         let aiSuggestedCorrectOption = null;
         if (candidate.mcOptions) {
@@ -241,6 +247,7 @@ export function useLessonDiscussions(
     }, [publishing, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, clearAIState]);
 
     return {
+        peakStudentCount,
         discussions,
         activeDiscussion,
         responses,

@@ -22,10 +22,10 @@ import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 /** Renders all discussions as clickable cards; clicking one opens the analytics modal. */
 function AnalyticsTab({
   discussions,
-  studentCount,
+  peakStudentCount,
 }: {
   discussions: DiscussionWithResponseCount[];
-  studentCount: number;
+  peakStudentCount: number;
 }) {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [modalResponses, setModalResponses] = React.useState<Response[]>([]);
@@ -60,9 +60,13 @@ function AnalyticsTab({
         {[...discussions].reverse().map((d, i) => {
           const promptNumber = discussions.length - i;
           const isActive = d.status === 'active';
-          const snapshot = d.participant_snapshot ?? studentCount;
+          // For active discussions use the live peak; for closed ones use the saved snapshot
+          const snapshot = isActive
+            ? Math.max(d.participant_snapshot ?? 0, peakStudentCount) || null
+            : d.participant_snapshot || null;
+          const safeSnapshot = snapshot ?? 0;
           const responseRate =
-            snapshot > 0 ? Math.round((d.response_count / snapshot) * 100) : null;
+            safeSnapshot > 0 ? Math.round((d.response_count / safeSnapshot) * 100) : null;
 
           return (
             <Button
@@ -97,7 +101,7 @@ function AnalyticsTab({
               <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                 <span>{d.response_count} responses</span>
                 {responseRate !== null && <span>{responseRate}% rate</span>}
-                {snapshot > 0 && <span>{snapshot} students</span>}
+                {safeSnapshot > 0 && <span>{snapshot} students</span>}
               </div>
             </Button>
           );
@@ -110,7 +114,7 @@ function AnalyticsTab({
         onClose={closeModal}
         discussion={selectedDiscussion}
         responses={modalResponses}
-        studentCount={studentCount}
+        studentCount={peakStudentCount}
       />
     </>
   );
@@ -138,7 +142,8 @@ export function ActiveSidebar(props: {
   const isUploading = context ? context.isUploading : props.isUploading!;
   const onUploadFile = context ? context.uploadFile : props.onUploadFile!;
   const onDeleteFile = context ? context.deleteFile : props.onDeleteFile!;
-  const studentCount = context ? context.studentCount : (props.studentCount ?? 0);
+  // peakStudentCount: highest count seen during the current discussion — only goes up
+  const peakStudentCount = context ? context.peakStudentCount : (props.studentCount ?? 0);
 
   return (
     <aside className="w-full md:w-72 border-r bg-white">
@@ -178,7 +183,7 @@ export function ActiveSidebar(props: {
             <ScrollArea className="h-[calc(100vh-170px)] pr-2">
               <AnalyticsTab
                 discussions={discussions}
-                studentCount={studentCount}
+                peakStudentCount={peakStudentCount}
               />
             </ScrollArea>
           </TabsContent>
