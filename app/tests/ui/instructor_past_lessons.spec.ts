@@ -137,7 +137,8 @@ test.describe('Instructor Past Lessons', () => {
         });
 
         // Mock lesson files and transcripts to prevent crashes
-        await page.route('**/rest/v1/lesson_files*', async (route) => {
+        // lesson_files are fetched via the Next.js API route, not Supabase directly
+        await page.route('**/api/lessons/*/files', async (route) => {
             await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
         });
         await page.route('**/rest/v1/lesson_chunks*', async (route) => {
@@ -151,7 +152,7 @@ test.describe('Instructor Past Lessons', () => {
             r => r.url().includes('/rest/v1/discussions') && !r.url().includes('count'));
         const activeDiscussionsLoaded = page.waitForResponse(
             r => r.url().includes('/rest/v1/discussions') && r.url().includes('count'));
-        const filesLoaded = page.waitForResponse('**/rest/v1/lesson_files*');
+        const filesLoaded = page.waitForResponse(r => r.url().includes('/api/lessons/') && r.url().endsWith('/files'));
         const chunksLoaded = page.waitForResponse('**/rest/v1/lesson_chunks*');
 
         // 1. Navigate
