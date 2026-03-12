@@ -42,10 +42,10 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Verify ownership — two-step to avoid the Supabase array/object join ambiguity
+    // Verify ownership — single round-trip via PostgREST embedded select
     const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
-      .select('id, course_id')
+      .select('id, courses(instructor_id)')
       .eq('id', lessonId)
       .single();
 
@@ -53,17 +53,13 @@ export async function POST(
       return NextResponse.json({ error: 'Lesson not found' }, { status: 404 });
     }
 
-    const { data: course, error: courseError } = await supabase
-      .from('courses')
-      .select('instructor_id')
-      .eq('id', (lesson as { id: string; course_id: string }).course_id)
-      .single();
-
-    if (courseError || !course) {
+    const { courses } = lesson as unknown as { id: string; courses: { instructor_id: string }[] };
+    const course = courses?.[0] ?? null;
+    if (!course) {
       return NextResponse.json({ error: 'Course not found' }, { status: 404 });
     }
 
-    if ((course as { instructor_id: string }).instructor_id !== user.id) {
+    if (course.instructor_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
