@@ -3,7 +3,7 @@
 import type { AIProvider } from './providers';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PromptType } from '@/types/discussion';
-import type { CandidateSet, GeneratedPrompt, MCOption } from '@/types/ai';
+import type { CandidateSet, GeneratedPrompt, MCOption, AIPromptPreferences } from '@/types/ai';
 import { retrieveChunksBySimilarity, retrieveRecentChunks } from './retrieveChunks';
 import { buildSystemPrompt, buildUserPrompt, CANDIDATE_COUNT } from './prompts/discussionPrompt';
 
@@ -25,7 +25,8 @@ export async function generatePrompts(
   transcriptText: string,
   promptType: PromptType,
   supabase: SupabaseClient,
-  aiProvider: AIProvider
+  aiProvider: AIProvider,
+  preferences?: AIPromptPreferences
 ): Promise<CandidateSet> {
   let chunks: string[] = [];
   let warning: string | undefined;
@@ -49,9 +50,9 @@ export async function generatePrompts(
     }
 
     // Build and call
-    const userPrompt = buildUserPrompt({ chunks, transcriptText, promptType });
+    const userPrompt = buildUserPrompt({ chunks, transcriptText, promptType, preferences });
     const rawContent = await aiProvider.generateChatCompletion([
-      { role: 'system', content: buildSystemPrompt() },
+      { role: 'system', content: buildSystemPrompt(preferences) },
       { role: 'user', content: userPrompt }
     ], { jsonMode: true, temperature: 0.7 });
 

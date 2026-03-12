@@ -14,6 +14,7 @@ import { SessionContext } from './SessionContext';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { CandidateCard } from './CandidateCard';
 import { MultipleChoiceEditor } from './MultipleChoiceEditor';
+import { AIPreferencesDialog } from './AIPreferencesDialog';
 import { transcribeAudioApi } from '@/lib/api/aiApi';
 
 
@@ -243,6 +244,7 @@ export function ActiveCenter(props: Partial<{
                 <option value="multiple_choice">Multiple Choice</option>
               </select>
 
+              <AIPreferencesDialog />
               <Button
                 onClick={onGenerate}
                 disabled={isGenerating || recorder.isRecording}

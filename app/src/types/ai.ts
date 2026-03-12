@@ -3,6 +3,13 @@
 
 import { PromptType } from './discussion';
 
+export interface AIPromptPreferences {
+  difficulty: 'basic' | 'intermediate' | 'advanced';
+  style: 'socratic' | 'factual' | 'clinical_scenario';
+  length: 'brief' | 'standard' | 'detailed';
+  focusAreas?: string;
+}
+
 // Upload pipeline state for a lesson file
 export type UploadStatus = 'uploading' | 'processing' | 'ready' | 'failed';
 
