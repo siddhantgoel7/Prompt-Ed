@@ -82,7 +82,7 @@ describe('SessionEndedView (Acceptance)', () => {
     expect(screen.getByText(/Ended Header:\s*Ended Lesson/i)).toBeInTheDocument();
   });
 
-  // 6.2
+  // 6.2 — responses are hidden behind "Show Responses" toggle in new design
   it('[US 1.34][AT1] success: displays preserved discussions and responses in history', () => {
     const vm = makeVM({
       lessonDiscussions: [
@@ -99,8 +99,11 @@ describe('SessionEndedView (Acceptance)', () => {
     });
 
     render(<SessionEndedView vm={vm} />);
-    expect(screen.getByText(/Discussions and Responses/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^Discussions$/i })).toBeInTheDocument();
     expect(screen.getByText(/What is 2\+2\?/i)).toBeInTheDocument();
+
+    // Responses are behind the toggle — expand first
+    fireEvent.click(screen.getByText(/Show Responses/i));
     expect(screen.getByText(/^4$/)).toBeInTheDocument();
     expect(screen.getByText(/Four/i)).toBeInTheDocument();
   });
@@ -163,12 +166,14 @@ describe('SessionEndedView (Acceptance)', () => {
           fileSizeBytes: 1024,
           status: 'ready',
           uploadedAt: '2026-03-06T10:00:00Z',
-        },],
+        },
+      ],
     });
     render(<SessionEndedView vm={vm} />);
     expect(screen.getByText(/lecture-1\.pdf/i)).toBeInTheDocument();
   });
 
+  // download button text is "Download" not "download file"
   it('[US 1.14] success: clicking download calls vm.openFile', () => {
     const vm = makeVM({
       files: [
@@ -185,10 +190,11 @@ describe('SessionEndedView (Acceptance)', () => {
     });
 
     render(<SessionEndedView vm={vm} />);
-    fireEvent.click(screen.getByRole('button', { name: /download file/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Download$/i }));
     expect(vm.openFile).toHaveBeenCalledWith('f1');
   });
-  // 6.7
+
+  // 6.7 — "Discussions and Responses" no longer exists, section heading is "Discussions"
   it('success: clicking Split View opens the split view overlay', () => {
     const vm = makeVM();
     render(<SessionEndedView vm={vm} />);
@@ -196,10 +202,10 @@ describe('SessionEndedView (Acceptance)', () => {
     fireEvent.click(screen.getByRole('button', { name: /Split View/i }));
 
     expect(screen.getByText('Split View Overlay')).toBeInTheDocument();
-    expect(screen.queryByText('Discussions and Responses')).not.toBeInTheDocument();
+    expect(screen.queryByText('No discussions recorded.')).not.toBeInTheDocument();
   });
 
-  // 6.8
+  // 6.8 — same heading fix
   it('success: clicking Back to Session returns to normal ended view', () => {
     const vm = makeVM();
     render(<SessionEndedView vm={vm} />);
@@ -209,7 +215,7 @@ describe('SessionEndedView (Acceptance)', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Back to Session/i }));
     expect(screen.queryByText('Split View Overlay')).not.toBeInTheDocument();
-    expect(screen.getByText('Discussions and Responses')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^Discussions$/i })).toBeInTheDocument();
   });
 
   // 6.9

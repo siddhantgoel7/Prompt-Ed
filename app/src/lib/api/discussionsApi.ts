@@ -72,11 +72,19 @@ export async function fetchEndedDiscussionsApi(lessonId: string) {
     return supabase
         .from('discussions')
         .select(`
-        id, lesson_id, prompt_text, prompt_type, status, created_at, published_at, closed_at, display_order,
-        responses ( id, discussion_id, response_text, created_at )
-      `)
+            *,
+            responses ( id, discussion_id, response_text, created_at )
+        `)
         .eq('lesson_id', lessonId)
         .order('display_order', { ascending: true });
+}
+
+export async function updateParticipantSnapshotApi(discussionId: string, peak: number): Promise<void> {
+    const supabase = createClient();
+    await supabase
+        .from('discussions')
+        .update({ participant_snapshot: peak })
+        .eq('id', discussionId);
 }
 
 export async function fetchExportDiscussionsApi(lessonId: string) {

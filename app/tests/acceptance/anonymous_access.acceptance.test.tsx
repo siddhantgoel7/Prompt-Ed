@@ -1,7 +1,7 @@
 // [US 2.03] Anonymous access
 // Tests that students can participate without providing any identifying information
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { StudentSessionPage } from '@/components/student/session/StudentSessionPage';
 import { SessionEndedView } from '@/components/instructor/session/SessionEndedView';
 import type { SessionVM } from '@/hooks/useSessionPage';
@@ -112,7 +112,7 @@ describe('Anonymous Access (Acceptance) [US 2.03]', () => {
     expect(body).not.toMatch(/student-id/i);
   });
 
-  // 1.3
+  // 1.3 — responses are hidden behind "Show Responses" toggle in new design
   it('[US 2.03][AT3] success: instructor view has no student identifiers', () => {
     const vm = makeEndedVM({
       lessonDiscussions: [
@@ -130,6 +130,9 @@ describe('Anonymous Access (Acceptance) [US 2.03]', () => {
     });
 
     render(<SessionEndedView vm={vm} />);
+
+    // Responses are behind the toggle — expand first
+    fireEvent.click(screen.getByText(/Show Responses/i));
 
     // Responses are visible
     expect(screen.getByText(/Student answer 1/i)).toBeInTheDocument();

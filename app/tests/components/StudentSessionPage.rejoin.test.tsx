@@ -38,6 +38,7 @@ const mockActiveDiscussion: Discussion = {
   correct_option: null,
   feedback_enabled: false,
   ai_generated_correct_option: null,
+  participant_snapshot: 0,
 };
 
 const baseHookReturn = {

@@ -45,6 +45,10 @@ export type SessionVM = {
   loading: boolean;
   notFound: boolean;
   isConnected: boolean;
+  // Live count of students currently present in the session via Realtime Presence
+  studentCount: number;
+  // Highest student count seen during the current active discussion
+  peakStudentCount: number;
   handleReconnect: () => void;
   discussions: DiscussionWithResponseCount[];
   activeDiscussion: Discussion | null;
@@ -88,7 +92,8 @@ export type SessionVM = {
 
 export function useSessionPage(lessonId: string): SessionVM {
   const router = useRouter();
-  const { channel, isConnected, reconnect } = useRealtime(lessonId, 'instructor');
+  // studentCount: live presence count from Realtime — number of students currently in session
+  const { channel, isConnected, reconnect, studentCount } = useRealtime(lessonId, 'instructor');
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
@@ -112,6 +117,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   } = useLessonAI(lessonId, setPromptInput);
 
   const {
+    peakStudentCount,
     discussions,
     activeDiscussion,
     responses,
@@ -119,8 +125,9 @@ export function useSessionPage(lessonId: string): SessionVM {
     fetchResponses,
     handleCloseDiscussion,
     handlePublishDiscussion,
-    handlePublishAiCandidate
-  } = useLessonDiscussions(lessonId, channel, clearAIState, promptInput, setPromptInput, promptType);
+    handlePublishAiCandidate,
+  // studentCount passed so publish handlers can snapshot it into participant_snapshot
+  } = useLessonDiscussions(lessonId, channel, clearAIState, promptInput, setPromptInput, promptType, studentCount);
 
   const {
     files,
@@ -296,6 +303,12 @@ export function useSessionPage(lessonId: string): SessionVM {
     setEndingLesson(true);
     setEndError(null);
     const now = new Date().toISOString();
+
+    // If a discussion is still active, close it properly so peak gets saved to DB
+    if (activeDiscussion) {
+      await handleCloseDiscussion(activeDiscussion.id);
+    }
+
     await closeActiveDiscussionsApi(lesson.id, now);
     const { error } = await endLessonApi(lesson.id, now);
 
@@ -309,7 +322,7 @@ export function useSessionPage(lessonId: string): SessionVM {
       });
     }
     router.push(`/lessons_page/${lesson.course_id}`);
-  }, [lesson, channel, router]);
+  }, [lesson, channel, router, activeDiscussion, handleCloseDiscussion]);
 
   const handleActivate = useCallback(async () => {
     if (!lesson) return;
@@ -379,7 +392,7 @@ export function useSessionPage(lessonId: string): SessionVM {
 
   return useMemo(() => ({
     lesson: lesson as Lesson,
-    loading, notFound, isConnected, handleReconnect,
+    loading, notFound, isConnected, studentCount, peakStudentCount, handleReconnect,
     discussions, activeDiscussion, responses, promptInput, setPromptInput,
     displayState, handleDisplay,
     endingLesson, endError, handleEnd,
@@ -393,7 +406,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
   }), [
-    lesson, loading, notFound, isConnected, handleReconnect,
+    lesson, loading, notFound, isConnected, studentCount, peakStudentCount, handleReconnect,
     discussions, activeDiscussion, responses, promptInput,
     displayState, handleDisplay,
     endingLesson, endError, handleEnd,
@@ -402,7 +415,8 @@ export function useSessionPage(lessonId: string): SessionVM {
     transcripts, transcriptsLoading, transcriptsError,
     exportingData, activatingLesson, handleExportLessonData, handleActivate,
     files, isUploading, uploadFile, deleteFile, openFile,
-    transcriptText, setTranscriptText, promptType, setPromptType, candidates, isGenerating, generationWarning,
+    transcriptText, setTranscriptText, promptType, setPromptType,
+    candidates, isGenerating, generationWarning,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
   ]);

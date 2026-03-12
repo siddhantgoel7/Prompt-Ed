@@ -5,6 +5,8 @@ import { render, screen } from '@testing-library/react';
 import { SessionActiveView } from '@/components/instructor/session/SessionActiveView';
 import { SessionEndedView } from '@/components/instructor/session/SessionEndedView';
 import type { SessionVM } from '@/hooks/useSessionPage';
+// Use fireEvent or userEvent to click
+import { fireEvent } from '@testing-library/react'; 
 
 jest.mock('@/components/instructor/session/SessionHeaderActive', () => ({
   SessionHeaderActive: (props: any) => (
@@ -156,9 +158,16 @@ describe('Real-time Responses (Acceptance) [US 1.34]', () => {
   });
 
   // 10.4
-  it('[US 1.34][AT1] success: preserved responses visible in ended view', () => {
+  it('[US 1.34][AT1] success: preserved responses visible in ended view', async () => { // Note: added async
     const vm = makeVM({
-      lesson: { id: 'lesson-1', title: 'Ended', status: 'ended', course_id: 'c1', pin_code: '123456', created_at: new Date().toISOString() } as any,
+      lesson: { 
+        id: 'lesson-1', 
+        title: 'Ended', 
+        status: 'ended', 
+        course_id: 'c1', 
+        pin_code: '123456', 
+        created_at: new Date().toISOString() 
+      } as any,
       isConnected: false,
       lessonDiscussions: [
         {
@@ -175,7 +184,16 @@ describe('Real-time Responses (Acceptance) [US 1.34]', () => {
 
     render(<SessionEndedView vm={vm} />);
 
+    // Verify the prompt itself is there
     expect(screen.getByText(/Discussion prompt/i)).toBeInTheDocument();
+
+    // FIX: Click the "Show Responses" button to reveal the hidden text
+    const showResponsesBtn = screen.getByRole('button', { name: /Show Responses/i });
+    
+  
+    fireEvent.click(showResponsesBtn);
+
+    // Now the text should be in the document and visible
     expect(screen.getByText(/Preserved answer/i)).toBeInTheDocument();
   });
 });

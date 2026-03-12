@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
 import type { GeneratedPrompt } from '@/types/ai';
@@ -8,7 +8,8 @@ import {
     fetchDiscussionsApi,
     insertDiscussionApi,
     closeDiscussionApi,
-    fetchResponsesApi
+    fetchResponsesApi,
+    updateParticipantSnapshotApi,
 } from '@/lib/api/discussionsApi';
 
 interface RealtimeLikeChannel {
@@ -33,26 +34,42 @@ export function useLessonDiscussions(
     clearAIState: () => void,
     promptInput: string,
     setPromptInput: (value: string) => void,
-    promptType: PromptType
+    promptType: PromptType,
+    // Live student count from Realtime Presence — used to track peak during a discussion
+    studentCount: number = 0
 ) {
     const [discussions, setDiscussions] = useState<DiscussionWithResponseCount[]>([]);
     const [activeDiscussion, setActiveDiscussion] = useState<Discussion | null>(null);
     const [responses, setResponses] = useState<Response[]>([]);
     const [publishing, setPublishing] = useState(false);
 
+    // Tracks the highest student count seen while the current discussion is active.
+    // Reset to 0 when a new discussion is published, saved as participant_snapshot on close.
+    const peakStudentCountRef = useRef<number>(0);
+    // Reactive state mirror of the ref — triggers re-renders so UI stays in sync
+    const [peakStudentCount, setPeakStudentCount] = useState<number>(0);
+
+    // Whenever studentCount changes and a discussion is active, update the peak if higher
+    useEffect(() => {
+        if (activeDiscussion && studentCount > peakStudentCountRef.current) {
+            peakStudentCountRef.current = studentCount;
+            // queueMicrotask defers the setState call to after the current effect finishes,
+            // preventing React strict-mode from flagging a state update triggered during
+            // an effect that itself was caused by a state change (ref update + setState in
+            // the same synchronous frame). The ref is already updated above so the peak
+            // value is consistent regardless of when the re-render occurs.
+            queueMicrotask(() => {
+                setPeakStudentCount(prev => Math.max(prev, studentCount));
+            });
+        }
+    }, [studentCount, activeDiscussion]);
+
     const fetchDiscussions = useCallback(async () => {
         const data = await fetchDiscussionsApi(lessonId);
         setDiscussions(data);
         const active = data.find((d) => d.status === 'active');
         setActiveDiscussion(active || null);
-
-        // Auto-fetch responses for the active discussion
-        if (active) {
-            const resData = await fetchResponsesApi(active.id);
-            setResponses(resData);
-        } else {
-            setResponses([]);
-        }
+        // Responses are fetched by the activeDiscussion?.id useEffect below
     }, [lessonId]);
 
     const fetchResponses = useCallback(async () => {
@@ -94,6 +111,16 @@ export function useLessonDiscussions(
     }, [channel]);
 
     const handleCloseDiscussion = useCallback(async (discussionId: string) => {
+        // Save the peak student count seen during this discussion as participant_snapshot
+        const peak = peakStudentCountRef.current;
+        if (peak > 0) {
+            await updateParticipantSnapshotApi(discussionId, peak);
+        }
+
+        // Reset peak for the next discussion
+        peakStudentCountRef.current = 0;
+        setPeakStudentCount(0);
+
         await closeDiscussionApi(discussionId);
 
         if (channel) {
@@ -115,6 +142,10 @@ export function useLessonDiscussions(
             await handleCloseDiscussion(activeDiscussion.id);
         }
 
+        // Seed peak with current count for the new discussion
+        peakStudentCountRef.current = studentCount;
+        setPeakStudentCount(studentCount);
+
         const payload = {
             lesson_id: lessonId,
             prompt_text: promptInput,
@@ -123,6 +154,8 @@ export function useLessonDiscussions(
             published_at: new Date().toISOString(),
             display_order: discussions.length,
             source: 'manual',
+            // Seed with current count; will be updated to peak on close
+            participant_snapshot: studentCount > 0 ? studentCount : null,
         };
 
         const newDiscussion = await insertDiscussionApi(payload);
@@ -141,7 +174,7 @@ export function useLessonDiscussions(
         setResponses([]);
         setPromptInput('');
         setPublishing(false);
-    }, [promptInput, publishing, promptType, activeDiscussion, discussions.length, lessonId, channel, handleCloseDiscussion, setPromptInput]);
+    }, [promptInput, publishing, promptType, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, setPromptInput]);
 
     const handlePublishAiCandidate = useCallback(async (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled: boolean = false) => {
         if (publishing) return;
@@ -150,6 +183,10 @@ export function useLessonDiscussions(
         if (activeDiscussion) {
             await handleCloseDiscussion(activeDiscussion.id);
         }
+
+        // Seed peak with current count for the new discussion
+        peakStudentCountRef.current = studentCount;
+        setPeakStudentCount(studentCount);
 
         let aiSuggestedCorrectOption = null;
         if (candidate.mcOptions) {
@@ -177,6 +214,8 @@ export function useLessonDiscussions(
             correct_option: finalCorrectOption,
             feedback_enabled: feedbackEnabled,
             ai_generated_correct_option: aiSuggestedCorrectOption,
+            // Seed with current count; will be updated to peak on close
+            participant_snapshot: studentCount > 0 ? studentCount : null,
         };
 
         const newDiscussion = await insertDiscussionApi(payload);
@@ -201,9 +240,10 @@ export function useLessonDiscussions(
         setResponses([]);
         clearAIState();
         setPublishing(false);
-    }, [publishing, activeDiscussion, discussions.length, lessonId, channel, handleCloseDiscussion, clearAIState]);
+    }, [publishing, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, clearAIState]);
 
     return {
+        peakStudentCount,
         discussions,
         activeDiscussion,
         responses,
