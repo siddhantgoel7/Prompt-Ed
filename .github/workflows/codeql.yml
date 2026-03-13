@@ -1,0 +1,53 @@
+name: CodeQL Security Analysis
+
+on:
+  push:
+    branches:
+      - main
+      - "sprint-*"
+  pull_request:
+    branches:
+      - main
+      - "sprint-*"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag, or SHA to run against"
+        required: true
+        default: "main"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: self-hosted
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - javascript-typescript
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # No build step needed for JS/TS — CodeQL auto-detects
+          build-mode: none
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
