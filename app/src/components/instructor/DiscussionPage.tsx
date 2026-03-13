@@ -3,12 +3,85 @@
 'use client';
 
 import { useRealtime } from '@/lib/realtime/useRealtime';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Flag } from 'lucide-react';
 import Link from 'next/link';
 import { DiscussionAnalyticsContent } from '@/components/instructor/session/DiscussionAnalyticsModal';
+import { deleteResponseApi } from '@/lib/api/discussionsApi';
+
+/** Isolated response list — owns its own selection state so clicks don't re-render the whole page. */
+function ResponseList({ responses, onRemoveResponse }: {
+  responses: Response[];
+  onRemoveResponse: (id: string) => void;
+}) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [flaggingId, setFlaggingId] = useState<string | null>(null);
+
+  const handleFlagInappropriate = useCallback(async (responseId: string) => {
+    setFlaggingId(responseId);
+    try {
+      await deleteResponseApi(responseId);
+      onRemoveResponse(responseId);
+      setSelectedId(null);
+    } catch (err) {
+      console.error('Failed to flag response:', err);
+    } finally {
+      setFlaggingId(null);
+    }
+  }, [onRemoveResponse]);
+
+  return (
+    <div className="grid gap-4">
+      {responses.map((resp) => {
+        const isSelected = selectedId === resp.id;
+        const isBeingFlagged = flaggingId === resp.id;
+
+        return (
+          <div
+            key={resp.id}
+            className={`rounded-xl cursor-pointer transition-all duration-300 ease-in-out ${
+              isSelected
+                ? 'bg-yellow-50 border-2 border-black ring-4 ring-black/15 shadow-2xl p-8 md:p-10 my-4 z-10 relative'
+                : 'bg-white border border-gray-200 hover:border-gray-400 shadow-sm p-5'
+            }`}
+            onClick={() => setSelectedId(isSelected ? null : resp.id)}
+          >
+            <p className={`text-gray-800 leading-relaxed transition-all duration-300 ${
+              isSelected ? 'text-3xl md:text-4xl font-semibold' : 'text-base'
+            }`}>
+              {resp.response_text}
+            </p>
+            <div className={`flex justify-end items-center gap-2 text-gray-400 font-medium transition-all duration-300 ${
+              isSelected ? 'mt-6 text-sm' : 'mt-3 text-xs'
+            }`}>
+              <span suppressHydrationWarning>{new Date(resp.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+
+            {/* Expanded action bar — visible when response is selected */}
+            {isSelected && (
+              <div className="mt-6 pt-5 border-t border-gray-300 flex items-center justify-end animate-in fade-in slide-in-from-top-1 duration-200">
+                <button
+                  type="button"
+                  disabled={isBeingFlagged}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void handleFlagInappropriate(resp.id);
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Flag className="w-4 h-4" />
+                  {isBeingFlagged ? 'Removing...' : 'Flag as Inappropriate'}
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 
 interface DiscussionClientProps {
@@ -35,6 +108,10 @@ export function DiscussionPage({
   // We use state because we need to update this list when new responses arrive.
   const [responses, setResponses] = useState<Response[]>(initialResponses);
   const [isActive] = useState(initialIsActive);
+
+  const handleRemoveResponse = useCallback((responseId: string) => {
+    setResponses((prev) => prev.filter((r) => r.id !== responseId));
+  }, []);
 
   // 2. Setup Realtime
   const { channel, isConnected } = useRealtime(lessonId, 'instructor');
@@ -189,19 +266,7 @@ export function DiscussionPage({
                 <p>No responses recorded yet.</p>
               </div>
             ) : (
-              <div className="grid gap-4">
-                {responses.map((resp) => (
-                  <div
-                    key={resp.id}
-                    className="p-5 bg-white border border-gray-200 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
-                  >
-                    <p className="text-gray-800 text-lg leading-relaxed">{resp.response_text}</p>
-                    <div className="mt-3 flex justify-end items-center gap-2 text-xs text-gray-400 font-medium">
-                      <span suppressHydrationWarning>{new Date(resp.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ResponseList responses={responses} onRemoveResponse={handleRemoveResponse} />
             )}
           </div>
         </div>

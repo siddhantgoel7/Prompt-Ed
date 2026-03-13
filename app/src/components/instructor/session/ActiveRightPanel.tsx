@@ -6,6 +6,7 @@ import * as React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Flag } from 'lucide-react';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 import { SessionContext } from './SessionContext';
@@ -21,8 +22,32 @@ export function ActiveRightPanel(props: {
   const responses = context ? context.responses : props.responses!;
   const activeDiscussion = context ? context.activeDiscussion : props.activeDiscussion!;
   const studentCount = context ? context.studentCount : (props.studentCount ?? 0);
+  const removeResponse = context ? context.removeResponse : undefined;
   // Peak student count seen during the current discussion — only goes up, never down
   const peakStudentCount = context ? context.peakStudentCount : studentCount;
+
+  // Track which response is selected/expanded
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [flaggingId, setFlaggingId] = React.useState<string | null>(null);
+
+  // Clear selection when active discussion changes
+  React.useEffect(() => {
+    setSelectedId(null);
+    setFlaggingId(null);
+  }, [activeDiscussion?.id]);
+
+  const handleFlagInappropriate = React.useCallback(async (responseId: string) => {
+    if (!removeResponse) return;
+    setFlaggingId(responseId);
+    try {
+      await removeResponse(responseId);
+      setSelectedId(null);
+    } catch (err) {
+      console.error('Failed to flag response:', err);
+    } finally {
+      setFlaggingId(null);
+    }
+  }, [removeResponse]);
 
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
 
@@ -106,18 +131,53 @@ export function ActiveRightPanel(props: {
                   </p>
                 ) : (
                   <div className="space-y-2">
-                    {responses.map((r) => (
-                      <Card key={r.id} className="shadow-sm border-gray-200">
-                        <CardContent className="p-3">
-                          <p className="text-sm whitespace-pre-wrap break-words text-gray-800">
-                            {r.response_text}
-                          </p>
-                          <p className="text-[10px] text-gray-400 mt-1.5 font-medium uppercase tracking-wider">
-                            {new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    ))}
+                    {responses.map((r) => {
+                      const isSelected = selectedId === r.id;
+                      const isBeingFlagged = flaggingId === r.id;
+
+                      return (
+                        <Card
+                          key={r.id}
+                          className={`cursor-pointer transition-all duration-300 ease-in-out ${
+                            isSelected
+                              ? 'border-2 border-black ring-4 ring-black/15 bg-yellow-50 shadow-xl z-10 relative my-4'
+                              : 'shadow-sm border-gray-200 hover:border-gray-400'
+                          }`}
+                          onClick={() => setSelectedId(isSelected ? null : r.id)}
+                        >
+                          <CardContent className={`transition-all duration-300 ${isSelected ? 'p-6' : 'p-3'}`}>
+                            <p className={`whitespace-pre-wrap break-words text-gray-800 transition-all duration-300 ${
+                              isSelected ? 'text-2xl leading-relaxed font-semibold' : 'text-sm line-clamp-3'
+                            }`}>
+                              {r.response_text}
+                            </p>
+                            <p className={`text-gray-400 font-medium uppercase tracking-wider transition-all duration-300 ${
+                              isSelected ? 'text-xs mt-4' : 'text-[10px] mt-1.5'
+                            }`}>
+                              {new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+
+                            {/* Expanded action bar — visible when response is selected */}
+                            {isSelected && (
+                              <div className="mt-4 pt-4 border-t border-gray-300 flex items-center justify-end animate-in fade-in slide-in-from-top-1 duration-200">
+                                <button
+                                  type="button"
+                                  disabled={isBeingFlagged}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    void handleFlagInappropriate(r.id);
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <Flag className="w-3 h-3" />
+                                  {isBeingFlagged ? 'Removing...' : 'Flag as Inappropriate'}
+                                </button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
               </TabsContent>

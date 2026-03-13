@@ -10,6 +10,7 @@ import {
     closeDiscussionApi,
     fetchResponsesApi,
     updateParticipantSnapshotApi,
+    deleteResponseApi,
 } from '@/lib/api/discussionsApi';
 
 interface RealtimeLikeChannel {
@@ -176,6 +177,18 @@ export function useLessonDiscussions(
         setPublishing(false);
     }, [promptInput, publishing, promptType, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, setPromptInput]);
 
+    const removeResponse = useCallback(async (responseId: string) => {
+        await deleteResponseApi(responseId);
+        setResponses((prev) => prev.filter((r) => r.id !== responseId));
+        setDiscussions((prev) =>
+            prev.map((d) =>
+                d.id === activeDiscussion?.id
+                    ? { ...d, response_count: Math.max((d.response_count ?? 1) - 1, 0) }
+                    : d
+            )
+        );
+    }, [activeDiscussion]);
+
     const handlePublishAiCandidate = useCallback(async (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled: boolean = false) => {
         if (publishing) return;
         setPublishing(true);
@@ -251,6 +264,7 @@ export function useLessonDiscussions(
         fetchResponses,
         handleCloseDiscussion,
         handlePublishDiscussion,
-        handlePublishAiCandidate
+        handlePublishAiCandidate,
+        removeResponse,
     };
 }

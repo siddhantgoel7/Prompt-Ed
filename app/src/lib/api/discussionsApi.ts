@@ -106,6 +106,19 @@ export async function fetchStudentActiveDiscussionApi(lessonId: string) {
         .maybeSingle();
 }
 
+export async function deleteResponseApi(responseId: string): Promise<void> {
+    const supabase = createClient();
+    const { error } = await supabase
+        .from('responses')
+        .delete()
+        .eq('id', responseId);
+
+    if (error) {
+        console.error('Failed to delete response:', error);
+        throw error;
+    }
+}
+
 export async function submitStudentResponseApi(discussionId: string, text: string, selectedOption: string | null = null, isCorrect: boolean | null = null) {
     const supabase = createClient();
     return supabase

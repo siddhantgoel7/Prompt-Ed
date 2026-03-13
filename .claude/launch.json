@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "nextjs-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "app"],
+      "port": 3000
+    },
+    {
+      "name": "mkdocs",
+      "runtimeExecutable": "mkdocs",
+      "runtimeArgs": ["serve"],
+      "port": 8000
+    },
+    {
+      "name": "swagger-ui",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "api:swagger", "--prefix", "app"],
+      "port": 8080
+    }
+  ]
+}

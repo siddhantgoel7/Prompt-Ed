@@ -88,6 +88,7 @@ export type SessionVM = {
   selectCandidate: (p: GeneratedPrompt) => void;
   regenerateCandidates: () => Promise<void>;
   handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => Promise<void>;
+  removeResponse: (responseId: string) => Promise<void>;
 };
 
 export function useSessionPage(lessonId: string): SessionVM {
@@ -126,6 +127,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     handleCloseDiscussion,
     handlePublishDiscussion,
     handlePublishAiCandidate,
+    removeResponse,
   // studentCount passed so publish handlers can snapshot it into participant_snapshot
   } = useLessonDiscussions(lessonId, channel, clearAIState, promptInput, setPromptInput, promptType, studentCount);
 
@@ -405,6 +407,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     candidates, isGenerating, generationWarning,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
+    removeResponse,
   }), [
     lesson, loading, notFound, isConnected, studentCount, peakStudentCount, handleReconnect,
     discussions, activeDiscussion, responses, promptInput,
@@ -419,5 +422,6 @@ export function useSessionPage(lessonId: string): SessionVM {
     candidates, isGenerating, generationWarning,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
+    removeResponse,
   ]);
 }
