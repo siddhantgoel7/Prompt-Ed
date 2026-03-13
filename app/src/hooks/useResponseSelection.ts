@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, type Dispatch, type SetStateAction } from 'react';
+import { useState, useCallback, useEffect, type Dispatch, type SetStateAction } from 'react';
 
 export interface UseResponseSelectionOptions {
   /** Called to remove/flag a response. The hook handles loading state and
@@ -51,6 +51,13 @@ export function useResponseSelection({
     setFlaggingId(null);
     setShowHighlightedOnly(false);
   }, []);
+
+  // Auto-reset highlight filter when all highlighted responses are removed (e.g. flagged)
+  useEffect(() => {
+    if (selectedIds.length === 0 && showHighlightedOnly) {
+      setShowHighlightedOnly(false);
+    }
+  }, [selectedIds.length, showHighlightedOnly]);
 
   const filterResponses = useCallback(<T extends { id: string }>(responses: T[]): T[] => {
     return showHighlightedOnly

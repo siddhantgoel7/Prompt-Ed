@@ -266,6 +266,31 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.getByText(/The liver is the primary site/)).toBeInTheDocument();
     expect(screen.getByText(/CYP450 enzymes/)).toBeInTheDocument();
   });
+
+  it('[US 1.36][AC1-AT8] flagging all highlighted responses while filtered auto-switches back to full view', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    // Highlight a response and activate the filter
+    await user.click(screen.getByText(/Phase I reactions/));
+    await user.click(screen.getByRole('button', { name: /Show highlighted only/i }));
+
+    // Only the highlighted response is visible
+    expect(screen.getByText(/Phase I reactions/)).toBeInTheDocument();
+    expect(screen.queryByText(/The liver is the primary site/)).not.toBeInTheDocument();
+
+    // Flag the only highlighted response — this removes it from selectedIds
+    await user.click(screen.getByRole('button', { name: /Flag as Inappropriate/i }));
+
+    // The view should auto-switch back to show all remaining responses
+    await waitFor(() => {
+      expect(screen.getByText(/The liver is the primary site/)).toBeInTheDocument();
+    });
+    expect(screen.getByText(/CYP450 enzymes/)).toBeInTheDocument();
+
+    // The filter toggle should be gone since no responses are highlighted
+    expect(screen.queryByRole('button', { name: /Show highlighted only/i })).not.toBeInTheDocument();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -475,5 +500,33 @@ describe('DiscussionPage — flagged response restore feature', () => {
     // Show flagged — the flagged response should be visible
     await user.click(screen.getByRole('button', { name: /Show flagged \(1\)/i }));
     expect(screen.getByText(/The liver is the primary site/)).toBeInTheDocument();
+  });
+
+  it('[US 1.35][AC1-AT8] unflagging all responses auto-switches back to normal view', async () => {
+    const user = userEvent.setup();
+    renderPage(RESPONSES, FLAGGED);
+
+    // Show flagged view
+    await user.click(screen.getByRole('button', { name: /Show flagged \(1\)/i }));
+    expect(screen.getByText(/Flagged response about incorrect enzyme/)).toBeInTheDocument();
+    expect(screen.queryByText(/Phase I reactions/)).not.toBeInTheDocument();
+
+    // Select and unflag the only flagged response
+    await user.click(screen.getByText(/Flagged response about incorrect enzyme/));
+    await user.click(screen.getByRole('button', { name: /Unflag/i }));
+
+    // After unflagging the last flagged response, the view should auto-switch
+    // back to showing active responses (no empty flagged page)
+    await waitFor(() => {
+      expect(screen.getByText(/Phase I reactions/)).toBeInTheDocument();
+    });
+    expect(screen.getByText(/The liver is the primary site/)).toBeInTheDocument();
+    expect(screen.getByText(/CYP450 enzymes/)).toBeInTheDocument();
+
+    // The restored response should also be visible in the active list
+    expect(screen.getByText(/Flagged response about incorrect enzyme/)).toBeInTheDocument();
+
+    // Flagged toggle should be gone since there are no more flagged responses
+    expect(screen.queryByRole('button', { name: /Show flagged/i })).not.toBeInTheDocument();
   });
 });

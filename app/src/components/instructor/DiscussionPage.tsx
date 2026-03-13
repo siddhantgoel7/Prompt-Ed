@@ -35,6 +35,13 @@ function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestore
 
   const [showFlagged, setShowFlagged] = useState(false);
 
+  // Auto-switch back to normal view when all flagged responses are restored
+  useEffect(() => {
+    if (flaggedResponses.length === 0 && showFlagged) {
+      setShowFlagged(false);
+    }
+  }, [flaggedResponses.length, showFlagged]);
+
   // Separate selection/flagging state for the flagged view
   const [flaggedSelectedIds, setFlaggedSelectedIds] = useState<string[]>([]);
   const [restoringId, setRestoringId] = useState<string | null>(null);
