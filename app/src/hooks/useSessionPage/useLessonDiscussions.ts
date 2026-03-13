@@ -9,8 +9,10 @@ import {
     insertDiscussionApi,
     closeDiscussionApi,
     fetchResponsesApi,
+    fetchFlaggedResponsesApi,
     updateParticipantSnapshotApi,
-    deleteResponseApi,
+    flagResponseApi,
+    unflagResponseApi,
 } from '@/lib/api/discussionsApi';
 
 interface RealtimeLikeChannel {
@@ -42,6 +44,7 @@ export function useLessonDiscussions(
     const [discussions, setDiscussions] = useState<DiscussionWithResponseCount[]>([]);
     const [activeDiscussion, setActiveDiscussion] = useState<Discussion | null>(null);
     const [responses, setResponses] = useState<Response[]>([]);
+    const [flaggedResponses, setFlaggedResponses] = useState<Response[]>([]);
     const [publishing, setPublishing] = useState(false);
 
     // Tracks the highest student count seen while the current discussion is active.
@@ -82,10 +85,21 @@ export function useLessonDiscussions(
         setResponses(data);
     }, [activeDiscussion]);
 
+    const fetchFlaggedResponses = useCallback(async () => {
+        if (!activeDiscussion) {
+            Promise.resolve().then(() => setFlaggedResponses([]));
+            return;
+        }
+        const data = await fetchFlaggedResponsesApi(activeDiscussion.id);
+        setFlaggedResponses(data);
+    }, [activeDiscussion]);
+
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchResponses();
-    }, [activeDiscussion?.id, fetchResponses]);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchFlaggedResponses();
+    }, [activeDiscussion?.id, fetchResponses, fetchFlaggedResponses]);
 
     useEffect(() => {
         if (!channel) return;
@@ -178,12 +192,51 @@ export function useLessonDiscussions(
     }, [promptInput, publishing, promptType, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, setPromptInput]);
 
     const removeResponse = useCallback(async (responseId: string) => {
-        await deleteResponseApi(responseId);
-        setResponses((prev) => prev.filter((r) => r.id !== responseId));
+        await flagResponseApi(responseId);
+        // Capture the response via the functional updater (runs synchronously),
+        // then add to flagged at the top level — React 18+ batches both updates
+        // into a single render, preventing duplicate keys.
+        let flaggedItem: Response | undefined;
+        setResponses((prev) => {
+            flaggedItem = prev.find((r) => r.id === responseId);
+            return prev.filter((r) => r.id !== responseId);
+        });
+        if (flaggedItem) {
+            const item = flaggedItem;
+            setFlaggedResponses((prev) => {
+                if (prev.some((r) => r.id === responseId)) return prev;
+                return [{ ...item, flagged_at: new Date().toISOString() }, ...prev];
+            });
+        }
         setDiscussions((prev) =>
             prev.map((d) =>
                 d.id === activeDiscussion?.id
                     ? { ...d, response_count: Math.max((d.response_count ?? 1) - 1, 0) }
+                    : d
+            )
+        );
+    }, [activeDiscussion]);
+
+    const restoreResponse = useCallback(async (responseId: string) => {
+        await unflagResponseApi(responseId);
+        // Capture the response via the functional updater, then add to responses
+        // at the top level so React batches both updates into a single render.
+        let restoredItem: Response | undefined;
+        setFlaggedResponses((prev) => {
+            restoredItem = prev.find((r) => r.id === responseId);
+            return prev.filter((r) => r.id !== responseId);
+        });
+        if (restoredItem) {
+            const item = restoredItem;
+            setResponses((prev) => {
+                if (prev.some((r) => r.id === responseId)) return prev;
+                return [{ ...item, flagged_at: null }, ...prev];
+            });
+        }
+        setDiscussions((prev) =>
+            prev.map((d) =>
+                d.id === activeDiscussion?.id
+                    ? { ...d, response_count: (d.response_count ?? 0) + 1 }
                     : d
             )
         );
@@ -260,11 +313,13 @@ export function useLessonDiscussions(
         discussions,
         activeDiscussion,
         responses,
+        flaggedResponses,
         fetchDiscussions,
         fetchResponses,
         handleCloseDiscussion,
         handlePublishDiscussion,
         handlePublishAiCandidate,
         removeResponse,
+        restoreResponse,
     };
 }

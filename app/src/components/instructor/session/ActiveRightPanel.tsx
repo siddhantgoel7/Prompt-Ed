@@ -4,13 +4,14 @@
 
 import * as React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Flag } from 'lucide-react';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 import { SessionContext } from './SessionContext';
 import { DiscussionAnalyticsContent } from './DiscussionAnalyticsModal';
+import { useResponseSelection } from '@/hooks/useResponseSelection';
+import { ResponseCard } from '@/components/instructor/ResponseCard';
+import { FilterToggle } from '@/components/instructor/FilterToggle';
 
 /** Displays live student responses and analytics for the active discussion. */
 export function ActiveRightPanel(props: {
@@ -26,28 +27,16 @@ export function ActiveRightPanel(props: {
   // Peak student count seen during the current discussion — only goes up, never down
   const peakStudentCount = context ? context.peakStudentCount : studentCount;
 
-  // Track which response is selected/expanded
-  const [selectedId, setSelectedId] = React.useState<string | null>(null);
-  const [flaggingId, setFlaggingId] = React.useState<string | null>(null);
+  const {
+    selectedIds, flaggingId, showHighlightedOnly,
+    toggleSelected, handleFlagInappropriate,
+    setShowHighlightedOnly, resetSelection, filterResponses,
+  } = useResponseSelection({
+    onRemove: removeResponse ?? (async () => {}),
+  });
 
-  // Clear selection when active discussion changes
-  React.useEffect(() => {
-    setSelectedId(null);
-    setFlaggingId(null);
-  }, [activeDiscussion?.id]);
-
-  const handleFlagInappropriate = React.useCallback(async (responseId: string) => {
-    if (!removeResponse) return;
-    setFlaggingId(responseId);
-    try {
-      await removeResponse(responseId);
-      setSelectedId(null);
-    } catch (err) {
-      console.error('Failed to flag response:', err);
-    } finally {
-      setFlaggingId(null);
-    }
-  }, [removeResponse]);
+  // Clear selection and filter when active discussion changes
+  React.useEffect(() => { resetSelection(); }, [activeDiscussion?.id, resetSelection]);
 
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
 
@@ -125,61 +114,40 @@ export function ActiveRightPanel(props: {
                   </div>
                 )}
 
+                {/* Filter toggle — appears when responses are highlighted */}
+                {selectedIds.length > 0 && responses.length > 0 && (
+                  <div className="mb-3">
+                    <FilterToggle
+                      variant="compact"
+                      selectedCount={selectedIds.length}
+                      showHighlightedOnly={showHighlightedOnly}
+                      onToggle={() => setShowHighlightedOnly(prev => !prev)}
+                      onShowAll={() => setShowHighlightedOnly(false)}
+                    />
+                  </div>
+                )}
+
                 {responses.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-4 text-center">
                     Waiting for student responses...
                   </p>
                 ) : (
                   <div className="space-y-2">
-                    {responses.map((r) => {
-                      const isSelected = selectedId === r.id;
-                      const isBeingFlagged = flaggingId === r.id;
-
-                      return (
-                        <Card
-                          key={r.id}
-                          className={`cursor-pointer transition-all duration-300 ease-in-out ${
-                            isSelected
-                              ? 'border-2 border-black ring-4 ring-black/15 bg-yellow-50 shadow-xl z-10 relative my-4'
-                              : 'shadow-sm border-gray-200 hover:border-gray-400'
-                          }`}
-                          onClick={() => setSelectedId(isSelected ? null : r.id)}
-                        >
-                          <CardContent className={`transition-all duration-300 ${isSelected ? 'p-6' : 'p-3'}`}>
-                            <p className={`whitespace-pre-wrap break-words text-gray-800 transition-all duration-300 ${
-                              isSelected ? 'text-2xl leading-relaxed font-semibold' : 'text-sm line-clamp-3'
-                            }`}>
-                              {r.response_text}
-                            </p>
-                            <p className={`text-gray-400 font-medium uppercase tracking-wider transition-all duration-300 ${
-                              isSelected ? 'text-xs mt-4' : 'text-[10px] mt-1.5'
-                            }`}>
-                              {new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-
-                            {/* Expanded action bar — visible when response is selected */}
-                            {isSelected && (
-                              <div className="mt-4 pt-4 border-t border-gray-300 flex items-center justify-end animate-in fade-in slide-in-from-top-1 duration-200">
-                                <button
-                                  type="button"
-                                  disabled={isBeingFlagged}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    void handleFlagInappropriate(r.id);
-                                  }}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  <Flag className="w-3 h-3" />
-                                  {isBeingFlagged ? 'Removing...' : 'Flag as Inappropriate'}
-                                </button>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
+                    {filterResponses(responses).map((r) => (
+                      <ResponseCard
+                        key={r.id}
+                        variant="compact"
+                        responseText={r.response_text}
+                        createdAt={r.created_at}
+                        isSelected={selectedIds.includes(r.id)}
+                        isBeingFlagged={flaggingId === r.id}
+                        onToggle={() => toggleSelected(r.id)}
+                        onFlag={() => void handleFlagInappropriate(r.id)}
+                      />
+                    ))}
                   </div>
                 )}
+
               </TabsContent>
 
               <TabsContent value="analytics" className="mt-0 pt-2 focus-visible:outline-none focus-visible:ring-0">
