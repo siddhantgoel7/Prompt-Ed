@@ -10,36 +10,26 @@ on:
       - main
       - "sprint-*"
   workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag, or SHA to run against"
+        required: true
+        default: "main"
+
+env:
+  # Opt into Node.js 24 for all GitHub Actions runners to suppress Node.js 20 deprecation warnings.
+  # The app's own Node version is still controlled per-job via actions/setup-node.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  setup:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
-    name: Install dependencies
-    runs-on: self-hosted
-    defaults:
-      run:
-        working-directory: app
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
   lint:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     name: Lint
     runs-on: self-hosted
-    needs: setup
     defaults:
       run:
         working-directory: app
@@ -52,7 +42,17 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      - name: Install dependencies
+      - name: Restore node_modules cache
+        id: cache-node
+        uses: actions/cache@v4
+        with:
+          path: app/node_modules
+          key: node-${{ runner.os }}-${{ runner.name }}-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: |
+            node-${{ runner.os }}-${{ runner.name }}-
+
+      - name: Install dependencies (only on cache miss)
+        if: steps.cache-node.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Run ESLint
@@ -62,7 +62,6 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     name: TypeScript typecheck
     runs-on: self-hosted
-    needs: setup
     defaults:
       run:
         working-directory: app
@@ -75,7 +74,17 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      - name: Install dependencies
+      - name: Restore node_modules cache
+        id: cache-node
+        uses: actions/cache@v4
+        with:
+          path: app/node_modules
+          key: node-${{ runner.os }}-${{ runner.name }}-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: |
+            node-${{ runner.os }}-${{ runner.name }}-
+
+      - name: Install dependencies (only on cache miss)
+        if: steps.cache-node.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Typecheck (no emit)
@@ -83,9 +92,13 @@ jobs:
 
   test-jest:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
-    name: Jest tests
+    name: "Jest tests (shard ${{ matrix.shard }}/3)"
     runs-on: self-hosted
-    needs: setup
+    needs: [lint, typecheck]
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     defaults:
       run:
         working-directory: app
@@ -98,17 +111,35 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      - name: Install dependencies
+      - name: Restore node_modules cache
+        id: cache-node
+        uses: actions/cache@v4
+        with:
+          path: app/node_modules
+          key: node-${{ runner.os }}-${{ runner.name }}-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: |
+            node-${{ runner.os }}-${{ runner.name }}-
+
+      - name: Install dependencies (only on cache miss)
+        if: steps.cache-node.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Run Jest
-        run: npm test
+      - name: Restore Jest transform cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/jest-cache
+          key: jest-${{ runner.os }}-${{ hashFiles('app/package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            jest-${{ runner.os }}-${{ hashFiles('app/package-lock.json') }}-
+
+      - name: Run Jest (shard ${{ matrix.shard }}/3)
+        run: npm test -- --shard=${{ matrix.shard }}/3 --maxWorkers=50% --ci --cacheDirectory=/tmp/jest-cache
 
       - name: Upload coverage (if present)
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: jest-coverage
+          name: jest-coverage-shard-${{ matrix.shard }}
           path: app/coverage
           if-no-files-found: ignore
 
@@ -116,7 +147,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     name: Playwright UI tests
     runs-on: self-hosted
-    needs: setup
+    needs: [lint, typecheck]
     defaults:
       run:
         working-directory: app
@@ -136,24 +167,29 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Restore node_modules cache
+        id: cache-node
+        uses: actions/cache@v4
+        with:
+          path: app/node_modules
+          key: node-${{ runner.os }}-${{ runner.name }}-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: |
+            node-${{ runner.os }}-${{ runner.name }}-
 
-      # Cache Playwright browsers
-      - name: Get Playwright version
-        id: playwright-version
-        run: echo "version=$(node -p "require('./package.json').devDependencies['@playwright/test']")" >> $GITHUB_OUTPUT
+      - name: Install dependencies (only on cache miss)
+        if: steps.cache-node.outputs.cache-hit != 'true'
+        run: npm ci
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+          key: playwright-${{ runner.os }}-${{ hashFiles('app/package-lock.json') }}
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install chromium
+        run: npx playwright install chromium --with-deps --no-shell
 
       - name: Install Playwright system dependencies
         run: npx playwright install-deps chromium
@@ -163,9 +199,9 @@ jobs:
 
       - name: Free port 3000 (self-hosted cleanup)
         run: |
-          if command -v lsof >/dev/null 2>&1; then
+          if command -v lsof > /dev/null 2>&1; then
             lsof -ti:3000 | xargs -r kill -9 || true
-          elif command -v fuser >/dev/null 2>&1; then
+          elif command -v fuser > /dev/null 2>&1; then
             fuser -k 3000/tcp || true
           else
             echo "Neither lsof nor fuser found; skipping port cleanup"
@@ -203,8 +239,7 @@ jobs:
             kill $(cat /tmp/next-server.pid) || true
             rm /tmp/next-server.pid
           fi
-          # Additional cleanup
-          if command -v lsof >/dev/null 2>&1; then
+          if command -v lsof > /dev/null 2>&1; then
             lsof -ti:3000 | xargs -r kill -9 || true
           fi
 
@@ -230,7 +265,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     name: Build (Next.js)
     runs-on: self-hosted
-    needs: [lint, typecheck, test-jest, test-ui]
+    needs: [test-jest, test-ui]
     defaults:
       run:
         working-directory: app
@@ -243,7 +278,17 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      - name: Install dependencies
+      - name: Restore node_modules cache
+        id: cache-node
+        uses: actions/cache@v4
+        with:
+          path: app/node_modules
+          key: node-${{ runner.os }}-${{ runner.name }}-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: |
+            node-${{ runner.os }}-${{ runner.name }}-
+
+      - name: Install dependencies (only on cache miss)
+        if: steps.cache-node.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Build
