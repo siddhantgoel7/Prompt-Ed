@@ -36,14 +36,21 @@ export async function embedChunks(
       throw err;
     }
 
-    // Single upsert per batch instead of N individual updates
-    await supabase
-      .from('lesson_chunks')
-      .upsert(
-        batch.map((chunk, j) => ({
-          id: chunk.id,
-          embedding: JSON.stringify(embeddings[j]),
-        }))
-      );
+    // Parallel updates — upsert is avoided because its INSERT path triggers
+    // RLS INSERT policies that fail when only {id, embedding} are provided.
+    const results = await Promise.all(
+      batch.map((chunk, j) =>
+        supabase
+          .from('lesson_chunks')
+          .update({ embedding: JSON.stringify(embeddings[j]) })
+          .eq('id', chunk.id)
+      )
+    );
+
+    const failed = results.find(({ error }) => error);
+    if (failed?.error) {
+      console.error(`EMBED_UPDATE_ERR [${failed.error.code ?? 'unknown'}]: ${failed.error.message}`);
+      throw new Error(`Failed to store embeddings: ${failed.error.message}`);
+    }
   }
 }
