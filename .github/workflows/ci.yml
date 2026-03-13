@@ -16,6 +16,11 @@ on:
         required: true
         default: "main"
 
+env:
+  # Opt into Node.js 24 for all GitHub Actions runners to suppress Node.js 20 deprecation warnings.
+  # The app's own Node version is still controlled per-job via actions/setup-node.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -138,11 +143,61 @@ jobs:
           path: app/coverage
           if-no-files-found: ignore
 
-  test-ui:
+  build-app:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
-    name: Playwright UI tests
+    name: Build app (for UI tests)
     runs-on: self-hosted
     needs: [lint, typecheck]
+    defaults:
+      run:
+        working-directory: app
+    env:
+      # Public env vars are baked into the Next.js build at compile time
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Restore node_modules cache
+        id: cache-node
+        uses: actions/cache@v4
+        with:
+          path: app/node_modules
+          key: node-${{ runner.os }}-${{ runner.name }}-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: |
+            node-${{ runner.os }}-${{ runner.name }}-
+
+      - name: Install dependencies (only on cache miss)
+        if: steps.cache-node.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Upload .next build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build-${{ github.sha }}
+          path: app/.next
+          retention-days: 1
+
+  test-ui:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    name: "Playwright UI tests (shard ${{ matrix.shard }}/3)"
+    runs-on: self-hosted
+    needs: [build-app]
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     defaults:
       run:
         working-directory: app
@@ -189,14 +244,17 @@ jobs:
       - name: Install Playwright system dependencies
         run: npx playwright install-deps chromium
 
-      - name: Build app (for UI tests)
-        run: npm run build
+      - name: Download .next build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-build-${{ github.sha }}
+          path: app/.next
 
       - name: Free port 3000 (self-hosted cleanup)
         run: |
-          if command -v lsof >/dev/null 2>&1; then
+          if command -v lsof > /dev/null 2>&1; then
             lsof -ti:3000 | xargs -r kill -9 || true
-          elif command -v fuser >/dev/null 2>&1; then
+          elif command -v fuser > /dev/null 2>&1; then
             fuser -k 3000/tcp || true
           else
             echo "Neither lsof nor fuser found; skipping port cleanup"
@@ -204,9 +262,9 @@ jobs:
 
       - name: Start app in background
         run: |
-          nohup npm run start -- -p 3000 > /tmp/next-start.log 2>&1 &
-          echo $! > /tmp/next-server.pid
-          echo "Started Next.js with PID $(cat /tmp/next-server.pid)"
+          nohup npm run start -- -p 3000 > /tmp/next-start-shard-${{ matrix.shard }}.log 2>&1 &
+          echo $! > /tmp/next-server-shard-${{ matrix.shard }}.pid
+          echo "Started Next.js with PID $(cat /tmp/next-server-shard-${{ matrix.shard }}.pid)"
 
       - name: Wait for app to be ready
         run: |
@@ -219,22 +277,22 @@ jobs:
             sleep 2
           done
           echo "Server failed to start"
-          cat /tmp/next-start.log
+          cat /tmp/next-start-shard-${{ matrix.shard }}.log
           exit 1
 
-      - name: Run Playwright (without webServer)
-        run: npm run test:ui -- --reporter=html
+      - name: Run Playwright (shard ${{ matrix.shard }}/3)
+        run: npm run test:ui -- --shard=${{ matrix.shard }}/3 --reporter=html
         env:
           PLAYWRIGHT_SKIP_WEBSERVER: true
 
       - name: Stop Next.js server
         if: always()
         run: |
-          if [ -f /tmp/next-server.pid ]; then
-            kill $(cat /tmp/next-server.pid) || true
-            rm /tmp/next-server.pid
+          if [ -f /tmp/next-server-shard-${{ matrix.shard }}.pid ]; then
+            kill $(cat /tmp/next-server-shard-${{ matrix.shard }}.pid) || true
+            rm /tmp/next-server-shard-${{ matrix.shard }}.pid
           fi
-          if command -v lsof >/dev/null 2>&1; then
+          if command -v lsof > /dev/null 2>&1; then
             lsof -ti:3000 | xargs -r kill -9 || true
           fi
 
@@ -242,7 +300,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-artifacts
+          name: playwright-artifacts-shard-${{ matrix.shard }}
           path: |
             app/playwright-report
             app/test-results
@@ -252,39 +310,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: next-start-log
-          path: /tmp/next-start.log
+          name: next-start-log-shard-${{ matrix.shard }}
+          path: /tmp/next-start-shard-${{ matrix.shard }}.log
           if-no-files-found: ignore
-
-  build:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
-    name: Build (Next.js)
-    runs-on: self-hosted
-    needs: [test-jest, test-ui]
-    defaults:
-      run:
-        working-directory: app
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-
-      - name: Restore node_modules cache
-        id: cache-node
-        uses: actions/cache@v4
-        with:
-          path: app/node_modules
-          key: node-${{ runner.os }}-${{ runner.name }}-${{ hashFiles('app/package-lock.json') }}
-          restore-keys: |
-            node-${{ runner.os }}-${{ runner.name }}-
-
-      - name: Install dependencies (only on cache miss)
-        if: steps.cache-node.outputs.cache-hit != 'true'
-        run: npm ci
-
-      - name: Build
-        run: npm run build
