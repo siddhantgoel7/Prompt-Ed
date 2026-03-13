@@ -144,25 +144,29 @@ test.describe('Instructor Past Lessons', () => {
         await page.route('**/rest/v1/lesson_chunks*', async (route) => {
             await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
         });
+        await page.route('**/rest/v1/responses*', async (route) => {
+            await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+        });
 
         // Register all waitForResponse promises before navigation.
         // setLoading(false) only fires after ALL four requests below complete, so we must
         // wait for each one before asserting on the rendered SessionEndedView.
         const endedDiscussionsLoaded = page.waitForResponse(
-            r => r.url().includes('/rest/v1/discussions') && !r.url().includes('count'));
+            r => r.url().includes('/rest/v1/discussions') && !r.url().includes('count'), { timeout: 20000 });
+        const chunksLoaded = page.waitForResponse('**/rest/v1/lesson_chunks*', { timeout: 20000 });
         const activeDiscussionsLoaded = page.waitForResponse(
-            r => r.url().includes('/rest/v1/discussions') && r.url().includes('count'));
-        const filesLoaded = page.waitForResponse(r => r.url().includes('/api/lessons/') && r.url().endsWith('/files'));
-        const chunksLoaded = page.waitForResponse('**/rest/v1/lesson_chunks*');
+            r => r.url().includes('/rest/v1/discussions') && r.url().includes('count'), { timeout: 20000 });
+        const filesLoaded = page.waitForResponse(
+            r => r.url().includes('/api/lessons/') && r.url().includes('/files'), { timeout: 20000 });
 
         // 1. Navigate
         await page.goto('/session/past-lesson-xyz');
 
         // Wait for all requests that gate setLoading(false) → SessionEndedView mount
         await endedDiscussionsLoaded;
+        await chunksLoaded;
         await activeDiscussionsLoaded;
         await filesLoaded;
-        await chunksLoaded;
 
         // Use a longer timeout for CI environments
         await expect(page.getByText('Historical Lesson')).toBeVisible({ timeout: 15000 });
