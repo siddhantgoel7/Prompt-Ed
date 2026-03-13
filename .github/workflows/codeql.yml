@@ -40,6 +40,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js (required by CodeQL TypeScript extractor)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Export resolved PATH so CodeQL Java extractor can find node
+        # $GITHUB_PATH only injects into the runner's shell wrapper, not into Java
+        # subprocesses that CodeQL spawns. Writing to $GITHUB_ENV sets a real process
+        # environment variable that is inherited by all child processes including the
+        # TypeScript extractor's JVM.
+        run: echo "PATH=$PATH" >> $GITHUB_ENV
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
