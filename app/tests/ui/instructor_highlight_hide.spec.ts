@@ -284,4 +284,34 @@ test.describe('Instructor Highlight & Hide Responses', () => {
     await expect(page.getByText('First response about pharmacokinetics')).toBeVisible();
     await expect(page.getByText('Third response about bioavailability')).toBeVisible();
   });
+
+  test('[US 1.35][AC1-AT2] flagged responses can be viewed and restored via toggle', async ({ page }) => {
+    // 1. Initial State: all 3 visible
+    const secondResponse = page.getByText('Second response about drug absorption');
+    await expect(secondResponse).toBeVisible({ timeout: 10000 });
+
+    // 2. Hide response
+    await secondResponse.click();
+    await page.getByRole('button', { name: /Flag as Inappropriate/i }).click();
+    await expect(secondResponse).not.toBeVisible();
+
+    // 3. Toggle flagged view
+    const showFlaggedBtn = page.getByRole('button', { name: /Show flagged/i });
+    await expect(showFlaggedBtn).toBeVisible();
+    await showFlaggedBtn.click();
+
+    // 4. Verify flagged view shows the hidden response and hides normal responses
+    await expect(secondResponse).toBeVisible();
+    await expect(page.getByText('First response about pharmacokinetics')).not.toBeVisible();
+    await expect(page.getByText('Third response about bioavailability')).not.toBeVisible();
+
+    // 5. Restore the response
+    await secondResponse.click();
+    await page.getByRole('button', { name: /Unflag/i }).click();
+
+    // 6. Verify automatically returns to normal view and all 3 are visible again
+    await expect(page.getByText('First response about pharmacokinetics')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Second response about drug absorption')).toBeVisible();
+    await expect(page.getByText('Third response about bioavailability')).toBeVisible();
+  });
 });
