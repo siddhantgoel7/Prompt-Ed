@@ -241,7 +241,7 @@ describe('AI Features (Acceptance)', () => {
 
             fireEvent.click(screen.getByRole('button', { name: /Publish This Question/i }));
 
-            expect(defaultCenterProps.onPublishAiCandidate).toHaveBeenCalledWith(expect.objectContaining({ promptText: 'Option A' }), null, false);
+            expect(defaultCenterProps.onPublishAiCandidate).toHaveBeenCalledWith(expect.objectContaining({ promptText: 'Option A' }), null, false, null);
         });
     });
 
@@ -321,7 +321,8 @@ describe('AI Features (Acceptance)', () => {
             expect(defaultCenterProps.onPublishAiCandidate).toHaveBeenCalledWith(
                 expect.objectContaining({ promptText: 'Edited text completely' }),
                 null,
-                false
+                false,
+                null
             );
         });
 

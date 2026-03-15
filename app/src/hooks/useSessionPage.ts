@@ -64,7 +64,7 @@ export type SessionVM = {
   transcriptsLoading: boolean;
   transcriptsError: string | null;
   openFile: (fileId: string) => Promise<void>;
-  handlePublishDiscussion: () => Promise<void> | void;
+  handlePublishDiscussion: (timerSeconds?: number | null) => Promise<void> | void;
   handleCloseDiscussion: (discussionId: string) => Promise<void> | void;
   historyLoading: boolean;
   historyError: string | null;
@@ -87,7 +87,9 @@ export type SessionVM = {
   generateCandidates: () => Promise<void>;
   selectCandidate: (p: GeneratedPrompt) => void;
   regenerateCandidates: () => Promise<void>;
-  handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => Promise<void>;
+  handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => Promise<void>;
+  discussionTimerEndTime: number | null;
+  discussionTimerSeconds: number | null;
 };
 
 export function useSessionPage(lessonId: string): SessionVM {
@@ -121,6 +123,8 @@ export function useSessionPage(lessonId: string): SessionVM {
     discussions,
     activeDiscussion,
     responses,
+    discussionTimerEndTime,
+    discussionTimerSeconds,
     fetchDiscussions,
     fetchResponses,
     handleCloseDiscussion,
@@ -405,6 +409,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     candidates, isGenerating, generationWarning,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
+    discussionTimerEndTime, discussionTimerSeconds,
   }), [
     lesson, loading, notFound, isConnected, studentCount, peakStudentCount, handleReconnect,
     discussions, activeDiscussion, responses, promptInput,
@@ -419,5 +424,6 @@ export function useSessionPage(lessonId: string): SessionVM {
     candidates, isGenerating, generationWarning,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
+    discussionTimerEndTime, discussionTimerSeconds,
   ]);
 }
