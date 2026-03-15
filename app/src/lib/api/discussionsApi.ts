@@ -91,7 +91,16 @@ export async function fetchExportDiscussionsApi(lessonId: string) {
     const supabase = createClient();
     return supabase
         .from('discussions')
-        .select('prompt_text, created_at, responses ( response_text, created_at )')
+        .select(`
+        prompt_text,
+        prompt_type,
+        mc_options,
+        correct_option,
+        created_at,
+        closed_at,
+        participant_snapshot,
+        responses ( response_text, created_at, selected_option, is_correct )
+        `)
         .eq('lesson_id', lessonId)
         .order('display_order', { ascending: true });
 }
