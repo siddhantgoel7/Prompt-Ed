@@ -39,6 +39,7 @@ const mockActiveDiscussion: Discussion = {
   feedback_enabled: false,
   ai_generated_correct_option: null,
   participant_snapshot: 0,
+  time_limit_seconds: null,
 };
 
 const baseHookReturn = {
@@ -61,6 +62,9 @@ const baseHookReturn = {
   errorMessage: null,
   canSubmit: false,
   submitResponse: jest.fn(),
+  timerEndTime: null,
+  timerTotalSeconds: null,
+  timerExpired: false,
 };
 
 describe('StudentSessionPage Rejoin Tests [US 2.14]', () => {

@@ -25,6 +25,7 @@ export const mockDiscussion: Discussion = {
   feedback_enabled: false,
   ai_generated_correct_option: null,
   participant_snapshot: 0,
+  time_limit_seconds: null,
 };
 
 // 18.2
@@ -44,6 +45,7 @@ export const mockClosedDiscussion: Discussion = {
   feedback_enabled: false,
   ai_generated_correct_option: null,
   participant_snapshot: 0,
+  time_limit_seconds: null,
 };
 
 // 18.3
@@ -63,6 +65,7 @@ export const mockMultipleChoiceDiscussion: Discussion = {
   feedback_enabled: false,
   ai_generated_correct_option: null,
   participant_snapshot: 0,
+  time_limit_seconds: null,
 };
 
 // 18.4

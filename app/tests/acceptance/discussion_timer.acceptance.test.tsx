@@ -224,7 +224,7 @@ describe('[US 2.11] Timer Expired State', () => {
 
     // 8
     it('[US 2.11][AC3-AT5] success: MC with feedback_enabled shows correct answer in expired message', () => {
-        mockHook.mockReturnValue(makeExpiredHookValue(MC_DISCUSSION_WITH_TIMER as typeof BASE_DISCUSSION));
+        mockHook.mockReturnValue(makeExpiredHookValue(MC_DISCUSSION_WITH_TIMER as unknown as typeof BASE_DISCUSSION));
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByText(/Correct Answer: Option A/i)).toBeInTheDocument();
     });
@@ -232,7 +232,7 @@ describe('[US 2.11] Timer Expired State', () => {
     // 9
     it('[US 2.11][AC3-AT6] success: MC without feedback_enabled does NOT show correct answer in expired message', () => {
         const disc = { ...MC_DISCUSSION_WITH_TIMER, feedback_enabled: false };
-        mockHook.mockReturnValue(makeExpiredHookValue(disc as typeof BASE_DISCUSSION));
+        mockHook.mockReturnValue(makeExpiredHookValue(disc as unknown as typeof BASE_DISCUSSION));
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.queryByText(/Correct Answer/i)).not.toBeInTheDocument();
     });
