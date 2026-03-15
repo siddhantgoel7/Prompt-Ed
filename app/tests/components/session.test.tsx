@@ -465,7 +465,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
       await waitFor(() => {
         expect(mockSupabase.from).toHaveBeenCalledWith('lessons');
         expect(lessonsUpdateEqMock).toHaveBeenCalledWith('id', 'lesson-456');
-        expect(mockPush).toHaveBeenCalledWith('/lessons_page/course-123');
+        expect(mockPush).toHaveBeenCalledWith('/session/lesson-456');
       });
     });
   });

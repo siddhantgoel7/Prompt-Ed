@@ -321,7 +321,8 @@ export function useSessionPage(lessonId: string): SessionVM {
         payload: { lessonId: lesson.id, endedAt: now, message: 'Lesson has ended' },
       });
     }
-    router.push(`/lessons_page/${lesson.course_id}`);
+    // Redirect to the lesson route so the ended summary view is shown immediately.
+    router.push(`/session/${lesson.id}`);
   }, [lesson, channel, router, activeDiscussion, handleCloseDiscussion]);
 
   const handleActivate = useCallback(async () => {
