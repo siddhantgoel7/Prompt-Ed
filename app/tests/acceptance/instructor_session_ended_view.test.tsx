@@ -1,6 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SessionEndedView } from '@/components/instructor/session/SessionEndedView';
 import type { SessionVM } from '@/hooks/useSessionPage';
+import userEvent from '@testing-library/user-event';
+
 
 jest.mock('@/components/instructor/session/SessionHeaderEnded', () => ({
   SessionHeaderEnded: (props: any) => {
@@ -9,7 +11,9 @@ jest.mock('@/components/instructor/session/SessionHeaderEnded', () => ({
     return (
       <div>
         <div>Ended Header: {vm.lesson.title}</div>
-        <button onClick={vm.handleExportLessonData}>Export Txt</button>
+        <button onClick={vm.handleExportOverviewTxt}>Export Overview TXT</button>
+        <button onClick={vm.handleExportDiscussionsCsv}>Export Discussions CSV</button>
+        <button onClick={vm.handleExportStatistics}>Export Statistics</button>
         <button onClick={vm.handleActivate}>Activate</button>
         <button onClick={props.onSplitView}>Split View</button>
         <div>exporting={String(vm.exportingData)}</div>
@@ -60,7 +64,9 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     lessonDiscussions: [],
     exportingData: false,
     activatingLesson: false,
-    handleExportLessonData: jest.fn(),
+    handleExportOverviewTxt: jest.fn(),
+    handleExportDiscussionsCsv: jest.fn(),
+    handleExportStatistics: jest.fn(),
     handleActivate: jest.fn(),
     transcripts: [],
     transcriptsLoading: false,
@@ -125,13 +131,41 @@ describe('SessionEndedView (Acceptance)', () => {
   });
 
   // 6.5
-  it('[US 1.09][AT1] success: clicking Export calls vm.handleExportLessonData', () => {
+  it('[US 1.09][AT1] success: clicking Export overview TXT calls vm.handleExportOverviewTxt', async () => {
     const vm = makeVM();
+    const user = userEvent.setup();
+
     render(<SessionEndedView vm={vm} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Export Txt/i }));
-    expect(vm.handleExportLessonData).toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: /Export Overview TXT/i }));
+
+
+    expect(vm.handleExportOverviewTxt).toHaveBeenCalled();
   });
+
+  it('[US 1.09][AT1] success: clicking Export Discussions CSV calls vm.handleExportDiscussionsCsv', async () => {
+    const vm = makeVM();
+    const user = userEvent.setup();
+
+    render(<SessionEndedView vm={vm} />);
+
+    await user.click(screen.getByRole('button', { name: /Export Discussions CSV/i }));
+
+    expect(vm.handleExportDiscussionsCsv).toHaveBeenCalled();
+  });
+
+  it('[US 1.09][AT1] success: clicking Export Statistics calls vm.handleExportStatistics', async () => {
+    const vm = makeVM();
+    const user = userEvent.setup();
+
+    render(<SessionEndedView vm={vm} />);
+
+    await user.click(screen.getByRole('button', { name: /Export Statistics/i }));
+
+    expect(vm.handleExportStatistics).toHaveBeenCalled();
+  });
+
+
 
   // 6.6
   it('[US 1.06][AT3] success: clicking Activate calls vm.handleActivate', () => {
