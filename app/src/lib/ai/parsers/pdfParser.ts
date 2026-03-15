@@ -56,17 +56,21 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
   dlog(`[pdfParser] pages=${pdf.numPages} aiProvider=${!!aiProvider}`);
 
   // ── Step 1: Extract text from every page (pdfjs, always works) ─────────────
-  const pageTexts: string[] = [];
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    const text = (content.items as Array<{ str: string }>)
-      .map((item) => item.str)
-      .join(' ')
-      .trim();
-    pageTexts.push(text);
-    dlog(`[pdfParser] page=${i} textLen=${text.length}`);
-  }
+  // Process all pages in parallel — reduces total time from O(pages) to O(1) round-trips.
+  // Promise.all preserves input order so page numbering stays correct.
+  const pageTexts = await Promise.all(
+    Array.from({ length: pdf.numPages }, async (_, idx) => {
+      const i = idx + 1;
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const text = (content.items as Array<{ str: string }>)
+        .map((item) => item.str)
+        .join(' ')
+        .trim();
+      dlog(`[pdfParser] page=${i} textLen=${text.length}`);
+      return text;
+    })
+  );
 
   // ── Step 2: One-shot visual pass — send whole PDF to GPT-4o ────────────────
   // Why one whole-PDF call instead of per-page rendering:
