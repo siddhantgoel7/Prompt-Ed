@@ -146,7 +146,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   const initializedConnectionRef = React.useRef(false);
   const wasConnectedRef = React.useRef(false);
 
-  const [displayState, setDisplayState] = useState(false);
+  const [displayState] = useState(false);
   const [endError, setEndError] = useState<string | null>(null);
   const [endingLesson, setEndingLesson] = useState(false);
   const [activatingLesson, setActivatingLesson] = useState(false);
@@ -295,7 +295,8 @@ export function useSessionPage(lessonId: string): SessionVM {
 
   const handleDisplay = useCallback(() => {
     if (!lesson) return;
-    setDisplayState((prev) => !prev);
+    if (typeof window === 'undefined') return;
+    window.open(`/session/${lesson.id}/display`, '_blank', 'noopener,noreferrer');
   }, [lesson]);
 
   const handleEnd = useCallback(async () => {
