@@ -34,9 +34,36 @@ type RealtimeLikeChannel = {
   send: (message: unknown) => Promise<unknown>;
 };
 
+function getSubmittedDiscussionIdsFromStorage(storageKey: string): string[] {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((id): id is string => typeof id === 'string');
+  } catch {
+    return [];
+  }
+}
+
+function hasSubmittedDiscussionInStorage(storageKey: string, discussionId: string): boolean {
+  return getSubmittedDiscussionIdsFromStorage(storageKey).includes(discussionId);
+}
+
+function markDiscussionSubmittedInStorage(storageKey: string, discussionId: string): void {
+  try {
+    const ids = new Set(getSubmittedDiscussionIdsFromStorage(storageKey));
+    ids.add(discussionId);
+    localStorage.setItem(storageKey, JSON.stringify([...ids]));
+  } catch {
+    // Non-fatal: if storage fails, we still keep the current in-memory submitted state.
+  }
+}
+
 export function useStudentSession(lessonId: string) {
   const router = useRouter();
   const { channel, isConnected } = useRealtime(lessonId, 'student');
+  const submittedDiscussionsKey = `student:${lessonId}:submitted-discussions`;
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [activeDiscussion, setActiveDiscussion] = useState<Discussion | null>(null);
@@ -87,9 +114,14 @@ export function useStudentSession(lessonId: string) {
       }
 
       if (discussionData) {
-        setActiveDiscussion(discussionData as Discussion);
+        const nextDiscussion = discussionData as Discussion;
+        setActiveDiscussion(nextDiscussion);
         setResponseText('');
-        setView('active');
+        setView(
+          hasSubmittedDiscussionInStorage(submittedDiscussionsKey, nextDiscussion.id)
+            ? 'submitted'
+            : 'active'
+        );
       } else {
         setView('waiting');
       }
@@ -100,7 +132,7 @@ export function useStudentSession(lessonId: string) {
     return () => {
       cancelled = true;
     };
-  }, [lessonId, router]);
+  }, [lessonId, router, submittedDiscussionsKey]);
 
   // 2) Realtime listeners
   useEffect(() => {
@@ -129,7 +161,11 @@ export function useStudentSession(lessonId: string) {
       setActiveDiscussion(discussion);
       setResponseText('');
       setSubmitting(false);
-      setView('active');
+      setView(
+        hasSubmittedDiscussionInStorage(submittedDiscussionsKey, discussion.id)
+          ? 'submitted'
+          : 'active'
+      );
     });
 
     const discussionClosedSub = ch.on('broadcast', { event: 'discussion:closed' }, (raw) => {
@@ -151,7 +187,7 @@ export function useStudentSession(lessonId: string) {
       discussionPublishedSub.unsubscribe();
       discussionClosedSub.unsubscribe();
     };
-  }, [channel]);
+  }, [channel, submittedDiscussionsKey]);
 
   // 3) Submit response
   // responseTextOverride: for MC questions, the page passes the formatted option string directly so we don't race against the setState for responseText.
@@ -193,6 +229,7 @@ export function useStudentSession(lessonId: string) {
 
     setSubmitting(false);
     setResponseText('');
+    markDiscussionSubmittedInStorage(submittedDiscussionsKey, activeDiscussion.id);
     setView('submitted');
   };
 
