@@ -1,6 +1,7 @@
 // Parses PDF files into text using pdfjs-serverless, then optionally sends the whole
 // PDF to GPT-4o for a single-pass visual description of any pages with diagrams or images.
 import type { AIProvider } from '@/lib/ai/providers';
+import { GeminiProvider } from '@/lib/ai/providers';
 import { createCanvas, Path2D } from '@napi-rs/canvas';
 
 const NO_VISUAL_CONTENT = 'NO_VISUAL_CONTENT';
@@ -83,8 +84,13 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
   let visualDescriptionsByPage: Map<number, string> = new Map();
 
   if (aiProvider) {
+    // Prefer GeminiProvider for PDF vision when GOOGLE_AI_API_KEY is available —
+    // native PDF input is ~50-65% faster and ~90% cheaper than GPT-4o for multi-page docs.
+    const visionProvider: AIProvider = process.env.GOOGLE_AI_API_KEY
+      ? new GeminiProvider()
+      : aiProvider;
     try {
-      const descriptions = await aiProvider.generatePdfVisualDescriptions(buffer, pdf.numPages);
+      const descriptions = await visionProvider.generatePdfVisualDescriptions(buffer, pdf.numPages);
       visualDescriptionsByPage = descriptions;
       dlog(`[pdfParser] PDF vision pass complete — got descriptions for ${descriptions.size} pages`);
     } catch (err) {

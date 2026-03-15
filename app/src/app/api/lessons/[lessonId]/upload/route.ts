@@ -118,13 +118,18 @@ export async function POST(
 
     // --- BACKGROUND PROCESSING ---
     const processFile = async () => {
+      const t0 = Date.now();
+      const elapsed = () => `${((Date.now() - t0) / 1000).toFixed(1)}s`;
       try {
         // Parse text
+        console.log(`[upload] [${file.name}] starting parse`);
         const rawText = await parseFile(buffer, detectedType, aiProvider);
+        console.log(`[upload] [${file.name}] parse done at ${elapsed()} — ${rawText.length} chars`);
 
         // Chunk
         const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1024, chunkOverlap: 64 });
         const chunks = (await splitter.splitText(rawText)).filter((c) => c.trim()).slice(0, MAX_CHUNKS_PER_FILE);
+        console.log(`[upload] [${file.name}] chunked at ${elapsed()} — ${chunks.length} chunks`);
 
         if (chunks.length === 0) {
           await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
@@ -144,6 +149,7 @@ export async function POST(
           .from('lesson_chunks')
           .insert(chunkRows)
           .select('id');
+        console.log(`[upload] [${file.name}] DB insert done at ${elapsed()}`);
 
         if (chunksError || !insertedChunks) {
           await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
@@ -156,12 +162,14 @@ export async function POST(
           content: chunks[i],
         }));
         await embedChunks(chunksToEmbed, supabase, aiProvider);
+        console.log(`[upload] [${file.name}] embed done at ${elapsed()}`);
 
         // Mark as ready
         await supabase.from('lesson_files').update({ status: 'ready' }).eq('id', fileRecord.id);
+        console.log(`[upload] [${file.name}] DONE — total ${elapsed()}`);
 
       } catch (err) {
-        console.error('[upload] Background parse/embed error:', err);
+        console.error(`[upload] [${file.name}] failed at ${elapsed()}:`, err);
         await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
       }
     };
