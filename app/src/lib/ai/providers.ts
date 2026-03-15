@@ -7,6 +7,24 @@ import { GoogleGenerativeAI, type Part, type Content } from '@google/generative-
 /** Represents a single message in the chat history passed to the LLM. */
 export type AIMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
+// ── Shared PDF vision prompt ────────────────────────────────────────────────
+// Single source of truth used by both OpenAIProvider and GeminiProvider so
+// prompt changes only need to be made in one place.
+const PDF_VISION_SYSTEM_PROMPT =
+    'You are a visual content extractor for a teaching tool. ' +
+    'For each page with diagrams, figures, chemical structures, tables, graphs, or images: ' +
+    'list only the key visual elements — component names, labels, arrow directions, table headers and values. ' +
+    'Write as a compact list of facts, not prose. No full sentences, no explanation, no interpretation. ' +
+    'Good: "Flowchart: A→B→C; feedback loop B→A. Labels: Input, Process, Output." ' +
+    'Bad: "The diagram shows a flowchart that illustrates how data flows between components..." ' +
+    'For pages with ONLY text and no visual elements, output exactly: NO_VISUAL_CONTENT';
+
+const buildPdfVisionUserPrompt = (numPages: number): string =>
+    `This PDF has ${numPages} pages. ` +
+    'For EACH page output a JSON object:\n' +
+    '{ "pages": [ { "page": 1, "description": "..." }, ... ] }\n\n' +
+    `Use "NO_VISUAL_CONTENT" for text-only pages. Include all ${numPages} pages.`;
+
 export interface AIProvider {
     generateChatCompletion(
         messages: AIMessage[],
@@ -143,29 +161,12 @@ export class OpenAIProvider implements AIProvider {
         const base64Pdf = pdfBuffer.toString('base64');
         const pdfDataUri = `data:application/pdf;base64,${base64Pdf}`;
 
-        const systemPrompt =
-            'You are a visual content extractor for a pharmacology teaching tool. ' +
-            'You will be given a PDF. For each page that contains diagrams, figures, ' +
-            'chemical structures, tables, graphs, or images, describe the visual content precisely. ' +
-            'Chemical structures: name atoms, bonds, functional groups, and stereochemistry. ' +
-            'Pathway diagrams: describe all components, arrows, and labels. ' +
-            'Tables: transcribe all cell values. ' +
-            'For pages that contain ONLY text (no diagrams, figures, or images), output NO_VISUAL_CONTENT. ' +
-            'Be factual and specific — do not interpret, describe exactly what is visually present.';
-
-        const userPrompt =
-            `This PDF has ${numPages} pages. ` +
-            'For EACH page, output a JSON object in this exact format:\n' +
-            '{ "pages": [ { "page": 1, "description": "..." }, ... ] }\n\n' +
-            'Use "NO_VISUAL_CONTENT" as the description for text-only pages. ' +
-            'Include every page number from 1 to ' + numPages + ' in the array.';
-
         const response = await this.openai.chat.completions.create({
             model: 'gpt-4o',
-            max_tokens: 4096,
+            max_tokens: 16384,
             response_format: { type: 'json_object' },
             messages: [
-                { role: 'system', content: systemPrompt },
+                { role: 'system', content: PDF_VISION_SYSTEM_PROMPT },
                 {
                     role: 'user',
                     content: [
@@ -179,7 +180,7 @@ export class OpenAIProvider implements AIProvider {
                         } as OpenAI.Chat.ChatCompletionContentPart,
                         {
                             type: 'text',
-                            text: userPrompt,
+                            text: buildPdfVisionUserPrompt(numPages),
                         },
                     ],
                 },
@@ -349,38 +350,23 @@ export class GeminiProvider implements AIProvider {
         pdfBuffer: Buffer,
         numPages: number
     ): Promise<Map<number, string>> {
-        const systemPrompt =
-            'You are a visual content extractor for a pharmacology teaching tool. ' +
-            'You will be given a PDF. For each page that contains diagrams, figures, ' +
-            'chemical structures, tables, graphs, or images, describe the visual content precisely. ' +
-            'Chemical structures: name atoms, bonds, functional groups, and stereochemistry. ' +
-            'Pathway diagrams: describe all components, arrows, and labels. ' +
-            'Tables: transcribe all cell values. ' +
-            `For pages that contain ONLY text (no diagrams, figures, or images), output ${this.NO_VISUAL_CONTENT}. ` +
-            'Be factual and specific — do not interpret, describe exactly what is visually present.';
-
-        const userPrompt =
-            `This PDF has ${numPages} pages. ` +
-            'For EACH page, output a JSON object in this exact format:\n' +
-            '{ "pages": [ { "page": 1, "description": "..." }, ... ] }\n\n' +
-            `Use "${this.NO_VISUAL_CONTENT}" as the description for text-only pages. ` +
-            `Include every page number from 1 to ${numPages} in the array.`;
+        // thinkingConfig is a Gemini 2.5 feature not yet in the SDK's GenerationConfig types.
+        // Passed via unknown → Record spread to avoid any.
+        const generationConfig: Record<string, unknown> = {
+            responseMimeType: 'application/json',
+            maxOutputTokens: 16384,
+            thinkingConfig: { thinkingBudget: 0 }, // Disable thinking — no benefit for factual extraction
+        };
 
         const geminiModel = this.genAI.getGenerativeModel({
             model: this.model,
-            systemInstruction: systemPrompt,
-            generationConfig: {
-                responseMimeType: 'application/json',
-                maxOutputTokens: 8192,
-                // Disable thinking mode — adds latency with no benefit for factual visual extraction
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                thinkingConfig: { thinkingBudget: 0 } as any,
-            },
+            systemInstruction: PDF_VISION_SYSTEM_PROMPT,
+            generationConfig: generationConfig as Parameters<typeof this.genAI.getGenerativeModel>[0]['generationConfig'],
         });
 
         const result = await geminiModel.generateContent([
             { inlineData: { mimeType: 'application/pdf', data: pdfBuffer.toString('base64') } },
-            userPrompt,
+            buildPdfVisionUserPrompt(numPages),
         ]);
 
         const raw = result.response.text();

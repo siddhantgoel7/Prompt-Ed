@@ -85,7 +85,7 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
 
   if (aiProvider) {
     // Prefer GeminiProvider for PDF vision when GOOGLE_AI_API_KEY is available —
-    // native PDF input is ~50-65% faster and ~90% cheaper than GPT-4o for multi-page docs.
+    // same quality as GPT-4o at ~90% lower cost.
     const visionProvider: AIProvider = process.env.GOOGLE_AI_API_KEY
       ? new GeminiProvider()
       : aiProvider;

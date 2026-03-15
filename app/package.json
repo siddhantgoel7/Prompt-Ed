@@ -17,6 +17,7 @@
     "api:swagger": "swagger-ui-watcher ../docs/openapi.yaml --port 8080"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.2.2",
     "@langchain/textsplitters": "^1.0.1",
     "@napi-rs/canvas": "^0.1.95",
