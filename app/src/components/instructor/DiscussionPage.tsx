@@ -3,12 +3,122 @@
 'use client';
 
 import { useRealtime } from '@/lib/realtime/useRealtime';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { DiscussionAnalyticsContent } from '@/components/instructor/session/DiscussionAnalyticsModal';
+import { flagResponseApi, unflagResponseApi } from '@/lib/api/discussionsApi';
+import { useResponseSelection } from '@/hooks/useResponseSelection';
+import { ResponseCard } from '@/components/instructor/ResponseCard';
+import { FilterToggle } from '@/components/instructor/FilterToggle';
+import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
+
+/** Isolated response list — owns its own selection state so clicks don't re-render the whole page. */
+function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse }: {
+  responses: Response[];
+  flaggedResponses: Response[];
+  onRemoveResponse: (id: string) => void;
+  onRestoreResponse: (id: string) => Promise<void>;
+}) {
+  const {
+    selectedIds, flaggingId, showHighlightedOnly,
+    toggleSelected, handleFlagInappropriate,
+    setShowHighlightedOnly, filterResponses,
+  } = useResponseSelection({
+    onRemove: async (responseId) => {
+      await flagResponseApi(responseId);
+      onRemoveResponse(responseId);
+    },
+  });
+
+  const [showFlagged, setShowFlagged] = useState(false);
+
+  // Auto-switch back to normal view when all flagged responses are restored
+  useEffect(() => {
+    if (flaggedResponses.length === 0 && showFlagged) {
+      setShowFlagged(false);
+    }
+  }, [flaggedResponses.length, showFlagged]);
+
+  // Separate selection/flagging state for the flagged view
+  const [flaggedSelectedIds, setFlaggedSelectedIds] = useState<string[]>([]);
+  const [restoringId, setRestoringId] = useState<string | null>(null);
+
+  const toggleFlaggedSelected = useCallback((id: string) => {
+    setFlaggedSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  }, []);
+
+  const handleRestore = async (responseId: string) => {
+    setRestoringId(responseId);
+    try {
+      await onRestoreResponse(responseId);
+      setFlaggedSelectedIds(prev => prev.filter(x => x !== responseId));
+    } catch (err) {
+      console.error('Failed to restore response:', err);
+    } finally {
+      setRestoringId(null);
+    }
+  };
+
+  return (
+    <div className="grid gap-4">
+      {/* Filter toggle — appears when responses are highlighted */}
+      {selectedIds.length > 0 && !showFlagged && (
+        <FilterToggle
+          variant="full"
+          selectedCount={selectedIds.length}
+          showHighlightedOnly={showHighlightedOnly}
+          onToggle={() => setShowHighlightedOnly(prev => !prev)}
+          onShowAll={() => setShowHighlightedOnly(false)}
+        />
+      )}
+
+      {/* Flagged toggle — appears when flagged responses exist */}
+      {flaggedResponses.length > 0 && (
+        <FlaggedFilterToggle
+          variant="full"
+          flaggedCount={flaggedResponses.length}
+          showFlagged={showFlagged}
+          onToggle={() => setShowFlagged(prev => !prev)}
+          onHide={() => setShowFlagged(false)}
+        />
+      )}
+
+      {/* Normal view — active responses */}
+      {!showFlagged && filterResponses(responses).map((resp) => (
+        <ResponseCard
+          key={resp.id}
+          variant="full"
+          responseText={resp.response_text}
+          createdAt={resp.created_at}
+          isSelected={selectedIds.includes(resp.id)}
+          isBeingFlagged={flaggingId === resp.id}
+          onToggle={() => toggleSelected(resp.id)}
+          onFlag={() => void handleFlagInappropriate(resp.id)}
+        />
+      ))}
+
+      {/* Flagged view — shows only flagged responses in red with Unflag action */}
+      {showFlagged && flaggedResponses.map((resp) => (
+        <ResponseCard
+          key={resp.id}
+          variant="full"
+          mode="flagged"
+          responseText={resp.response_text}
+          createdAt={resp.created_at}
+          isSelected={flaggedSelectedIds.includes(resp.id)}
+          isBeingFlagged={restoringId === resp.id}
+          onToggle={() => toggleFlaggedSelected(resp.id)}
+          onFlag={() => void handleRestore(resp.id)}
+        />
+      ))}
+    </div>
+  );
+}
 
 
 interface DiscussionClientProps {
@@ -16,6 +126,7 @@ interface DiscussionClientProps {
   discussionId: string;
   initialDiscussion: Discussion;
   initialResponses: Response[];
+  initialFlaggedResponses: Response[];
   initialIsActive: boolean;
 }
 
@@ -28,13 +139,51 @@ export function DiscussionPage({
   discussionId,
   initialDiscussion,
   initialResponses,
+  initialFlaggedResponses,
   initialIsActive
 }: DiscussionClientProps) {
 
   // 1. Initialize State with Server Data (Hydration)
   // We use state because we need to update this list when new responses arrive.
   const [responses, setResponses] = useState<Response[]>(initialResponses);
+  const [flaggedResponses, setFlaggedResponses] = useState<Response[]>(initialFlaggedResponses);
   const [isActive] = useState(initialIsActive);
+
+  const handleRemoveResponse = useCallback((responseId: string) => {
+    // Capture the response via the functional updater (runs synchronously),
+    // then add to flagged at the top level — React 18+ batches both updates
+    // into a single render, preventing duplicate keys.
+    let flaggedItem: Response | undefined;
+    setResponses((prev) => {
+      flaggedItem = prev.find((r) => r.id === responseId);
+      return prev.filter((r) => r.id !== responseId);
+    });
+    if (flaggedItem) {
+      const item = flaggedItem;
+      setFlaggedResponses((prev) => {
+        if (prev.some((r) => r.id === responseId)) return prev;
+        return [{ ...item, flagged_at: new Date().toISOString() }, ...prev];
+      });
+    }
+  }, []);
+
+  const handleRestoreResponse = useCallback(async (responseId: string) => {
+    await unflagResponseApi(responseId);
+    // Capture the response via the functional updater, then add to responses
+    // at the top level so React batches both updates into a single render.
+    let restoredItem: Response | undefined;
+    setFlaggedResponses((prev) => {
+      restoredItem = prev.find((r) => r.id === responseId);
+      return prev.filter((r) => r.id !== responseId);
+    });
+    if (restoredItem) {
+      const item = restoredItem;
+      setResponses((prev) => {
+        if (prev.some((r) => r.id === responseId)) return prev;
+        return [{ ...item, flagged_at: null }, ...prev];
+      });
+    }
+  }, []);
 
   // 2. Setup Realtime
   const { channel, isConnected } = useRealtime(lessonId, 'instructor');
@@ -184,24 +333,12 @@ export function DiscussionPage({
               <span>Total: {responses.length}</span>
             </div>
 
-            {responses.length === 0 ? (
+            {responses.length === 0 && flaggedResponses.length === 0 ? (
               <div className="text-center p-12 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl text-gray-400">
                 <p>No responses recorded yet.</p>
               </div>
             ) : (
-              <div className="grid gap-4">
-                {responses.map((resp) => (
-                  <div
-                    key={resp.id}
-                    className="p-5 bg-white border border-gray-200 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
-                  >
-                    <p className="text-gray-800 text-lg leading-relaxed">{resp.response_text}</p>
-                    <div className="mt-3 flex justify-end items-center gap-2 text-xs text-gray-400 font-medium">
-                      <span suppressHydrationWarning>{new Date(resp.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ResponseList responses={responses} flaggedResponses={flaggedResponses} onRemoveResponse={handleRemoveResponse} onRestoreResponse={handleRestoreResponse} />
             )}
           </div>
         </div>

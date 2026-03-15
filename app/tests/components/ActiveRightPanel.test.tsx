@@ -63,6 +63,7 @@ function makeResponse(id: string, selectedOption: string | null = null): Respons
     selected_option: selectedOption,
     created_at: '2024-01-01T10:00:30Z',
     is_correct: null,
+    flagged_at: null,
   } as unknown as Response;
 }
 

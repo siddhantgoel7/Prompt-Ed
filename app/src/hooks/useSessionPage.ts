@@ -37,7 +37,7 @@ type TranscriptRow = {
 type ExportDiscussionRow = {
   prompt_text: string;
   created_at: string;
-  responses?: Array<{ response_text: string; created_at: string }>;
+  responses?: Array<{ response_text: string; created_at: string; flagged_at?: string | null }>;
 };
 
 export type SessionVM = {
@@ -88,6 +88,9 @@ export type SessionVM = {
   selectCandidate: (p: GeneratedPrompt) => void;
   regenerateCandidates: () => Promise<void>;
   handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => Promise<void>;
+  removeResponse: (responseId: string) => Promise<void>;
+  flaggedResponses: Response[];
+  restoreResponse: (responseId: string) => Promise<void>;
 };
 
 export function useSessionPage(lessonId: string): SessionVM {
@@ -126,6 +129,9 @@ export function useSessionPage(lessonId: string): SessionVM {
     handleCloseDiscussion,
     handlePublishDiscussion,
     handlePublishAiCandidate,
+    removeResponse,
+    flaggedResponses,
+    restoreResponse,
   // studentCount passed so publish handlers can snapshot it into participant_snapshot
   } = useLessonDiscussions(lessonId, channel, clearAIState, promptInput, setPromptInput, promptType, studentCount);
 
@@ -227,7 +233,12 @@ export function useSessionPage(lessonId: string): SessionVM {
             setLessonDiscussions([]);
           } else {
             setHistoryError(null);
-            setLessonDiscussions((discussionsData || []) as DiscussionWithResponses[]);
+            // Filter out soft-deleted (flagged) responses
+            const filtered = ((discussionsData || []) as DiscussionWithResponses[]).map(d => ({
+              ...d,
+              responses: (d.responses || []).filter(r => !r.flagged_at),
+            }));
+            setLessonDiscussions(filtered);
           }
           setHistoryLoading(false);
           await fetchTranscripts();
@@ -347,7 +358,7 @@ export function useSessionPage(lessonId: string): SessionVM {
 
       rows.forEach((d, i) => {
         lines.push('', `Discussion ${i + 1}`, `Prompt: ${d.prompt_text}`, `Time: ${new Date(d.created_at).toLocaleString()}`, 'Responses:');
-        const res = d.responses ?? [];
+        const res = (d.responses ?? []).filter(r => !r.flagged_at);
         if (res.length === 0) { lines.push('  - No responses'); }
         else { res.forEach((r, ri) => { lines.push(`  ${ri + 1}. ${r.response_text}`, `     ${new Date(r.created_at).toLocaleString()}`); }); }
       });
@@ -405,6 +416,9 @@ export function useSessionPage(lessonId: string): SessionVM {
     candidates, isGenerating, generationWarning,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
+    removeResponse,
+    flaggedResponses,
+    restoreResponse,
   }), [
     lesson, loading, notFound, isConnected, studentCount, peakStudentCount, handleReconnect,
     discussions, activeDiscussion, responses, promptInput,
@@ -419,5 +433,8 @@ export function useSessionPage(lessonId: string): SessionVM {
     candidates, isGenerating, generationWarning,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
+    removeResponse,
+    flaggedResponses,
+    restoreResponse,
   ]);
 }
