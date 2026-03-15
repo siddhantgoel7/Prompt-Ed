@@ -84,7 +84,7 @@ export type SessionVM = {
   candidates: GeneratedPrompt[];
   isGenerating: boolean;
   generationWarning: string | null;
-  generateCandidates: () => Promise<void>;
+  generateCandidates: (transcriptOverride?: string) => Promise<void>;
   selectCandidate: (p: GeneratedPrompt) => void;
   regenerateCandidates: () => Promise<void>;
   handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => Promise<void>;

@@ -172,6 +172,7 @@ describe('AI Features (Acceptance)', () => {
             await waitFor(() => {
                 expect(global.fetch).toHaveBeenCalled();
                 expect(defaultCenterProps.setTranscriptText).toHaveBeenCalledWith('Test speech');
+                expect(defaultCenterProps.onGenerate).toHaveBeenCalledWith('Test speech');
             });
         });
     });

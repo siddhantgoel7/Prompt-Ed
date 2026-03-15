@@ -40,7 +40,7 @@ export function ActiveCenter(props: Partial<{
   candidates: GeneratedPrompt[];
   isGenerating: boolean;
   generationWarning: string | null;
-  onGenerate: () => void;
+  onGenerate: (transcriptOverride?: string) => void | Promise<void>;
   onSelectCandidate: (p: GeneratedPrompt) => void;
   onRegenerate: () => void;
   onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => void;
@@ -112,9 +112,8 @@ export function ActiveCenter(props: Partial<{
       setTranscriptText(transcript ?? '');
       setPromptInput(transcript ?? '');
       setSttStatus('idle');
-      // Auto-trigger generation after successful transcription
-      // Small delay so setTranscriptText flushes before onGenerate reads it
-      setTimeout(() => onGenerate(), 50);
+      // Pass fresh transcript directly to avoid stale state closure.
+      await onGenerate(transcript ?? '');
     } catch (err) {
       setSttError(err instanceof Error ? err.message : 'Transcription failed — type manually.');
       setSttStatus('error');
