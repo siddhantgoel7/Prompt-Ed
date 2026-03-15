@@ -76,6 +76,7 @@ export function ActiveCenter(props: Partial<{
   });
   const [creationMode, setCreationMode] = React.useState<'ai' | 'manual'>('ai');
   const [showTimerDialog, setShowTimerDialog] = React.useState(false);
+  const [pendingCandidate, setPendingCandidate] = React.useState<GeneratedPrompt | null>(null);
 
   const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -172,6 +173,15 @@ export function ActiveCenter(props: Partial<{
   // Called after instructor confirms timer dialog
   const handleTimerConfirm = (timerSeconds: number | null) => {
     setShowTimerDialog(false);
+
+    // If triggered by "Publish This Question →" on an AI candidate, publish that candidate
+    if (pendingCandidate) {
+      const candidate = pendingCandidate;
+      setPendingCandidate(null);
+      handlePublishSelected(candidate, timerSeconds);
+      return;
+    }
+
     if (creationMode === 'manual') {
       if (promptType === 'multiple_choice') {
         if (!overrideCorrectOption) {
@@ -357,7 +367,7 @@ export function ActiveCenter(props: Partial<{
                     {selectedIndex === i && (
                       <Button
                         size="sm"
-                        onClick={() => handlePublishSelected(c)}
+                        onClick={() => { setPendingCandidate(c); setShowTimerDialog(true); }}
                         disabled={!promptInput.trim() || !isConnected}
                         className="mt-2 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800 disabled:opacity-50"
                       >
@@ -441,7 +451,7 @@ export function ActiveCenter(props: Partial<{
         <StartDiscussionDialog
           open={showTimerDialog}
           onConfirm={handleTimerConfirm}
-          onCancel={() => setShowTimerDialog(false)}
+          onCancel={() => { setShowTimerDialog(false); setPendingCandidate(null); }}
         />
       </div>
     </div>

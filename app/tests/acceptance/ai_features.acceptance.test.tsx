@@ -241,7 +241,10 @@ describe('AI Features (Acceptance)', () => {
 
             fireEvent.click(screen.getByRole('button', { name: /Publish This Question/i }));
 
-            expect(defaultCenterProps.onPublishAiCandidate).toHaveBeenCalledWith(expect.objectContaining({ promptText: 'Option A' }), null, false, null);
+            // Timer dialog appears — confirm with default (1 min)
+            fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
+
+            expect(defaultCenterProps.onPublishAiCandidate).toHaveBeenCalledWith(expect.objectContaining({ promptText: 'Option A' }), null, false, 60);
         });
     });
 
@@ -314,15 +317,18 @@ describe('AI Features (Acceptance)', () => {
             // To simulate the component's internal state accurately in the test, we need to pass down the new value
             rerender(<ActiveCenter {...defaultCenterProps} candidates={candidates} promptInput="Edited text completely" />);
 
-            // Click publish
+            // Click publish — opens timer dialog
             const publishBtn = screen.getByRole('button', { name: /Publish This Question/i });
             fireEvent.click(publishBtn);
+
+            // Confirm timer dialog with default (1 min)
+            fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
 
             expect(defaultCenterProps.onPublishAiCandidate).toHaveBeenCalledWith(
                 expect.objectContaining({ promptText: 'Edited text completely' }),
                 null,
                 false,
-                null
+                60
             );
         });
 
