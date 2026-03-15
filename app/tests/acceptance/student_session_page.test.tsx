@@ -326,7 +326,7 @@ describe('Student Session Page (Acceptance)', () => {
     rerender(<StudentSessionPage lessonId="lesson-1" />);
 
     expect(screen.getByText(/❌ Incorrect/i)).toBeInTheDocument();
-    expect(screen.getByText(/Correct Answer: Option B/i)).toBeInTheDocument();
+    expect(screen.getByText(/Correct Answer: B\. 4/i)).toBeInTheDocument();
   });
 
   // 12.12

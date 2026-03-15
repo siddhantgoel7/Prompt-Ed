@@ -44,6 +44,10 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
   }
 
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
+  const correctOptionLabel = activeDiscussion?.correct_option ?? null;
+  const correctOptionText = correctOptionLabel
+    ? activeDiscussion?.mc_options?.find((o) => o.label === correctOptionLabel)?.text ?? null
+    : null;
 
   // For MC, canSubmit from the hook is always false (responseText is empty).
   // We override it here: MC just needs a connection + active view + no ongoing submit.
@@ -164,7 +168,9 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
               <p className="mt-2 opacity-90 font-normal">
                 {isSubmitCorrect
                   ? 'You selected the correct answer.'
-                  : `Correct Answer: Option ${activeDiscussion.correct_option}`
+                  : correctOptionLabel
+                    ? `Correct Answer: ${correctOptionLabel}. ${correctOptionText ?? '(answer text unavailable)'}`
+                    : 'Correct answer is unavailable.'
                 }
               </p>
             </div>

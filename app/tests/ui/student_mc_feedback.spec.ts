@@ -144,7 +144,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await expect(page.getByText(/❌ Incorrect/i)).toBeVisible({ timeout: 8_000 });
 
         // Correct option 'A' should be revealed
-        await expect(page.getByText(/Correct Answer: Option A/i)).toBeVisible({ timeout: 5_000 });
+        await expect(page.getByText(/Correct Answer: A\. Browser testing/i)).toBeVisible({ timeout: 5_000 });
     });
 
     // 32.6

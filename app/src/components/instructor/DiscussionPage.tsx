@@ -72,6 +72,11 @@ export function DiscussionPage({
     });
   }
 
+  const correctOptionLabel = initialDiscussion.correct_option;
+  const correctOptionText = correctOptionLabel
+    ? initialDiscussion.mc_options?.find((opt) => opt.label === correctOptionLabel)?.text ?? null
+    : null;
+
   // Use the snapshot from the discussion, fallback to length of responses if 0
   const studentCount = initialDiscussion.participant_snapshot ?? 0;
 
@@ -136,9 +141,9 @@ export function DiscussionPage({
             <div className="mb-8 p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-semibold text-gray-800">Multiple Choice Options</h3>
-                {initialDiscussion.correct_option && (
+                {correctOptionLabel && (
                   <span className="text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                    Correct Answer: Option {initialDiscussion.correct_option}
+                    Correct Answer: {correctOptionLabel}. {correctOptionText ?? '(answer text unavailable)'}
                   </span>
                 )}
               </div>
