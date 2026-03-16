@@ -8,6 +8,8 @@ export interface Response {
   created_at: string;
   selected_option: string | null;
   is_correct: boolean | null;
+  /** Timestamp when the response was flagged as inappropriate (soft delete). NULL = active. */
+  flagged_at: string | null;
 }
 
 /** Fields required to submit a new student response. */
