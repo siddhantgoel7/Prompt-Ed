@@ -53,6 +53,7 @@ export async function fetchResponsesApi(discussionId: string | null, ascending: 
         .from('responses')
         .select('*')
         .eq('discussion_id', discussionId)
+        .is('flagged_at', null)
         .order('created_at', { ascending });
 
     if (error || !data) return [];
@@ -73,7 +74,7 @@ export async function fetchEndedDiscussionsApi(lessonId: string) {
         .from('discussions')
         .select(`
             *,
-            responses ( id, discussion_id, response_text, created_at )
+            responses ( id, discussion_id, response_text, created_at, flagged_at )
         `)
         .eq('lesson_id', lessonId)
         .order('display_order', { ascending: true });
@@ -91,7 +92,7 @@ export async function fetchExportDiscussionsApi(lessonId: string) {
     const supabase = createClient();
     return supabase
         .from('discussions')
-        .select('prompt_text, created_at, responses ( response_text, created_at )')
+        .select('prompt_text, created_at, responses ( response_text, created_at, flagged_at )')
         .eq('lesson_id', lessonId)
         .order('display_order', { ascending: true });
 }
@@ -104,6 +105,61 @@ export async function fetchStudentActiveDiscussionApi(lessonId: string) {
         .eq('lesson_id', lessonId)
         .eq('status', 'active')
         .maybeSingle();
+}
+
+/** Soft-deletes a response by setting its `flagged_at` timestamp. */
+export async function flagResponseApi(responseId: string): Promise<void> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from('responses')
+        .update({ flagged_at: new Date().toISOString() })
+        .eq('id', responseId)
+        .select();
+
+    if (error) {
+        console.error('Failed to flag response:', error);
+        throw error;
+    }
+    if (!data || data.length === 0) {
+        const msg = 'Flag had no effect — the responses table may be missing an UPDATE RLS policy. See supabase/migrations/soft_delete_responses.sql.';
+        console.error(msg);
+        throw new Error(msg);
+    }
+}
+
+/** Restores a soft-deleted response by clearing its `flagged_at` timestamp. */
+export async function unflagResponseApi(responseId: string): Promise<void> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from('responses')
+        .update({ flagged_at: null })
+        .eq('id', responseId)
+        .select();
+
+    if (error) {
+        console.error('Failed to unflag response:', error);
+        throw error;
+    }
+    if (!data || data.length === 0) {
+        const msg = 'Unflag had no effect — the responses table may be missing an UPDATE RLS policy. See supabase/migrations/soft_delete_responses.sql.';
+        console.error(msg);
+        throw new Error(msg);
+    }
+}
+
+/** Fetches responses that have been flagged (soft-deleted) for a discussion. */
+export async function fetchFlaggedResponsesApi(discussionId: string | null): Promise<Response[]> {
+    if (!discussionId) return [];
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from('responses')
+        .select('*')
+        .eq('discussion_id', discussionId)
+        .not('flagged_at', 'is', null)
+        .order('created_at', { ascending: false });
+
+    if (error || !data) return [];
+    return data as Response[];
 }
 
 export async function submitStudentResponseApi(discussionId: string, text: string, selectedOption: string | null = null, isCorrect: boolean | null = null) {

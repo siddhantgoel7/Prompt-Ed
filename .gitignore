@@ -31,3 +31,5 @@ venv
 site/
 
 *.log
+
+.claude
