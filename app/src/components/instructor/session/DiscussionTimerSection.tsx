@@ -12,7 +12,7 @@ interface DiscussionTimerSectionProps {
   timerTotalSeconds: number | null;
   onClose: (discussionId: string) => void;
   onExtendTimer?: (extraSeconds: number) => Promise<void>;
-  onEditTimer?: (newSeconds: number) => Promise<void>;
+  onEditTimer?: (newSeconds: number | null) => Promise<void>;
 }
 
 function formatTime(secs: number): string {
