@@ -11,6 +11,7 @@ import {
     fetchResponsesApi,
     fetchFlaggedResponsesApi,
     updateParticipantSnapshotApi,
+    updateDiscussionTimerApi,
     flagResponseApi,
     unflagResponseApi,
 } from '@/lib/api/discussionsApi';
@@ -356,6 +357,76 @@ export function useLessonDiscussions(
         setPublishing(false);
     }, [publishing, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, clearAIState]);
 
+    /** Adds extraSeconds to the current timer end time (keeps same published_at anchor). */
+    const handleExtendTimer = useCallback(async (extraSeconds: number) => {
+        if (!activeDiscussion?.id || !activeDiscussion.published_at) return;
+
+        const publishedAt = activeDiscussion.published_at;
+        const currentEndTime = discussionTimerEndTime ?? Date.now();
+        const newEndTime = currentEndTime + extraSeconds * 1000;
+        // Recalculate total seconds from original published_at so anchor stays consistent
+        const newTimeLimitSeconds = Math.round((newEndTime - new Date(publishedAt).getTime()) / 1000);
+
+        setDiscussionTimerEndTime(newEndTime);
+        setDiscussionTimerSeconds(newTimeLimitSeconds);
+        // Allow auto-close to fire again at the new end time
+        autoCloseCalledRef.current = false;
+
+        await updateDiscussionTimerApi(activeDiscussion.id, newTimeLimitSeconds, publishedAt);
+
+        if (channel) {
+            await (channel as RealtimeLikeChannel).send({
+                type: 'broadcast',
+                event: 'discussion:timer_updated',
+                payload: { discussionId: activeDiscussion.id, time_limit_seconds: newTimeLimitSeconds, published_at: publishedAt },
+            });
+        }
+    }, [activeDiscussion, discussionTimerEndTime, channel]);
+
+    /** Replaces the timer with a brand-new countdown of newSeconds starting from now, or removes it if newSeconds is null. */
+    const handleEditTimer = useCallback(async (newSeconds: number | null) => {
+        if (!activeDiscussion?.id) return;
+
+        if (!newSeconds || newSeconds <= 0) {
+            // Remove the timer entirely
+            setDiscussionTimerEndTime(null);
+            setDiscussionTimerSeconds(null);
+            activeDiscussionIdRef.current = null;
+            autoCloseCalledRef.current = false;
+
+            const supabase = (await import('@/lib/supabase/client')).createClient();
+            await supabase.from('discussions').update({ time_limit_seconds: null }).eq('id', activeDiscussion.id);
+
+            if (channel) {
+                await (channel as RealtimeLikeChannel).send({
+                    type: 'broadcast',
+                    event: 'discussion:timer_updated',
+                    payload: { discussionId: activeDiscussion.id, time_limit_seconds: null, published_at: null },
+                });
+            }
+            return;
+        }
+
+        const newPublishedAt = new Date().toISOString();
+        const newEndTime = Date.now() + newSeconds * 1000;
+
+        setDiscussionTimerEndTime(newEndTime);
+        setDiscussionTimerSeconds(newSeconds);
+        activeDiscussionIdRef.current = activeDiscussion.id;
+        // Reset auto-close so it fires at the new end time
+        autoCloseCalledRef.current = false;
+
+        await updateDiscussionTimerApi(activeDiscussion.id, newSeconds, newPublishedAt);
+
+        if (channel) {
+            await (channel as RealtimeLikeChannel).send({
+                type: 'broadcast',
+                event: 'discussion:timer_updated',
+                payload: { discussionId: activeDiscussion.id, time_limit_seconds: newSeconds, published_at: newPublishedAt },
+            });
+        }
+    }, [activeDiscussion, channel]);
+
     return {
         peakStudentCount,
         discussions,
@@ -369,6 +440,8 @@ export function useLessonDiscussions(
         handleCloseDiscussion,
         handlePublishDiscussion,
         handlePublishAiCandidate,
+        handleExtendTimer,
+        handleEditTimer,
         removeResponse,
         restoreResponse,
     };

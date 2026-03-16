@@ -50,6 +50,8 @@ export function SessionActiveView(props: { vm?: SessionVM }) {
             timerEndTime={vm.discussionTimerEndTime}
             timerTotalSeconds={vm.discussionTimerSeconds}
             onClose={vm.handleCloseDiscussion}
+            onExtendTimer={vm.handleExtendTimer}
+            onEditTimer={vm.handleEditTimer}
           />
         </div>
         <ActiveRightPanel />

@@ -90,6 +90,8 @@ export type SessionVM = {
   handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => Promise<void>;
   discussionTimerEndTime: number | null;
   discussionTimerSeconds: number | null;
+  handleExtendTimer: (extraSeconds: number) => Promise<void>;
+  handleEditTimer: (newSeconds: number | null) => Promise<void>;
   removeResponse: (responseId: string) => Promise<void>;
   flaggedResponses: Response[];
   restoreResponse: (responseId: string) => Promise<void>;
@@ -133,6 +135,8 @@ export function useSessionPage(lessonId: string): SessionVM {
     handleCloseDiscussion,
     handlePublishDiscussion,
     handlePublishAiCandidate,
+    handleExtendTimer,
+    handleEditTimer,
     removeResponse,
     flaggedResponses,
     restoreResponse,
@@ -421,6 +425,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
     discussionTimerEndTime, discussionTimerSeconds,
+    handleExtendTimer, handleEditTimer,
     removeResponse,
     flaggedResponses,
     restoreResponse,
@@ -439,6 +444,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
     discussionTimerEndTime, discussionTimerSeconds,
+    handleExtendTimer, handleEditTimer,
     removeResponse,
     flaggedResponses,
     restoreResponse,

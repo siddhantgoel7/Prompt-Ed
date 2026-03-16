@@ -24,6 +24,7 @@ type LessonEndedPayload = { message?: string };
 type DiscussionPublishedPayload = { discussion: Discussion };
 type DiscussionClosedPayload = { discussionId: string };
 type ResponseNewPayload = { response: Response };
+type TimerUpdatedPayload = { discussionId: string; time_limit_seconds: number | null; published_at: string | null };
 
 type RealtimeLikeChannel = {
   on: (
@@ -224,10 +225,39 @@ export function useStudentSession(lessonId: string) {
       }
     });
 
+    const timerUpdatedSub = ch.on('broadcast', { event: 'discussion:timer_updated' }, (raw) => {
+      const data = unwrapBroadcast<TimerUpdatedPayload>(
+        raw as BroadcastEnvelope<TimerUpdatedPayload>
+      );
+      if (!data) return;
+
+      if (!data.time_limit_seconds || !data.published_at) {
+        // Timer removed — switch to no-limit mode
+        setTimerEndTime(null);
+        timerEndTimeRef.current = null;
+        setTimerTotalSeconds(null);
+        setTimerExpired(false);
+        timerExpiredRef.current = false;
+        return;
+      }
+
+      const newEndTime = new Date(data.published_at).getTime() + data.time_limit_seconds * 1000;
+      setTimerEndTime(newEndTime);
+      timerEndTimeRef.current = newEndTime;
+      setTimerTotalSeconds(data.time_limit_seconds);
+
+      // If the new end time is in the future, the timer is no longer expired
+      if (newEndTime > Date.now()) {
+        setTimerExpired(false);
+        timerExpiredRef.current = false;
+      }
+    });
+
     return () => {
       lessonEndedSub.unsubscribe();
       discussionPublishedSub.unsubscribe();
       discussionClosedSub.unsubscribe();
+      timerUpdatedSub.unsubscribe();
     };
   }, [channel]);
 

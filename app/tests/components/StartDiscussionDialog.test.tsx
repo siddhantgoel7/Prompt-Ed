@@ -106,4 +106,39 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         render(<StartDiscussionDialog open={false} onConfirm={jest.fn()} onCancel={jest.fn()} />);
         expect(screen.queryByText('Set Time Limit')).not.toBeInTheDocument();
     });
+
+    // 12
+    it('[US 1.29][UNIT12] success: default confirm button label is "Start Discussion"', () => {
+        renderDialog();
+        expect(screen.getByRole('button', { name: /Start Discussion/i })).toBeInTheDocument();
+    });
+
+    // 13
+    it('[US 1.29][UNIT13] success: custom confirmLabel overrides button text', () => {
+        render(
+            <StartDiscussionDialog
+                open={true}
+                onConfirm={jest.fn()}
+                onCancel={jest.fn()}
+                confirmLabel="Update Timer"
+            />
+        );
+        expect(screen.getByRole('button', { name: /Update Timer/i })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /Start Discussion/i })).not.toBeInTheDocument();
+    });
+
+    // 14
+    it('[US 1.29][UNIT14] success: custom confirmLabel button still calls onConfirm correctly', () => {
+        const onConfirm = jest.fn();
+        render(
+            <StartDiscussionDialog
+                open={true}
+                onConfirm={onConfirm}
+                onCancel={jest.fn()}
+                confirmLabel="Update Timer"
+            />
+        );
+        fireEvent.click(screen.getByRole('button', { name: /Update Timer/i }));
+        expect(onConfirm).toHaveBeenCalledWith(60); // default 1 minute
+    });
 });
