@@ -4,12 +4,15 @@
 
 import * as React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 import { SessionContext } from './SessionContext';
 import { DiscussionAnalyticsContent } from './DiscussionAnalyticsModal';
+import { useResponseSelection } from '@/hooks/useResponseSelection';
+import { ResponseCard } from '@/components/instructor/ResponseCard';
+import { FilterToggle } from '@/components/instructor/FilterToggle';
+import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
 
 /** Displays live student responses and analytics for the active discussion. */
 export function ActiveRightPanel(props: {
@@ -21,8 +24,54 @@ export function ActiveRightPanel(props: {
   const responses = context ? context.responses : props.responses!;
   const activeDiscussion = context ? context.activeDiscussion : props.activeDiscussion!;
   const studentCount = context ? context.studentCount : (props.studentCount ?? 0);
+  const removeResponse = context ? context.removeResponse : undefined;
+  const restoreResponse = context ? context.restoreResponse : undefined;
+  const flaggedResponses = context ? context.flaggedResponses : [];
   // Peak student count seen during the current discussion — only goes up, never down
   const peakStudentCount = context ? context.peakStudentCount : studentCount;
+
+  const {
+    selectedIds, flaggingId, showHighlightedOnly,
+    toggleSelected, handleFlagInappropriate,
+    setShowHighlightedOnly, resetSelection, filterResponses,
+  } = useResponseSelection({
+    onRemove: removeResponse ?? (async () => {}),
+  });
+
+  const [showFlagged, setShowFlagged] = React.useState(false);
+
+  // Auto-switch back to normal view when all flagged responses are restored
+  React.useEffect(() => {
+    if (flaggedResponses.length === 0 && showFlagged) {
+      setShowFlagged(false);
+    }
+  }, [flaggedResponses.length, showFlagged]);
+
+  // Separate selection/flagging state for the flagged view
+  const [flaggedSelectedIds, setFlaggedSelectedIds] = React.useState<string[]>([]);
+  const [restoringId, setRestoringId] = React.useState<string | null>(null);
+
+  const toggleFlaggedSelected = React.useCallback((id: string) => {
+    setFlaggedSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  }, []);
+
+  const handleRestore = async (responseId: string) => {
+    if (!restoreResponse) return;
+    setRestoringId(responseId);
+    try {
+      await restoreResponse(responseId);
+      setFlaggedSelectedIds(prev => prev.filter(x => x !== responseId));
+    } catch (err) {
+      console.error('Failed to restore response:', err);
+    } finally {
+      setRestoringId(null);
+    }
+  };
+
+  // Clear selection and filter when active discussion changes
+  React.useEffect(() => { resetSelection(); }, [activeDiscussion?.id, resetSelection]);
 
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
 
@@ -100,26 +149,65 @@ export function ActiveRightPanel(props: {
                   </div>
                 )}
 
-                {responses.length === 0 ? (
+                <div className="flex flex-col gap-3 mb-3">
+                  {/* Filter toggle — appears when responses are highlighted */}
+                  {selectedIds.length > 0 && responses.length > 0 && !showFlagged && (
+                    <FilterToggle
+                      variant="compact"
+                      selectedCount={selectedIds.length}
+                      showHighlightedOnly={showHighlightedOnly}
+                      onToggle={() => setShowHighlightedOnly(prev => !prev)}
+                      onShowAll={() => setShowHighlightedOnly(false)}
+                    />
+                  )}
+
+                  {/* Flagged toggle — appears when flagged responses exist */}
+                  {flaggedResponses.length > 0 && (
+                    <FlaggedFilterToggle
+                      variant="compact"
+                      flaggedCount={flaggedResponses.length}
+                      showFlagged={showFlagged}
+                      onToggle={() => setShowFlagged(prev => !prev)}
+                      onHide={() => setShowFlagged(false)}
+                    />
+                  )}
+                </div>
+
+                {responses.length === 0 && flaggedResponses.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-4 text-center">
                     Waiting for student responses...
                   </p>
                 ) : (
                   <div className="space-y-2">
-                    {responses.map((r) => (
-                      <Card key={r.id} className="shadow-sm border-gray-200">
-                        <CardContent className="p-3">
-                          <p className="text-sm whitespace-pre-wrap break-words text-gray-800">
-                            {r.response_text}
-                          </p>
-                          <p className="text-[10px] text-gray-400 mt-1.5 font-medium uppercase tracking-wider">
-                            {new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                        </CardContent>
-                      </Card>
+                    {!showFlagged && filterResponses(responses).map((r) => (
+                      <ResponseCard
+                        key={r.id}
+                        variant="compact"
+                        responseText={r.response_text}
+                        createdAt={r.created_at}
+                        isSelected={selectedIds.includes(r.id)}
+                        isBeingFlagged={flaggingId === r.id}
+                        onToggle={() => toggleSelected(r.id)}
+                        onFlag={() => void handleFlagInappropriate(r.id)}
+                      />
+                    ))}
+
+                    {showFlagged && flaggedResponses.map((r) => (
+                      <ResponseCard
+                        key={r.id}
+                        variant="compact"
+                        mode="flagged"
+                        responseText={r.response_text}
+                        createdAt={r.created_at}
+                        isSelected={flaggedSelectedIds.includes(r.id)}
+                        isBeingFlagged={restoringId === r.id}
+                        onToggle={() => toggleFlaggedSelected(r.id)}
+                        onFlag={() => void handleRestore(r.id)}
+                      />
                     ))}
                   </div>
                 )}
+
               </TabsContent>
 
               <TabsContent value="analytics" className="mt-0 pt-2 focus-visible:outline-none focus-visible:ring-0">

@@ -18,7 +18,7 @@ export default async function InstructorDiscussionPage({
   const { lessonId, discussionId } = await params;
   const supabase = await createClient();
 
-  const [discussionResult, responsesResult] = await Promise.all([
+  const [discussionResult, responsesResult, flaggedResult] = await Promise.all([
     // A. Fetch Discussion Details
     supabase
       .from('discussions')
@@ -26,11 +26,20 @@ export default async function InstructorDiscussionPage({
       .eq('id', discussionId)
       .single(),
 
-    // B. Fetch Existing Responses (Newest First)
+    // B. Fetch Existing Responses (Newest First, excluding flagged)
     supabase
       .from('responses')
       .select('*')
       .eq('discussion_id', discussionId)
+      .is('flagged_at', null)
+      .order('created_at', { ascending: false }),
+
+    // C. Fetch Flagged Responses (for restore capability)
+    supabase
+      .from('responses')
+      .select('*')
+      .eq('discussion_id', discussionId)
+      .not('flagged_at', 'is', null)
       .order('created_at', { ascending: false })
   ]);
 
@@ -41,11 +50,12 @@ export default async function InstructorDiscussionPage({
   const isActive = discussionResult.data.status === 'active';
 
   return (
-    <DiscussionPage 
+    <DiscussionPage
       lessonId={lessonId}
       discussionId={discussionId}
       initialDiscussion={discussionResult.data}
       initialResponses={responsesResult.data || []}
+      initialFlaggedResponses={flaggedResult.data || []}
       initialIsActive={isActive}
     />
   )
