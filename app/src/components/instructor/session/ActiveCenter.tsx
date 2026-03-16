@@ -245,7 +245,7 @@ export function ActiveCenter(props: Partial<{
 
               <AIPreferencesDialog />
               <Button
-                onClick={onGenerate}
+                onClick={() => onGenerate()}
                 disabled={isGenerating || recorder.isRecording}
                 size="sm"
                 className="px-4 py-1.5 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
