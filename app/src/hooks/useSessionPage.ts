@@ -24,6 +24,7 @@ import {
   closeActiveDiscussionsApi,
   fetchExportDiscussionsApi
 } from '@/lib/api/discussionsApi';
+import { escapeCsv, formatExportTimestamp } from '@/lib/utils/csv';
 
 type DiscussionWithResponses = Discussion & { responses: Response[] };
 
@@ -109,15 +110,6 @@ export type SessionVM = {
   restoreResponse: (responseId: string) => Promise<void>;
 };
 
-function escapeCsv(value: string | number | null | undefined): string {
-  const stringValue = String(value ?? '');
-  return `"${stringValue.replace(/"/g, '""')}"`;
-}
-
-function formatExportTimestamp(value: string | null | undefined): string {
-  if (!value) return '';
-  return new Date(value).toISOString();
-}
 
 
 export function useSessionPage(lessonId: string): SessionVM {
@@ -183,7 +175,6 @@ export function useSessionPage(lessonId: string): SessionVM {
   const initializedConnectionRef = React.useRef(false);
   const wasConnectedRef = React.useRef(false);
 
-  const [displayState, setDisplayState] = useState(false);
   const [endError, setEndError] = useState<string | null>(null);
   const [endingLesson, setEndingLesson] = useState(false);
   const [activatingLesson, setActivatingLesson] = useState(false);
@@ -337,7 +328,8 @@ export function useSessionPage(lessonId: string): SessionVM {
 
   const handleDisplay = useCallback(() => {
     if (!lesson) return;
-    setDisplayState((prev) => !prev);
+    if (typeof window === 'undefined') return;
+    window.open(`/session/${lesson.id}/display`, '_blank', 'noopener,noreferrer');
   }, [lesson]);
 
   const handleEnd = useCallback(async () => {
@@ -390,11 +382,11 @@ export function useSessionPage(lessonId: string): SessionVM {
     setLesson((prev) => prev ? { ...prev, status: 'active', started_at: new Date().toISOString(), ended_at: null } : prev);
     setActivatingLesson(false);
   }, [lesson]);
-  // TODO: Implement export analytics
 
   const handleExportOverviewTxt = useCallback(async () => {
     if (!lesson) return;
     setExportingData(true);
+    setEndError(null);
     try {
       const { data, error } = await fetchExportDiscussionsApi(lesson.id);
 
@@ -626,12 +618,12 @@ export function useSessionPage(lessonId: string): SessionVM {
       ].join(','));
     });
 
-      const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8' });
-      downloadBlob(blob, `${getSafeLessonFileBase()}_statistics.csv`);
-    } finally {
-      setExportingData(false);
-    }
-  }, [lesson, transcripts, files, downloadBlob, getSafeLessonFileBase]);
+    const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    downloadBlob(blob, `${getSafeLessonFileBase()}_statistics.csv`);
+  } finally {
+    setExportingData(false);
+  }
+}, [lesson, transcripts, files, downloadBlob, getSafeLessonFileBase]);
 
 
 
@@ -646,7 +638,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     lesson: lesson as Lesson,
     loading, notFound, isConnected, studentCount, peakStudentCount, handleReconnect,
     discussions, activeDiscussion, responses, promptInput, setPromptInput,
-    displayState, handleDisplay,
+    displayState: false, handleDisplay,
     endingLesson, endError, handleEnd,
     handlePublishDiscussion, handleCloseDiscussion,
     historyLoading, historyError, lessonDiscussions,
@@ -665,7 +657,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   }), [
     lesson, loading, notFound, isConnected, studentCount, peakStudentCount, handleReconnect,
     discussions, activeDiscussion, responses, promptInput,
-    displayState, handleDisplay,
+    handleDisplay,
     endingLesson, endError, handleEnd,
     handlePublishDiscussion, handleCloseDiscussion,
     historyLoading, historyError, lessonDiscussions,

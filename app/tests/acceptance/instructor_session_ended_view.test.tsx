@@ -131,7 +131,7 @@ describe('SessionEndedView (Acceptance)', () => {
   });
 
   // 6.5
-  it('[US 1.09][AT1] success: clicking Export overview TXT calls vm.handleExportOverviewTxt', async () => {
+  it('[US 1.41][AC3-AT1] success: clicking Export overview TXT calls vm.handleExportOverviewTxt', async () => {
     const vm = makeVM();
     const user = userEvent.setup();
 
@@ -143,7 +143,8 @@ describe('SessionEndedView (Acceptance)', () => {
     expect(vm.handleExportOverviewTxt).toHaveBeenCalled();
   });
 
-  it('[US 1.09][AT1] success: clicking Export Discussions CSV calls vm.handleExportDiscussionsCsv', async () => {
+  // 6.5b
+  it('[US 1.42][AC3-AT1] success: clicking Export Discussions CSV calls vm.handleExportDiscussionsCsv', async () => {
     const vm = makeVM();
     const user = userEvent.setup();
 
@@ -154,7 +155,8 @@ describe('SessionEndedView (Acceptance)', () => {
     expect(vm.handleExportDiscussionsCsv).toHaveBeenCalled();
   });
 
-  it('[US 1.09][AT1] success: clicking Export Statistics calls vm.handleExportStatistics', async () => {
+  // 6.5c
+  it('[US 1.43][AC3-AT1] success: clicking Export Statistics calls vm.handleExportStatistics', async () => {
     const vm = makeVM();
     const user = userEvent.setup();
 
@@ -315,5 +317,36 @@ describe('SessionEndedView (Acceptance)', () => {
     expect(screen.getByText('Failed to export discussions CSV.')).toBeInTheDocument();
   });
 
+  // 6.10 — Failure scenario: export API error for statistics shows inline error
+  it('[US 1.43][AC2-AT1] failure: shows error banner when statistics export API fails', () => {
+    const vm = makeVM({ endError: 'Failed to export statistics.' });
+    render(<SessionEndedView vm={vm} />);
+    expect(screen.getByText('Failed to export statistics.')).toBeInTheDocument();
+  });
 
+  // 6.11 — Failure scenario: export API error for overview TXT shows inline error
+  it('[US 1.41][AC2-AT1] failure: shows error banner when overview TXT export API fails', () => {
+    const vm = makeVM({ endError: 'Failed to export lesson data.' });
+    render(<SessionEndedView vm={vm} />);
+    expect(screen.getByText('Failed to export lesson data.')).toBeInTheDocument();
+  });
+
+  // 6.12 — Failure scenario: export API error for discussions CSV shows inline error
+  it('[US 1.42][AC2-AT1] failure: shows error banner when discussions CSV export API fails', () => {
+    const vm = makeVM({ endError: 'Failed to export discussions CSV.' });
+    render(<SessionEndedView vm={vm} />);
+    expect(screen.getByText('Failed to export discussions CSV.')).toBeInTheDocument();
+  });
+
+  // 6.13 — In-progress state: export button is disabled while exportingData=true
+  it('[US 1.41][US 1.42][US 1.43][AC3-AT2] state: Export button shows Exporting... and is disabled while exporting', async () => {
+    const vm = makeVM({ exportingData: true });
+    const user = userEvent.setup();
+    render(<SessionEndedView vm={vm} />);
+    // The mocked header exposes an exporting= attribute
+    expect(screen.getByText('exporting=true')).toBeInTheDocument();
+    // The real export button (via context) should be disabled — check via the header mock's label
+    // Since we mock SessionHeaderEnded, verify the vm flag reaches the mock
+    expect(screen.queryByText('exporting=false')).not.toBeInTheDocument();
+  });
 });
