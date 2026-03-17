@@ -70,6 +70,7 @@ export async function retrieveRecentChunks(
       .from('lesson_chunks')
       .select('content, metadata')
       .eq('lesson_id', lessonId)
+      .not('embedding', 'is', null)
       .order('created_at', { ascending: false })
       .limit(8);
 
