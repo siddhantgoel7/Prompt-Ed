@@ -74,7 +74,7 @@ export type SessionVM = {
   transcriptsLoading: boolean;
   transcriptsError: string | null;
   openFile: (fileId: string) => Promise<void>;
-  handlePublishDiscussion: () => Promise<void> | void;
+  handlePublishDiscussion: (timerSeconds?: number | null) => Promise<void> | void;
   handleCloseDiscussion: (discussionId: string) => Promise<void> | void;
   historyLoading: boolean;
   historyError: string | null;
@@ -99,7 +99,11 @@ export type SessionVM = {
   generateCandidates: () => Promise<void>;
   selectCandidate: (p: GeneratedPrompt) => void;
   regenerateCandidates: () => Promise<void>;
-  handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => Promise<void>;
+  handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => Promise<void>;
+  discussionTimerEndTime: number | null;
+  discussionTimerSeconds: number | null;
+  handleExtendTimer: (extraSeconds: number) => Promise<void>;
+  handleEditTimer: (newSeconds: number | null) => Promise<void>;
   removeResponse: (responseId: string) => Promise<void>;
   flaggedResponses: Response[];
   restoreResponse: (responseId: string) => Promise<void>;
@@ -147,11 +151,15 @@ export function useSessionPage(lessonId: string): SessionVM {
     discussions,
     activeDiscussion,
     responses,
+    discussionTimerEndTime,
+    discussionTimerSeconds,
     fetchDiscussions,
     fetchResponses,
     handleCloseDiscussion,
     handlePublishDiscussion,
     handlePublishAiCandidate,
+    handleExtendTimer,
+    handleEditTimer,
     removeResponse,
     flaggedResponses,
     restoreResponse,
@@ -649,6 +657,8 @@ export function useSessionPage(lessonId: string): SessionVM {
     candidates, isGenerating, generationWarning,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
+    discussionTimerEndTime, discussionTimerSeconds,
+    handleExtendTimer, handleEditTimer,
     removeResponse,
     flaggedResponses,
     restoreResponse,
@@ -666,6 +676,8 @@ export function useSessionPage(lessonId: string): SessionVM {
     candidates, isGenerating, generationWarning,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
+    discussionTimerEndTime, discussionTimerSeconds,
+    handleExtendTimer, handleEditTimer,
     removeResponse,
     flaggedResponses,
     restoreResponse,

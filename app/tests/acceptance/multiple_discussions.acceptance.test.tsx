@@ -51,7 +51,7 @@ jest.mock('@/components/instructor/session/ActiveCenter', () => ({
           onChange={(e: any) => vm.setPromptInput(e.target.value)}
         />
         <button onClick={vm.handlePublishDiscussion}>Publish</button>
-        <button onClick={vm.handleCloseDiscussion}>Close</button>
+        {/* Close Discussion button moved to DiscussionTimerSection */}
       </div>
     );
   },
@@ -233,8 +233,8 @@ describe('Multiple Discussions per Lesson (Acceptance) [US 1.25]', () => {
 
     render(<SessionActiveView vm={vm} />);
 
-    // Close button available for current discussion
-    const closeBtn = screen.getByRole('button', { name: /Close/i });
+    // Close Discussion button is now in DiscussionTimerSection (moved from ActiveCenter)
+    const closeBtn = screen.getByTestId('close-discussion-button');
     expect(closeBtn).toBeInTheDocument();
 
     fireEvent.click(closeBtn);

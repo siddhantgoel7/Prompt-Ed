@@ -80,6 +80,27 @@ export async function fetchEndedDiscussionsApi(lessonId: string) {
         .order('display_order', { ascending: true });
 }
 
+/** Updates time_limit_seconds and published_at for an active discussion (timer edit/extend). */
+export async function updateDiscussionTimerApi(
+    discussionId: string,
+    timeLimitSeconds: number,
+    publishedAt: string,
+): Promise<Discussion | null> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from('discussions')
+        .update({ time_limit_seconds: timeLimitSeconds, published_at: publishedAt })
+        .eq('id', discussionId)
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Failed to update discussion timer:', error);
+        return null;
+    }
+    return data as Discussion;
+}
+
 export async function updateParticipantSnapshotApi(discussionId: string, peak: number): Promise<void> {
     const supabase = createClient();
     await supabase

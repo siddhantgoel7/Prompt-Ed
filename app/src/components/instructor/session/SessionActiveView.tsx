@@ -12,6 +12,7 @@ import { ActiveRightPanel } from '@/components/instructor/session/ActiveRightPan
 import { SplitView } from '@/components/instructor/session/SplitView';
 import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
 import { SessionProvider, SessionContext } from '@/components/instructor/session/SessionContext';
+import { DiscussionTimerSection } from '@/components/instructor/session/DiscussionTimerSection';
 import type { SessionVM } from '@/hooks/useSessionPage';
 
 /** Renders the full active session layout; switches to SplitView when the split view toggle is active. */
@@ -42,7 +43,17 @@ export function SessionActiveView(props: { vm?: SessionVM }) {
 
       <div className="flex-1 flex flex-col md:flex-row">
         <ActiveSidebar />
-        <ActiveCenter />
+        <div className="flex-1 flex flex-col">
+          <ActiveCenter />
+          <DiscussionTimerSection
+            activeDiscussionId={vm.activeDiscussion?.id ?? null}
+            timerEndTime={vm.discussionTimerEndTime}
+            timerTotalSeconds={vm.discussionTimerSeconds}
+            onClose={vm.handleCloseDiscussion}
+            onExtendTimer={vm.handleExtendTimer}
+            onEditTimer={vm.handleEditTimer}
+          />
+        </div>
         <ActiveRightPanel />
       </div>
 
