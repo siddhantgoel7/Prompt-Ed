@@ -195,10 +195,10 @@ export function FilesTab({
                                         </TabsList>
 
                                         <TabsContent value="chunks">
-                                            <ScrollArea className="h-[60vh] pr-2 mt-2">
-                                                <div className="space-y-3">
+                                            <ScrollArea className="h-[60vh] mt-2">
+                                                <div className="space-y-3 pr-3">
                                                     {regularChunks.map((chunk, idx) => (
-                                                        <div key={chunk.id} className="border rounded p-2 space-y-1">
+                                                        <div key={chunk.id} className="border rounded p-2 space-y-1 min-w-0 overflow-hidden">
                                                             <div className="flex items-center gap-2">
                                                                 <span className="text-xs font-semibold text-muted-foreground">
                                                                     Chunk {idx + 1}/{regularChunks.length}
@@ -208,7 +208,7 @@ export function FilesTab({
                                                                 </Badge>
                                                             </div>
                                                             <hr />
-                                                            <pre className="text-xs whitespace-pre-wrap font-mono break-words">
+                                                            <pre className="text-xs whitespace-pre-wrap font-mono break-words w-full overflow-hidden">
                                                                 {chunk.content}
                                                             </pre>
                                                         </div>
@@ -218,8 +218,8 @@ export function FilesTab({
                                         </TabsContent>
 
                                         <TabsContent value="document">
-                                            <ScrollArea className="h-[60vh] pr-2 mt-2">
-                                                <pre className="text-xs whitespace-pre-wrap font-mono break-words">
+                                            <ScrollArea className="h-[60vh] mt-2">
+                                                <pre className="text-xs whitespace-pre-wrap font-mono break-words w-full overflow-hidden pr-3">
                                                     {regularChunks.map((c) => c.content).join('\n\n')}
                                                 </pre>
                                             </ScrollArea>
@@ -227,8 +227,8 @@ export function FilesTab({
 
                                         {rawJsonChunk && (
                                             <TabsContent value="raw_json">
-                                                <ScrollArea className="h-[60vh] pr-2 mt-2">
-                                                    <pre className="text-xs whitespace-pre-wrap font-mono break-words">
+                                                <ScrollArea className="h-[60vh] mt-2">
+                                                    <pre className="text-xs whitespace-pre-wrap font-mono break-words w-full overflow-hidden pr-3">
                                                         {prettyRawJson}
                                                     </pre>
                                                 </ScrollArea>
