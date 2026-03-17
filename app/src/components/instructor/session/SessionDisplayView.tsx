@@ -1,8 +1,7 @@
 // Full-page instructor display view for projecting join information (PIN + QR code).
 'use client';
 
-import * as React from 'react';
-import QRCode from 'qrcode';
+import { useStudentJoinQR } from '@/hooks/useStudentJoinQR';
 
 export function SessionDisplayView(props: {
   lessonId: string;
@@ -10,26 +9,7 @@ export function SessionDisplayView(props: {
   pinCode: string | null;
 }) {
   const { lessonId, title, pinCode } = props;
-  const [joinUrl, setJoinUrl] = React.useState<string | null>(null);
-  const [qrDataUrl, setQrDataUrl] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    const url = `${window.location.origin}/student/${lessonId}`;
-    setJoinUrl(url);
-
-    let cancelled = false;
-    QRCode.toDataURL(url, { width: 520, margin: 1 })
-      .then((dataUrl) => {
-        if (!cancelled) setQrDataUrl(dataUrl);
-      })
-      .catch(() => {
-        if (!cancelled) setQrDataUrl(null);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [lessonId]);
+  const { joinUrl, qrDataUrl } = useStudentJoinQR(lessonId, 520);
 
   return (
     <main className="min-h-screen bg-white text-black px-8 py-10 md:px-12 md:py-12">

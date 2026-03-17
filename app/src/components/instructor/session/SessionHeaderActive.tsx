@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import QRCode from 'qrcode';
+import { useStudentJoinQR } from '@/hooks/useStudentJoinQR';
 import { SessionContext } from './SessionContext';
 
 /**
@@ -27,32 +27,7 @@ export function SessionHeaderActive(props: {
   const onDisplay = context ? context.handleDisplay : props.onDisplay!;
   const onEnd = context ? context.handleEnd : props.onEnd!;
   const onSplitView = props.onSplitView;
-  const [joinUrl, setJoinUrl] = React.useState<string | null>(null);
-  const [qrDataUrl, setQrDataUrl] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (!lessonId) {
-      setJoinUrl(null);
-      setQrDataUrl(null);
-      return;
-    }
-
-    const url = `${window.location.origin}/student/${lessonId}`;
-    setJoinUrl(url);
-
-    let cancelled = false;
-    QRCode.toDataURL(url, { width: 96, margin: 1 })
-      .then((dataUrl) => {
-        if (!cancelled) setQrDataUrl(dataUrl);
-      })
-      .catch(() => {
-        if (!cancelled) setQrDataUrl(null);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [lessonId]);
+  const { joinUrl, qrDataUrl } = useStudentJoinQR(lessonId, 96);
 
   return (
     <header className="border-b border-gray-300 px-4 md:px-6 py-3 md:py-4 flex flex-wrap items-center justify-between gap-2">

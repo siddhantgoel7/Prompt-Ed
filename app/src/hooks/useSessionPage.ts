@@ -352,8 +352,8 @@ export function useSessionPage(lessonId: string): SessionVM {
 
     // Update local lesson state so SessionPage switches to ended summary immediately.
     setLesson((prev) => (prev ? { ...prev, status: 'ended', ended_at: now } : prev));
-    router.push(`/session/${lesson.id}`);
     await loadEndedLessonHistory();
+    router.push(`/session/${lesson.id}`);
     setEndingLesson(false);
   }, [lesson, channel, router, activeDiscussion, handleCloseDiscussion, loadEndedLessonHistory]);
 
