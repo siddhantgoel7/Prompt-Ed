@@ -1,6 +1,5 @@
 // Main student session page component — coordinates all student-facing session views
 // (loading, waiting, active prompt, submitted, ended) and handles MC submission logic.
-// src/components/student/session/StudentSessionPage.tsx
 'use client';
 
 import { useState } from 'react';
@@ -155,6 +154,7 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
             <TimerExpiredMessage
               feedbackEnabled={activeDiscussion?.feedback_enabled}
               correctOption={activeDiscussion?.correct_option}
+              correctOptionText={correctOptionText}
               isMC={isMC}
             />
           ) : activeDiscussion?.status === 'active' ? (
@@ -225,7 +225,6 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
                   : correctOptionLabel
                     ? `Correct Answer: ${correctOptionLabel}. ${correctOptionText ?? '(answer text unavailable)'}`
                     : 'Correct answer is unavailable.'
-                  : `Correct Answer: Option ${activeDiscussion?.correct_option}`
                 }
               </p>
             </div>

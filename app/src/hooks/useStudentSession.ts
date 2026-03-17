@@ -138,17 +138,13 @@ export function useStudentSession(lessonId: string) {
             ? 'submitted'
             : 'active'
         );
-        const disc = discussionData as Discussion;
-        setActiveDiscussion(disc);
-        setResponseText('');
-        setView('active');
 
         // Restore timer for late-joining students using published_at from DB
-        if (disc.time_limit_seconds && disc.time_limit_seconds > 0 && disc.published_at) {
-          const endTime = new Date(disc.published_at).getTime() + disc.time_limit_seconds * 1000;
+        if (nextDiscussion.time_limit_seconds && nextDiscussion.time_limit_seconds > 0 && nextDiscussion.published_at) {
+          const endTime = new Date(nextDiscussion.published_at).getTime() + nextDiscussion.time_limit_seconds * 1000;
           if (endTime > Date.now()) {
             setTimerEndTime(endTime);
-            setTimerTotalSeconds(disc.time_limit_seconds);
+            setTimerTotalSeconds(nextDiscussion.time_limit_seconds);
           }
           // If endTime is in the past, timer already expired — leave timerEndTime null
           // (instructor auto-close will have fired already)

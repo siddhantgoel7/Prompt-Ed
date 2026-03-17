@@ -192,6 +192,30 @@ export function useSessionPage(lessonId: string): SessionVM {
     }
   }, [lessonId]);
 
+  const loadEndedLessonHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const { data: discussionsData, error: discussionsError } = await fetchEndedDiscussionsApi(lessonId);
+
+      if (discussionsError) {
+        setHistoryError('Failed to load discussions/responses.');
+        setLessonDiscussions([]);
+      } else {
+        setHistoryError(null);
+        // Filter out soft-deleted (flagged) responses
+        const filtered = ((discussionsData || []) as DiscussionWithResponses[]).map(d => ({
+          ...d,
+          responses: (d.responses || []).filter(r => !r.flagged_at),
+        }));
+        setLessonDiscussions(filtered);
+      }
+    } finally {
+      setHistoryLoading(false);
+    }
+
+    await fetchTranscripts();
+  }, [lessonId, fetchTranscripts]);
+
   const syncLessonState = useCallback(async () => {
     await fetchDiscussions();
     await fetchFiles();
@@ -233,23 +257,7 @@ export function useSessionPage(lessonId: string): SessionVM {
         setLesson(lessonData as Lesson);
 
         if (lessonData.status === 'ended') {
-          setHistoryLoading(true);
-          const { data: discussionsData, error: discussionsError } = await fetchEndedDiscussionsApi(lessonId);
-
-          if (discussionsError) {
-            setHistoryError('Failed to load discussions/responses.');
-            setLessonDiscussions([]);
-          } else {
-            setHistoryError(null);
-            // Filter out soft-deleted (flagged) responses
-            const filtered = ((discussionsData || []) as DiscussionWithResponses[]).map(d => ({
-              ...d,
-              responses: (d.responses || []).filter(r => !r.flagged_at),
-            }));
-            setLessonDiscussions(filtered);
-          }
-          setHistoryLoading(false);
-          await fetchTranscripts();
+          await loadEndedLessonHistory();
         }
       }
 
@@ -259,7 +267,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     };
 
     run();
-  }, [lessonId, router, fetchDiscussions, fetchFiles, fetchTranscripts]);
+  }, [lessonId, router, fetchDiscussions, fetchFiles, loadEndedLessonHistory]);
 
   useEffect(() => {
     if (!initializedConnectionRef.current) {
@@ -341,9 +349,13 @@ export function useSessionPage(lessonId: string): SessionVM {
         payload: { lessonId: lesson.id, endedAt: now, message: 'Lesson has ended' },
       });
     }
-    // Redirect to the lesson route so the ended summary view is shown immediately.
+
+    // Update local lesson state so SessionPage switches to ended summary immediately.
+    setLesson((prev) => (prev ? { ...prev, status: 'ended', ended_at: now } : prev));
     router.push(`/session/${lesson.id}`);
-  }, [lesson, channel, router, activeDiscussion, handleCloseDiscussion]);
+    await loadEndedLessonHistory();
+    setEndingLesson(false);
+  }, [lesson, channel, router, activeDiscussion, handleCloseDiscussion, loadEndedLessonHistory]);
 
   const handleActivate = useCallback(async () => {
     if (!lesson) return;
