@@ -179,11 +179,18 @@ test.describe('Instructor AI Features & Tools', () => {
             }
         });
 
-        // Publish
+        // Clicking "Publish This Question →" opens the StartDiscussionDialog (timer config).
+        // The POST to /rest/v1/discussions only fires after the dialog is confirmed.
         await page.getByRole('button', { name: /Publish This Question/i }).click();
 
-        // Verify the payload contains the EDITED text
-        await page.waitForTimeout(500); // Give small time for mock network response to settle (avoiding race conditions in assertions)
+        // Wait for and interact with the timer dialog
+        await expect(page.getByText('Set Time Limit')).toBeVisible({ timeout: 5000 });
+        await page.getByTestId('no-time-limit-checkbox').click();
+        // Click the dialog's confirm button (labelled "Start Discussion" by default)
+        await page.getByRole('button', { name: /Start Discussion/i }).last().click();
+
+        // Now the network request fires — wait for it to settle
+        await page.waitForTimeout(500);
         expect(publishedPayload).toBeTruthy();
         expect(Array.isArray(publishedPayload)).toBe(true);
         expect(publishedPayload[0].prompt_text).toBe('EDITED: Short Answer Question!');
