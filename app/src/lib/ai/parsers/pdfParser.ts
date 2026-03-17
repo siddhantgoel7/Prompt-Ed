@@ -1,6 +1,7 @@
-// Parses PDF files into text using pdfjs-serverless, then optionally sends the whole
-// PDF to GPT-4o for a single-pass visual description of any pages with diagrams or images.
+// Parses PDF files into structured sections using pdfjs-serverless, then optionally sends the
+// whole PDF to a vision model for a single-pass visual description of diagram/image pages.
 import type { AIProvider } from '@/lib/ai/providers';
+import type { ParsedSection } from '@/types/ai';
 import { GeminiProvider } from '@/lib/ai/providers';
 import { createCanvas, Path2D } from '@napi-rs/canvas';
 
@@ -23,7 +24,8 @@ function registerCanvasGlobals() {
 
 /**
  * Extracts text and visual content from a PDF buffer.
- * Returns a page-annotated string with [Page N Text] and optional [Page N Visual Content] sections.
+ * Returns one ParsedSection per page per content type (page_text, visual_description),
+ * preserving page provenance for downstream chunk metadata.
  *
  * @param opts.onVisionRawJson [DEV-INSPECT] Called with the raw JSON string from the vision model,
  *   before page-level parsing. Remove with [DEV-INSPECT].
@@ -32,7 +34,7 @@ export async function parsePdf(
   buffer: Buffer,
   aiProvider?: AIProvider,
   opts?: { onVisionRawJson?: (raw: string) => void } // [DEV-INSPECT] raw JSON callback
-): Promise<string> {
+): Promise<ParsedSection[]> {
   registerCanvasGlobals();
 
   const pdfjs = await import('pdfjs-serverless');
@@ -106,23 +108,19 @@ export async function parsePdf(
     }
   }
 
-  // ── Step 3: Merge text + visual descriptions per page ──────────────────────
-  const parts: string[] = [];
+  // ── Step 3: Emit per-page sections with provenance metadata ─────────────────
+  // Each section is a discrete unit (text layer or visual description) tagged with
+  // its page number and content origin so the upload route can store them separately.
+  const sections: ParsedSection[] = [];
   for (let i = 1; i <= pdf.numPages; i++) {
-    const pageParts: string[] = [];
     if (pageTexts[i - 1]) {
-      pageParts.push(`[Page ${i} Text] ${pageTexts[i - 1]}`);
+      sections.push({ content: pageTexts[i - 1], contentOrigin: 'page_text', pageNumber: i });
     }
     const visual = visualDescriptionsByPage.get(i);
     if (visual && visual !== NO_VISUAL_CONTENT) {
-      pageParts.push(`[Page ${i} Visual Content] ${visual}`);
+      sections.push({ content: visual, contentOrigin: 'visual_description', pageNumber: i });
     }
-    if (pageParts.length > 0) parts.push(pageParts.join('\n'));
   }
 
-  const result = parts.join('\n').trim();
-  if (!result) {
-    throw new Error('No text or visual content found in this PDF.');
-  }
-  return result;
+  return sections;
 }

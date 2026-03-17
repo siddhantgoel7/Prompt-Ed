@@ -18,15 +18,16 @@ export type AIMessage = { role: 'system' | 'user' | 'assistant'; content: string
 // pathway/flowchart diagrams are expressed as sentences to preserve causality that flat
 // label lists lose.
 const VISION_EXTRACTION_RULES =
-    'If the diagram contains a legend or key, state what each arrow style means before listing any relationships ' +
-    '(e.g. "Legend: solid arrow with open triangle = activation; flat-head bar = inhibition; dashed arrow = indirect effect."). ' +
-    'If no legend is visible, apply standard pathway conventions: open triangle arrowhead = activation (actor at tail, recipient at head); ' +
-    'flat/bar arrowhead = inhibition (inhibitor at tail, inhibited at head).\n' +
     'Write short, factual natural-language sentences describing the visual content. ' +
     'Rules by visual type:\n' +
     '- Flowcharts and pathway diagrams: express each directional link as a sentence stating the relationship ' +
     '(e.g. "FFA stimulates insulin resistance." "Adiponectin improves insulin sensitivity and vascular function." ' +
-    '"TNF-alpha and IL-6 promote inflammation."). Only write relationship sentences — do not enumerate labels or components separately.\n' +
+    '"TNF-alpha and IL-6 promote inflammation."). Express relationships as sentences. ' +
+    'If a component has no clear directional relationship visible in the diagram, omit it rather than listing it in isolation.\n' +
+    'If the diagram contains a legend or key, state what each arrow style means after listing relationships ' +
+    '(e.g. "Legend: solid arrow with open triangle = activation; flat-head bar = inhibition; dashed arrow = indirect effect."). ' +
+    'If no legend is visible, apply standard pathway conventions: open triangle arrowhead = activation (actor at tail, recipient at head); ' +
+    'flat/bar arrowhead = inhibition (inhibitor at tail, inhibited at head).\n' +
     '- Tables: for every cell, write one sentence in the form ' +
     '"For [row criterion], [column name] requires [exact cell value]." ' +
     'Cover every row and every column. Use the exact values from the table — do not summarize or omit any cell.\n' +
@@ -189,7 +190,7 @@ export class OpenAIProvider implements AIProvider {
     async generatePdfVisualDescriptions(
         pdfBuffer: Buffer,
         numPages: number
-    ): Promise<Map<number, string>> {
+    ): Promise<{ descriptions: Map<number, string>; rawJson: string }> {
         const base64Pdf = pdfBuffer.toString('base64');
         const pdfDataUri = `data:application/pdf;base64,${base64Pdf}`;
 
@@ -363,7 +364,7 @@ export class GeminiProvider implements AIProvider {
     async generatePdfVisualDescriptions(
         pdfBuffer: Buffer,
         numPages: number
-    ): Promise<Map<number, string>> {
+    ): Promise<{ descriptions: Map<number, string>; rawJson: string }> {
         // thinkingConfig is a Gemini 2.5 feature not yet in the SDK's GenerationConfig types.
         // Passed via unknown → Record spread to avoid any.
         const generationConfig: Record<string, unknown> = {

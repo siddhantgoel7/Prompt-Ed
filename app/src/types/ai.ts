@@ -49,14 +49,45 @@ export interface LessonFile {
   uploadedAt: string;
 }
 
-// Chunk metadata JSONB shape — used to enable future RAG weighting
-// @see docs/sprint3-ai-pipeline-proposal.md "Future RAG Weighting Design"
-export type ChunkSource = 'slide_body' | 'slide_notes' | 'transcript' | 'prior_transcript';
+/** Where a chunk's text came from within its source document. */
+export type ContentOrigin =
+  | 'slide_body'         // PPTX: text extracted from slide body shapes
+  | 'slide_notes'        // PPTX: text extracted from speaker notes
+  | 'visual_description' // PDF or PPTX: AI-generated description of images/diagrams
+  | 'page_text'          // PDF: text layer extracted by pdfjs
+  | 'transcript';        // STT: Whisper output
 
+/** Structural role a chunk plays in the index.
+ *  'text' is the only active value; 'page_summary' and 'relationship' are reserved
+ *  for future multi-granularity chunking strategies. */
+export type ChunkType = 'text' | 'page_summary' | 'relationship';
+
+/** JSONB metadata stored with each lesson_chunk row. */
 export interface ChunkMetadata {
-  source: ChunkSource;
-  slideNumber?: number;
+  contentOrigin: ContentOrigin;
+  chunkType: ChunkType;
+  /** Source file name */
   fileName?: string;
+  /** 1-based page number (PDF only) */
+  pageNumber?: number;
+  /** 1-based slide number (PPTX only) */
+  slideNumber?: number;
+  /** Sequential index of this chunk within the file (0-based) */
+  chunkIndex: number;
+  /** Transcript-only: position of the segment in the STT output */
   segmentIndex?: number;
+  /** Transcript-only: ISO timestamp of when the transcript was recorded */
   recordedAt?: string;
+}
+
+/** A single structured content section returned by a parser, before chunking.
+ *  Maps to one logical unit of content (one page's text, one slide's notes, etc.)
+ *  and carries the provenance metadata needed to populate ChunkMetadata after splitting. */
+export interface ParsedSection {
+  content: string;
+  contentOrigin: ContentOrigin;
+  /** Set for PDF sections (1-based) */
+  pageNumber?: number;
+  /** Set for PPTX sections (1-based) */
+  slideNumber?: number;
 }

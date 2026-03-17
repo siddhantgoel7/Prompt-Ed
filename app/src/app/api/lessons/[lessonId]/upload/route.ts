@@ -7,6 +7,7 @@ import { parseFile } from '@/lib/ai/parsers';
 import { embedChunks } from '@/lib/ai/embedChunks';
 import { OpenAIProvider } from '@/lib/ai/providers';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
+import type { ChunkMetadata } from '@/types/ai';
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
 const MAX_CHUNKS_PER_FILE = 500;
@@ -121,29 +122,51 @@ export async function POST(
       const t0 = Date.now();
       const elapsed = () => `${((Date.now() - t0) / 1000).toFixed(1)}s`;
       try {
-        // Parse text
+        // Parse into structured sections
+        // [DEV-INSPECT] start — capture raw vision JSON for chunk inspector
+        let visionRawJson: string | undefined;
         console.log(`[upload] [${file.name}] starting parse`);
-        const rawText = await parseFile(buffer, detectedType, aiProvider);
-        console.log(`[upload] [${file.name}] parse done at ${elapsed()} — ${rawText.length} chars`);
+        const sections = await parseFile(buffer, detectedType, aiProvider, {
+          onVisionRawJson: (raw) => { visionRawJson = raw; },
+        });
+        // [DEV-INSPECT] end
+        console.log(`[upload] [${file.name}] parse done at ${elapsed()} — ${sections.length} section(s)`);
 
-        // Chunk
+        // Chunk each section independently so boundaries never cross page/slide/content-type lines.
+        // Each resulting chunk inherits its section's page/slide number and content origin.
         const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1024, chunkOverlap: 64 });
-        const chunks = (await splitter.splitText(rawText)).filter((c) => c.trim()).slice(0, MAX_CHUNKS_PER_FILE);
-        console.log(`[upload] [${file.name}] chunked at ${elapsed()} — ${chunks.length} chunks`);
+        const chunkRows: Array<{
+          lesson_id: string;
+          lesson_file_id: string;
+          content_type: string;
+          content: string;
+          metadata: ChunkMetadata;
+        }> = [];
+        let chunkIndex = 0;
 
-        if (chunks.length === 0) {
+        for (const section of sections) {
+          if (chunkRows.length >= MAX_CHUNKS_PER_FILE) break;
+          const subChunks = (await splitter.splitText(section.content)).filter((c) => c.trim());
+          for (const content of subChunks) {
+            if (chunkRows.length >= MAX_CHUNKS_PER_FILE) break;
+            const metadata: ChunkMetadata = {
+              contentOrigin: section.contentOrigin,
+              chunkType: 'text',
+              fileName: file.name,
+              pageNumber: section.pageNumber,
+              slideNumber: section.slideNumber,
+              chunkIndex: chunkIndex++,
+            };
+            chunkRows.push({ lesson_id: lessonId, lesson_file_id: fileRecord.id, content_type: 'slide', content, metadata });
+          }
+        }
+
+        console.log(`[upload] [${file.name}] chunked at ${elapsed()} — ${chunkRows.length} chunks`);
+
+        if (chunkRows.length === 0) {
           await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
           return;
         }
-
-        // Insert chunks without embeddings
-        const chunkRows = chunks.map((content, i) => ({
-          lesson_id: lessonId,
-          lesson_file_id: fileRecord.id,
-          content_type: 'slide',
-          content,
-          metadata: { file_name: file.name, chunk_index: i },
-        }));
 
         const { data: insertedChunks, error: chunksError } = await supabase
           .from('lesson_chunks')
@@ -156,10 +179,28 @@ export async function POST(
           return;
         }
 
+        // [DEV-INSPECT] start — store raw vision JSON as a non-embedded sentinel chunk
+        console.log(`[upload] [${file.name}] visionRawJson captured: ${visionRawJson !== undefined} (${visionRawJson?.length ?? 0} chars)`);
+        if (visionRawJson) {
+          const { error: visionChunkError } = await supabase.from('lesson_chunks').insert({
+            lesson_id: lessonId,
+            lesson_file_id: fileRecord.id,
+            content_type: 'transcript', // [DEV-INSPECT] stored as transcript to avoid CHECK constraint; identified by metadata.dev_inspect
+            content: visionRawJson,
+            metadata: { file_name: file.name, dev_inspect: true },
+          });
+          if (visionChunkError) {
+            console.warn(`[upload] [${file.name}] vision_raw_json chunk insert failed:`, visionChunkError.message);
+          } else {
+            console.log(`[upload] [${file.name}] vision_raw_json chunk stored`);
+          }
+        }
+        // [DEV-INSPECT] end
+
         // Pass chunks directly to avoid a redundant DB fetch — content is already in memory
         const chunksToEmbed = (insertedChunks as { id: string }[]).map((c, i) => ({
           id: c.id,
-          content: chunks[i],
+          content: chunkRows[i].content,
         }));
         await embedChunks(chunksToEmbed, supabase, aiProvider);
         console.log(`[upload] [${file.name}] embed done at ${elapsed()}`);

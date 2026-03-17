@@ -2,6 +2,15 @@
 // from the database, either by semantic similarity or by recency.
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+/** A chunk returned from the database with its content and stored metadata. */
+export interface RetrievedChunk {
+  content: string;
+  /** JSONB metadata as stored — may be the legacy { file_name, chunk_index } shape
+   *  for rows created before the enriched ChunkMetadata schema was introduced. */
+  metadata: Record<string, unknown>;
+  similarity?: number;
+}
+
 /**
  * Retrieves relevant lesson chunks for AI generation.
  *
@@ -12,7 +21,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  *
  * FUTURE (Sprint 4): Replace with weighted retrieval:
  *   40% file chunks (semantic), 40% current transcript chunks, 20% prior transcript chunks
- *   @see docs/sprint3-ai-pipeline-proposal.md "Future RAG Weighting Design"
  *
  * SECURITY: lesson_id filter is mandatory in match_lesson_chunks.
  * Without it, pgvector searches ALL instructors' lesson chunks.
@@ -24,7 +32,7 @@ export async function retrieveChunksBySimilarity(
   lessonId: string,
   queryEmbedding: number[],
   supabase: SupabaseClient
-): Promise<string[]> {
+): Promise<RetrievedChunk[]> {
   try {
     const { data, error } = await supabase.rpc('match_lesson_chunks', {
       p_lesson_id: lessonId,
@@ -37,7 +45,11 @@ export async function retrieveChunksBySimilarity(
       return [];
     }
 
-    return (data ?? []).map((row: { content: string }) => row.content);
+    return (data ?? []).map((row: { content: string; metadata: Record<string, unknown>; similarity: number }) => ({
+      content: row.content,
+      metadata: row.metadata ?? {},
+      similarity: row.similarity,
+    }));
   } catch (err) {
     const e = err as { code?: string; message?: string };
     console.error(`RETRIEVE_ERR [${e.code ?? 'unknown'}]: ${e.message ?? String(err)}`);
@@ -52,11 +64,11 @@ export async function retrieveChunksBySimilarity(
 export async function retrieveRecentChunks(
   lessonId: string,
   supabase: SupabaseClient
-): Promise<string[]> {
+): Promise<RetrievedChunk[]> {
   try {
     const { data, error } = await supabase
       .from('lesson_chunks')
-      .select('content')
+      .select('content, metadata')
       .eq('lesson_id', lessonId)
       .order('created_at', { ascending: false })
       .limit(8);
@@ -66,7 +78,10 @@ export async function retrieveRecentChunks(
       return [];
     }
 
-    return (data ?? []).map((row: { content: string }) => row.content);
+    return (data ?? []).map((row: { content: string; metadata: Record<string, unknown> }) => ({
+      content: row.content,
+      metadata: row.metadata ?? {},
+    }));
   } catch (err) {
     const e = err as { code?: string; message?: string };
     console.error(`RETRIEVE_RECENT_ERR [${e.code ?? 'unknown'}]: ${e.message ?? String(err)}`);
