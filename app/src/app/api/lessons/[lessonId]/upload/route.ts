@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase/server';
 import { parseFile } from '@/lib/ai/parsers';
 import { embedChunks } from '@/lib/ai/embedChunks';
 import { OpenAIProvider } from '@/lib/ai/providers';
-import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import type { ChunkMetadata } from '@/types/ai';
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
@@ -16,6 +15,38 @@ const MAGIC = {
   pdf: Buffer.from([0x25, 0x50, 0x44, 0x46]),
   pptx: Buffer.from([0x50, 0x4b, 0x03, 0x04]),
 };
+
+/**
+ * Groups text into chunks that respect sentence boundaries.
+ * Splits on sentence-ending punctuation and newlines, then packs sentences
+ * into windows up to maxChars. Carries overlapSentences sentences forward
+ * into the next chunk for retrieval context continuity.
+ */
+function splitBySentences(text: string, maxChars: number, overlapSentences = 1): string[] {
+  const sentences = text
+    .split(/(?<=[.!?])\s+|\n+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+
+  if (sentences.length === 0) return text.trim() ? [text.trim()] : [];
+
+  const chunks: string[] = [];
+  let window: string[] = [];
+  let windowLen = 0;
+
+  for (const sentence of sentences) {
+    if (windowLen + sentence.length + 1 > maxChars && window.length > 0) {
+      chunks.push(window.join(' ').trim());
+      window = window.slice(-overlapSentences);
+      windowLen = window.reduce((sum, s) => sum + s.length + 1, 0);
+    }
+    window.push(sentence);
+    windowLen += sentence.length + 1;
+  }
+
+  if (window.length > 0) chunks.push(window.join(' ').trim());
+  return chunks;
+}
 
 /** Detects file type by inspecting the first 4 magic bytes of the buffer. */
 function detectFileType(buffer: Buffer): 'pdf' | 'pptx' | null {
@@ -134,7 +165,6 @@ export async function POST(
 
         // Chunk each section independently so boundaries never cross page/slide/content-type lines.
         // Each resulting chunk inherits its section's page/slide number and content origin.
-        const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1024, chunkOverlap: 64 });
         const chunkRows: Array<{
           lesson_id: string;
           lesson_file_id: string;
@@ -146,7 +176,11 @@ export async function POST(
 
         for (const section of sections) {
           if (chunkRows.length >= MAX_CHUNKS_PER_FILE) break;
-          const subChunks = (await splitter.splitText(section.content)).filter((c) => c.trim());
+          const subChunks = (
+            section.contentOrigin === 'visual_description'
+              ? [section.content]                              // never split — vision output is pre-structured
+              : splitBySentences(section.content, 1024, 1)   // sentence-aware for all other types
+          ).filter(c => c.trim().length > 50);               // drop heading-only noise
           for (const content of subChunks) {
             if (chunkRows.length >= MAX_CHUNKS_PER_FILE) break;
             const metadata: ChunkMetadata = {
