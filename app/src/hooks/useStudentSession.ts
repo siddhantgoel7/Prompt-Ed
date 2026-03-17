@@ -1,7 +1,7 @@
 // src/hooks/useStudentSession.ts
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 
@@ -24,6 +24,7 @@ type LessonEndedPayload = { message?: string };
 type DiscussionPublishedPayload = { discussion: Discussion };
 type DiscussionClosedPayload = { discussionId: string };
 type ResponseNewPayload = { response: Response };
+type TimerUpdatedPayload = { discussionId: string; time_limit_seconds: number | null; published_at: string | null };
 
 type RealtimeLikeChannel = {
   on: (
@@ -75,6 +76,21 @@ export function useStudentSession(lessonId: string) {
 
   const [view, setView] = useState<ViewState>('loading');
 
+  // Timer state
+  const [timerEndTime, setTimerEndTime] = useState<number | null>(null);
+  const [timerTotalSeconds, setTimerTotalSeconds] = useState<number | null>(null);
+  const [timerExpired, setTimerExpired] = useState(false);
+  const timerExpiredRef = useRef(false);
+
+  // Refs to read current values inside broadcast callbacks without stale closures
+  const viewRef = useRef<ViewState>('loading');
+  const activeDiscussionRef = useRef<Discussion | null>(null);
+  const timerEndTimeRef = useRef<number | null>(null);
+
+  useEffect(() => { viewRef.current = view; }, [view]);
+  useEffect(() => { activeDiscussionRef.current = activeDiscussion; }, [activeDiscussion]);
+  useEffect(() => { timerEndTimeRef.current = timerEndTime; }, [timerEndTime]);
+
   const canSubmit = useMemo(() => {
     return (
       view === 'active' &&
@@ -122,6 +138,21 @@ export function useStudentSession(lessonId: string) {
             ? 'submitted'
             : 'active'
         );
+        const disc = discussionData as Discussion;
+        setActiveDiscussion(disc);
+        setResponseText('');
+        setView('active');
+
+        // Restore timer for late-joining students using published_at from DB
+        if (disc.time_limit_seconds && disc.time_limit_seconds > 0 && disc.published_at) {
+          const endTime = new Date(disc.published_at).getTime() + disc.time_limit_seconds * 1000;
+          if (endTime > Date.now()) {
+            setTimerEndTime(endTime);
+            setTimerTotalSeconds(disc.time_limit_seconds);
+          }
+          // If endTime is in the past, timer already expired — leave timerEndTime null
+          // (instructor auto-close will have fired already)
+        }
       } else {
         setView('waiting');
       }
@@ -166,6 +197,19 @@ export function useStudentSession(lessonId: string) {
           ? 'submitted'
           : 'active'
       );
+
+      setTimerExpired(false);
+      timerExpiredRef.current = false;
+
+      // Set up timer from discussion data
+      if (discussion.time_limit_seconds && discussion.time_limit_seconds > 0 && discussion.published_at) {
+        const endTime = new Date(discussion.published_at).getTime() + discussion.time_limit_seconds * 1000;
+        setTimerEndTime(endTime);
+        setTimerTotalSeconds(discussion.time_limit_seconds);
+      } else {
+        setTimerEndTime(null);
+        setTimerTotalSeconds(null);
+      }
     });
 
     const discussionClosedSub = ch.on('broadcast', { event: 'discussion:closed' }, (raw) => {
@@ -174,18 +218,86 @@ export function useStudentSession(lessonId: string) {
       );
       const discussionId = data?.discussionId;
 
+      // Snapshot refs before any state updates.
+      // Check timer expiry directly from the end-time ref rather than timerExpiredRef:
+      // the auto-close broadcast can arrive before the student's 500ms interval fires,
+      // so timerExpiredRef may still be false even though the time has passed.
+      const timerActuallyExpired =
+        timerEndTimeRef.current != null && Date.now() >= timerEndTimeRef.current;
+      const wasExpiredAndActive = timerActuallyExpired && viewRef.current === 'active';
+      const disc = activeDiscussionRef.current;
+      const isMCWithFeedback = disc?.prompt_type === 'multiple_choice' && !!disc?.feedback_enabled;
+
+      // Mark the discussion as closed but keep its data for the expired message
       setActiveDiscussion((prev) => {
         if (!prev || prev.id !== discussionId) return prev;
         return { ...prev, status: 'closed' } as Discussion;
       });
 
-      setView((prevView) => (prevView === 'active' ? 'waiting' : prevView));
+      // Stop the countdown UI
+      setTimerEndTime(null);
+      setTimerTotalSeconds(null);
+
+      if (wasExpiredAndActive) {
+        // Student was in active view when timer expired (never submitted).
+        // Ensure timerExpired state is set (may not have been set yet due to the race
+        // between the auto-close broadcast and the student's 500ms polling interval).
+        timerExpiredRef.current = true;
+        setTimerExpired(true);
+
+        if (isMCWithFeedback) {
+          // MC with correct-answer feedback: hold until the next discussion is published
+          // (discussion:published resets timerExpired and switches view to active again)
+        } else {
+          // All other questions: show "no answer submitted" for 5 seconds then go to waiting
+          setTimeout(() => {
+            setTimerExpired(false);
+            timerExpiredRef.current = false;
+            setActiveDiscussion(null);
+            setView('waiting');
+          }, 5000);
+        }
+      } else {
+        // Normal close (student submitted, or no timer expiry)
+        setTimerExpired(false);
+        timerExpiredRef.current = false;
+        setView((prevView) => (prevView === 'active' ? 'waiting' : prevView));
+      }
+    });
+
+    const timerUpdatedSub = ch.on('broadcast', { event: 'discussion:timer_updated' }, (raw) => {
+      const data = unwrapBroadcast<TimerUpdatedPayload>(
+        raw as BroadcastEnvelope<TimerUpdatedPayload>
+      );
+      if (!data) return;
+
+      if (!data.time_limit_seconds || !data.published_at) {
+        // Timer removed — switch to no-limit mode
+        setTimerEndTime(null);
+        timerEndTimeRef.current = null;
+        setTimerTotalSeconds(null);
+        setTimerExpired(false);
+        timerExpiredRef.current = false;
+        return;
+      }
+
+      const newEndTime = new Date(data.published_at).getTime() + data.time_limit_seconds * 1000;
+      setTimerEndTime(newEndTime);
+      timerEndTimeRef.current = newEndTime;
+      setTimerTotalSeconds(data.time_limit_seconds);
+
+      // If the new end time is in the future, the timer is no longer expired
+      if (newEndTime > Date.now()) {
+        setTimerExpired(false);
+        timerExpiredRef.current = false;
+      }
     });
 
     return () => {
       lessonEndedSub.unsubscribe();
       discussionPublishedSub.unsubscribe();
       discussionClosedSub.unsubscribe();
+      timerUpdatedSub.unsubscribe();
     };
   }, [channel, submittedDiscussionsKey]);
 
@@ -237,6 +349,20 @@ export function useStudentSession(lessonId: string) {
     if (view !== 'submitted') return;
   }, [view]);
 
+  // Detect timer expiry on student side
+  useEffect(() => {
+    if (!timerEndTime) return;
+
+    const id = setInterval(() => {
+      if (Date.now() >= timerEndTime && !timerExpiredRef.current) {
+        timerExpiredRef.current = true;
+        setTimerExpired(true);
+      }
+    }, 500);
+
+    return () => clearInterval(id);
+  }, [timerEndTime]);
+
   return {
     lesson,
     activeDiscussion,
@@ -248,6 +374,10 @@ export function useStudentSession(lessonId: string) {
     view,
     endedMessage,
     errorMessage,
+
+    timerEndTime,
+    timerTotalSeconds,
+    timerExpired,
 
     canSubmit,
     submitResponse,

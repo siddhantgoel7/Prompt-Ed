@@ -11,6 +11,7 @@ import {
     fetchResponsesApi,
     fetchFlaggedResponsesApi,
     updateParticipantSnapshotApi,
+    updateDiscussionTimerApi,
     flagResponseApi,
     unflagResponseApi,
 } from '@/lib/api/discussionsApi';
@@ -52,6 +53,13 @@ export function useLessonDiscussions(
     const peakStudentCountRef = useRef<number>(0);
     // Reactive state mirror of the ref — triggers re-renders so UI stays in sync
     const [peakStudentCount, setPeakStudentCount] = useState<number>(0);
+
+    // Timer state: end time (ms since epoch) and total seconds for the active discussion
+    const [discussionTimerEndTime, setDiscussionTimerEndTime] = useState<number | null>(null);
+    const [discussionTimerSeconds, setDiscussionTimerSeconds] = useState<number | null>(null);
+    // Ref to active discussion id for use in timer interval callback without stale closure
+    const activeDiscussionIdRef = useRef<string | null>(null);
+    const autoCloseCalledRef = useRef(false);
 
     // Whenever studentCount changes and a discussion is active, update the peak if higher
     useEffect(() => {
@@ -136,6 +144,12 @@ export function useLessonDiscussions(
         peakStudentCountRef.current = 0;
         setPeakStudentCount(0);
 
+        // Clear timer state
+        setDiscussionTimerEndTime(null);
+        setDiscussionTimerSeconds(null);
+        activeDiscussionIdRef.current = null;
+        autoCloseCalledRef.current = false;
+
         await closeDiscussionApi(discussionId);
 
         if (channel) {
@@ -149,7 +163,21 @@ export function useLessonDiscussions(
         await fetchDiscussions();
     }, [channel, fetchDiscussions]);
 
-    const handlePublishDiscussion = useCallback(async () => {
+    // Auto-close discussion when timer expires (instructor side)
+    useEffect(() => {
+        if (!discussionTimerEndTime) return;
+
+        const interval = setInterval(() => {
+            if (Date.now() >= discussionTimerEndTime && activeDiscussionIdRef.current && !autoCloseCalledRef.current) {
+                autoCloseCalledRef.current = true;
+                handleCloseDiscussion(activeDiscussionIdRef.current);
+            }
+        }, 500);
+
+        return () => clearInterval(interval);
+    }, [discussionTimerEndTime, handleCloseDiscussion]);
+
+    const handlePublishDiscussion = useCallback(async (timerSeconds: number | null = null) => {
         if (!promptInput.trim() || publishing) return;
         setPublishing(true);
 
@@ -161,16 +189,18 @@ export function useLessonDiscussions(
         peakStudentCountRef.current = studentCount;
         setPeakStudentCount(studentCount);
 
+        const publishedAt = new Date().toISOString();
         const payload = {
             lesson_id: lessonId,
             prompt_text: promptInput,
             prompt_type: promptType,
             status: 'active',
-            published_at: new Date().toISOString(),
+            published_at: publishedAt,
             display_order: discussions.length,
             source: 'manual',
             // Seed with current count; will be updated to peak on close
             participant_snapshot: studentCount > 0 ? studentCount : null,
+            time_limit_seconds: timerSeconds,
         };
 
         const newDiscussion = await insertDiscussionApi(payload);
@@ -182,6 +212,15 @@ export function useLessonDiscussions(
                 event: 'discussion:published',
                 payload: { discussion: newDiscussion },
             });
+        }
+
+        // Set up timer if applicable
+        if (timerSeconds && timerSeconds > 0) {
+            const endTime = new Date(newDiscussion.published_at!).getTime() + timerSeconds * 1000;
+            setDiscussionTimerEndTime(endTime);
+            setDiscussionTimerSeconds(timerSeconds);
+            activeDiscussionIdRef.current = newDiscussion.id;
+            autoCloseCalledRef.current = false;
         }
 
         setActiveDiscussion(newDiscussion);
@@ -242,7 +281,7 @@ export function useLessonDiscussions(
         );
     }, [activeDiscussion]);
 
-    const handlePublishAiCandidate = useCallback(async (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled: boolean = false) => {
+    const handlePublishAiCandidate = useCallback(async (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled: boolean = false, timerSeconds: number | null = null) => {
         if (publishing) return;
         setPublishing(true);
 
@@ -282,6 +321,7 @@ export function useLessonDiscussions(
             ai_generated_correct_option: aiSuggestedCorrectOption,
             // Seed with current count; will be updated to peak on close
             participant_snapshot: studentCount > 0 ? studentCount : null,
+            time_limit_seconds: timerSeconds,
         };
 
         const newDiscussion = await insertDiscussionApi(payload);
@@ -301,6 +341,15 @@ export function useLessonDiscussions(
             });
         }
 
+        // Set up timer if applicable
+        if (timerSeconds && timerSeconds > 0) {
+            const endTime = new Date(newDiscussion.published_at!).getTime() + timerSeconds * 1000;
+            setDiscussionTimerEndTime(endTime);
+            setDiscussionTimerSeconds(timerSeconds);
+            activeDiscussionIdRef.current = newDiscussion.id;
+            autoCloseCalledRef.current = false;
+        }
+
         setActiveDiscussion(newDiscussion);
         setDiscussions((prev) => [...prev, { ...newDiscussion, response_count: 0 }]);
         setResponses([]);
@@ -308,17 +357,91 @@ export function useLessonDiscussions(
         setPublishing(false);
     }, [publishing, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, clearAIState]);
 
+    /** Adds extraSeconds to the current timer end time (keeps same published_at anchor). */
+    const handleExtendTimer = useCallback(async (extraSeconds: number) => {
+        if (!activeDiscussion?.id || !activeDiscussion.published_at) return;
+
+        const publishedAt = activeDiscussion.published_at;
+        const currentEndTime = discussionTimerEndTime ?? Date.now();
+        const newEndTime = currentEndTime + extraSeconds * 1000;
+        // Recalculate total seconds from original published_at so anchor stays consistent
+        const newTimeLimitSeconds = Math.round((newEndTime - new Date(publishedAt).getTime()) / 1000);
+
+        setDiscussionTimerEndTime(newEndTime);
+        setDiscussionTimerSeconds(newTimeLimitSeconds);
+        // Allow auto-close to fire again at the new end time
+        autoCloseCalledRef.current = false;
+
+        await updateDiscussionTimerApi(activeDiscussion.id, newTimeLimitSeconds, publishedAt);
+
+        if (channel) {
+            await (channel as RealtimeLikeChannel).send({
+                type: 'broadcast',
+                event: 'discussion:timer_updated',
+                payload: { discussionId: activeDiscussion.id, time_limit_seconds: newTimeLimitSeconds, published_at: publishedAt },
+            });
+        }
+    }, [activeDiscussion, discussionTimerEndTime, channel]);
+
+    /** Replaces the timer with a brand-new countdown of newSeconds starting from now, or removes it if newSeconds is null. */
+    const handleEditTimer = useCallback(async (newSeconds: number | null) => {
+        if (!activeDiscussion?.id) return;
+
+        if (!newSeconds || newSeconds <= 0) {
+            // Remove the timer entirely
+            setDiscussionTimerEndTime(null);
+            setDiscussionTimerSeconds(null);
+            activeDiscussionIdRef.current = null;
+            autoCloseCalledRef.current = false;
+
+            const supabase = (await import('@/lib/supabase/client')).createClient();
+            await supabase.from('discussions').update({ time_limit_seconds: null }).eq('id', activeDiscussion.id);
+
+            if (channel) {
+                await (channel as RealtimeLikeChannel).send({
+                    type: 'broadcast',
+                    event: 'discussion:timer_updated',
+                    payload: { discussionId: activeDiscussion.id, time_limit_seconds: null, published_at: null },
+                });
+            }
+            return;
+        }
+
+        const newPublishedAt = new Date().toISOString();
+        const newEndTime = Date.now() + newSeconds * 1000;
+
+        setDiscussionTimerEndTime(newEndTime);
+        setDiscussionTimerSeconds(newSeconds);
+        activeDiscussionIdRef.current = activeDiscussion.id;
+        // Reset auto-close so it fires at the new end time
+        autoCloseCalledRef.current = false;
+
+        await updateDiscussionTimerApi(activeDiscussion.id, newSeconds, newPublishedAt);
+
+        if (channel) {
+            await (channel as RealtimeLikeChannel).send({
+                type: 'broadcast',
+                event: 'discussion:timer_updated',
+                payload: { discussionId: activeDiscussion.id, time_limit_seconds: newSeconds, published_at: newPublishedAt },
+            });
+        }
+    }, [activeDiscussion, channel]);
+
     return {
         peakStudentCount,
         discussions,
         activeDiscussion,
         responses,
+        discussionTimerEndTime,
+        discussionTimerSeconds,
         flaggedResponses,
         fetchDiscussions,
         fetchResponses,
         handleCloseDiscussion,
         handlePublishDiscussion,
         handlePublishAiCandidate,
+        handleExtendTimer,
+        handleEditTimer,
         removeResponse,
         restoreResponse,
     };
