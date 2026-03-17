@@ -49,8 +49,9 @@ export async function embedChunks(
 
     const failed = results.find(({ error }) => error);
     if (failed?.error) {
-      console.error(`EMBED_UPDATE_ERR [${failed.error.code ?? 'unknown'}]: ${failed.error.message}`);
-      throw new Error(`Failed to store embeddings: ${failed.error.message}`);
+      const msg = String(failed.error.message ?? '').slice(0, 200);
+      console.error(`EMBED_UPDATE_ERR [${failed.error.code ?? 'unknown'}]: ${msg}`);
+      throw new Error(`Failed to store embeddings: ${msg}`);
     }
   }
 }
