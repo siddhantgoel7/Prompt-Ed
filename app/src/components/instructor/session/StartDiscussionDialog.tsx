@@ -58,6 +58,8 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
             <div
               role="checkbox"
               aria-checked={noLimit}
+              aria-label="No Time Limit"
+              data-testid="no-time-limit-checkbox"
               tabIndex={0}
               onClick={() => setNoLimit((v) => !v)}
               onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') setNoLimit((v) => !v); }}

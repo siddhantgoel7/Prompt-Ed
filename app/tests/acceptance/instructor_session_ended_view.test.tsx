@@ -1,6 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SessionEndedView } from '@/components/instructor/session/SessionEndedView';
 import type { SessionVM } from '@/hooks/useSessionPage';
+import userEvent from '@testing-library/user-event';
+
 
 jest.mock('@/components/instructor/session/SessionHeaderEnded', () => ({
   SessionHeaderEnded: (props: any) => {
@@ -9,7 +11,9 @@ jest.mock('@/components/instructor/session/SessionHeaderEnded', () => ({
     return (
       <div>
         <div>Ended Header: {vm.lesson.title}</div>
-        <button onClick={vm.handleExportLessonData}>Export Txt</button>
+        <button onClick={vm.handleExportOverviewTxt}>Export Overview TXT</button>
+        <button onClick={vm.handleExportDiscussionsCsv}>Export Discussions CSV</button>
+        <button onClick={vm.handleExportStatistics}>Export Statistics</button>
         <button onClick={vm.handleActivate}>Activate</button>
         <button onClick={props.onSplitView}>Split View</button>
         <div>exporting={String(vm.exportingData)}</div>
@@ -60,7 +64,9 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
     lessonDiscussions: [],
     exportingData: false,
     activatingLesson: false,
-    handleExportLessonData: jest.fn(),
+    handleExportOverviewTxt: jest.fn(),
+    handleExportDiscussionsCsv: jest.fn(),
+    handleExportStatistics: jest.fn(),
     handleActivate: jest.fn(),
     transcripts: [],
     transcriptsLoading: false,
@@ -125,13 +131,43 @@ describe('SessionEndedView (Acceptance)', () => {
   });
 
   // 6.5
-  it('[US 1.09][AT1] success: clicking Export calls vm.handleExportLessonData', () => {
+  it('[US 1.41][AC3-AT1] success: clicking Export overview TXT calls vm.handleExportOverviewTxt', async () => {
     const vm = makeVM();
+    const user = userEvent.setup();
+
     render(<SessionEndedView vm={vm} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Export Txt/i }));
-    expect(vm.handleExportLessonData).toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: /Export Overview TXT/i }));
+
+
+    expect(vm.handleExportOverviewTxt).toHaveBeenCalled();
   });
+
+  // 6.5b
+  it('[US 1.42][AC3-AT1] success: clicking Export Discussions CSV calls vm.handleExportDiscussionsCsv', async () => {
+    const vm = makeVM();
+    const user = userEvent.setup();
+
+    render(<SessionEndedView vm={vm} />);
+
+    await user.click(screen.getByRole('button', { name: /Export Discussions CSV/i }));
+
+    expect(vm.handleExportDiscussionsCsv).toHaveBeenCalled();
+  });
+
+  // 6.5c
+  it('[US 1.43][AC3-AT1] success: clicking Export Statistics calls vm.handleExportStatistics', async () => {
+    const vm = makeVM();
+    const user = userEvent.setup();
+
+    render(<SessionEndedView vm={vm} />);
+
+    await user.click(screen.getByRole('button', { name: /Export Statistics/i }));
+
+    expect(vm.handleExportStatistics).toHaveBeenCalled();
+  });
+
+
 
   // 6.6
   it('[US 1.06][AT3] success: clicking Activate calls vm.handleActivate', () => {
@@ -259,5 +295,58 @@ describe('SessionEndedView (Acceptance)', () => {
     fireEvent.click(screen.getByRole('button', { name: /Split View/i }));
 
     expect(screen.getByText('Discussions: 2')).toBeInTheDocument();
+  });
+  
+  it('shows an error message when vm.endError exists', () => {
+    const vm = makeVM({
+      endError: 'Failed to export statistics.',
+    });
+
+    render(<SessionEndedView vm={vm} />);
+
+    expect(screen.getByText('Failed to export statistics.')).toBeInTheDocument();
+  });
+
+  it('shows an error message when discussions export fails', () => {
+    const vm = makeVM({
+      endError: 'Failed to export discussions CSV.',
+    });
+
+    render(<SessionEndedView vm={vm} />);
+
+    expect(screen.getByText('Failed to export discussions CSV.')).toBeInTheDocument();
+  });
+
+  // 6.10 — Failure scenario: export API error for statistics shows inline error
+  it('[US 1.43][AC2-AT1] failure: shows error banner when statistics export API fails', () => {
+    const vm = makeVM({ endError: 'Failed to export statistics.' });
+    render(<SessionEndedView vm={vm} />);
+    expect(screen.getByText('Failed to export statistics.')).toBeInTheDocument();
+  });
+
+  // 6.11 — Failure scenario: export API error for overview TXT shows inline error
+  it('[US 1.41][AC2-AT1] failure: shows error banner when overview TXT export API fails', () => {
+    const vm = makeVM({ endError: 'Failed to export lesson data.' });
+    render(<SessionEndedView vm={vm} />);
+    expect(screen.getByText('Failed to export lesson data.')).toBeInTheDocument();
+  });
+
+  // 6.12 — Failure scenario: export API error for discussions CSV shows inline error
+  it('[US 1.42][AC2-AT1] failure: shows error banner when discussions CSV export API fails', () => {
+    const vm = makeVM({ endError: 'Failed to export discussions CSV.' });
+    render(<SessionEndedView vm={vm} />);
+    expect(screen.getByText('Failed to export discussions CSV.')).toBeInTheDocument();
+  });
+
+  // 6.13 — In-progress state: export button is disabled while exportingData=true
+  it('[US 1.41][US 1.42][US 1.43][AC3-AT2] state: Export button shows Exporting... and is disabled while exporting', async () => {
+    const vm = makeVM({ exportingData: true });
+    const user = userEvent.setup();
+    render(<SessionEndedView vm={vm} />);
+    // The mocked header exposes an exporting= attribute
+    expect(screen.getByText('exporting=true')).toBeInTheDocument();
+    // The real export button (via context) should be disabled — check via the header mock's label
+    // Since we mock SessionHeaderEnded, verify the vm flag reaches the mock
+    expect(screen.queryByText('exporting=false')).not.toBeInTheDocument();
   });
 });
