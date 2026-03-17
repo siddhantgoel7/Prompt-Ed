@@ -34,6 +34,8 @@ describe('SessionDisplayView', () => {
     });
 
     expect(screen.getByText('http://localhost/student/lesson-xyz')).toBeInTheDocument();
-    expect(screen.getByAltText(/join lesson qr code/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByAltText(/join lesson qr code/i)).toBeInTheDocument();
+    });
   });
 });

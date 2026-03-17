@@ -2,34 +2,36 @@
 
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
+import { useRouter } from 'next/navigation';
+
 
 export function useStudentJoinQR(lessonId: string | undefined, width: number) {
-  const [joinUrl, setJoinUrl] = useState<string | null>(null);
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const router = useRouter()
+  const joinUrl =
+    lessonId && typeof window !== 'undefined'
+      ? `${window.location.origin}/student/${lessonId}`
+      : null;
+  const [qrState, setQrState] = useState<{ lessonId: string; dataUrl: string } | null>(null);
+    router.push(`/session/${lessonId}`);
 
   useEffect(() => {
-    if (!lessonId) {
-      setJoinUrl(null);
-      setQrDataUrl(null);
-      return;
-    }
-
-    const url = `${window.location.origin}/student/${lessonId}`;
-    setJoinUrl(url);
+    if (!lessonId || !joinUrl) return;
 
     let cancelled = false;
-    QRCode.toDataURL(url, { width, margin: 1 })
+    QRCode.toDataURL(joinUrl, { width, margin: 1 })
       .then((dataUrl) => {
-        if (!cancelled) setQrDataUrl(dataUrl);
+        if (!cancelled) setQrState({ lessonId, dataUrl });
       })
       .catch(() => {
-        if (!cancelled) setQrDataUrl(null);
+        // Keep previous QR hidden via lessonId guard below.
       });
 
     return () => {
       cancelled = true;
     };
-  }, [lessonId, width]);
+  }, [lessonId, joinUrl, width]);
+
+  const qrDataUrl = qrState?.lessonId === lessonId ? qrState.dataUrl : null;
 
   return { joinUrl, qrDataUrl };
 }
