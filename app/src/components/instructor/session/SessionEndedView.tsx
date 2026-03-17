@@ -230,6 +230,14 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
   const content = (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SessionHeaderEnded onSplitView={() => setSplitView(true)} />
+        
+      {vm.endError && (
+        <div className="px-6 pt-4">
+          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {vm.endError}
+          </div>
+        </div>
+      )}
 
       <SummaryBar
         totalDiscussions={vm.lessonDiscussions.length}

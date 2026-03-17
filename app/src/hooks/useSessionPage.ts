@@ -105,6 +105,17 @@ export type SessionVM = {
   restoreResponse: (responseId: string) => Promise<void>;
 };
 
+function escapeCsv(value: string | number | null | undefined): string {
+  const stringValue = String(value ?? '');
+  return `"${stringValue.replace(/"/g, '""')}"`;
+}
+
+function formatExportTimestamp(value: string | null | undefined): string {
+  if (!value) return '';
+  return new Date(value).toISOString();
+}
+
+
 export function useSessionPage(lessonId: string): SessionVM {
   const router = useRouter();
   // studentCount: live presence count from Realtime — number of students currently in session
@@ -462,10 +473,7 @@ export function useSessionPage(lessonId: string): SessionVM {
 
       const rows = (data ?? []) as ExportDiscussionRow[];
 
-      const escapeCsv = (value: string | number | null | undefined) => {
-        const stringValue = String(value ?? '');
-        return `"${stringValue.replace(/"/g, '""')}"`;
-      };
+      
 
       const csvLines: string[] = [
         [
@@ -485,7 +493,7 @@ export function useSessionPage(lessonId: string): SessionVM {
           csvLines.push([
             escapeCsv(discussionIndex + 1),
             escapeCsv(discussion.prompt_text),
-            escapeCsv(new Date(discussion.created_at).toLocaleString()),
+            escapeCsv(formatExportTimestamp(discussion.created_at)),
             escapeCsv(''),
             escapeCsv(''),
             escapeCsv(''),
@@ -497,10 +505,10 @@ export function useSessionPage(lessonId: string): SessionVM {
           csvLines.push([
             escapeCsv(discussionIndex + 1),
             escapeCsv(discussion.prompt_text),
-            escapeCsv(new Date(discussion.created_at).toLocaleString()),
+            escapeCsv(formatExportTimestamp(discussion.created_at)),
             escapeCsv(responseIndex + 1),
             escapeCsv(response.response_text),
-            escapeCsv(new Date(response.created_at).toLocaleString()),
+            escapeCsv(formatExportTimestamp(response.created_at)),
           ].join(','));
         });
       });
@@ -521,6 +529,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   try {
     const { data, error } = await fetchExportDiscussionsApi(lesson.id);
 
+    
     if (error) {
       setEndError('Failed to export statistics.');
       return;
@@ -528,18 +537,16 @@ export function useSessionPage(lessonId: string): SessionVM {
 
     const rows = (data ?? []) as ExportDiscussionRow[];
 
-    const escapeCsv = (value: string | number | null | undefined) => {
-      const stringValue = String(value ?? '');
-      return `"${stringValue.replace(/"/g, '""')}"`;
-    };
+    
 
     const lessonWithDates = lesson as Lesson & {
       started_at?: string | null;
       ended_at?: string | null;
     };
 
-    const startedAt = lessonWithDates.started_at ?? '';
-    const endedAt = lessonWithDates.ended_at ?? '';
+    const startedAt = formatExportTimestamp(lessonWithDates.started_at);
+    const endedAt = formatExportTimestamp(lessonWithDates.ended_at);
+
 
     const totalResponses = rows.reduce((sum, d) => sum + (d.responses?.length ?? 0), 0);
     const avgResponses = rows.length > 0 ? (totalResponses / rows.length).toFixed(2) : '0.00';
@@ -587,8 +594,8 @@ export function useSessionPage(lessonId: string): SessionVM {
       const responseCount = responses.length;
       const snapshot = d.participant_snapshot ?? 0;
       const participationRate = snapshot > 0 ? Math.round((responseCount / snapshot) * 100) : '';
-      const firstResponseAt = responses[0]?.created_at ?? '';
-      const lastResponseAt = responses[responses.length - 1]?.created_at ?? '';
+      const firstResponseAt = formatExportTimestamp(responses[0]?.created_at);
+      const lastResponseAt = formatExportTimestamp(responses[responses.length - 1]?.created_at);
       const minutesToFirstResponse =
         firstResponseAt
           ? (
@@ -600,8 +607,8 @@ export function useSessionPage(lessonId: string): SessionVM {
         escapeCsv(index + 1),
         escapeCsv(d.prompt_text),
         escapeCsv(d.prompt_type),
-        escapeCsv(d.created_at),
-        escapeCsv(d.closed_at ?? ''),
+        escapeCsv(formatExportTimestamp(d.created_at)),
+        escapeCsv(formatExportTimestamp(d.closed_at)),
         escapeCsv(snapshot || ''),
         escapeCsv(responseCount),
         escapeCsv(participationRate),

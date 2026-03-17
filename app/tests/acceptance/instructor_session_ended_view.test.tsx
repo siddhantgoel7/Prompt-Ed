@@ -294,4 +294,26 @@ describe('SessionEndedView (Acceptance)', () => {
 
     expect(screen.getByText('Discussions: 2')).toBeInTheDocument();
   });
+  
+  it('shows an error message when vm.endError exists', () => {
+    const vm = makeVM({
+      endError: 'Failed to export statistics.',
+    });
+
+    render(<SessionEndedView vm={vm} />);
+
+    expect(screen.getByText('Failed to export statistics.')).toBeInTheDocument();
+  });
+
+  it('shows an error message when discussions export fails', () => {
+    const vm = makeVM({
+      endError: 'Failed to export discussions CSV.',
+    });
+
+    render(<SessionEndedView vm={vm} />);
+
+    expect(screen.getByText('Failed to export discussions CSV.')).toBeInTheDocument();
+  });
+
+
 });
