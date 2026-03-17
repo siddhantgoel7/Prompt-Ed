@@ -48,6 +48,18 @@ function splitBySentences(text: string, maxChars: number, overlapSentences = 1):
   return chunks;
 }
 
+/**
+ * Returns true if text is predominantly label soup (disconnected tokens, no prose).
+ * Used to decide whether to suppress a page_text chunk when a visual_description
+ * for the same page already exists. Threshold: avg words per sentence < 4.
+ */
+function isLabelSoup(text: string): boolean {
+  const segments = text.split(/[\n.]+/).map(s => s.trim()).filter(s => s.length > 0);
+  if (segments.length === 0) return true;
+  const avgWords = segments.reduce((sum, s) => sum + s.split(/\s+/).length, 0) / segments.length;
+  return avgWords < 4;
+}
+
 /** Detects file type by inspecting the first 4 magic bytes of the buffer. */
 function detectFileType(buffer: Buffer): 'pdf' | 'pptx' | null {
   if (buffer.subarray(0, 4).equals(MAGIC.pdf)) return 'pdf';
@@ -163,6 +175,14 @@ export async function POST(
         // [DEV-INSPECT] end
         console.log(`[upload] [${file.name}] parse done at ${elapsed()} — ${sections.length} section(s)`);
 
+        // Build a set of page numbers that have a visual_description so we can suppress
+        // the corresponding page_text chunk when it is label soup (figures/tables with no prose).
+        const pagesWithVision = new Set(
+          sections
+            .filter(s => s.contentOrigin === 'visual_description' && s.pageNumber != null)
+            .map(s => s.pageNumber!)
+        );
+
         // Chunk each section independently so boundaries never cross page/slide/content-type lines.
         // Each resulting chunk inherits its section's page/slide number and content origin.
         const chunkRows: Array<{
@@ -176,6 +196,23 @@ export async function POST(
 
         for (const section of sections) {
           if (chunkRows.length >= MAX_CHUNKS_PER_FILE) break;
+
+          // Suppress page_text for pages where visual_description exists AND the text is
+          // label soup — disconnected tokens from figure/table layouts with no prose value.
+          if (section.contentOrigin === 'page_text' && section.pageNumber != null && pagesWithVision.has(section.pageNumber)) {
+            const segments = section.content.split(/[\n.]+/).map(s => s.trim()).filter(s => s.length > 0);
+            const avgWords = segments.length > 0
+              ? segments.reduce((sum, s) => sum + s.split(/\s+/).length, 0) / segments.length
+              : 0;
+            const shortSegments = segments.filter(s => s.split(/\s+/).length < 4).length;
+            const shortRatio = segments.length > 0 ? shortSegments / segments.length : 1;
+            console.log(`[upload] [${file.name}] p.${section.pageNumber} vision+text — avg_words=${avgWords.toFixed(2)} short_ratio=${shortRatio.toFixed(2)} segments=${segments.length}`);
+            if (isLabelSoup(section.content)) {
+              console.log(`[upload] [${file.name}] suppressed page_text p.${section.pageNumber} — label soup (visual_description present)`);
+              continue;
+            }
+          }
+
           const chunkSize =
             section.contentOrigin === 'slide_body'  ? 512  :
             section.contentOrigin === 'slide_notes' ? 768  : 1024;
