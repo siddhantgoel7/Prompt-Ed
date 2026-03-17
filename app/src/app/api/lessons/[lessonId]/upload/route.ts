@@ -176,11 +176,14 @@ export async function POST(
 
         for (const section of sections) {
           if (chunkRows.length >= MAX_CHUNKS_PER_FILE) break;
+          const chunkSize =
+            section.contentOrigin === 'slide_body'  ? 512  :
+            section.contentOrigin === 'slide_notes' ? 768  : 1024;
           const subChunks = (
             section.contentOrigin === 'visual_description'
-              ? [section.content]                              // never split — vision output is pre-structured
-              : splitBySentences(section.content, 1024, 1)   // sentence-aware for all other types
-          ).filter(c => c.trim().length > 50);               // drop heading-only noise
+              ? [section.content]                                        // never split — vision output is pre-structured
+              : splitBySentences(section.content, chunkSize, 1)         // sentence-aware, size tuned per content type
+          ).filter(c => c.trim().length > 50);                          // drop heading-only noise
           for (const content of subChunks) {
             if (chunkRows.length >= MAX_CHUNKS_PER_FILE) break;
             const metadata: ChunkMetadata = {
