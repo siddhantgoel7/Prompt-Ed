@@ -194,7 +194,7 @@ export async function POST(
               slideNumber: section.slideNumber,
               chunkIndex: chunkIndex++,
             };
-            chunkRows.push({ lesson_id: lessonId, lesson_file_id: fileRecord.id, content_type: 'slide', content, metadata });
+            chunkRows.push({ lesson_id: lessonId, lesson_file_id: fileRecord.id, content_type: section.contentOrigin, content, metadata });
           }
         }
 
