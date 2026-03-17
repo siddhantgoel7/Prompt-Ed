@@ -24,8 +24,15 @@ function registerCanvasGlobals() {
 /**
  * Extracts text and visual content from a PDF buffer.
  * Returns a page-annotated string with [Page N Text] and optional [Page N Visual Content] sections.
+ *
+ * @param opts.onVisionRawJson [DEV-INSPECT] Called with the raw JSON string from the vision model,
+ *   before page-level parsing. Remove with [DEV-INSPECT].
  */
-export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise<string> {
+export async function parsePdf(
+  buffer: Buffer,
+  aiProvider?: AIProvider,
+  opts?: { onVisionRawJson?: (raw: string) => void } // [DEV-INSPECT] raw JSON callback
+): Promise<string> {
   registerCanvasGlobals();
 
   const pdfjs = await import('pdfjs-serverless');
@@ -90,8 +97,9 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
       ? new GeminiProvider()
       : aiProvider;
     try {
-      const descriptions = await visionProvider.generatePdfVisualDescriptions(buffer, pdf.numPages);
+      const { descriptions, rawJson } = await visionProvider.generatePdfVisualDescriptions(buffer, pdf.numPages); // [DEV-INSPECT] unpack rawJson
       visualDescriptionsByPage = descriptions;
+      opts?.onVisionRawJson?.(rawJson); // [DEV-INSPECT] forward raw JSON to caller
       dlog(`[pdfParser] PDF vision pass complete — got descriptions for ${descriptions.size} pages`);
     } catch (err) {
       console.warn('[pdfParser] PDF vision pass failed, continuing with text only:', err);

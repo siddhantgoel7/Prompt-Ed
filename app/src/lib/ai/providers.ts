@@ -7,17 +7,54 @@ import { GoogleGenerativeAI, type Part, type Content } from '@google/generative-
 /** Represents a single message in the chat history passed to the LLM. */
 export type AIMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
-// ── Shared PDF vision prompt ────────────────────────────────────────────────
-// Single source of truth used by both OpenAIProvider and GeminiProvider so
-// prompt changes only need to be made in one place.
+// ── Shared vision prompts ────────────────────────────────────────────────────
+// Single source of truth for all three vision tasks (PDF, single image, PPTX slide).
+// All three use the same extraction rules so prompt changes only need to be made here.
+//
+// Natural-language sentences are used instead of compact symbol notation because
+// text-embedding-3-small is trained on natural language: "FFA stimulates insulin
+// resistance" embeds with richer semantic context than "Arrows: FFA→Insulin resistance",
+// and retrieval against conversational queries improves. Directional relationships in
+// pathway/flowchart diagrams are expressed as sentences to preserve causality that flat
+// label lists lose.
+const VISION_EXTRACTION_RULES =
+    'If the diagram contains a legend or key, state what each arrow style means before listing any relationships ' +
+    '(e.g. "Legend: solid arrow with open triangle = activation; flat-head bar = inhibition; dashed arrow = indirect effect."). ' +
+    'If no legend is visible, apply standard pathway conventions: open triangle arrowhead = activation (actor at tail, recipient at head); ' +
+    'flat/bar arrowhead = inhibition (inhibitor at tail, inhibited at head).\n' +
+    'Write short, factual natural-language sentences describing the visual content. ' +
+    'Rules by visual type:\n' +
+    '- Flowcharts and pathway diagrams: express each directional link as a sentence stating the relationship ' +
+    '(e.g. "FFA stimulates insulin resistance." "Adiponectin improves insulin sensitivity and vascular function." ' +
+    '"TNF-alpha and IL-6 promote inflammation."). Only write relationship sentences — do not enumerate labels or components separately.\n' +
+    '- Tables: for every cell, write one sentence in the form ' +
+    '"For [row criterion], [column name] requires [exact cell value]." ' +
+    'Cover every row and every column. Use the exact values from the table — do not summarize or omit any cell.\n' +
+    '- Graphs and charts: describe the axes, units, and the main trend or comparison shown.\n' +
+    '- Chemical structures: name the compound and describe atoms, bonds, and functional groups.\n' +
+    'Be specific and factual — use the actual names from the visual, not generic descriptions. ' +
+    'Do not interpret or explain — only describe what is shown.';
+
 const PDF_VISION_SYSTEM_PROMPT =
     'You are a visual content extractor for a teaching tool. ' +
-    'For each page with diagrams, figures, chemical structures, tables, graphs, or images: ' +
-    'list only the key visual elements — component names, labels, arrow directions, table headers and values. ' +
-    'Write as a compact list of facts, not prose. No full sentences, no explanation, no interpretation. ' +
-    'Good: "Flowchart: A→B→C; feedback loop B→A. Labels: Input, Process, Output." ' +
-    'Bad: "The diagram shows a flowchart that illustrates how data flows between components..." ' +
+    'For each page containing diagrams, figures, chemical structures, tables, graphs, or images:\n' +
+    VISION_EXTRACTION_RULES + '\n' +
     'For pages with ONLY text and no visual elements, output exactly: NO_VISUAL_CONTENT';
+
+const SINGLE_IMAGE_SYSTEM_PROMPT =
+    'You are a visual content extractor for a teaching tool.\n' +
+    VISION_EXTRACTION_RULES + '\n' +
+    'If the image contains no meaningful content (blank slide, logo, decorative element), ' +
+    'respond with exactly: NO_VISUAL_CONTENT';
+
+const PPTX_SLIDE_SYSTEM_PROMPT =
+    'You are a visual content extractor for a teaching tool. ' +
+    'You will be given a PowerPoint slide: its text, speaker notes, and embedded images. ' +
+    'Describe ONLY what is in the images and not already captured in the slide text or notes.\n' +
+    VISION_EXTRACTION_RULES + '\n' +
+    'Do NOT repeat information already present in the slide text or notes. ' +
+    'If the images add no information beyond what the text/notes already cover, ' +
+    'respond with exactly: NO_VISUAL_CONTENT';
 
 const buildPdfVisionUserPrompt = (numPages: number): string =>
     `This PDF has ${numPages} pages. ` +
@@ -47,11 +84,14 @@ export interface AIProvider {
      * Uses OpenAI's native PDF file input (data URI) which lets GPT-4o
      * process all pages including embedded images in a single API call.
      * Pages with only text return NO_VISUAL_CONTENT and are excluded from the map.
+     *
+     * [DEV-INSPECT] rawJson: the verbatim JSON string returned by the vision model,
+     * before parsing — useful for inspecting prompt output. Remove with [DEV-INSPECT].
      */
     generatePdfVisualDescriptions(
         pdfBuffer: Buffer,
         numPages: number
-    ): Promise<Map<number, string>>;
+    ): Promise<{ descriptions: Map<number, string>; rawJson: string }>; // [DEV-INSPECT] rawJson added
 
     /**
      * Describes all visual content on a single PPTX slide.
@@ -115,15 +155,7 @@ export class OpenAIProvider implements AIProvider {
         mimeType: 'image/png' | 'image/jpeg' | 'image/webp',
         contextHint?: string
     ): Promise<string> {
-        const systemPrompt =
-            'You are a visual content extractor for a pharmacology teaching tool. ' +
-            'Describe all visual content in the image concisely and precisely: ' +
-            'chemical structures (name atoms, bonds, functional groups), receptor diagrams, ' +
-            'pathway figures, tables (transcribe all cell values), charts (axes, data points), ' +
-            'and any embedded text not already captured as slide text. ' +
-            'Be factual. Do not interpret — describe exactly what is visually present. ' +
-            'If the image contains no meaningful content (blank slide, logo, decorative element), ' +
-            'respond with exactly: NO_VISUAL_CONTENT';
+        const systemPrompt = SINGLE_IMAGE_SYSTEM_PROMPT;
 
         const userContent: OpenAI.Chat.ChatCompletionContentPart[] = [
             {
@@ -201,7 +233,7 @@ export class OpenAIProvider implements AIProvider {
             console.warn('[providers] Failed to parse PDF vision JSON response:', err, raw.slice(0, 200));
         }
 
-        return result;
+        return { descriptions: result, rawJson: raw }; // [DEV-INSPECT] rawJson added
     }
 
     async generatePptxSlideVisualDescription(
@@ -211,17 +243,7 @@ export class OpenAIProvider implements AIProvider {
         notesText: string,
         images: Array<{ base64: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp' }>
     ): Promise<string> {
-        const systemPrompt =
-            'You are a visual content extractor for a pharmacology teaching tool. ' +
-            'You will be given a PowerPoint slide: its text, speaker notes, and embedded images. ' +
-            'Describe ONLY visual content not already captured in the text/notes: ' +
-            'chemical structures (atoms, bonds, functional groups, stereochemistry), ' +
-            'receptor/pathway diagrams (all components, arrows, labels), ' +
-            'tables (transcribe all cell values), graphs (axes, units, data trends). ' +
-            'Do NOT repeat information already present in the slide text or notes. ' +
-            'Be factual and specific — describe exactly what is visually present. ' +
-            'If the images add no information beyond what the text/notes already cover, ' +
-            'respond with exactly: NO_VISUAL_CONTENT';
+        const systemPrompt = PPTX_SLIDE_SYSTEM_PROMPT;
 
         // Build user message: text context first, then all images
         const userContent: OpenAI.Chat.ChatCompletionContentPart[] = [];
@@ -318,15 +340,7 @@ export class GeminiProvider implements AIProvider {
         mimeType: 'image/png' | 'image/jpeg' | 'image/webp',
         contextHint?: string
     ): Promise<string> {
-        const systemPrompt =
-            'You are a visual content extractor for a pharmacology teaching tool. ' +
-            'Describe all visual content in the image concisely and precisely: ' +
-            'chemical structures (name atoms, bonds, functional groups), receptor diagrams, ' +
-            'pathway figures, tables (transcribe all cell values), charts (axes, data points), ' +
-            'and any embedded text not already captured as slide text. ' +
-            'Be factual. Do not interpret — describe exactly what is visually present. ' +
-            'If the image contains no meaningful content (blank slide, logo, decorative element), ' +
-            `respond with exactly: ${this.NO_VISUAL_CONTENT}`;
+        const systemPrompt = SINGLE_IMAGE_SYSTEM_PROMPT;
 
         const parts: Part[] = [{ inlineData: { mimeType, data: base64Image } }];
         if (contextHint) {
@@ -383,7 +397,7 @@ export class GeminiProvider implements AIProvider {
             console.warn('[GeminiProvider] Failed to parse PDF vision JSON:', err, raw.slice(0, 200));
         }
 
-        return descriptions;
+        return { descriptions, rawJson: raw }; // [DEV-INSPECT] rawJson added
     }
 
     /** Describes all visual content on a single PPTX slide using gemini-1.5-pro. */
@@ -393,17 +407,7 @@ export class GeminiProvider implements AIProvider {
         notesText: string,
         images: Array<{ base64: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp' }>
     ): Promise<string> {
-        const systemPrompt =
-            'You are a visual content extractor for a pharmacology teaching tool. ' +
-            'You will be given a PowerPoint slide: its text, speaker notes, and embedded images. ' +
-            'Describe ONLY visual content not already captured in the text/notes: ' +
-            'chemical structures (atoms, bonds, functional groups, stereochemistry), ' +
-            'receptor/pathway diagrams (all components, arrows, labels), ' +
-            'tables (transcribe all cell values), graphs (axes, units, data trends). ' +
-            'Do NOT repeat information already present in the slide text or notes. ' +
-            'Be factual and specific — describe exactly what is visually present. ' +
-            'If the images add no information beyond what the text/notes already cover, ' +
-            `respond with exactly: ${this.NO_VISUAL_CONTENT}`;
+        const systemPrompt = PPTX_SLIDE_SYSTEM_PROMPT;
 
         const contextText = [`Slide ${slideNumber} text: ${bodyText || '(none)'}`];
         if (notesText) contextText.push(`Speaker notes: ${notesText}`);
