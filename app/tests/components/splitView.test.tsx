@@ -51,7 +51,9 @@ describe('SplitView Component', () => {
       from: jest.fn().mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            is: jest.fn().mockReturnValue({
+              order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            }),
           }),
         }),
       }),
@@ -129,9 +131,11 @@ describe('SplitView Component', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({
-              data: [mockResponse, mockResponse2],
-              error: null,
+            is: jest.fn().mockReturnValue({
+              order: jest.fn().mockResolvedValue({
+                data: [mockResponse, mockResponse2],
+                error: null,
+              }),
             }),
           }),
         }),
@@ -157,9 +161,11 @@ describe('SplitView Component', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({
-              data: responsesData,
-              error: null,
+            is: jest.fn().mockReturnValue({
+              order: jest.fn().mockResolvedValue({
+                data: responsesData,
+                error: null,
+              }),
             }),
           }),
         }),
@@ -185,7 +191,9 @@ describe('SplitView Component', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            is: jest.fn().mockReturnValue({
+              order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            }),
           }),
         }),
       });
@@ -213,7 +221,9 @@ describe('SplitView Component', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            is: jest.fn().mockReturnValue({
+              order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            }),
           }),
         }),
       });
@@ -243,7 +253,9 @@ describe('SplitView Component', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            is: jest.fn().mockReturnValue({
+              order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            }),
           }),
         }),
       });
@@ -266,7 +278,9 @@ describe('SplitView Component', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            is: jest.fn().mockReturnValue({
+              order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            }),
           }),
         }),
       });
@@ -294,7 +308,9 @@ describe('SplitView Component', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            is: jest.fn().mockReturnValue({
+              order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            }),
           }),
         }),
       });
@@ -326,7 +342,9 @@ describe('SplitView Component', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            is: jest.fn().mockReturnValue({
+              order: jest.fn().mockResolvedValue({ data: [], error: null }),
+            }),
           }),
         }),
       });
@@ -358,9 +376,11 @@ describe('SplitView Component', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({
-              data: [mockResponse],
-              error: null,
+            is: jest.fn().mockReturnValue({
+              order: jest.fn().mockResolvedValue({
+                data: [mockResponse],
+                error: null,
+              }),
             }),
           }),
         }),
@@ -388,7 +408,9 @@ describe('SplitView Component', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockReturnValue(new Promise(() => {})),
+            is: jest.fn().mockReturnValue({
+              order: jest.fn().mockReturnValue(new Promise(() => {})),
+            }),
           }),
         }),
       });

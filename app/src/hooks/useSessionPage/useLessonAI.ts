@@ -10,11 +10,12 @@ export function useLessonAI(lessonId: string, setPromptInput: (p: string) => voi
     const [isGenerating, setIsGenerating] = useState(false);
     const [generationWarning, setGenerationWarning] = useState<string | null>(null);
 
-    const generateCandidates = useCallback(async () => {
+    const generateCandidates = useCallback(async (transcriptOverride?: string) => {
+        const transcriptToUse = transcriptOverride ?? transcriptText;
         setIsGenerating(true);
         setGenerationWarning(null);
         try {
-            const data = await generateCandidatesApi(lessonId, promptType, transcriptText);
+            const data = await generateCandidatesApi(lessonId, promptType, transcriptToUse);
             setCandidates(data.candidates);
             setGenerationWarning(data.warning ?? null);
         } catch (err) {

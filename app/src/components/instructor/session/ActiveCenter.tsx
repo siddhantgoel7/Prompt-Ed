@@ -16,6 +16,7 @@ import { CandidateCard } from './CandidateCard';
 import { MultipleChoiceEditor } from './MultipleChoiceEditor';
 import { AIPreferencesDialog } from './AIPreferencesDialog';
 import { transcribeAudioApi } from '@/lib/api/aiApi';
+import { StartDiscussionDialog } from './StartDiscussionDialog';
 
 
 
@@ -40,17 +41,16 @@ export function ActiveCenter(props: Partial<{
   candidates: GeneratedPrompt[];
   isGenerating: boolean;
   generationWarning: string | null;
-  onGenerate: () => void;
+  onGenerate: (transcriptOverride?: string) => void | Promise<void>;
   onSelectCandidate: (p: GeneratedPrompt) => void;
   onRegenerate: () => void;
-  onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean) => void;
+  onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => void;
 }>) {
   const context = React.useContext(SessionContext);
   const promptInput = context ? context.promptInput : props.promptInput!;
   const setPromptInput = context ? context.setPromptInput : props.setPromptInput!;
   const isConnected = context ? context.isConnected : props.isConnected!;
-  const onPublish = context ? context.handlePublishDiscussion : props.onPublish!;
-  const onClose = context ? context.handleCloseDiscussion : props.onClose!;
+  const onPublish = context ? (timerSeconds: number | null) => context.handlePublishDiscussion(timerSeconds) : (timerSeconds: number | null) => props.onPublish!();
   const transcriptText = context ? context.transcriptText : props.transcriptText!;
   const setTranscriptText = context ? context.setTranscriptText : props.setTranscriptText!;
   const promptType = context ? context.promptType : props.promptType!;
@@ -75,6 +75,9 @@ export function ActiveCenter(props: Partial<{
     A: '', B: '', C: '', D: ''
   });
   const [creationMode, setCreationMode] = React.useState<'ai' | 'manual'>('ai');
+  const [showTimerDialog, setShowTimerDialog] = React.useState(false);
+  const [pendingCandidate, setPendingCandidate] = React.useState<GeneratedPrompt | null>(null);
+  const [publishError, setPublishError] = React.useState<string | null>(null);
 
   const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -92,6 +95,7 @@ export function ActiveCenter(props: Partial<{
     setFeedbackEnabled(false);
     setEditingOptions({});
     setManualOptions({ A: '', B: '', C: '', D: '' });
+    setPublishError(null);
   }, [candidates]);
 
   // Stop recording → Whisper → populate transcriptText → trigger generate
@@ -112,9 +116,8 @@ export function ActiveCenter(props: Partial<{
       setTranscriptText(transcript ?? '');
       setPromptInput(transcript ?? '');
       setSttStatus('idle');
-      // Auto-trigger generation after successful transcription
-      // Small delay so setTranscriptText flushes before onGenerate reads it
-      setTimeout(() => onGenerate(), 50);
+      // Pass fresh transcript directly to avoid stale state closure.
+      await onGenerate(transcript ?? '');
     } catch (err) {
       setSttError(err instanceof Error ? err.message : 'Transcription failed — type manually.');
       setSttStatus('error');
@@ -144,7 +147,7 @@ export function ActiveCenter(props: Partial<{
     }
   };
 
-  const handlePublishSelected = (p: GeneratedPrompt) => {
+  const handlePublishSelected = (p: GeneratedPrompt, timerSeconds: number | null = null) => {
     let publishedCandidate = p;
     if (p.promptType === 'multiple_choice' && p.mcOptions) {
       publishedCandidate = {
@@ -163,9 +166,68 @@ export function ActiveCenter(props: Partial<{
     }
 
     if (onPublishAiCandidate) {
-      onPublishAiCandidate(publishedCandidate, overrideCorrectOption, feedbackEnabled);
+      onPublishAiCandidate(publishedCandidate, overrideCorrectOption, feedbackEnabled, timerSeconds);
       setSelectedIndex(null);
+      setPublishError(null);
     }
+  };
+
+  // Called after instructor confirms timer dialog
+  const handleTimerConfirm = (timerSeconds: number | null) => {
+    setShowTimerDialog(false);
+
+    // If triggered by "Publish This Question →" on an AI candidate, publish that candidate
+    if (pendingCandidate) {
+      const candidate = pendingCandidate;
+      setPendingCandidate(null);
+      handlePublishSelected(candidate, timerSeconds);
+      return;
+    }
+
+    if (creationMode === 'manual') {
+      if (promptType === 'multiple_choice') {
+        if (!overrideCorrectOption) {
+          setPublishError('Please select a correct answer for your multiple-choice question.');
+          return;
+        }
+        setPublishError(null);
+        if (onPublishAiCandidate) {
+          const mcOptions = (['A', 'B', 'C', 'D'] as const).map(label => ({
+            label,
+            text: manualOptions[label] || `Option ${label}`
+          }));
+          onPublishAiCandidate(
+            { promptText: promptInput, promptType: 'multiple_choice', mcOptions },
+            overrideCorrectOption,
+            feedbackEnabled,
+            timerSeconds
+          );
+          setManualOptions({ A: '', B: '', C: '', D: '' });
+          setOverrideCorrectOption(null);
+          setFeedbackEnabled(false);
+          setPromptInput('');
+        }
+        return;
+      }
+      onPublish(timerSeconds);
+      return;
+    }
+    // AI Mode
+    if (selectedIndex !== null && candidates[selectedIndex]) {
+      setPublishError(null);
+      handlePublishSelected(candidates[selectedIndex], timerSeconds);
+      return;
+    }
+    if (promptType === 'multiple_choice' && candidates.length > 0) {
+      setPublishError('Please select a generated AI prompt to publish.');
+      return;
+    }
+    if (promptType === 'multiple_choice') {
+      setPublishError('Please generate AI prompts and select one to publish, or switch to Manual Creation mode.');
+      return;
+    }
+    setPublishError(null);
+    onPublish(timerSeconds);
   };
 
   return (
@@ -246,7 +308,7 @@ export function ActiveCenter(props: Partial<{
 
               <AIPreferencesDialog />
               <Button
-                onClick={onGenerate}
+                onClick={() => onGenerate()}
                 disabled={isGenerating || recorder.isRecording}
                 size="sm"
                 className="px-4 py-1.5 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
@@ -310,7 +372,7 @@ export function ActiveCenter(props: Partial<{
                     {selectedIndex === i && (
                       <Button
                         size="sm"
-                        onClick={() => handlePublishSelected(c)}
+                        onClick={() => { setPendingCandidate(c); setShowTimerDialog(true); }}
                         disabled={!promptInput.trim() || !isConnected}
                         className="mt-2 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800 disabled:opacity-50"
                       >
@@ -377,80 +439,31 @@ export function ActiveCenter(props: Partial<{
           </TabsContent>
         </Tabs>
 
-        {/* Start / Close Discussion Toggle */}
-        <div className="pt-4 border-t border-gray-200">
-          {activeDiscussionId ? (
+        {publishError && (
+          <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
+            {publishError}
+          </p>
+        )}
+
+        {/* Start Discussion button — Close Discussion moved to DiscussionTimerSection */}
+        {!activeDiscussionId && (
+          <div className="pt-4 border-t border-gray-200">
             <Button
-              onClick={() => onClose(activeDiscussionId)}
-              className="w-full px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800"
-            >
-              Close Discussion
-            </Button>
-          ) : (
-            <Button
-              onClick={() => {
-                if (creationMode === 'manual') {
-                  if (promptType === 'multiple_choice') {
-                    if (!overrideCorrectOption) {
-                      alert('Please select a correct answer for your multiple-choice question.');
-                      return;
-                    }
-                    if (onPublishAiCandidate) {
-                      const mcOptions = (['A', 'B', 'C', 'D'] as const).map(label => ({
-                        label,
-                        text: manualOptions[label] || `Option ${label}`
-                      }));
-
-                      onPublishAiCandidate(
-                        {
-                          promptText: promptInput,
-                          promptType: 'multiple_choice',
-                          mcOptions
-                        },
-                        overrideCorrectOption,
-                        feedbackEnabled
-                      );
-
-                      setManualOptions({ A: '', B: '', C: '', D: '' });
-                      setOverrideCorrectOption(null);
-                      setFeedbackEnabled(false);
-                      setPromptInput('');
-                    }
-                    return;
-                  }
-
-                  // For long/short answer in manual mode
-                  onPublish();
-                  return;
-                }
-
-                // AI Mode
-                if (selectedIndex !== null && candidates[selectedIndex]) {
-                  handlePublishSelected(candidates[selectedIndex]);
-                  return;
-                }
-
-                if (promptType === 'multiple_choice' && candidates.length > 0) {
-                  alert('Please select a generated AI prompt to publish.');
-                  return;
-                }
-
-                if (promptType === 'multiple_choice') {
-                  alert('Please generate AI prompts and select one to publish, or switch to Manual Creation mode.');
-                  return;
-                }
-
-                // fallback for short/long answer when no candidate selected 
-                // publishes the STT input as the prompt
-                onPublish();
-              }}
+              onClick={() => setShowTimerDialog(true)}
               disabled={!promptInput.trim() || !isConnected}
               className="w-full px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
+              data-testid="start-discussion-button"
             >
               Start Discussion
             </Button>
-          )}
-        </div>
+          </div>
+        )}
+
+        <StartDiscussionDialog
+          open={showTimerDialog}
+          onConfirm={handleTimerConfirm}
+          onCancel={() => { setShowTimerDialog(false); setPendingCandidate(null); }}
+        />
       </div>
     </div>
   );

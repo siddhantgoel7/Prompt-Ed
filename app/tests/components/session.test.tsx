@@ -1,5 +1,6 @@
 // Covers US 1.04, 1.06, 1.09, 1.14, 1.25, 1.34, 1.41
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { SessionPage } from '@/components/instructor/SessionPage';
 import { createClient } from '@/lib/supabase/client';
@@ -310,12 +311,18 @@ describe('SessionPage - Real-time Integration Tests', () => {
           };
         }
         if (table === 'responses') {
+          const orderMock = jest.fn().mockResolvedValue({
+            data: [],
+            error: null
+          });
           return {
             select: jest.fn().mockReturnValue({
               eq: jest.fn().mockReturnValue({
-                order: jest.fn().mockResolvedValue({
-                  data: [],
-                  error: null
+                is: jest.fn().mockReturnValue({
+                  order: orderMock
+                }),
+                not: jest.fn().mockReturnValue({
+                  order: orderMock
                 })
               })
             })
@@ -381,12 +388,18 @@ describe('SessionPage - Real-time Integration Tests', () => {
           };
         }
         if (table === 'responses') {
+          const orderMock = jest.fn().mockResolvedValue({
+            data: [],
+            error: null
+          });
           return {
             select: jest.fn().mockReturnValue({
               eq: jest.fn().mockReturnValue({
-                order: jest.fn().mockResolvedValue({
-                  data: [],
-                  error: null
+                is: jest.fn().mockReturnValue({
+                  order: orderMock
+                }),
+                not: jest.fn().mockReturnValue({
+                  order: orderMock
                 })
               })
             })
@@ -465,7 +478,7 @@ describe('SessionPage - Real-time Integration Tests', () => {
       await waitFor(() => {
         expect(mockSupabase.from).toHaveBeenCalledWith('lessons');
         expect(lessonsUpdateEqMock).toHaveBeenCalledWith('id', 'lesson-456');
-        expect(mockPush).toHaveBeenCalledWith('/lessons_page/course-123');
+        expect(mockPush).toHaveBeenCalledWith('/session/lesson-456');
       });
     });
   });
@@ -572,6 +585,152 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
   describe('Export Feature', () => {
     // 17.12
+
+    function mockEndedLessonExportData() {
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: { id: 'user-123' } },
+        error: null
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'lessons') {
+          return {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({
+                  data: {
+                    id: 'lesson-456',
+                    course_id: 'course-123',
+                    title: 'Econ 101',
+                    status: 'ended',
+                    started_at: '2026-02-11T18:00:00.000Z',
+                    ended_at: '2026-02-11T19:00:00.000Z',
+                    pin_code: '123456',
+                    courses: { instructor_id: 'user-123' }
+                  },
+                  error: null
+                })
+              })
+            })
+          };
+        }
+
+        if (table === 'discussions') {
+          return {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                order: jest.fn().mockResolvedValue({
+                  data: [
+                    {
+                      id: 'disc-1',
+                      lesson_id: 'lesson-456',
+                      prompt_text: 'What is 2+2?',
+                      prompt_type: 'short_answer',
+                      status: 'closed',
+                      created_at: '2026-02-11T18:15:44.000Z',
+                      published_at: '2026-02-11T18:15:44.000Z',
+                      closed_at: '2026-02-11T18:16:44.000Z',
+                      display_order: 0,
+                      participant_snapshot: 5,
+                      responses: [
+                        {
+                          id: 'resp-1',
+                          discussion_id: 'disc-1',
+                          response_text: '4',
+                          created_at: '2026-02-11T18:16:10.000Z',
+                          selected_option: null,
+                          is_correct: null,
+                        }
+                      ]
+                    },
+                    {
+                      id: 'disc-2',
+                      lesson_id: 'lesson-456',
+                      prompt_text: 'Pick the correct option',
+                      prompt_type: 'multiple_choice',
+                      status: 'closed',
+                      created_at: '2026-02-11T18:20:00.000Z',
+                      published_at: '2026-02-11T18:20:00.000Z',
+                      closed_at: '2026-02-11T18:21:00.000Z',
+                      display_order: 1,
+                      participant_snapshot: 4,
+                      correct_option: 'B',
+                      mc_options: [
+                        { label: 'A', text: '3' },
+                        { label: 'B', text: '4' },
+                        { label: 'C', text: '5' },
+                      ],
+                      responses: [
+                        {
+                          id: 'resp-2',
+                          discussion_id: 'disc-2',
+                          response_text: '4',
+                          created_at: '2026-02-11T18:20:20.000Z',
+                          selected_option: 'B',
+                          is_correct: true,
+                        }
+                      ]
+                    }
+                  ],
+                  error: null
+                })
+              })
+            })
+          };
+        }
+
+        if (table === 'lesson_chunks') {
+          return {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                eq: jest.fn().mockReturnValue({
+                  order: jest.fn().mockResolvedValue({
+                    data: [],
+                    error: null
+                  })
+                })
+              })
+            })
+          };
+        }
+
+        return {};
+      });
+    }
+
+    async function openExportMenu() {
+      const user = userEvent.setup();
+      const exportMenuButton = await screen.findByRole('button', { name: /^Export$/i });
+      await user.click(exportMenuButton);
+      return user;
+    }
+
+    function mockDownloadAnchor() {
+      const originalCreateElement = document.createElement.bind(document);
+      const mockAnchor = originalCreateElement('a');
+      const clickSpy = jest.spyOn(mockAnchor, 'click').mockImplementation(() => {});
+
+      const createElementSpy = jest
+        .spyOn(document, 'createElement')
+        .mockImplementation((tagName: string) => {
+          if (tagName.toLowerCase() === 'a') {
+            return mockAnchor;
+          }
+          return originalCreateElement(tagName);
+        });
+
+      return {
+        mockAnchor,
+        clickSpy,
+        restore: () => {
+          clickSpy.mockRestore();
+          createElementSpy.mockRestore();
+        },
+      };
+    }
+
+
+    
     it('[US 1.41] should export lesson data as a .txt file when Export Txt is clicked', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
@@ -644,9 +803,17 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
       render(<SessionPage lessonId="lesson-456" />);
 
-      const exportBtn = await screen.findByRole('button', { name: /Export Txt/i });
+      
 
-      fireEvent.click(exportBtn);
+      const user = userEvent.setup();
+
+      const exportMenuButton = await screen.findByRole('button', { name: /^Export$/i });
+      await user.click(exportMenuButton);
+
+      const exportTxtOption = await screen.findByRole('menuitem', { name: /Export overview TXT/i });
+      await user.click(exportTxtOption);
+
+
 
       await waitFor(() => {
         expect(mockCreateObjectURL).toHaveBeenCalled();
@@ -658,10 +825,170 @@ describe('SessionPage - Real-time Integration Tests', () => {
       URL.createObjectURL = originalCreateObjectURL;
       URL.revokeObjectURL = originalRevokeObjectURL;
     });
+
+    it('[US 1.42] should export discussions as a CSV file from the export dropdown', async () => {
+      mockEndedLessonExportData();
+
+      const mockCreateObjectURL = jest.fn(() => 'blob:mock-url');
+      const mockRevokeObjectURL = jest.fn();
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+      URL.createObjectURL = mockCreateObjectURL;
+      URL.revokeObjectURL = mockRevokeObjectURL;
+
+      const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+      render(<SessionPage lessonId="lesson-456" />);
+
+      const user = await openExportMenu();
+      const exportCsvOption = await screen.findByRole('menuitem', { name: /Export Discussions CSV/i });
+      await user.click(exportCsvOption);
+
+      await waitFor(() => {
+        expect(mockCreateObjectURL).toHaveBeenCalled();
+        expect(clickSpy).toHaveBeenCalled();
+        expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+      });
+
+      clickSpy.mockRestore();
+      URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
+    });
+    
+
+    it('[US 1.43] should export lesson statistics as a CSV file from the export dropdown', async () => {
+      mockEndedLessonExportData();
+
+      const mockCreateObjectURL = jest.fn(() => 'blob:mock-url');
+      const mockRevokeObjectURL = jest.fn();
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+      URL.createObjectURL = mockCreateObjectURL;
+      URL.revokeObjectURL = mockRevokeObjectURL;
+
+      const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+      render(<SessionPage lessonId="lesson-456" />);
+
+      const user = await openExportMenu();
+      const exportStatisticsOption = await screen.findByRole('menuitem', { name: /Export Statistics/i });
+      await user.click(exportStatisticsOption);
+
+      await waitFor(() => {
+        expect(mockCreateObjectURL).toHaveBeenCalled();
+        expect(clickSpy).toHaveBeenCalled();
+        expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+      });
+
+      clickSpy.mockRestore();
+      URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
+    });
+
+    it('[US 1.42] should use the correct filename for discussions CSV export', async () => {
+      mockEndedLessonExportData();
+
+      const mockCreateObjectURL = jest.fn(() => 'blob:mock-url');
+      const mockRevokeObjectURL = jest.fn();
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+      URL.createObjectURL = mockCreateObjectURL;
+      URL.revokeObjectURL = mockRevokeObjectURL;
+
+      const { mockAnchor, clickSpy, restore } = mockDownloadAnchor();
+
+
+      render(<SessionPage lessonId="lesson-456" />);
+
+      const user = await openExportMenu();
+      const exportCsvOption = await screen.findByRole('menuitem', { name: /Export Discussions CSV/i });
+      await user.click(exportCsvOption);
+
+      await waitFor(() => {
+        expect(mockCreateObjectURL).toHaveBeenCalled();
+        expect(clickSpy).toHaveBeenCalled();
+      });
+
+
+      expect(mockAnchor.download).toBe('econ_101_discussions.csv');
+      expect(mockAnchor.href).toBe('blob:mock-url');
+
+      restore();
+      URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
+    });
+
+    it('[US 1.43]should use the correct filename for statistics export', async () => {
+      mockEndedLessonExportData();
+
+      const mockCreateObjectURL = jest.fn(() => 'blob:mock-url');
+      const mockRevokeObjectURL = jest.fn();
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+      URL.createObjectURL = mockCreateObjectURL;
+      URL.revokeObjectURL = mockRevokeObjectURL;
+
+      const { mockAnchor, clickSpy, restore } = mockDownloadAnchor();
+
+      render(<SessionPage lessonId="lesson-456" />);
+
+      const user = await openExportMenu();
+      const exportStatisticsOption = await screen.findByRole('menuitem', { name: /Export Statistics/i });
+      await user.click(exportStatisticsOption);
+
+      await waitFor(() => {
+        expect(mockCreateObjectURL).toHaveBeenCalled();
+        expect(clickSpy).toHaveBeenCalled();
+      });
+
+      expect(mockAnchor.download).toBe('econ_101_statistics.csv');
+      expect(mockAnchor.href).toBe('blob:mock-url');
+
+      restore();
+      URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
+    });
+
+    it('[US 1.41]should use the correct filename for overview TXT export', async () => {
+      mockEndedLessonExportData();
+
+      const mockCreateObjectURL = jest.fn(() => 'blob:mock-url');
+      const mockRevokeObjectURL = jest.fn();
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+      URL.createObjectURL = mockCreateObjectURL;
+      URL.revokeObjectURL = mockRevokeObjectURL;
+
+      const { mockAnchor, clickSpy, restore } = mockDownloadAnchor();
+
+
+      render(<SessionPage lessonId="lesson-456" />);
+
+      const user = await openExportMenu();
+      const exportTxtOption = await screen.findByRole('menuitem', { name: /Export overview TXT/i });
+      await user.click(exportTxtOption);
+
+      await waitFor(() => {
+        expect(mockCreateObjectURL).toHaveBeenCalled();
+        expect(clickSpy).toHaveBeenCalled();
+      });
+
+      expect(mockAnchor.download).toBe('econ_101_overview.txt');
+      expect(mockAnchor.href).toBe('blob:mock-url');
+
+      restore();
+      URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
+    });
+
+
+
+
+
   });
 
   describe('Saved Lesson View', () => {
-    // 17.13
+    // 17.13 — responses are hidden behind "Show Responses" toggle in the new design
     it('[US 1.14] should display preserved discussions and responses when instructor accesses a saved lesson', async () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
@@ -733,12 +1060,15 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
       render(<SessionPage lessonId="lesson-456" />);
 
+      // Discussion and prompt are always visible
       expect(await screen.findByText('Saved Lesson')).toBeInTheDocument();
       expect(await screen.findByText('What is 2+2?')).toBeInTheDocument();
+
+      // Responses are hidden behind the toggle — expand them first
+      fireEvent.click(screen.getByText(/Show Responses/i));
+
       expect(screen.getByText('4')).toBeInTheDocument();
       expect(screen.getByText('5')).toBeInTheDocument();
-      expect(screen.getByText(/Prompt time:/i)).toBeInTheDocument();
-      expect(screen.getAllByText(/Response time:/i).length).toBeGreaterThan(0);
     });
   });
 });

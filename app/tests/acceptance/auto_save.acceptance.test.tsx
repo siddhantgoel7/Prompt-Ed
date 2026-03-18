@@ -1,7 +1,7 @@
 // [US 1.10] Auto-save on end
 // Tests that ending a lesson automatically saves all data without manual action
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { SessionEndedView } from '@/components/instructor/session/SessionEndedView';
 import type { SessionVM } from '@/hooks/useSessionPage';
 
@@ -54,7 +54,7 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
 }
 
 describe('Auto-Save on End (Acceptance) [US 1.10]', () => {
-  // 3.1
+  // 3.1 — "Discussions and Responses" heading no longer exists, section is now "Discussions"
   it('[US 1.10][AT1] success: ending lesson closes active discussions (status=closed, closed_at set)', () => {
     const closedAt = '2026-02-14T10:30:00Z';
     const vm = makeVM({
@@ -75,7 +75,7 @@ describe('Auto-Save on End (Acceptance) [US 1.10]', () => {
     // Discussion is shown in ended view with preserved data
     expect(screen.getByText(/What is pharmacology\?/i)).toBeInTheDocument();
     // The ended view renders, meaning data was saved (discussion has closed status and closed_at)
-    expect(screen.getByText(/Discussions and Responses/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^Discussions$/i })).toBeInTheDocument();
   });
 
   // 3.2
@@ -110,7 +110,7 @@ describe('Auto-Save on End (Acceptance) [US 1.10]', () => {
     expect(screen.getByText(/What are side effects\?/i)).toBeInTheDocument();
   });
 
-  // 3.3
+  // 3.3 — responses are hidden behind "Show Responses" toggle in new design
   it('[US 1.10][AT3] success: responses preserved with submission times after end', () => {
     const vm = makeVM({
       lessonDiscussions: [
@@ -131,7 +131,8 @@ describe('Auto-Save on End (Acceptance) [US 1.10]', () => {
 
     // Prompt preserved
     expect(screen.getByText(/What is 2\+2\?/i)).toBeInTheDocument();
-    // Responses preserved
+    // Responses are behind the toggle — expand first
+    fireEvent.click(screen.getByText(/Show Responses/i));
     expect(screen.getByText(/^4$/)).toBeInTheDocument();
     expect(screen.getByText(/Four/i)).toBeInTheDocument();
   });

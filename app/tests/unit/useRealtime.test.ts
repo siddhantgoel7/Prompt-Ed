@@ -3,7 +3,12 @@ import { useRealtime } from '@/lib/realtime/useRealtime';
 import { createMockRealtimeChannel } from '../../jest.setup';
 
 // Mock the Supabase client
-const mockChannel = createMockRealtimeChannel();
+const mockChannel = {
+  ...createMockRealtimeChannel(),
+  track: jest.fn(() => Promise.resolve('ok')),
+  untrack: jest.fn(() => Promise.resolve('ok')),
+  on: jest.fn().mockReturnThis(), // Ensure chaining works if your hook uses it
+};
 const mockChannelFn = jest.fn(() => mockChannel);
 const mockCreateClient = jest.fn(() => ({
   channel: mockChannelFn
@@ -18,7 +23,7 @@ describe('useRealtime Hook [US 1.34][US 2.06]', () => {
     jest.clearAllMocks();
   });
 
-  // 26.1
+  // 26.1 — updated: config now includes presence key in addition to broadcast
   it('should create channel with correct lesson ID', () => {
     const lessonId = 'lesson-123';
     renderHook(() => useRealtime(lessonId, 'instructor'));
@@ -27,7 +32,8 @@ describe('useRealtime Hook [US 1.34][US 2.06]', () => {
       `lesson:${lessonId}`,
       {
         config: {
-          broadcast: { ack: true }
+          broadcast: { ack: true },
+          presence: { key: lessonId },
         }
       }
     );

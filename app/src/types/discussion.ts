@@ -21,6 +21,10 @@ export interface Discussion {
   correct_option: string | null;
   feedback_enabled: boolean;
   ai_generated_correct_option: string | null;
+  // Number of students present when this discussion was published (snapshotted from realtime presence)
+  participant_snapshot: number | null;
+  // Time limit in seconds set by instructor; null means no time limit
+  time_limit_seconds?: number | null;
 }
 
 export interface CreateDiscussionInput {

@@ -78,19 +78,28 @@ describe('Auto-save interval + recovery [US 1.13]', () => {
         }
 
         if (table === 'responses') {
+          const orderMock = jest.fn().mockResolvedValue({
+            data: [
+              {
+                id: 'r1',
+                discussion_id: 'disc-1',
+                response_text: 'A1',
+                created_at: new Date().toISOString(),
+              },
+            ],
+            error: null,
+          });
           return {
             select: jest.fn().mockReturnValue({
               eq: jest.fn().mockReturnValue({
-                order: jest.fn().mockResolvedValue({
-                  data: [
-                    {
-                      id: 'r1',
-                      discussion_id: 'disc-1',
-                      response_text: 'A1',
-                      created_at: new Date().toISOString(),
-                    },
-                  ],
-                  error: null,
+                is: jest.fn().mockReturnValue({
+                  order: orderMock,
+                }),
+                not: jest.fn().mockReturnValue({
+                  order: jest.fn().mockResolvedValue({
+                    data: [],
+                    error: null,
+                  }),
                 }),
               }),
             }),

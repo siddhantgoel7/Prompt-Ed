@@ -55,12 +55,13 @@ function shouldShowFeedback(
  */
 function getFeedbackMessage(
     isCorrect: boolean,
-    correctOption: string
+    correctOption: string,
+    correctOptionText: string
 ): { headline: string; detail: string } {
     if (isCorrect) {
         return { headline: '✅ Correct!', detail: 'You selected the correct answer.' };
     }
-    return { headline: '❌ Incorrect', detail: `Correct Answer: Option ${correctOption}` };
+    return { headline: '❌ Incorrect', detail: `Correct Answer: ${correctOption}. ${correctOptionText}` };
 }
 
 // ---------------------------------------------------------------------------
@@ -187,27 +188,27 @@ describe('MC Feedback Logic — Unit Tests [US 2.10]', () => {
 
         // 28.17
         it('[US 2.10][UT17] success: correct answer shows confirmation headline', () => {
-            const { headline, detail } = getFeedbackMessage(true, 'B');
+            const { headline, detail } = getFeedbackMessage(true, 'B', 'A text editor');
             expect(headline).toBe('✅ Correct!');
             expect(detail).toBe('You selected the correct answer.');
         });
 
         // 28.18
         it('[US 2.10][UT18] failure: incorrect answer shows error headline', () => {
-            const { headline } = getFeedbackMessage(false, 'B');
+            const { headline } = getFeedbackMessage(false, 'B', 'A text editor');
             expect(headline).toBe('❌ Incorrect');
         });
 
         // 28.19
         it('[US 2.10][UT19] failure: incorrect answer reveals the correct option label', () => {
-            const { detail } = getFeedbackMessage(false, 'B');
-            expect(detail).toBe('Correct Answer: Option B');
+            const { detail } = getFeedbackMessage(false, 'B', 'A text editor');
+            expect(detail).toBe('Correct Answer: B. A text editor');
         });
 
         // 28.20
         it('[US 2.10][UT20] failure: correct option label varies with the actual correct answer', () => {
-            expect(getFeedbackMessage(false, 'D').detail).toBe('Correct Answer: Option D');
-            expect(getFeedbackMessage(false, 'A').detail).toBe('Correct Answer: Option A');
+            expect(getFeedbackMessage(false, 'D', 'A CI service').detail).toBe('Correct Answer: D. A CI service');
+            expect(getFeedbackMessage(false, 'A', 'Browser testing').detail).toBe('Correct Answer: A. Browser testing');
         });
     });
 });

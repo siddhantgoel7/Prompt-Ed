@@ -1,10 +1,9 @@
 // Active session layout — composes the header, sidebar, center panel, right panel,
-// join code overlay, and connection status indicator into the full instructor session UI.
+// and connection status indicator into the full instructor session UI.
 'use client';
 // MERGED: wires all AI props from VM to components
 
 import * as React from 'react';
-import { JoinCodeOverlay } from '@/components/instructor/session/JoinCodeOverlay';
 import { SessionHeaderActive } from '@/components/instructor/session/SessionHeaderActive';
 import { ActiveSidebar } from '@/components/instructor/session/ActiveSidebar';
 import { ActiveCenter } from '@/components/instructor/session/ActiveCenter';
@@ -12,6 +11,7 @@ import { ActiveRightPanel } from '@/components/instructor/session/ActiveRightPan
 import { SplitView } from '@/components/instructor/session/SplitView';
 import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
 import { SessionProvider, SessionContext } from '@/components/instructor/session/SessionContext';
+import { DiscussionTimerSection } from '@/components/instructor/session/DiscussionTimerSection';
 import type { SessionVM } from '@/hooks/useSessionPage';
 
 /** Renders the full active session layout; switches to SplitView when the split view toggle is active. */
@@ -38,11 +38,19 @@ export function SessionActiveView(props: { vm?: SessionVM }) {
 
       {vm.endError ? <p className="text-sm text-red-600 px-6 py-2">{vm.endError}</p> : null}
 
-      <JoinCodeOverlay />
-
       <div className="flex-1 flex flex-col md:flex-row">
         <ActiveSidebar />
-        <ActiveCenter />
+        <div className="flex-1 flex flex-col">
+          <ActiveCenter />
+          <DiscussionTimerSection
+            activeDiscussionId={vm.activeDiscussion?.id ?? null}
+            timerEndTime={vm.discussionTimerEndTime}
+            timerTotalSeconds={vm.discussionTimerSeconds}
+            onClose={vm.handleCloseDiscussion}
+            onExtendTimer={vm.handleExtendTimer}
+            onEditTimer={vm.handleEditTimer}
+          />
+        </div>
         <ActiveRightPanel />
       </div>
 
