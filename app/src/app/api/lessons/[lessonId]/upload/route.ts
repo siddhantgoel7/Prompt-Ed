@@ -177,18 +177,9 @@ export async function POST(
 
     // --- BACKGROUND PROCESSING ---
     const processFile = async () => {
-      const t0 = Date.now();
-      const elapsed = () => `${((Date.now() - t0) / 1000).toFixed(1)}s`;
       try {
         // Parse into structured sections
-        // [DEV-INSPECT] start — capture raw vision JSON for chunk inspector
-        let visionRawJson: string | undefined;
-        console.log(`[upload] [${file.name}] starting parse`);
-        const sections = await parseFile(buffer, detectedType, aiProvider, {
-          onVisionRawJson: (raw) => { visionRawJson = raw; },
-        });
-        // [DEV-INSPECT] end
-        console.log(`[upload] [${file.name}] parse done at ${elapsed()} — ${sections.length} section(s)`);
+        const sections = await parseFile(buffer, detectedType, aiProvider);
 
         // Build a set of page numbers that have a visual_description so we can suppress
         // the corresponding page_text chunk when it is label soup (figures/tables with no prose).
@@ -215,15 +206,7 @@ export async function POST(
           // Suppress page_text for pages where visual_description exists AND the text is
           // label soup — disconnected tokens from figure/table layouts with no prose value.
           if (section.contentOrigin === 'page_text' && section.pageNumber != null && pagesWithVision.has(section.pageNumber)) {
-            const segments = section.content.split(/[\n.]+/).map(s => s.trim()).filter(s => s.length > 0);
-            const avgWords = segments.length > 0
-              ? segments.reduce((sum, s) => sum + s.split(/\s+/).length, 0) / segments.length
-              : 0;
-            const shortSegments = segments.filter(s => s.split(/\s+/).length < 4).length;
-            const shortRatio = segments.length > 0 ? shortSegments / segments.length : 1;
-            console.log(`[upload] [${file.name}] p.${section.pageNumber} vision+text — avg_words=${avgWords.toFixed(2)} short_ratio=${shortRatio.toFixed(2)} segments=${segments.length}`);
             if (isLabelSoup(section.content)) {
-              console.log(`[upload] [${file.name}] suppressed page_text p.${section.pageNumber} — label soup (visual_description present)`);
               continue;
             }
           }
@@ -254,24 +237,12 @@ export async function POST(
         // Multi-column PDF layout and repeated slide pages both produce chunks that are
         // textually identical or near-identical. Keeping both wastes retrieval slots.
         // Strategy: for each chunk, check all earlier chunks — drop if Jaccard > 0.70.
-        const dedupedRows = chunkRows.filter((row, i) => {
+        const finalRows = chunkRows.filter((row, i) => {
           for (let j = 0; j < i; j++) {
-            const score = jaccardSimilarity(row.content, chunkRows[j].content);
-            if (score > 0.70) {
-              const fmt = (s: string) => `${s.slice(0, 240).replace(/\n/g, ' ')} … ${s.slice(-240).replace(/\n/g, ' ')}`;
-              console.log(`[upload] [${file.name}] dedup: dropped chunk ${i} (J=${score.toFixed(3)} vs chunk ${j})\n  DROPPED: ${fmt(row.content)}\n  KEPT:    ${fmt(chunkRows[j].content)}`);
-              return false;
-            }
+            if (jaccardSimilarity(row.content, chunkRows[j].content) > 0.70) return false;
           }
           return true;
         });
-        const dedupDropped = chunkRows.length - dedupedRows.length;
-        if (dedupDropped > 0) {
-          console.log(`[upload] [${file.name}] dedup removed ${dedupDropped} duplicate chunk(s)`);
-        }
-        const finalRows = dedupedRows;
-
-        console.log(`[upload] [${file.name}] chunked at ${elapsed()} — ${chunkRows.length} chunks (${dedupDropped} deduped → ${finalRows.length} final)`);
 
         if (finalRows.length === 0) {
           await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
@@ -282,30 +253,11 @@ export async function POST(
           .from('lesson_chunks')
           .insert(finalRows)
           .select('id');
-        console.log(`[upload] [${file.name}] DB insert done at ${elapsed()}`);
 
         if (chunksError || !insertedChunks) {
           await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
           return;
         }
-
-        // [DEV-INSPECT] start — store raw vision JSON as a non-embedded sentinel chunk
-        console.log(`[upload] [${file.name}] visionRawJson captured: ${visionRawJson !== undefined} (${visionRawJson?.length ?? 0} chars)`);
-        if (visionRawJson) {
-          const { error: visionChunkError } = await supabase.from('lesson_chunks').insert({
-            lesson_id: lessonId,
-            lesson_file_id: fileRecord.id,
-            content_type: 'transcript', // [DEV-INSPECT] stored as transcript to avoid CHECK constraint; identified by metadata.dev_inspect
-            content: visionRawJson,
-            metadata: { file_name: file.name, dev_inspect: true },
-          });
-          if (visionChunkError) {
-            console.warn(`[upload] [${file.name}] vision_raw_json chunk insert failed:`, visionChunkError.message);
-          } else {
-            console.log(`[upload] [${file.name}] vision_raw_json chunk stored`);
-          }
-        }
-        // [DEV-INSPECT] end
 
         // Pass chunks directly to avoid a redundant DB fetch — content is already in memory
         const chunksToEmbed = (insertedChunks as { id: string }[]).map((c, i) => ({
@@ -313,14 +265,12 @@ export async function POST(
           content: finalRows[i].content,
         }));
         await embedChunks(chunksToEmbed, supabase, aiProvider);
-        console.log(`[upload] [${file.name}] embed done at ${elapsed()}`);
 
         // Mark as ready
         await supabase.from('lesson_files').update({ status: 'ready' }).eq('id', fileRecord.id);
-        console.log(`[upload] [${file.name}] DONE — total ${elapsed()}`);
 
       } catch (err) {
-        console.error(`[upload] [${file.name}] failed at ${elapsed()}:`, err);
+        console.error(`[upload] [${file.name}] processing failed:`, err);
         await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
       }
     };

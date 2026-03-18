@@ -36,15 +36,12 @@ export async function generatePrompts(
       // Semantic retrieval: embed transcript text, find similar chunks
       const embeddingResponse = await aiProvider.generateEmbedding(transcriptText.trim());
       const queryEmbedding = embeddingResponse[0];
-      console.log(`[generatePrompts] lessonId=${lessonId} queryEmbedding dims=${queryEmbedding?.length ?? 'undefined'}`);
       retrieved = await retrieveChunksBySimilarity(lessonId, queryEmbedding, supabase);
-      console.log(`[generatePrompts] similarity retrieval returned ${retrieved.length} chunk(s)`);
     }
 
     // Fallback to recent chunks if no transcript or retrieval returned nothing
     if (retrieved.length === 0) {
       retrieved = await retrieveRecentChunks(lessonId, supabase);
-      console.log(`[generatePrompts] recent fallback returned ${retrieved.length} chunk(s)`);
       if (!transcriptText.trim()) {
         warning = 'No transcript provided. Generating from uploaded file content only.';
       } else {

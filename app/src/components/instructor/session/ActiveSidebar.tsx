@@ -59,8 +59,6 @@ export function ActiveSidebar(props: {
 
           <TabsContent value="files" className="mt-4">
             <FilesTab
-              // [DEV-INSPECT] lessonId prop — remove when removing chunk inspection feature
-              lessonId={context?.lesson.id ?? ''}
               files={files}
               isUploading={isUploading}
               onUploadFile={onUploadFile}

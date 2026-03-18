@@ -85,14 +85,11 @@ export interface AIProvider {
      * Uses OpenAI's native PDF file input (data URI) which lets GPT-4o
      * process all pages including embedded images in a single API call.
      * Pages with only text return NO_VISUAL_CONTENT and are excluded from the map.
-     *
-     * [DEV-INSPECT] rawJson: the verbatim JSON string returned by the vision model,
-     * before parsing — useful for inspecting prompt output. Remove with [DEV-INSPECT].
      */
     generatePdfVisualDescriptions(
         pdfBuffer: Buffer,
         numPages: number
-    ): Promise<{ descriptions: Map<number, string>; rawJson: string }>; // [DEV-INSPECT] rawJson added
+    ): Promise<Map<number, string>>;
 
     /**
      * Describes all visual content on a single PPTX slide.
@@ -190,7 +187,7 @@ export class OpenAIProvider implements AIProvider {
     async generatePdfVisualDescriptions(
         pdfBuffer: Buffer,
         numPages: number
-    ): Promise<{ descriptions: Map<number, string>; rawJson: string }> {
+    ): Promise<Map<number, string>> {
         const base64Pdf = pdfBuffer.toString('base64');
         const pdfDataUri = `data:application/pdf;base64,${base64Pdf}`;
 
@@ -234,7 +231,7 @@ export class OpenAIProvider implements AIProvider {
             console.warn('[providers] Failed to parse PDF vision JSON response:', err, raw.slice(0, 200));
         }
 
-        return { descriptions: result, rawJson: raw }; // [DEV-INSPECT] rawJson added
+        return result;
     }
 
     async generatePptxSlideVisualDescription(
@@ -364,7 +361,7 @@ export class GeminiProvider implements AIProvider {
     async generatePdfVisualDescriptions(
         pdfBuffer: Buffer,
         numPages: number
-    ): Promise<{ descriptions: Map<number, string>; rawJson: string }> {
+    ): Promise<Map<number, string>> {
         // thinkingConfig is a Gemini 2.5 feature not yet in the SDK's GenerationConfig types.
         // Passed via unknown → Record spread to avoid any.
         const generationConfig: Record<string, unknown> = {
@@ -398,7 +395,7 @@ export class GeminiProvider implements AIProvider {
             console.warn('[GeminiProvider] Failed to parse PDF vision JSON:', err, raw.slice(0, 200));
         }
 
-        return { descriptions, rawJson: raw }; // [DEV-INSPECT] rawJson added
+        return descriptions;
     }
 
     /** Describes all visual content on a single PPTX slide using gemini-1.5-pro. */
