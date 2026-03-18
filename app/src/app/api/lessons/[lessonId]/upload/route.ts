@@ -60,6 +60,21 @@ function isLabelSoup(text: string): boolean {
   return avgWords < 4;
 }
 
+/**
+ * Computes Jaccard similarity between two tokenised word sets.
+ * Used by the pre-insert deduplication pass to drop near-identical chunks
+ * caused by multi-column PDF layout extracting the same paragraph twice.
+ */
+function jaccardSimilarity(a: string, b: string): number {
+  const tokenize = (s: string) => new Set(s.toLowerCase().match(/[a-z0-9]+/g) ?? []);
+  const A = tokenize(a);
+  const B = tokenize(b);
+  if (A.size === 0 && B.size === 0) return 1;
+  let intersection = 0;
+  for (const t of A) { if (B.has(t)) intersection++; }
+  return intersection / (A.size + B.size - intersection);
+}
+
 /** Detects file type by inspecting the first 4 magic bytes of the buffer. */
 function detectFileType(buffer: Buffer): 'pdf' | 'pptx' | null {
   if (buffer.subarray(0, 4).equals(MAGIC.pdf)) return 'pdf';
@@ -235,16 +250,37 @@ export async function POST(
           }
         }
 
-        console.log(`[upload] [${file.name}] chunked at ${elapsed()} — ${chunkRows.length} chunks`);
+        // Deduplicate near-identical chunks before DB insert.
+        // Multi-column PDF layout and repeated slide pages both produce chunks that are
+        // textually identical or near-identical. Keeping both wastes retrieval slots.
+        // Strategy: for each chunk, check all earlier chunks — drop if Jaccard > 0.70.
+        const dedupedRows = chunkRows.filter((row, i) => {
+          for (let j = 0; j < i; j++) {
+            const score = jaccardSimilarity(row.content, chunkRows[j].content);
+            if (score > 0.70) {
+              const fmt = (s: string) => `${s.slice(0, 240).replace(/\n/g, ' ')} … ${s.slice(-240).replace(/\n/g, ' ')}`;
+              console.log(`[upload] [${file.name}] dedup: dropped chunk ${i} (J=${score.toFixed(3)} vs chunk ${j})\n  DROPPED: ${fmt(row.content)}\n  KEPT:    ${fmt(chunkRows[j].content)}`);
+              return false;
+            }
+          }
+          return true;
+        });
+        const dedupDropped = chunkRows.length - dedupedRows.length;
+        if (dedupDropped > 0) {
+          console.log(`[upload] [${file.name}] dedup removed ${dedupDropped} duplicate chunk(s)`);
+        }
+        const finalRows = dedupedRows;
 
-        if (chunkRows.length === 0) {
+        console.log(`[upload] [${file.name}] chunked at ${elapsed()} — ${chunkRows.length} chunks (${dedupDropped} deduped → ${finalRows.length} final)`);
+
+        if (finalRows.length === 0) {
           await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
           return;
         }
 
         const { data: insertedChunks, error: chunksError } = await supabase
           .from('lesson_chunks')
-          .insert(chunkRows)
+          .insert(finalRows)
           .select('id');
         console.log(`[upload] [${file.name}] DB insert done at ${elapsed()}`);
 
@@ -274,7 +310,7 @@ export async function POST(
         // Pass chunks directly to avoid a redundant DB fetch — content is already in memory
         const chunksToEmbed = (insertedChunks as { id: string }[]).map((c, i) => ({
           id: c.id,
-          content: chunkRows[i].content,
+          content: finalRows[i].content,
         }));
         await embedChunks(chunksToEmbed, supabase, aiProvider);
         console.log(`[upload] [${file.name}] embed done at ${elapsed()}`);
