@@ -74,29 +74,31 @@ describe('[US 1.16] parsePdf', () => {
 
   describe('text extraction', () => {
     // 37.1
-    it('success: returns labelled page text when PDF has text content', async () => {
+    it('success: returns page_text section when PDF has text content', async () => {
       const result = await parsePdf(Buffer.from('fake pdf content'));
-      expect(result).toBe('[Page 1 Text] Hello PDF content');
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({ content: 'Hello PDF content', contentOrigin: 'page_text', pageNumber: 1 });
     });
 
     // 37.2
-    it('success: returns text for all pages in a multi-page PDF', async () => {
+    it('success: returns page_text sections for all pages in a multi-page PDF', async () => {
       const result = await parsePdf(Buffer.from('MULTI'));
-      expect(result).toContain('[Page 1 Text] Page 1 text');
-      expect(result).toContain('[Page 2 Text] Page 2 text');
+      const page1 = result.find(s => s.pageNumber === 1 && s.contentOrigin === 'page_text');
+      const page2 = result.find(s => s.pageNumber === 2 && s.contentOrigin === 'page_text');
+      expect(page1?.content).toBe('Page 1 text');
+      expect(page2?.content).toBe('Page 2 text');
     });
 
     // 37.3
-    it('failure: throws when PDF yields no text and no aiProvider for vision', async () => {
-      await expect(parsePdf(Buffer.from('EMPTY'))).rejects.toThrow(
-        'No text or visual content found in this PDF.'
-      );
+    it('failure: returns empty array when PDF yields no text and no aiProvider for vision', async () => {
+      const result = await parsePdf(Buffer.from('EMPTY'));
+      expect(result).toEqual([]);
     });
   });
 
   describe('vision pass (generatePdfVisualDescriptions)', () => {
     // 37.4
-    it('success: merges visual description alongside page text', async () => {
+    it('success: emits both page_text and visual_description sections', async () => {
       const descMap = new Map([[1, 'Diagram showing DNA double helix and RNAi pathway']]);
       const provider = makeMockProvider({
         generatePdfVisualDescriptions: jest.fn().mockResolvedValue(descMap),
@@ -104,40 +106,44 @@ describe('[US 1.16] parsePdf', () => {
 
       const result = await parsePdf(Buffer.from('fake pdf content'), provider);
 
-      expect(result).toContain('[Page 1 Text] Hello PDF content');
-      expect(result).toContain('[Page 1 Visual Content] Diagram showing DNA double helix');
+      const textSection = result.find(s => s.contentOrigin === 'page_text');
+      const visualSection = result.find(s => s.contentOrigin === 'visual_description');
+      expect(textSection?.content).toBe('Hello PDF content');
+      expect(visualSection?.content).toContain('Diagram showing DNA double helix');
+      expect(visualSection?.pageNumber).toBe(1);
       expect(provider.generatePdfVisualDescriptions).toHaveBeenCalledWith(
         expect.any(Buffer), 1
       );
     });
 
     // 37.5
-    it('success: omits Visual Content label when provider returns empty map (text-only page)', async () => {
+    it('success: emits only page_text section when provider returns empty map (text-only page)', async () => {
       const provider = makeMockProvider({
         generatePdfVisualDescriptions: jest.fn().mockResolvedValue(new Map()),
       });
 
       const result = await parsePdf(Buffer.from('fake pdf content'), provider);
 
-      expect(result).toContain('[Page 1 Text] Hello PDF content');
-      expect(result).not.toContain('Visual Content');
+      expect(result).toHaveLength(1);
+      expect(result[0].contentOrigin).toBe('page_text');
+      expect(result.find(s => s.contentOrigin === 'visual_description')).toBeUndefined();
     });
 
     // 37.6
-    it('failure: falls back to text-only result when vision API call fails', async () => {
+    it('failure: falls back to text-only sections when vision API call fails', async () => {
       jest.spyOn(console, 'warn').mockImplementation(() => { });
       const provider = makeMockProvider({
         generatePdfVisualDescriptions: jest.fn().mockRejectedValue(new Error('OpenAI 500')),
       });
 
-      // Must not throw — vision failure is non-fatal
       const result = await parsePdf(Buffer.from('fake pdf content'), provider);
-      expect(result).toBe('[Page 1 Text] Hello PDF content');
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({ content: 'Hello PDF content', contentOrigin: 'page_text' });
       (console.warn as jest.Mock).mockRestore();
     });
 
     // 37.7
-    it('success: visual content alone satisfies non-empty result when page has no text', async () => {
+    it('success: visual_description alone satisfies result when page has no text', async () => {
       const descMap = new Map([[1, 'Scanned chemical structure: benzene ring with OH group']]);
       const provider = makeMockProvider({
         generatePdfVisualDescriptions: jest.fn().mockResolvedValue(descMap),
@@ -145,13 +151,16 @@ describe('[US 1.16] parsePdf', () => {
 
       // EMPTY mock → no text items on any page
       const result = await parsePdf(Buffer.from('EMPTY'), provider);
-      expect(result).toContain('[Page 1 Visual Content] Scanned chemical structure');
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({ contentOrigin: 'visual_description', pageNumber: 1 });
+      expect(result[0].content).toContain('Scanned chemical structure');
     });
 
     // 37.8
     it('success: no vision call is made when aiProvider is not supplied', async () => {
       const result = await parsePdf(Buffer.from('fake pdf content'));
-      expect(result).toBe('[Page 1 Text] Hello PDF content');
+      expect(result).toHaveLength(1);
+      expect(result[0].contentOrigin).toBe('page_text');
     });
   });
 });
@@ -226,38 +235,45 @@ describe('[US 1.16] parsePptx', () => {
 
   describe('text extraction', () => {
     // 37.9
-    it('success: extracts slide body text with correct label', async () => {
+    it('success: emits slide_body section with correct content', async () => {
       const buf = await buildPptx([{ num: 1, bodyText: 'Slide body text' }]);
-      expect(await parsePptx(buf)).toContain('[Slide 1 Body] Slide body text');
+      const result = await parsePptx(buf);
+      const section = result.find(s => s.contentOrigin === 'slide_body');
+      expect(section?.content).toContain('Slide body text');
+      expect(section?.slideNumber).toBe(1);
     });
 
     // 37.10
-    it('success: extracts speaker notes with correct label', async () => {
+    it('success: emits slide_notes section with correct content', async () => {
       const buf = await buildPptx([{ num: 1, bodyText: 'Body', notesText: 'Speaker notes text' }]);
       const result = await parsePptx(buf);
-      expect(result).toContain('[Slide 1 Notes] Speaker notes text');
+      const section = result.find(s => s.contentOrigin === 'slide_notes');
+      expect(section?.content).toContain('Speaker notes text');
+      expect(section?.slideNumber).toBe(1);
     });
 
     // 37.11
-    it('success: processes multiple slides in slide-number order', async () => {
+    it('success: sections for slide 1 appear before sections for slide 2', async () => {
       const buf = await buildPptx([
         { num: 1, bodyText: 'First slide' },
         { num: 2, bodyText: 'Second slide' },
       ]);
       const result = await parsePptx(buf);
-      expect(result.indexOf('[Slide 1 Body]')).toBeLessThan(result.indexOf('[Slide 2 Body]'));
+      const idx1 = result.findIndex(s => s.slideNumber === 1);
+      const idx2 = result.findIndex(s => s.slideNumber === 2);
+      expect(idx1).toBeLessThan(idx2);
     });
 
     // 37.12
-    it('success: returns empty string for PPTX with no text nodes anywhere', async () => {
+    it('success: returns empty array for PPTX with no text nodes anywhere', async () => {
       const buf = await buildPptx([{ num: 1 }]);
-      expect((await parsePptx(buf)).trim()).toBe('');
+      expect(await parsePptx(buf)).toEqual([]);
     });
   });
 
   describe('vision pass (generatePptxSlideVisualDescription)', () => {
     // 37.13
-    it('success: calls vision with body, notes, and image — appends Visual Content label', async () => {
+    it('success: emits visual_description section when vision returns content', async () => {
       const provider = makeMockProvider({
         generatePptxSlideVisualDescription: jest.fn().mockResolvedValue(
           'RNAi pathway: nucleus at top, Dicer cleavage in cytoplasm, RISC loading'
@@ -276,11 +292,13 @@ describe('[US 1.16] parsePptx', () => {
         1, 'RNAi Pathway', 'Describe the steps',
         [{ base64: expect.any(String), mimeType: 'image/png' }]
       );
-      expect(result).toContain('[Slide 1 Visual Content] RNAi pathway');
+      const visual = result.find(s => s.contentOrigin === 'visual_description');
+      expect(visual?.content).toContain('RNAi pathway');
+      expect(visual?.slideNumber).toBe(1);
     });
 
     // 37.14
-    it('success: omits Visual Content label when vision returns NO_VISUAL_CONTENT', async () => {
+    it('success: no visual_description section when vision returns NO_VISUAL_CONTENT', async () => {
       const provider = makeMockProvider({
         generatePptxSlideVisualDescription: jest.fn().mockResolvedValue('NO_VISUAL_CONTENT'),
       });
@@ -289,8 +307,8 @@ describe('[US 1.16] parsePptx', () => {
       }]);
 
       const result = await parsePptx(buf, provider);
-      expect(result).not.toContain('Visual Content');
-      expect(result).toContain('[Slide 1 Body] Text only');
+      expect(result.find(s => s.contentOrigin === 'visual_description')).toBeUndefined();
+      expect(result.find(s => s.contentOrigin === 'slide_body')?.content).toContain('Text only');
     });
 
     // 37.15
@@ -342,10 +360,10 @@ describe('[US 1.16] parsePptx', () => {
       const result = await parsePptx(buf, provider);
 
       // Slide 1: vision failed but body text still emitted
-      expect(result).toContain('[Slide 1 Body] Slide 1');
-      expect(result).not.toContain('[Slide 1 Visual Content]');
+      expect(result.find(s => s.slideNumber === 1 && s.contentOrigin === 'slide_body')?.content).toContain('Slide 1');
+      expect(result.find(s => s.slideNumber === 1 && s.contentOrigin === 'visual_description')).toBeUndefined();
       // Slide 2: vision succeeded
-      expect(result).toContain('[Slide 2 Visual Content] Slide 2 diagram');
+      expect(result.find(s => s.slideNumber === 2 && s.contentOrigin === 'visual_description')?.content).toContain('Slide 2 diagram');
       (console.warn as jest.Mock).mockRestore();
     });
 
@@ -356,8 +374,8 @@ describe('[US 1.16] parsePptx', () => {
         images: [{ name: 'image1.png', bytes: FAKE_PNG }],
       }]);
       const result = await parsePptx(buf);
-      expect(result).toContain('[Slide 1 Body] Body text');
-      expect(result).not.toContain('Visual Content');
+      expect(result.find(s => s.contentOrigin === 'slide_body')?.content).toContain('Body text');
+      expect(result.find(s => s.contentOrigin === 'visual_description')).toBeUndefined();
     });
   });
 });
@@ -365,15 +383,16 @@ describe('[US 1.16] parsePptx', () => {
 // parseFile dispatcher
 describe('[US 1.16] parseFile dispatcher', () => {
   // 37.19
-  it('success: routes "pdf" type to parsePdf', async () => {
+  it('success: routes "pdf" type to parsePdf and returns ParsedSection[]', async () => {
     const result = await parseFile(Buffer.from('fake pdf'), 'pdf');
-    expect(result).toBe('[Page 1 Text] Hello PDF content');
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0]).toMatchObject({ contentOrigin: 'page_text' });
   });
 
   // 37.20
-  it('success: routes "pptx" type to parsePptx', async () => {
+  it('success: routes "pptx" type to parsePptx and returns empty array for empty PPTX', async () => {
     const buf = await (new JSZip()).generateAsync({ type: 'nodebuffer' }) as Buffer;
-    expect(await parseFile(buf, 'pptx')).toBe('');
+    expect(await parseFile(buf, 'pptx')).toEqual([]);
   });
 
   // 37.21
@@ -383,7 +402,7 @@ describe('[US 1.16] parseFile dispatcher', () => {
       generatePdfVisualDescriptions: jest.fn().mockResolvedValue(descMap),
     });
     const result = await parseFile(Buffer.from('fake pdf'), 'pdf', provider);
-    expect(result).toContain('[Page 1 Visual Content] Visual description from provider');
+    expect(result.find(s => s.contentOrigin === 'visual_description')?.content).toContain('Visual description from provider');
   });
 
   // 37.22
@@ -396,6 +415,6 @@ describe('[US 1.16] parseFile dispatcher', () => {
       images: [{ name: 'img.png', bytes: FAKE_PNG }],
     }]);
     const result = await parseFile(buf, 'pptx', provider);
-    expect(result).toContain('[Slide 1 Visual Content] Diagram via dispatcher');
+    expect(result.find(s => s.contentOrigin === 'visual_description')?.content).toContain('Diagram via dispatcher');
   });
 });
