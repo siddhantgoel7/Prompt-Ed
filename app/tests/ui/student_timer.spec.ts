@@ -18,11 +18,28 @@ import { test, expect, Page } from '@playwright/test';
 const TEST_PIN = '123456';
 
 async function joinLesson(page: Page) {
+    // Clear all cookies and storage before each join attempt.
+    // This prevents a Supabase auth session established by a previous test's
+    // student-page visit from causing useHomeJoin to redirect to /instructor_dashboard
+    // (which would hide the PIN input and cause all subsequent tests to timeout).
+    await page.context().clearCookies();
+    await page.evaluate(() => {
+        localStorage.clear();
+        sessionStorage.clear();
+    }).catch(() => {/* ignore if no page loaded yet */});
+
     await page.goto('/');
-    await page.getByLabel('PIN code').fill(TEST_PIN);
+
+    // HomeJoin shows a skeleton while it checks auth (useHomeJoin 'checking-auth' state).
+    // Wait explicitly for the PIN input to appear — it only renders once auth resolves.
+    const pinInput = page.getByLabel('PIN code');
+    await pinInput.waitFor({ state: 'visible', timeout: 15_000 });
+
+    await pinInput.fill(TEST_PIN);
     await page.getByRole('button', { name: 'Join' }).click();
     await expect(page).toHaveURL(/\/student\//, { timeout: 30_000 });
 }
+
 
 async function waitForDiscussionOrWaiting(page: Page): Promise<'active' | 'waiting'> {
     const waiting = page.getByText('Waiting for the instructor to publish a discussion');
