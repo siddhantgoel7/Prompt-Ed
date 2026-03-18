@@ -247,8 +247,8 @@ describe('[US 2.11] MC Feedback Timing with Timer', () => {
     it('[US 2.11][AC3-AT7] success: MC feedback is NOT shown in submitted view while timer is still running', () => {
         mockHook.mockReturnValue(makeSubmittedWithTimerHookValue(false));
         render(<StudentSessionPage lessonId="lesson-1" />);
-        expect(screen.queryByText('✅ Correct!')).not.toBeInTheDocument();
-        expect(screen.queryByText(/❌ Incorrect/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Good Job/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Oops/i)).not.toBeInTheDocument();
     });
 
     // 11
@@ -277,7 +277,7 @@ describe('[US 2.11] MC Feedback Timing with Timer', () => {
         mockHook.mockReturnValue(makeSubmittedWithTimerHookValue(true));
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
-        expect(screen.getByText('✅ Correct!')).toBeInTheDocument();
+        expect(screen.getByText(/Good Job/i)).toBeInTheDocument();
     });
 });
 
