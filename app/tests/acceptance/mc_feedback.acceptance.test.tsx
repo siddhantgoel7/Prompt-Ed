@@ -159,7 +159,7 @@ describe('[US 2.10] MC Feedback — Correct Answer (Acceptance)', () => {
     });
 
     // 29.6
-    it('[US 2.10][AC1-AT6] success: correct answer feedback does NOT reveal "Correct Answer: Option X"', () => {
+    it('[US 2.10][AC1-AT6] success: correct answer feedback does NOT reveal "Correct Answer: X. [text]"', () => {
         renderAndSubmit('A');
         expect(screen.queryByText(/Correct Answer:/i)).not.toBeInTheDocument();
     });
@@ -179,7 +179,7 @@ describe('[US 2.10] MC Feedback — Incorrect Answer (Acceptance)', () => {
     // 29.8
     it('[US 2.10][AC2-AT2] failure: incorrect answer reveals correct option label', () => {
         renderAndSubmit('B'); // correct is A
-        expect(screen.getByText(/Correct Answer: Option A/i)).toBeInTheDocument();
+        expect(screen.getByText(/Correct Answer: A\. Browser testing/i)).toBeInTheDocument();
     });
 
     // 29.9
@@ -199,8 +199,8 @@ describe('[US 2.10] MC Feedback — Incorrect Answer (Acceptance)', () => {
     it('[US 2.10][AC2-AT5] failure: correct answer revealed matches actual correct_option in discussion', () => {
         renderAndSubmit('C'); // correct is A, selecting C
         // Confirms the revealed answer is A, not the wrong selection C
-        expect(screen.getByText(/Correct Answer: Option A/i)).toBeInTheDocument();
-        expect(screen.queryByText(/Correct Answer: Option C/i)).not.toBeInTheDocument();
+        expect(screen.getByText(/Correct Answer: A\. Browser testing/i)).toBeInTheDocument();
+        expect(screen.queryByText(/Correct Answer: C\./i)).not.toBeInTheDocument();
     });
 
     // 29.12

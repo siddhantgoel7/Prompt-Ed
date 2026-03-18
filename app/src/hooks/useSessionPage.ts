@@ -97,7 +97,7 @@ export type SessionVM = {
   candidates: GeneratedPrompt[];
   isGenerating: boolean;
   generationWarning: string | null;
-  generateCandidates: () => Promise<void>;
+  generateCandidates: (transcriptOverride?: string) => Promise<void>;
   selectCandidate: (p: GeneratedPrompt) => void;
   regenerateCandidates: () => Promise<void>;
   handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => Promise<void>;
@@ -175,6 +175,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   const initializedConnectionRef = React.useRef(false);
   const wasConnectedRef = React.useRef(false);
 
+
   const [endError, setEndError] = useState<string | null>(null);
   const [endingLesson, setEndingLesson] = useState(false);
   const [activatingLesson, setActivatingLesson] = useState(false);
@@ -205,6 +206,30 @@ export function useSessionPage(lessonId: string): SessionVM {
       setTranscriptsLoading(false);
     }
   }, [lessonId]);
+
+  const loadEndedLessonHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const { data: discussionsData, error: discussionsError } = await fetchEndedDiscussionsApi(lessonId);
+
+      if (discussionsError) {
+        setHistoryError('Failed to load discussions/responses.');
+        setLessonDiscussions([]);
+      } else {
+        setHistoryError(null);
+        // Filter out soft-deleted (flagged) responses
+        const filtered = ((discussionsData || []) as DiscussionWithResponses[]).map(d => ({
+          ...d,
+          responses: (d.responses || []).filter(r => !r.flagged_at),
+        }));
+        setLessonDiscussions(filtered);
+      }
+    } finally {
+      setHistoryLoading(false);
+    }
+
+    await fetchTranscripts();
+  }, [lessonId, fetchTranscripts]);
 
   const syncLessonState = useCallback(async () => {
     await fetchDiscussions();
@@ -247,23 +272,7 @@ export function useSessionPage(lessonId: string): SessionVM {
         setLesson(lessonData as Lesson);
 
         if (lessonData.status === 'ended') {
-          setHistoryLoading(true);
-          const { data: discussionsData, error: discussionsError } = await fetchEndedDiscussionsApi(lessonId);
-
-          if (discussionsError) {
-            setHistoryError('Failed to load discussions/responses.');
-            setLessonDiscussions([]);
-          } else {
-            setHistoryError(null);
-            // Filter out soft-deleted (flagged) responses
-            const filtered = ((discussionsData || []) as DiscussionWithResponses[]).map(d => ({
-              ...d,
-              responses: (d.responses || []).filter(r => !r.flagged_at),
-            }));
-            setLessonDiscussions(filtered);
-          }
-          setHistoryLoading(false);
-          await fetchTranscripts();
+          await loadEndedLessonHistory();
         }
       }
 
@@ -273,7 +282,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     };
 
     run();
-  }, [lessonId, router, fetchDiscussions, fetchFiles, fetchTranscripts]);
+  }, [lessonId, router, fetchDiscussions, fetchFiles, loadEndedLessonHistory]);
 
   useEffect(() => {
     if (!initializedConnectionRef.current) {
@@ -355,8 +364,13 @@ export function useSessionPage(lessonId: string): SessionVM {
         payload: { lessonId: lesson.id, endedAt: now, message: 'Lesson has ended' },
       });
     }
-    router.push(`/lessons_page/${lesson.course_id}`);
-  }, [lesson, channel, router, activeDiscussion, handleCloseDiscussion]);
+
+    // Update local lesson state so SessionPage switches to ended summary immediately.
+    setLesson((prev) => (prev ? { ...prev, status: 'ended', ended_at: now } : prev));
+    await loadEndedLessonHistory();
+    setEndingLesson(false);
+    router.push(`/session/${lesson.id}`);
+  }, [lesson, channel, router, activeDiscussion, handleCloseDiscussion, loadEndedLessonHistory]);
 
   const getSafeLessonFileBase = useCallback(() => {
     return lesson?.title.replace(/[^a-z0-9-_]/gi, '_').toLowerCase() || 'lesson';

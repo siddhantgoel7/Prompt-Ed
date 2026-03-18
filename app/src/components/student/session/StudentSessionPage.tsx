@@ -1,6 +1,5 @@
 // Main student session page component — coordinates all student-facing session views
 // (loading, waiting, active prompt, submitted, ended) and handles MC submission logic.
-// src/components/student/session/StudentSessionPage.tsx
 'use client';
 
 import { useState } from 'react';
@@ -52,6 +51,11 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
   }
 
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
+  const correctOptionLabel = activeDiscussion?.correct_option ?? null;
+  const correctOptionText = correctOptionLabel
+    ? activeDiscussion?.mc_options?.find((o) => o.label === correctOptionLabel)?.text ?? null
+    : null;
+
   // Use loose null check so undefined (from older mocks / no timer) is treated same as null
   const hasTimer = timerEndTime != null && timerTotalSeconds != null;
 
@@ -150,6 +154,7 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
             <TimerExpiredMessage
               feedbackEnabled={activeDiscussion?.feedback_enabled}
               correctOption={activeDiscussion?.correct_option}
+              correctOptionText={correctOptionText}
               isMC={isMC}
             />
           ) : activeDiscussion?.status === 'active' ? (
@@ -217,7 +222,9 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
               <p className="mt-2 opacity-90 font-normal">
                 {isSubmitCorrect
                   ? 'You selected the correct answer.'
-                  : `Correct Answer: Option ${activeDiscussion?.correct_option}`
+                  : correctOptionLabel
+                    ? `Correct Answer: ${correctOptionLabel}. ${correctOptionText ?? '(answer text unavailable)'}`
+                    : 'Correct answer is unavailable.'
                 }
               </p>
             </div>

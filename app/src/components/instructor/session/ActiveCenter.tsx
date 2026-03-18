@@ -41,7 +41,7 @@ export function ActiveCenter(props: Partial<{
   candidates: GeneratedPrompt[];
   isGenerating: boolean;
   generationWarning: string | null;
-  onGenerate: () => void;
+  onGenerate: (transcriptOverride?: string) => void | Promise<void>;
   onSelectCandidate: (p: GeneratedPrompt) => void;
   onRegenerate: () => void;
   onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => void;
@@ -77,6 +77,7 @@ export function ActiveCenter(props: Partial<{
   const [creationMode, setCreationMode] = React.useState<'ai' | 'manual'>('ai');
   const [showTimerDialog, setShowTimerDialog] = React.useState(false);
   const [pendingCandidate, setPendingCandidate] = React.useState<GeneratedPrompt | null>(null);
+  const [publishError, setPublishError] = React.useState<string | null>(null);
 
   const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -94,6 +95,7 @@ export function ActiveCenter(props: Partial<{
     setFeedbackEnabled(false);
     setEditingOptions({});
     setManualOptions({ A: '', B: '', C: '', D: '' });
+    setPublishError(null);
   }, [candidates]);
 
   // Stop recording → Whisper → populate transcriptText → trigger generate
@@ -114,9 +116,8 @@ export function ActiveCenter(props: Partial<{
       setTranscriptText(transcript ?? '');
       setPromptInput(transcript ?? '');
       setSttStatus('idle');
-      // Auto-trigger generation after successful transcription
-      // Small delay so setTranscriptText flushes before onGenerate reads it
-      setTimeout(() => onGenerate(), 50);
+      // Pass fresh transcript directly to avoid stale state closure.
+      await onGenerate(transcript ?? '');
     } catch (err) {
       setSttError(err instanceof Error ? err.message : 'Transcription failed — type manually.');
       setSttStatus('error');
@@ -167,6 +168,7 @@ export function ActiveCenter(props: Partial<{
     if (onPublishAiCandidate) {
       onPublishAiCandidate(publishedCandidate, overrideCorrectOption, feedbackEnabled, timerSeconds);
       setSelectedIndex(null);
+      setPublishError(null);
     }
   };
 
@@ -185,9 +187,10 @@ export function ActiveCenter(props: Partial<{
     if (creationMode === 'manual') {
       if (promptType === 'multiple_choice') {
         if (!overrideCorrectOption) {
-          alert('Please select a correct answer for your multiple-choice question.');
+          setPublishError('Please select a correct answer for your multiple-choice question.');
           return;
         }
+        setPublishError(null);
         if (onPublishAiCandidate) {
           const mcOptions = (['A', 'B', 'C', 'D'] as const).map(label => ({
             label,
@@ -211,17 +214,19 @@ export function ActiveCenter(props: Partial<{
     }
     // AI Mode
     if (selectedIndex !== null && candidates[selectedIndex]) {
+      setPublishError(null);
       handlePublishSelected(candidates[selectedIndex], timerSeconds);
       return;
     }
     if (promptType === 'multiple_choice' && candidates.length > 0) {
-      alert('Please select a generated AI prompt to publish.');
+      setPublishError('Please select a generated AI prompt to publish.');
       return;
     }
     if (promptType === 'multiple_choice') {
-      alert('Please generate AI prompts and select one to publish, or switch to Manual Creation mode.');
+      setPublishError('Please generate AI prompts and select one to publish, or switch to Manual Creation mode.');
       return;
     }
+    setPublishError(null);
     onPublish(timerSeconds);
   };
 
@@ -303,7 +308,7 @@ export function ActiveCenter(props: Partial<{
 
               <AIPreferencesDialog />
               <Button
-                onClick={onGenerate}
+                onClick={() => onGenerate()}
                 disabled={isGenerating || recorder.isRecording}
                 size="sm"
                 className="px-4 py-1.5 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
@@ -433,6 +438,12 @@ export function ActiveCenter(props: Partial<{
             )}
           </TabsContent>
         </Tabs>
+
+        {publishError && (
+          <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
+            {publishError}
+          </p>
+        )}
 
         {/* Start Discussion button — Close Discussion moved to DiscussionTimerSection */}
         {!activeDiscussionId && (

@@ -35,9 +35,36 @@ type RealtimeLikeChannel = {
   send: (message: unknown) => Promise<unknown>;
 };
 
+function getSubmittedDiscussionIdsFromStorage(storageKey: string): string[] {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((id): id is string => typeof id === 'string');
+  } catch {
+    return [];
+  }
+}
+
+function hasSubmittedDiscussionInStorage(storageKey: string, discussionId: string): boolean {
+  return getSubmittedDiscussionIdsFromStorage(storageKey).includes(discussionId);
+}
+
+function markDiscussionSubmittedInStorage(storageKey: string, discussionId: string): void {
+  try {
+    const ids = new Set(getSubmittedDiscussionIdsFromStorage(storageKey));
+    ids.add(discussionId);
+    localStorage.setItem(storageKey, JSON.stringify([...ids]));
+  } catch {
+    // Non-fatal: if storage fails, we still keep the current in-memory submitted state.
+  }
+}
+
 export function useStudentSession(lessonId: string) {
   const router = useRouter();
   const { channel, isConnected } = useRealtime(lessonId, 'student');
+  const submittedDiscussionsKey = `student:${lessonId}:submitted-discussions`;
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [activeDiscussion, setActiveDiscussion] = useState<Discussion | null>(null);
@@ -103,17 +130,21 @@ export function useStudentSession(lessonId: string) {
       }
 
       if (discussionData) {
-        const disc = discussionData as Discussion;
-        setActiveDiscussion(disc);
+        const nextDiscussion = discussionData as Discussion;
+        setActiveDiscussion(nextDiscussion);
         setResponseText('');
-        setView('active');
+        setView(
+          hasSubmittedDiscussionInStorage(submittedDiscussionsKey, nextDiscussion.id)
+            ? 'submitted'
+            : 'active'
+        );
 
         // Restore timer for late-joining students using published_at from DB
-        if (disc.time_limit_seconds && disc.time_limit_seconds > 0 && disc.published_at) {
-          const endTime = new Date(disc.published_at).getTime() + disc.time_limit_seconds * 1000;
+        if (nextDiscussion.time_limit_seconds && nextDiscussion.time_limit_seconds > 0 && nextDiscussion.published_at) {
+          const endTime = new Date(nextDiscussion.published_at).getTime() + nextDiscussion.time_limit_seconds * 1000;
           if (endTime > Date.now()) {
             setTimerEndTime(endTime);
-            setTimerTotalSeconds(disc.time_limit_seconds);
+            setTimerTotalSeconds(nextDiscussion.time_limit_seconds);
           }
           // If endTime is in the past, timer already expired — leave timerEndTime null
           // (instructor auto-close will have fired already)
@@ -128,7 +159,7 @@ export function useStudentSession(lessonId: string) {
     return () => {
       cancelled = true;
     };
-  }, [lessonId, router]);
+  }, [lessonId, router, submittedDiscussionsKey]);
 
   // 2) Realtime listeners
   useEffect(() => {
@@ -157,9 +188,14 @@ export function useStudentSession(lessonId: string) {
       setActiveDiscussion(discussion);
       setResponseText('');
       setSubmitting(false);
+      setView(
+        hasSubmittedDiscussionInStorage(submittedDiscussionsKey, discussion.id)
+          ? 'submitted'
+          : 'active'
+      );
+
       setTimerExpired(false);
       timerExpiredRef.current = false;
-      setView('active');
 
       // Set up timer from discussion data
       if (discussion.time_limit_seconds && discussion.time_limit_seconds > 0 && discussion.published_at) {
@@ -259,7 +295,7 @@ export function useStudentSession(lessonId: string) {
       discussionClosedSub.unsubscribe();
       timerUpdatedSub.unsubscribe();
     };
-  }, [channel]);
+  }, [channel, submittedDiscussionsKey]);
 
   // 3) Submit response
   // responseTextOverride: for MC questions, the page passes the formatted option string directly so we don't race against the setState for responseText.
@@ -301,6 +337,7 @@ export function useStudentSession(lessonId: string) {
 
     setSubmitting(false);
     setResponseText('');
+    markDiscussionSubmittedInStorage(submittedDiscussionsKey, activeDiscussion.id);
     setView('submitted');
   };
 

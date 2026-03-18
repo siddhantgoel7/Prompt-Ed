@@ -4,11 +4,17 @@
 interface TimerExpiredMessageProps {
   feedbackEnabled?: boolean;
   correctOption?: string | null;
+  correctOptionText?: string | null;
   isMC?: boolean;
 }
 
 /** Displayed when time is up and the student did not submit. */
-export function TimerExpiredMessage({ feedbackEnabled, correctOption, isMC }: TimerExpiredMessageProps) {
+export function TimerExpiredMessage({
+  feedbackEnabled,
+  correctOption,
+  correctOptionText,
+  isMC,
+}: TimerExpiredMessageProps) {
   return (
     <div
       className="p-4 rounded-lg border border-destructive bg-red-50 text-red-800 space-y-2"
@@ -21,7 +27,7 @@ export function TimerExpiredMessage({ feedbackEnabled, correctOption, isMC }: Ti
       <p className="text-sm">No answer was submitted.</p>
       {isMC && feedbackEnabled && correctOption && (
         <p className="text-sm font-medium mt-1">
-          Correct Answer: Option {correctOption}
+          Correct Answer: {correctOption}. {correctOptionText ?? '(answer text unavailable)'}
         </p>
       )}
     </div>
