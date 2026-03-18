@@ -12,7 +12,6 @@ export function useStudentJoinQR(lessonId: string | undefined, width: number) {
       ? `${window.location.origin}/student/${lessonId}`
       : null;
   const [qrState, setQrState] = useState<{ lessonId: string; dataUrl: string } | null>(null);
-    router.push(`/session/${lessonId}`);
 
   useEffect(() => {
     if (!lessonId || !joinUrl) return;
@@ -31,7 +30,7 @@ export function useStudentJoinQR(lessonId: string | undefined, width: number) {
     };
   }, [lessonId, joinUrl, width]);
 
-  const qrDataUrl = qrState?.lessonId === lessonId ? qrState.dataUrl : null;
+  const qrDataUrl = (qrState?.lessonId === lessonId) ? qrState?.dataUrl : null;
 
   return { joinUrl, qrDataUrl };
 }

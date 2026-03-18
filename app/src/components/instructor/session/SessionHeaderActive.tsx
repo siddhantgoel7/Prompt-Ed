@@ -58,7 +58,7 @@ export function SessionHeaderActive(props: {
               QR
             </div>
           )}
-          <span className="font-semibold text-sm md:text-base">Join Code: {pinCode || '124567'}</span>
+          <span className="font-semibold text-sm md:text-base">Join Code: {pinCode ?? '------'}</span>
         </div>
 
         <Button size="sm" onClick={onDisplay}>Display</Button>

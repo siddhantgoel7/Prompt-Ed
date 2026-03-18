@@ -77,6 +77,7 @@ export function ActiveCenter(props: Partial<{
   const [creationMode, setCreationMode] = React.useState<'ai' | 'manual'>('ai');
   const [showTimerDialog, setShowTimerDialog] = React.useState(false);
   const [pendingCandidate, setPendingCandidate] = React.useState<GeneratedPrompt | null>(null);
+  const [publishError, setPublishError] = React.useState<string | null>(null);
 
   const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -94,6 +95,7 @@ export function ActiveCenter(props: Partial<{
     setFeedbackEnabled(false);
     setEditingOptions({});
     setManualOptions({ A: '', B: '', C: '', D: '' });
+    setPublishError(null);
   }, [candidates]);
 
   // Stop recording → Whisper → populate transcriptText → trigger generate
@@ -166,6 +168,7 @@ export function ActiveCenter(props: Partial<{
     if (onPublishAiCandidate) {
       onPublishAiCandidate(publishedCandidate, overrideCorrectOption, feedbackEnabled, timerSeconds);
       setSelectedIndex(null);
+      setPublishError(null);
     }
   };
 
@@ -184,9 +187,10 @@ export function ActiveCenter(props: Partial<{
     if (creationMode === 'manual') {
       if (promptType === 'multiple_choice') {
         if (!overrideCorrectOption) {
-          alert('Please select a correct answer for your multiple-choice question.');
+          setPublishError('Please select a correct answer for your multiple-choice question.');
           return;
         }
+        setPublishError(null);
         if (onPublishAiCandidate) {
           const mcOptions = (['A', 'B', 'C', 'D'] as const).map(label => ({
             label,
@@ -210,17 +214,19 @@ export function ActiveCenter(props: Partial<{
     }
     // AI Mode
     if (selectedIndex !== null && candidates[selectedIndex]) {
+      setPublishError(null);
       handlePublishSelected(candidates[selectedIndex], timerSeconds);
       return;
     }
     if (promptType === 'multiple_choice' && candidates.length > 0) {
-      alert('Please select a generated AI prompt to publish.');
+      setPublishError('Please select a generated AI prompt to publish.');
       return;
     }
     if (promptType === 'multiple_choice') {
-      alert('Please generate AI prompts and select one to publish, or switch to Manual Creation mode.');
+      setPublishError('Please generate AI prompts and select one to publish, or switch to Manual Creation mode.');
       return;
     }
+    setPublishError(null);
     onPublish(timerSeconds);
   };
 
@@ -432,6 +438,12 @@ export function ActiveCenter(props: Partial<{
             )}
           </TabsContent>
         </Tabs>
+
+        {publishError && (
+          <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
+            {publishError}
+          </p>
+        )}
 
         {/* Start Discussion button — Close Discussion moved to DiscussionTimerSection */}
         {!activeDiscussionId && (
