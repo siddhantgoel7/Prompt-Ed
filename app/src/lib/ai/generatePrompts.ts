@@ -4,7 +4,7 @@ import type { AIProvider } from './providers';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PromptType } from '@/types/discussion';
 import type { CandidateSet, GeneratedPrompt, MCOption, AIPromptPreferences } from '@/types/ai';
-import { retrieveChunksBySimilarity, retrieveRecentChunks } from './retrieveChunks';
+import { retrieveChunksBySimilarity, retrieveRecentChunks, type RetrievedChunk } from './retrieveChunks';
 import { buildSystemPrompt, buildUserPrompt, CANDIDATE_COUNT } from './prompts/discussionPrompt';
 
 /**
@@ -28,7 +28,7 @@ export async function generatePrompts(
   aiProvider: AIProvider,
   preferences?: AIPromptPreferences
 ): Promise<CandidateSet> {
-  let chunks: string[] = [];
+  let retrieved: RetrievedChunk[] = [];
   let warning: string | undefined;
 
   try {
@@ -36,12 +36,12 @@ export async function generatePrompts(
       // Semantic retrieval: embed transcript text, find similar chunks
       const embeddingResponse = await aiProvider.generateEmbedding(transcriptText.trim());
       const queryEmbedding = embeddingResponse[0];
-      chunks = await retrieveChunksBySimilarity(lessonId, queryEmbedding, supabase);
+      retrieved = await retrieveChunksBySimilarity(lessonId, queryEmbedding, supabase);
     }
 
     // Fallback to recent chunks if no transcript or retrieval returned nothing
-    if (chunks.length === 0) {
-      chunks = await retrieveRecentChunks(lessonId, supabase);
+    if (retrieved.length === 0) {
+      retrieved = await retrieveRecentChunks(lessonId, supabase);
       if (!transcriptText.trim()) {
         warning = 'No transcript provided. Generating from uploaded file content only.';
       } else {
@@ -50,6 +50,7 @@ export async function generatePrompts(
     }
 
     // Build and call
+    const chunks = retrieved.map((c) => c.content);
     const userPrompt = buildUserPrompt({ chunks, transcriptText, promptType, preferences });
     const rawContent = await aiProvider.generateChatCompletion([
       { role: 'system', content: buildSystemPrompt(preferences) },

@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { parseFile } from '@/lib/ai/parsers';
 import { embedChunks } from '@/lib/ai/embedChunks';
 import { OpenAIProvider } from '@/lib/ai/providers';
-import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
+import type { ChunkMetadata } from '@/types/ai';
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
 const MAX_CHUNKS_PER_FILE = 500;
@@ -15,6 +15,65 @@ const MAGIC = {
   pdf: Buffer.from([0x25, 0x50, 0x44, 0x46]),
   pptx: Buffer.from([0x50, 0x4b, 0x03, 0x04]),
 };
+
+/**
+ * Groups text into chunks that respect sentence boundaries.
+ * Splits on sentence-ending punctuation and newlines, then packs sentences
+ * into windows up to maxChars. Carries overlapSentences sentences forward
+ * into the next chunk for retrieval context continuity.
+ */
+function splitBySentences(text: string, maxChars: number, overlapSentences = 1): string[] {
+  const sentences = text
+    .split(/(?<=[.!?])\s+|\n+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+
+  if (sentences.length === 0) return text.trim() ? [text.trim()] : [];
+
+  const chunks: string[] = [];
+  let window: string[] = [];
+  let windowLen = 0;
+
+  for (const sentence of sentences) {
+    if (windowLen + sentence.length + 1 > maxChars && window.length > 0) {
+      chunks.push(window.join(' ').trim());
+      window = window.slice(-overlapSentences);
+      windowLen = window.reduce((sum, s) => sum + s.length + 1, 0);
+    }
+    window.push(sentence);
+    windowLen += sentence.length + 1;
+  }
+
+  if (window.length > 0) chunks.push(window.join(' ').trim());
+  return chunks;
+}
+
+/**
+ * Returns true if text is predominantly label soup (disconnected tokens, no prose).
+ * Used to decide whether to suppress a page_text chunk when a visual_description
+ * for the same page already exists. Threshold: avg words per sentence < 4.
+ */
+function isLabelSoup(text: string): boolean {
+  const segments = text.split(/[\n.]+/).map(s => s.trim()).filter(s => s.length > 0);
+  if (segments.length === 0) return true;
+  const avgWords = segments.reduce((sum, s) => sum + s.split(/\s+/).length, 0) / segments.length;
+  return avgWords < 4;
+}
+
+/**
+ * Computes Jaccard similarity between two tokenised word sets.
+ * Used by the pre-insert deduplication pass to drop near-identical chunks
+ * caused by multi-column PDF layout extracting the same paragraph twice.
+ */
+function jaccardSimilarity(a: string, b: string): number {
+  const tokenize = (s: string) => new Set(s.toLowerCase().match(/[a-z0-9]+/g) ?? []);
+  const A = tokenize(a);
+  const B = tokenize(b);
+  if (A.size === 0 && B.size === 0) return 1;
+  let intersection = 0;
+  for (const t of A) { if (B.has(t)) intersection++; }
+  return intersection / (A.size + B.size - intersection);
+}
 
 /** Detects file type by inspecting the first 4 magic bytes of the buffer. */
 function detectFileType(buffer: Buffer): 'pdf' | 'pptx' | null {
@@ -119,30 +178,80 @@ export async function POST(
     // --- BACKGROUND PROCESSING ---
     const processFile = async () => {
       try {
-        // Parse text
-        const rawText = await parseFile(buffer, detectedType, aiProvider);
+        // Parse into structured sections
+        const sections = await parseFile(buffer, detectedType, aiProvider);
 
-        // Chunk
-        const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 500, chunkOverlap: 200 });
-        const chunks = (await splitter.splitText(rawText)).filter((c) => c.trim()).slice(0, MAX_CHUNKS_PER_FILE);
+        // Build a set of page numbers that have a visual_description so we can suppress
+        // the corresponding page_text chunk when it is label soup (figures/tables with no prose).
+        const pagesWithVision = new Set(
+          sections
+            .filter(s => s.contentOrigin === 'visual_description' && s.pageNumber != null)
+            .map(s => s.pageNumber!)
+        );
 
-        if (chunks.length === 0) {
+        // Chunk each section independently so boundaries never cross page/slide/content-type lines.
+        // Each resulting chunk inherits its section's page/slide number and content origin.
+        const chunkRows: Array<{
+          lesson_id: string;
+          lesson_file_id: string;
+          content_type: string;
+          content: string;
+          metadata: ChunkMetadata;
+        }> = [];
+        let chunkIndex = 0;
+
+        for (const section of sections) {
+          if (chunkRows.length >= MAX_CHUNKS_PER_FILE) break;
+
+          // Suppress page_text for pages where visual_description exists AND the text is
+          // label soup — disconnected tokens from figure/table layouts with no prose value.
+          if (section.contentOrigin === 'page_text' && section.pageNumber != null && pagesWithVision.has(section.pageNumber)) {
+            if (isLabelSoup(section.content)) {
+              continue;
+            }
+          }
+
+          const chunkSize =
+            section.contentOrigin === 'slide_body'  ? 512  :
+            section.contentOrigin === 'slide_notes' ? 768  : 1024;
+          const subChunks = (
+            section.contentOrigin === 'visual_description'
+              ? [section.content]                                        // never split — vision output is pre-structured
+              : splitBySentences(section.content, chunkSize, 1)         // sentence-aware, size tuned per content type
+          ).filter(c => c.trim().length > 50);                          // drop heading-only noise
+          for (const content of subChunks) {
+            if (chunkRows.length >= MAX_CHUNKS_PER_FILE) break;
+            const metadata: ChunkMetadata = {
+              contentOrigin: section.contentOrigin,
+              chunkType: 'text',
+              fileName: file.name,
+              pageNumber: section.pageNumber,
+              slideNumber: section.slideNumber,
+              chunkIndex: chunkIndex++,
+            };
+            chunkRows.push({ lesson_id: lessonId, lesson_file_id: fileRecord.id, content_type: section.contentOrigin, content, metadata });
+          }
+        }
+
+        // Deduplicate near-identical chunks before DB insert.
+        // Multi-column PDF layout and repeated slide pages both produce chunks that are
+        // textually identical or near-identical. Keeping both wastes retrieval slots.
+        // Strategy: for each chunk, check all earlier chunks — drop if Jaccard > 0.70.
+        const finalRows = chunkRows.filter((row, i) => {
+          for (let j = 0; j < i; j++) {
+            if (jaccardSimilarity(row.content, chunkRows[j].content) > 0.70) return false;
+          }
+          return true;
+        });
+
+        if (finalRows.length === 0) {
           await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
           return;
         }
 
-        // Insert chunks without embeddings
-        const chunkRows = chunks.map((content, i) => ({
-          lesson_id: lessonId,
-          lesson_file_id: fileRecord.id,
-          content_type: 'slide',
-          content,
-          metadata: { file_name: file.name, chunk_index: i },
-        }));
-
         const { data: insertedChunks, error: chunksError } = await supabase
           .from('lesson_chunks')
-          .insert(chunkRows)
+          .insert(finalRows)
           .select('id');
 
         if (chunksError || !insertedChunks) {
@@ -150,15 +259,18 @@ export async function POST(
           return;
         }
 
-        // Embed using our new adapter layer
-        const chunkIds = (insertedChunks as { id: string }[]).map((c) => c.id);
-        await embedChunks(chunkIds, supabase, aiProvider);
+        // Pass chunks directly to avoid a redundant DB fetch — content is already in memory
+        const chunksToEmbed = (insertedChunks as { id: string }[]).map((c, i) => ({
+          id: c.id,
+          content: finalRows[i].content,
+        }));
+        await embedChunks(chunksToEmbed, supabase, aiProvider);
 
         // Mark as ready
         await supabase.from('lesson_files').update({ status: 'ready' }).eq('id', fileRecord.id);
 
       } catch (err) {
-        console.error('[upload] Background parse/embed error:', err);
+        console.error(`[upload] [${file.name}] processing failed:`, err);
         await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
       }
     };
