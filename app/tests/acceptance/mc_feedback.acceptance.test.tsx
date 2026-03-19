@@ -8,11 +8,11 @@
  * Acceptance Criteria:
  *   AC1: GIVEN feedback_enabled AND student submits MC answer
  *        WHEN the answer is correct
- *        THEN they see " Correct!" and "You selected the correct answer."
+ *        THEN they see "Good Job! 🎉" and the option highlighted green
  *
  *   AC2: GIVEN feedback_enabled AND student submits MC answer
  *        WHEN the answer is incorrect
- *        THEN they see " Incorrect" and the correct option label
+ *        THEN they see "Oops! 😔" and their option highlighted red; correct option shown in green
  *
  *   AC3: GIVEN feedback is disabled
  *        WHEN the student submits ANY MC answer
@@ -127,41 +127,42 @@ describe('[US 2.10] MC Feedback — Correct Answer (Acceptance)', () => {
     beforeEach(() => jest.clearAllMocks());
 
     // 29.1
-    it('[US 2.10][AC1-AT1] success: submitting correct option shows ✅ Correct! headline', () => {
+    it('[US 2.10][AC1-AT1] success: submitting correct option shows Good Job! headline', () => {
         renderAndSubmit('A'); // A is the correct_option in fixture
-        expect(screen.getByText('✅ Correct!')).toBeInTheDocument();
+        expect(screen.getByText(/Good Job/i)).toBeInTheDocument();
     });
 
     // 29.2
-    it('[US 2.10][AC1-AT2] success: correct answer shows "You selected the correct answer." detail', () => {
+    it('[US 2.10][AC1-AT2] success: correct answer shows question with green highlighted option', () => {
         renderAndSubmit('A');
-        expect(screen.getByText(/You selected the correct answer/i)).toBeInTheDocument();
+        // The question text is shown (via StudentPromptCard)
+        expect(screen.getByText('What is Playwright used for?')).toBeInTheDocument();
     });
 
     // 29.3
-    it('[US 2.10][AC1-AT3] success: correct feedback block has green styling class', () => {
+    it('[US 2.10][AC1-AT3] success: correct feedback banner has green styling class', () => {
         renderAndSubmit('A');
-        const feedbackBlock = screen.getByText('✅ Correct!').closest('div[class*="p-4"]') as HTMLElement;
-        expect(feedbackBlock?.className).toMatch(/green/);
+        const banner = screen.getByTestId('mc-feedback-banner');
+        expect(banner?.className).toMatch(/green/);
     });
 
     // 29.4
-    it('[US 2.10][AC1-AT4] success: "Response submitted" alert is also shown alongside correct feedback', () => {
+    it('[US 2.10][AC1-AT4] success: Good Job! banner is shown after correct submission', () => {
         renderAndSubmit('A');
-        expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
-        expect(screen.getByText('✅ Correct!')).toBeInTheDocument();
+        expect(screen.getByText(/Good Job/i)).toBeInTheDocument();
     });
 
     // 29.5
-    it('[US 2.10][AC1-AT5] success: correct answer feedback does NOT show any incorrect icon', () => {
+    it('[US 2.10][AC1-AT5] success: correct answer feedback does NOT show Oops! banner', () => {
         renderAndSubmit('A');
-        expect(screen.queryByText(/❌ Incorrect/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Oops/i)).not.toBeInTheDocument();
     });
 
     // 29.6
-    it('[US 2.10][AC1-AT6] success: correct answer feedback does NOT reveal "Correct Answer: X. [text]"', () => {
+    it('[US 2.10][AC1-AT6] success: correct answer feedback does NOT show "Response submitted" alert during feedback period', () => {
         renderAndSubmit('A');
-        expect(screen.queryByText(/Correct Answer:/i)).not.toBeInTheDocument();
+        // During the 7-second feedback window, the normal "Response submitted" alert is replaced by the banner
+        expect(screen.queryByText(/Response submitted/i)).not.toBeInTheDocument();
     });
 });
 
@@ -171,43 +172,41 @@ describe('[US 2.10] MC Feedback — Incorrect Answer (Acceptance)', () => {
     beforeEach(() => jest.clearAllMocks());
 
     // 29.7
-    it('[US 2.10][AC2-AT1] failure: submitting wrong option shows ❌ Incorrect headline', () => {
+    it('[US 2.10][AC2-AT1] failure: submitting wrong option shows Oops! headline', () => {
         renderAndSubmit('B'); // correct is A
-        expect(screen.getByText(/❌ Incorrect/i)).toBeInTheDocument();
+        expect(screen.getByText(/Oops/i)).toBeInTheDocument();
     });
 
     // 29.8
-    it('[US 2.10][AC2-AT2] failure: incorrect answer reveals correct option label', () => {
+    it('[US 2.10][AC2-AT2] failure: incorrect answer shows full question so student can see the correct option', () => {
         renderAndSubmit('B'); // correct is A
-        expect(screen.getByText(/Correct Answer: A\. Browser testing/i)).toBeInTheDocument();
+        expect(screen.getByText('What is Playwright used for?')).toBeInTheDocument();
     });
 
     // 29.9
-    it('[US 2.10][AC2-AT3] failure: incorrect feedback block has red styling class', () => {
+    it('[US 2.10][AC2-AT3] failure: incorrect feedback banner has red styling class', () => {
         renderAndSubmit('C'); // correct is A
-        const feedbackBlock = screen.getByText(/❌ Incorrect/i).closest('div[class*="p-4"]') as HTMLElement;
-        expect(feedbackBlock?.className).toMatch(/red/);
+        const banner = screen.getByTestId('mc-feedback-banner');
+        expect(banner?.className).toMatch(/red/);
     });
 
     // 29.10
-    it('[US 2.10][AC2-AT4] failure: wrong answer does NOT show ✅ Correct! icon', () => {
+    it('[US 2.10][AC2-AT4] failure: wrong answer does NOT show Good Job! banner', () => {
         renderAndSubmit('D'); // correct is A
-        expect(screen.queryByText('✅ Correct!')).not.toBeInTheDocument();
+        expect(screen.queryByText(/Good Job/i)).not.toBeInTheDocument();
     });
 
     // 29.11
-    it('[US 2.10][AC2-AT5] failure: correct answer revealed matches actual correct_option in discussion', () => {
+    it('[US 2.10][AC2-AT5] failure: all MC options are shown after incorrect submission', () => {
         renderAndSubmit('C'); // correct is A, selecting C
-        // Confirms the revealed answer is A, not the wrong selection C
-        expect(screen.getByText(/Correct Answer: A\. Browser testing/i)).toBeInTheDocument();
-        expect(screen.queryByText(/Correct Answer: C\./i)).not.toBeInTheDocument();
+        expect(screen.getByText('Browser testing')).toBeInTheDocument();
+        expect(screen.getByText('A linting tool')).toBeInTheDocument();
     });
 
     // 29.12
-    it('[US 2.10][AC2-AT6] failure: "Response submitted" alert is still shown alongside incorrect feedback', () => {
+    it('[US 2.10][AC2-AT6] failure: Oops! banner is shown after incorrect submission', () => {
         renderAndSubmit('B');
-        expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
-        expect(screen.getByText(/❌ Incorrect/i)).toBeInTheDocument();
+        expect(screen.getByText(/Oops/i)).toBeInTheDocument();
     });
 });
 
@@ -217,29 +216,32 @@ describe('[US 2.10] MC Feedback — Feedback Disabled (Acceptance)', () => {
     beforeEach(() => jest.clearAllMocks());
 
     // 29.13
-    it('[US 2.10][AC3-AT1] success: no feedback shown when feedback_enabled=false and answer is correct', () => {
+    it('[US 2.10][AC3-AT1] success: no feedback banner when feedback_enabled=false and answer is correct', () => {
         renderAndSubmit('A', MC_DISCUSSION_FEEDBACK_OFF);
-        expect(screen.queryByText('✅ Correct!')).not.toBeInTheDocument();
-        expect(screen.queryByText(/❌ Incorrect/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Good Job/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Oops/i)).not.toBeInTheDocument();
     });
 
     // 29.14
-    it('[US 2.10][AC3-AT2] success: no feedback shown when feedback_enabled=false and answer is incorrect', () => {
+    it('[US 2.10][AC3-AT2] success: no feedback banner when feedback_enabled=false and answer is incorrect', () => {
         renderAndSubmit('B', MC_DISCUSSION_FEEDBACK_OFF);
-        expect(screen.queryByText('✅ Correct!')).not.toBeInTheDocument();
-        expect(screen.queryByText(/❌ Incorrect/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Good Job/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Oops/i)).not.toBeInTheDocument();
     });
 
     // 29.15
-    it('[US 2.10][AC3-AT3] success: "Response submitted" still appears even when feedback is disabled', () => {
+    it('[US 2.10][AC3-AT3] success: "Response submitted" still appears when feedback is disabled', () => {
         renderAndSubmit('A', MC_DISCUSSION_FEEDBACK_OFF);
         expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
     });
 
     // 29.16
-    it('[US 2.10][AC3-AT4] success: correct option label is NOT revealed when feedback is disabled', () => {
+    it('[US 2.10][AC3-AT4] success: selected option is highlighted in gray when feedback is disabled', () => {
         renderAndSubmit('B', MC_DISCUSSION_FEEDBACK_OFF);
-        expect(screen.queryByText(/Correct Answer:/i)).not.toBeInTheDocument();
+        // The selected option button should have gray styling
+        const optionButtons = screen.getAllByRole('button');
+        const selectedBtn = optionButtons.find(btn => btn.textContent?.includes('B.'));
+        expect(selectedBtn?.className).toMatch(/bg-gray-200/);
     });
 });
 
@@ -249,12 +251,14 @@ describe('[US 2.10] MC Feedback — Non-MC Questions (Edge Cases)', () => {
     beforeEach(() => jest.clearAllMocks());
 
     // 29.17
-    it('[US 2.10][SC3] success: short-answer submission does NOT show MC feedback block', () => {
-        mockHook.mockReturnValue(makeSubmittedHookValue(SHORT_ANSWER_DISCUSSION as any));
+    it('[US 2.10][SC3] success: short-answer submission does NOT show MC feedback banner', () => {
+        mockHook.mockReturnValue({
+            ...makeSubmittedHookValue(SHORT_ANSWER_DISCUSSION as any),
+            submittedAnswerText: null,
+        });
         render(<StudentSessionPage lessonId="lesson-1" />);
-        expect(screen.queryByText('✅ Correct!')).not.toBeInTheDocument();
-        expect(screen.queryByText(/❌ Incorrect/i)).not.toBeInTheDocument();
-        expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
+        expect(screen.queryByText(/Good Job/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Oops/i)).not.toBeInTheDocument();
     });
 });
 
@@ -281,13 +285,11 @@ describe('[US 2.08] MC Option Selection', () => {
         expect(screen.getByText('A text editor')).toBeInTheDocument();
     });
 
-    // 29.20
-    it('[US 2.08][UI3] success: selecting an option populates the response textarea', () => {
+    // 29.20 — Updated: no textarea for MC questions (selection is via option buttons only)
+    it('[US 2.08][UI3] success: no textarea is rendered for MC questions', () => {
         mockHook.mockReturnValue(makeActiveHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
-        fireEvent.click(screen.getByText('A.'));
-        const textarea = screen.getByPlaceholderText('Type your response here...');
-        expect((textarea as HTMLTextAreaElement).value).toMatch(/Option A/);
+        expect(screen.queryByPlaceholderText('Type your response here...')).not.toBeInTheDocument();
     });
 
     // 29.21
@@ -340,7 +342,7 @@ describe('[US 2.10] MC Feedback — Discussion Reset Between Questions', () => {
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         // After discussion change, feedback is gone and new question is shown
-        expect(screen.queryByText('✅ Correct!')).not.toBeInTheDocument();
+        expect(screen.queryByText(/Good Job/i)).not.toBeInTheDocument();
         expect(screen.getByText('New question?')).toBeInTheDocument();
     });
 });

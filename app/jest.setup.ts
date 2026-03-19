@@ -1,5 +1,11 @@
 import '@testing-library/jest-dom'
 
+// Mock canvas-confetti (browser-only library not available in jsdom)
+jest.mock('canvas-confetti', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+
 // Mock environment variables
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
