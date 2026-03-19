@@ -1,5 +1,6 @@
-// Circular countdown timer shown to students in the top-left of the discussion container.
-// Depletes clockwise; turns red in the last 10 seconds; shows "Time's Up" at zero.
+// Pill-shaped countdown timer shown to students during timed discussions.
+// Circular arc shows elapsed vs remaining time; turns blush red when < 20% remains.
+// src/components/student/session/DiscussionTimer.tsx
 'use client';
 
 import * as React from 'react';
@@ -15,7 +16,7 @@ function formatTime(secs: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-/** Circular SVG countdown timer for the student discussion view. */
+/** Pill-shaped countdown timer for the student discussion view. */
 export function DiscussionTimer({ timerEndTime, timerTotalSeconds }: DiscussionTimerProps) {
   const [remaining, setRemaining] = React.useState<number>(() =>
     Math.max(0, Math.ceil((timerEndTime - Date.now()) / 1000))
@@ -31,58 +32,71 @@ export function DiscussionTimer({ timerEndTime, timerTotalSeconds }: DiscussionT
     return () => clearInterval(id);
   }, [timerEndTime]);
 
-  const radius = 36;
+  const radius = 22;
   const circumference = 2 * Math.PI * radius;
   const progress = timerTotalSeconds > 0 ? Math.max(0, remaining / timerTotalSeconds) : 0;
   const strokeDashoffset = circumference * (1 - progress);
   const isExpired = remaining <= 0;
-  const isWarning = remaining <= 10 && !isExpired;
+  const isUrgent = progress < 0.20 && !isExpired;
 
-  const strokeColor = isExpired || isWarning ? 'var(--destructive)' : 'var(--primary)';
-  const textColor = isExpired || isWarning ? 'var(--destructive)' : 'var(--foreground)';
+  const arcColor = isExpired
+    ? 'var(--accent-blush)'
+    : isUrgent
+    ? 'var(--accent-blush)'
+    : 'var(--color-primary-400)';
+
+  const textColor = isExpired || isUrgent
+    ? '#c0392b'
+    : 'var(--text-primary)';
 
   return (
     <div
-      className="flex flex-col items-center"
+      className="inline-flex items-center gap-3 px-5 py-2.5"
+      style={{
+        borderRadius: '999px',
+        border: '1px solid var(--border-default)',
+        background: 'var(--surface-glass)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+      }}
       data-testid="student-timer"
       aria-label={isExpired ? "Time's up" : `Time remaining: ${formatTime(remaining)}`}
     >
-      <svg viewBox="0 0 80 80" width="64" height="64">
-        {/* Track ring */}
+      {/* Circular arc */}
+      <svg viewBox="0 0 52 52" width="40" height="40" style={{ flexShrink: 0 }}>
+        {/* Track */}
         <circle
-          cx="40" cy="40" r={radius}
-          stroke="var(--border)"
-          strokeWidth="6"
+          cx="26" cy="26" r={radius}
           fill="none"
+          stroke="var(--border-default)"
+          strokeWidth="4"
         />
-        {/* Countdown arc */}
+        {/* Arc */}
         <circle
-          cx="40" cy="40" r={radius}
-          stroke={strokeColor}
-          strokeWidth="6"
+          cx="26" cy="26" r={radius}
           fill="none"
+          stroke={arcColor}
+          strokeWidth="4"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
-          transform="rotate(-90 40 40)"
-          style={{ transition: 'stroke-dashoffset 0.9s linear, stroke 0.3s ease' }}
+          transform="rotate(-90 26 26)"
+          style={{ transition: 'stroke-dashoffset 0.9s linear, stroke 0.4s ease' }}
         />
-        {/* Time label */}
-        <text
-          x="40" y="40"
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontSize={isExpired ? '9' : '12'}
-          fontFamily="monospace"
-          fontWeight="700"
-          fill={textColor}
+      </svg>
+
+      {/* Time text */}
+      <div className="flex flex-col items-start leading-tight">
+        <span
+          className="text-base font-bold font-mono tabular-nums"
+          style={{ color: textColor }}
         >
           {isExpired ? "00:00" : formatTime(remaining)}
-        </text>
-      </svg>
-      <span className="text-[10px] font-medium mt-0.5" style={{ color: textColor }}>
-        {isExpired ? "Time's up" : 'left'}
-      </span>
+        </span>
+        <span className="text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>
+          {isExpired ? "Time's up" : 'remaining'}
+        </span>
+      </div>
     </div>
   );
 }

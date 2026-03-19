@@ -2,13 +2,11 @@
 // and add/edit/delete dialogs, all driven by the useInstructorDashboard hook.
 'use client';
 
-import { Skeleton } from '@/components/ui/skeleton';
-
 import { InstructorDashboardHeader } from './InstructorDashboardHeader';
 import { CoursesSection } from './CoursesSection';
 import { CourseDialog } from './CourseDialog';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
-
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { useInstructorDashboard } from '@/hooks/useInstructorDashboard';
 
 /** Renders the full instructor dashboard page with course management and modals. */
@@ -16,23 +14,14 @@ export function InstructorDashboard() {
   const dashboard = useInstructorDashboard();
 
   if (dashboard.loadingUser) {
-    // Keep the literal "Loading..." for tests or update tests later
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-full max-w-md space-y-4 px-6">
-          <p className="text-gray-500">Loading...</p>
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-40 w-full" />
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: 'var(--surface-base)' }}>
       <InstructorDashboardHeader loggingOut={dashboard.loggingOut} onLogout={dashboard.logout} />
 
-      <main className="px-8 py-12">
+      <main className="px-4 py-10 md:px-8 md:py-12">
         <CoursesSection
           courses={dashboard.courses}
           onAdd={dashboard.openAdd}

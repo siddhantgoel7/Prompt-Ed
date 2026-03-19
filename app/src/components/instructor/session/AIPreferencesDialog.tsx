@@ -62,7 +62,20 @@ export function AIPreferencesDialog() {
                 </DialogHeader>
 
                 {isLoading ? (
-                    <div className="py-6 text-center text-sm text-gray-500">Loading preferences...</div>
+                    <div className="py-6 flex justify-center">
+                      <div className="flex items-center gap-1.5">
+                        {[0, 1, 2].map((i) => (
+                          <span
+                            key={i}
+                            className="block w-1.5 h-1.5 rounded-full"
+                            style={{
+                              background: 'var(--color-primary-400)',
+                              animation: `dotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
                 ) : (
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">

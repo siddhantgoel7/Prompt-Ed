@@ -3,44 +3,51 @@
 'use client';
 
 import * as React from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
 
 import { useLessonsPage } from '@/hooks/useLessonsPage';
 import { LessonsPageHeader } from './LessonsPageHeader';
 import { LessonsGrid } from './LessonsGrid';
 import { LessonCreateDialog } from './LessonCreateDialog';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
 
 /** Renders the lessons page for a course, with loading/not-found states and lesson management dialogs. */
 export function LessonsPage({ courseId }: { courseId: string }) {
   const page = useLessonsPage(courseId);
 
   if (page.loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-full max-w-md space-y-4 px-6">
-          <p className="text-gray-500">Loading...</p>
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!page.course) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Course not found</p>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'var(--surface-base)' }}
+      >
+        <p style={{ color: 'var(--text-muted)' }}>Course not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <LessonsPageHeader title="PMCOL Teaching Tool" onBack={page.back} />
+    <div className="min-h-screen" style={{ background: 'var(--surface-base)' }}>
+      <LessonsPageHeader title="PromptED" onBack={page.back} />
 
-      <main className="mx-auto w-full max-w-6xl px-6 py-10">
-        <h2 className="text-3xl font-bold tracking-tight mb-8">{page.course.title}</h2>
+      <main className="mx-auto w-full max-w-6xl px-4 md:px-6 py-10">
+        <div className="mb-8">
+          <h2
+            className="text-2xl md:text-3xl font-bold tracking-tight"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {page.course.title}
+          </h2>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+            {page.lessons.length === 0
+              ? 'No lessons yet — create your first'
+              : `${page.lessons.length} lesson${page.lessons.length === 1 ? '' : 's'}`}
+          </p>
+        </div>
 
         <LessonsGrid
           lessons={page.lessons}
@@ -48,12 +55,6 @@ export function LessonsPage({ courseId }: { courseId: string }) {
           onAccess={page.accessLesson}
           onDelete={page.openDelete}
         />
-
-        {page.lessons.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            No lessons yet. Click &quot;Start a New Lesson&quot; to create your first lesson!
-          </div>
-        )}
       </main>
 
       <LessonCreateDialog

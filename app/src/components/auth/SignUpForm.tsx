@@ -6,14 +6,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signUpWithEmail, signInWithGoogle } from '@/lib/supabase/auth';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { OAuthButton } from './OAuthButton';
 import { EmailConfirmation } from './EmailConfirmation';
-import {useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 type SignUpFormData = {
   fullName: string;
@@ -117,88 +113,115 @@ export function SignUpForm() {
     );
   }
 
+  const inputClass = `
+    w-full px-4 py-3 rounded-[10px] text-sm transition-all duration-150
+  `;
+  const inputStyle = {
+    background: 'var(--surface-raised)',
+    border: '1px solid var(--border-default)',
+    color: 'var(--text-primary)',
+  };
+  const labelStyle = { color: 'var(--text-secondary)' };
+
   return (
-    <>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name</Label>
-          <Input
-            id="fullName"
-            value={formData.fullName}
-            onChange={(e) => setField('fullName', e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => setField('email', e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            value={formData.password}
-            onChange={(e) => setField('password', e.target.value)}
-            required
-          />
-          <p className="text-xs text-muted-foreground">
-            Must be at least 8 characters
-          </p>
-        </div>
-
-        <div className="flex items-start gap-2">
-          <input
-            type="checkbox"
-            checked={formData.agreeToTerms}
-            onChange={(e) => setField('agreeToTerms', e.target.checked)}
-          />
-          <span className="text-sm text-muted-foreground">
-            I agree to the Terms and Privacy Policy
-          </span>
-        </div>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Signing up...' : 'Sign Up'}
-        </Button>
-      </form>
-
-      <div className="flex items-center gap-2">
-        <Separator className="flex-1" />
-        <span className="text-sm text-muted-foreground">OR</span>
-        <Separator className="flex-1" />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <label htmlFor="fullName" className="block text-sm font-medium" style={labelStyle}>
+          Full Name
+        </label>
+        <input
+          id="fullName"
+          value={formData.fullName}
+          onChange={(e) => setField('fullName', e.target.value)}
+          required
+          className={inputClass}
+          style={inputStyle}
+        />
       </div>
 
-      <OAuthButton
-        loading={loading}
-        onClick={handleGoogleSignUp}
-        providerLabel="Google"
-      />
+      <div className="space-y-1.5">
+        <label htmlFor="email" className="block text-sm font-medium" style={labelStyle}>
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setField('email', e.target.value)}
+          placeholder="your@ualberta.ca"
+          required
+          className={inputClass}
+          style={inputStyle}
+        />
+      </div>
 
-      <p className="text-sm text-center text-muted-foreground">
+      <div className="space-y-1.5">
+        <label htmlFor="password" className="block text-sm font-medium" style={labelStyle}>
+          Password
+        </label>
+        <input
+          id="password"
+          type="password"
+          value={formData.password}
+          onChange={(e) => setField('password', e.target.value)}
+          required
+          className={inputClass}
+          style={inputStyle}
+        />
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          Must be at least 8 characters
+        </p>
+      </div>
+
+      <div className="flex items-start gap-2.5 pt-1">
+        <input
+          type="checkbox"
+          id="agreeToTerms"
+          checked={formData.agreeToTerms}
+          onChange={(e) => setField('agreeToTerms', e.target.checked)}
+          className="mt-0.5 w-4 h-4 rounded accent-[var(--color-primary-500)]"
+        />
+        <label htmlFor="agreeToTerms" className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          I agree to the Terms and Privacy Policy
+        </label>
+      </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-3.5 rounded-[10px] text-sm font-semibold text-white transition-all duration-150 disabled:opacity-60 btn-primary-glow"
+        style={{
+          background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+        }}
+      >
+        {loading ? 'Signing up…' : 'Create Account'}
+      </button>
+
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px" style={{ background: 'var(--border-default)' }} />
+        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>OR</span>
+        <div className="flex-1 h-px" style={{ background: 'var(--border-default)' }} />
+      </div>
+
+      <OAuthButton loading={loading} onClick={handleGoogleSignUp} providerLabel="Google" />
+
+      <p className="text-sm text-center" style={{ color: 'var(--text-muted)' }}>
         Already have an account?{' '}
         <button
           type="button"
           onClick={() => router.push('/login_instructor')}
-          className="underline underline-offset-4 hover:text-foreground"
+          className="font-medium transition-colors duration-150 hover:underline"
+          style={{ color: 'var(--color-primary-500)' }}
         >
           Sign In
         </button>
       </p>
-    </>
+    </form>
   );
 }

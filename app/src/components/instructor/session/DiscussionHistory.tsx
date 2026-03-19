@@ -3,8 +3,6 @@
 'use client';
 
 import * as React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -43,32 +41,41 @@ export function DiscussionHistory({
                         href={`/session/${lessonId}/discussion/${d.id}`}
                         className="block"
                     >
-                        <Card
-                            className={[
-                                'cursor-pointer transition-colors',
-                                isActive ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'
-                            ].join(' ')}
+                        <div
+                            className="rounded-xl p-3 cursor-pointer transition-all duration-150"
+                            style={isActive ? {
+                                background: 'rgba(45,158,45,0.08)',
+                                border: '1px solid var(--color-primary-500)',
+                            } : {
+                                background: 'var(--surface-raised)',
+                                border: '1px solid var(--border-default)',
+                            }}
                         >
-                            <CardContent className="p-3">
                                 <div className="flex items-start justify-between mb-2">
-                                    <span className="text-xs font-semibold text-muted-foreground">#{originalIndex}</span>
+                                    <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>#{originalIndex}</span>
 
                                     {d.status === 'active' ? (
-                                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                        <span
+                                            className="text-xs font-medium px-2 py-0.5 rounded-full"
+                                            style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-500)' }}
+                                        >
                                             Active
-                                        </Badge>
+                                        </span>
                                     ) : (
-                                        <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                                        <span
+                                            className="text-xs font-medium px-2 py-0.5 rounded-full"
+                                            style={{ background: 'var(--surface-overlay)', color: 'var(--text-muted)' }}
+                                        >
                                             Closed
-                                        </Badge>
+                                        </span>
                                     )}
                                 </div>
 
-                                <p className="text-sm text-foreground/90 mb-2 leading-relaxed">
+                                <p className="text-sm mb-2 leading-relaxed" style={{ color: 'var(--text-primary)' }}>
                                     {truncateText(d.prompt_text)}
                                 </p>
 
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
                                     <span className="font-medium">{d.response_count}</span>
                                     <span>{d.response_count === 1 ? 'response' : 'responses'}</span>
 
@@ -79,8 +86,7 @@ export function DiscussionHistory({
                                         </>
                                     ) : null}
                                 </div>
-                            </CardContent>
-                        </Card>
+                        </div>
                     </Link>
                 );
             })}

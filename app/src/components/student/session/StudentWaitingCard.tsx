@@ -2,15 +2,44 @@
 // src/components/student/session/StudentWaitingCard.tsx
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
-
-/** Renders a centered waiting message inside a card while no discussion is active. */
+/** Renders a centered waiting message while no discussion is active. */
 export function StudentWaitingCard({ text }: { text?: string }) {
   return (
-    <Card>
-      <CardContent className="py-10 text-center text-sm text-muted-foreground">
-        {text || 'Waiting for the instructor to publish a discussion…'}
-      </CardContent>
-    </Card>
+    <div
+      className="rounded-2xl p-10 text-center enter"
+      style={{
+        background: 'var(--surface-glass)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        border: '1px solid var(--border-default)',
+      }}
+    >
+      {/* Animated pulse indicator */}
+      <div className="flex justify-center mb-5">
+        <div className="relative">
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(45,158,45,0.15)' }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          {/* Ping animation */}
+          <div
+            className="absolute inset-0 rounded-full animate-ping opacity-30"
+            style={{ background: 'var(--color-primary-300)' }}
+          />
+        </div>
+      </div>
+
+      <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
+        Waiting for next question
+      </p>
+      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+        {text || 'The instructor will publish a discussion prompt shortly…'}
+      </p>
+    </div>
   );
 }

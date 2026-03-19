@@ -44,11 +44,17 @@ export function FlaggedFilterToggle({
         onClick={onToggle}
         className={cn(
           'inline-flex items-center font-semibold rounded-full border transition-colors',
-          showFlagged
-            ? 'bg-red-50 text-red-700 border-red-200'
-            : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100',
           s.button,
         )}
+        style={showFlagged ? {
+          background: 'rgba(239,68,68,0.10)',
+          color: 'var(--recording-text, #dc2626)',
+          borderColor: 'rgba(239,68,68,0.30)',
+        } : {
+          background: 'var(--surface-raised)',
+          color: 'var(--text-secondary)',
+          borderColor: 'var(--border-default)',
+        }}
       >
         <Flag className={s.icon} />
         {showFlagged
@@ -59,7 +65,10 @@ export function FlaggedFilterToggle({
         <button
           type="button"
           onClick={onHide}
-          className={cn('text-gray-400 hover:text-gray-600 transition-colors', s.hideBtn)}
+          className={cn('transition-colors', s.hideBtn)}
+          style={{ color: 'var(--text-muted)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; }}
         >
           Hide
         </button>

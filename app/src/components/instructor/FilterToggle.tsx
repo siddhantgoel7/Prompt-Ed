@@ -44,11 +44,17 @@ export function FilterToggle({
         onClick={onToggle}
         className={cn(
           'inline-flex items-center font-semibold rounded-full border transition-colors',
-          showHighlightedOnly
-            ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
-            : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100',
           s.button,
         )}
+        style={showHighlightedOnly ? {
+          background: 'rgba(250,204,21,0.15)',
+          color: 'oklch(0.55 0.15 85)',
+          borderColor: 'rgba(250,204,21,0.45)',
+        } : {
+          background: 'var(--surface-raised)',
+          color: 'var(--text-secondary)',
+          borderColor: 'var(--border-default)',
+        }}
       >
         <Filter className={s.icon} />
         {showHighlightedOnly
@@ -59,7 +65,10 @@ export function FilterToggle({
         <button
           type="button"
           onClick={onShowAll}
-          className={cn('text-gray-400 hover:text-gray-600 transition-colors', s.showAll)}
+          className={cn('transition-colors', s.showAll)}
+          style={{ color: 'var(--text-muted)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; }}
         >
           Show all
         </button>

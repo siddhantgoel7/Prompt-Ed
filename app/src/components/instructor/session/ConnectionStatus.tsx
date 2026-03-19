@@ -30,23 +30,48 @@ export function ConnectionStatus(props: {
 
   if (isConnected) {
     return (
-      <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg border bg-white px-3 py-2 shadow-sm">
-        <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-        <span className="text-xs text-muted-foreground">Connected</span>
+      <div
+        className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-2 rounded-full"
+        style={{
+          background: 'var(--surface-glass)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(45,158,45,0.25)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+        }}
+      >
+        <span
+          className="h-2 w-2 rounded-full animate-pulse"
+          style={{ background: 'var(--color-primary-400)' }}
+        />
+        <span className="text-xs font-medium" style={{ color: 'var(--color-primary-600)' }}>
+          Connected
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 shadow-lg">
+    <div
+      className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-2 rounded-full"
+      style={{
+        background: 'rgba(239,68,68,0.08)',
+        backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(239,68,68,0.25)',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+      }}
+    >
       <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-      <span className="text-sm font-medium text-red-800">
-        {reconnecting ? 'Reconnecting\u2026' : 'Disconnected'}
+      <span className="text-sm font-medium" style={{ color: '#dc2626' }}>
+        {reconnecting ? 'Reconnecting…' : 'Disconnected'}
       </span>
       {!reconnecting ? (
-        <Button size="sm" variant="outline" className="ml-1 h-7 text-xs" onClick={handleClick}>
+        <button
+          onClick={handleClick}
+          className="ml-1 px-2.5 py-1 text-xs rounded-full font-medium text-white transition-all duration-150"
+          style={{ background: '#ef4444' }}
+        >
           Reconnect
-        </Button>
+        </button>
       ) : null}
     </div>
   );

@@ -1,7 +1,6 @@
 'use client';
 
 import { Flag, RotateCcw } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 export type ResponseCardVariant = 'compact' | 'full';
@@ -71,11 +70,17 @@ function ActionButton({
       }}
       className={cn(
         'inline-flex items-center font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
-        isFlagged
-          ? 'text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 hover:border-green-300'
-          : 'text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 hover:border-red-300',
         className,
       )}
+      style={isFlagged ? {
+        color: 'var(--color-primary-600)',
+        background: 'rgba(45,158,45,0.10)',
+        border: '1px solid rgba(45,158,45,0.30)',
+      } : {
+        color: 'var(--recording-text, #dc2626)',
+        background: 'rgba(239,68,68,0.08)',
+        border: '1px solid rgba(239,68,68,0.25)',
+      }}
     >
       {isFlagged ? <RotateCcw className={iconClassName} /> : <Flag className={iconClassName} />}
       {isFlagged
@@ -100,42 +105,59 @@ export function ResponseCard({
 
   const timeString = new Date(createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // Colour tokens that differ between normal (yellow) and flagged (red) mode
-  const selectedBg = isFlagged ? 'bg-red-50' : 'bg-yellow-50';
-  const selectedBorder = isFlagged ? 'border-red-400' : 'border-black';
-  const selectedRing = isFlagged ? 'ring-red-200' : 'ring-black/15';
+  // Selected state styles — tinted backgrounds that work in both light + dark mode
+  const selectedStyle = isFlagged
+    ? { background: 'rgba(239,68,68,0.10)', border: '2px solid rgba(239,68,68,0.50)', boxShadow: '0 4px 24px rgba(239,68,68,0.12)' }
+    : { background: 'rgba(250,204,21,0.10)', border: '2px solid rgba(250,204,21,0.55)', boxShadow: '0 4px 24px rgba(250,204,21,0.12)' };
+
+  const unselectedStyle = {
+    background: 'var(--surface-raised)',
+    border: '1px solid var(--border-default)',
+  };
 
   const content = (
     <>
-      <p className={cn(
-        'whitespace-pre-wrap break-words text-gray-800 transition-all duration-300',
-        isSelected ? s.selectedText : s.unselectedText,
-        variant === 'full' && 'leading-relaxed',
-      )}>
+      <p
+        className={cn(
+          'whitespace-pre-wrap break-words transition-all duration-300',
+          isSelected ? s.selectedText : s.unselectedText,
+          variant === 'full' && 'leading-relaxed',
+        )}
+        style={{ color: 'var(--text-primary)' }}
+      >
         {responseText}
       </p>
 
       {variant === 'compact' ? (
-        <p className={cn(
-          'text-gray-400 font-medium uppercase tracking-wider transition-all duration-300',
-          isSelected ? s.selectedTimestamp : s.unselectedTimestamp,
-        )}>
+        <p
+          className={cn(
+            'font-medium uppercase tracking-wider transition-all duration-300',
+            isSelected ? s.selectedTimestamp : s.unselectedTimestamp,
+          )}
+          style={{ color: 'var(--text-muted)' }}
+        >
           {timeString}
         </p>
       ) : (
-        <div className={cn(
-          'flex justify-end items-center gap-2 text-gray-400 font-medium transition-all duration-300',
-          isSelected ? s.selectedTimestamp : s.unselectedTimestamp,
-        )}>
+        <div
+          className={cn(
+            'flex justify-end items-center gap-2 font-medium transition-all duration-300',
+            isSelected ? s.selectedTimestamp : s.unselectedTimestamp,
+          )}
+          style={{ color: 'var(--text-muted)' }}
+        >
           <span suppressHydrationWarning>{timeString}</span>
         </div>
       )}
 
       {isSelected && (
-        <div className={cn(
-          s.actionBarSpacing,
-          'border-t border-gray-300 flex items-center justify-end animate-in fade-in slide-in-from-top-1 duration-200',
-        )}>
+        <div
+          className={cn(
+            s.actionBarSpacing,
+            'flex items-center justify-end animate-in fade-in slide-in-from-top-1 duration-200',
+          )}
+          style={{ borderTop: '1px solid var(--border-default)' }}
+        >
           <ActionButton
             mode={mode}
             isBeingFlagged={isBeingFlagged}
@@ -148,36 +170,13 @@ export function ResponseCard({
     </>
   );
 
-  if (variant === 'compact') {
-    return (
-      <Card
-        className={cn(
-          'cursor-pointer transition-all duration-300 ease-in-out',
-          isSelected
-            ? `border-2 ${selectedBorder} ring-4 ${selectedRing} ${selectedBg} shadow-xl z-10 relative my-4`
-            : 'shadow-sm border-gray-200 hover:border-gray-400',
-        )}
-        onClick={onToggle}
-      >
-        <CardContent className={cn(
-          'transition-all duration-300',
-          isSelected ? s.selectedPadding : s.unselectedPadding,
-        )}>
-          {content}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // full variant — plain div (matches DiscussionPage's existing DOM)
   return (
     <div
       className={cn(
         'rounded-xl cursor-pointer transition-all duration-300 ease-in-out',
-        isSelected
-          ? `${selectedBg} border-2 ${selectedBorder} ring-4 ${selectedRing} shadow-2xl ${s.selectedPadding} my-4 z-10 relative`
-          : `bg-white border border-gray-200 hover:border-gray-400 shadow-sm ${s.unselectedPadding}`,
+        isSelected ? cn(s.selectedPadding, 'my-4 z-10 relative') : s.unselectedPadding,
       )}
+      style={isSelected ? selectedStyle : unselectedStyle}
       onClick={onToggle}
     >
       {content}

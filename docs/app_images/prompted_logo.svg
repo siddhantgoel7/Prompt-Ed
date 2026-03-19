@@ -1,0 +1,11 @@
+<svg width="100%" viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg"><defs><mask id="imagine-text-gaps-iab1q8" maskUnits="userSpaceOnUse"><rect x="0" y="0" width="680" height="200" fill="white"/><rect x="144.12022399902344" y="49.88673400878906" width="391.759521484375" height="85.72206115722656" fill="black" rx="2"/><rect x="220.27532958984375" y="146.19406127929688" width="239.4302215576172" height="18.639366149902344" fill="black" rx="2"/></mask></defs>
+  
+
+  <text text-anchor="middle" dominant-baseline="auto" y="118" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:middle;dominant-baseline:auto">
+    <tspan x="340" style="fill:rgb(45, 106, 79);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Georgia, &quot;Times New Roman&quot;, serif;font-size:72px;font-weight:700;text-anchor:middle;dominant-baseline:auto">Prompt</tspan><tspan style="fill:rgb(45, 106, 79);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Georgia, &quot;Times New Roman&quot;, serif;font-size:72px;font-weight:400;text-anchor:middle;dominant-baseline:auto">ED</tspan>
+  </text>
+
+  <line x1="200" y1="134" x2="480" y2="134" mask="url(#imagine-text-gaps-iab1q8)" style="fill:rgb(0, 0, 0);stroke:rgb(45, 106, 79);color:rgb(255, 255, 255);stroke-width:0.75px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <text text-anchor="middle" x="340" y="160" style="fill:rgb(45, 106, 79);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;text-anchor:middle;dominant-baseline:auto">AI-ASSISTED TEACHING</text>
+</svg>

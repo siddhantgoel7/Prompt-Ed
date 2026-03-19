@@ -11,7 +11,6 @@ import { ActiveRightPanel } from '@/components/instructor/session/ActiveRightPan
 import { SplitView } from '@/components/instructor/session/SplitView';
 import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
 import { SessionProvider, SessionContext } from '@/components/instructor/session/SessionContext';
-import { DiscussionTimerSection } from '@/components/instructor/session/DiscussionTimerSection';
 import type { SessionVM } from '@/hooks/useSessionPage';
 
 /** Renders the full active session layout; switches to SplitView when the split view toggle is active. */
@@ -33,24 +32,33 @@ export function SessionActiveView(props: { vm?: SessionVM }) {
   }
 
   const content = (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: 'var(--surface-base)' }}
+    >
       <SessionHeaderActive onSplitView={() => setSplitView(true)} />
 
-      {vm.endError ? <p className="text-sm text-red-600 px-6 py-2">{vm.endError}</p> : null}
+      {vm.endError ? (
+        <p
+          className="text-sm px-6 py-2"
+          style={{ color: 'oklch(0.577 0.245 27.325)', background: 'rgba(239,68,68,0.08)' }}
+        >
+          {vm.endError}
+        </p>
+      ) : null}
 
-      <div className="flex-1 flex flex-col md:flex-row">
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left sidebar */}
         <ActiveSidebar />
-        <div className="flex-1 flex flex-col">
-          <ActiveCenter />
-          <DiscussionTimerSection
-            activeDiscussionId={vm.activeDiscussion?.id ?? null}
-            timerEndTime={vm.discussionTimerEndTime}
-            timerTotalSeconds={vm.discussionTimerSeconds}
-            onClose={vm.handleCloseDiscussion}
-            onExtendTimer={vm.handleExtendTimer}
-            onEditTimer={vm.handleEditTimer}
-          />
+
+        {/* Center */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <div className="flex-1 overflow-y-auto">
+            <ActiveCenter />
+          </div>
         </div>
+
+        {/* Right panel */}
         <ActiveRightPanel />
       </div>
 
