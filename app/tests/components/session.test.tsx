@@ -469,11 +469,18 @@ describe('SessionPage - Real-time Integration Tests', () => {
 
       render(<SessionPage lessonId="lesson-456" />);
 
+      // Open the hamburger menu first, then click End Session inside it
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /End/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Session menu/i })).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByRole('button', { name: /End/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Session menu/i }));
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /End Session/i })).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /End Session/i }));
 
       await waitFor(() => {
         expect(mockSupabase.from).toHaveBeenCalledWith('lessons');
