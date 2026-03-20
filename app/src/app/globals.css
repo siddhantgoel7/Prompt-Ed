@@ -216,6 +216,18 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Blur-in: each character fades in from blurred state (ReactBits blur-text style) */
+@keyframes blurIn {
+  from { filter: blur(10px); opacity: 0; transform: translateY(4px); }
+  to   { filter: blur(0px);  opacity: 1; transform: translateY(0); }
+}
+
+/* Rotating glow border for Generate Prompts button */
+@keyframes rotate-glow {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
 @keyframes pop {
   0%   { transform: scale(1); }
   50%  { transform: scale(1.35); }
@@ -261,6 +273,46 @@
 /* Primary button glow on hover */
 .btn-primary-glow:hover {
   box-shadow: 0 0 16px rgba(45, 158, 45, 0.4);
+}
+
+/* ─── Rotating Glow Button Wrapper ──────────────────────────────────── */
+.rotating-glow-wrap {
+  position: relative;
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 2px;
+  overflow: hidden;
+}
+
+.rotating-glow-wrap::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: 50%;
+  left: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--color-primary-200) 30deg,
+    var(--color-primary-400) 60deg,
+    var(--color-primary-300) 90deg,
+    transparent 130deg
+  );
+  animation: rotate-glow 2.5s linear infinite;
+  z-index: 0;
+}
+
+.rotating-glow-wrap > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Pause rotation when button is disabled */
+.rotating-glow-wrap:has(button:disabled)::before,
+.rotating-glow-wrap:has([disabled])::before {
+  animation-play-state: paused;
+  opacity: 0.4;
 }
 
 /* Skeleton shimmer */

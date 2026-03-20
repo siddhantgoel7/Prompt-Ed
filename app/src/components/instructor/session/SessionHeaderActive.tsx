@@ -7,6 +7,100 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useStudentJoinQR } from '@/hooks/useStudentJoinQR';
 import { SessionContext } from './SessionContext';
 
+/** Hamburger dropdown menu for session action buttons. */
+function HamburgerMenu({
+  onDisplay,
+  onSplitView,
+  onEnd,
+  endingLesson,
+}: {
+  onDisplay?: () => void;
+  onSplitView?: () => void;
+  onEnd?: () => void;
+  endingLesson?: boolean;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  // Close on outside click
+  React.useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  const menuItems: { label: string; onClick?: () => void; danger?: boolean; disabled?: boolean }[] = [
+    { label: 'Display QR/Code', onClick: () => { onDisplay?.(); setOpen(false); } },
+    { label: 'Split View', onClick: () => { onSplitView?.(); setOpen(false); } },
+    { label: 'Settings' },
+    { label: endingLesson ? 'Ending…' : 'End Session', onClick: () => { onEnd?.(); setOpen(false); }, danger: true, disabled: endingLesson },
+  ];
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      {/* Hamburger button */}
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Session menu"
+        aria-expanded={open}
+        className="w-9 h-9 flex flex-col items-center justify-center gap-[5px] rounded-[10px] transition-all duration-150"
+        style={{
+          background: open ? 'rgba(45,158,45,0.12)' : 'var(--surface-raised)',
+          border: open ? '1px solid rgba(45,158,45,0.35)' : '1px solid var(--border-default)',
+          color: open ? 'var(--color-primary-500)' : 'var(--text-secondary)',
+        }}
+      >
+        <span className="block w-4 h-[2px] rounded-full" style={{ background: 'currentColor' }} />
+        <span className="block w-4 h-[2px] rounded-full" style={{ background: 'currentColor' }} />
+        <span className="block w-4 h-[2px] rounded-full" style={{ background: 'currentColor' }} />
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div
+          className="absolute right-0 mt-2 rounded-2xl overflow-hidden"
+          style={{
+            minWidth: '160px',
+            background: 'var(--surface-overlay)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid var(--border-default)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.24)',
+            zIndex: 100,
+          }}
+        >
+          {menuItems.map((item) => (
+            <button
+              key={item.label}
+              onClick={item.onClick}
+              disabled={item.disabled}
+              className="w-full px-4 py-2.5 text-left text-sm font-medium transition-colors duration-100 disabled:opacity-50"
+              style={{
+                color: item.danger ? '#ef4444' : 'var(--text-primary)',
+                background: 'transparent',
+                borderBottom: '1px solid var(--border-subtle)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = item.danger
+                  ? 'rgba(239,68,68,0.10)'
+                  : 'rgba(45,158,45,0.08)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
  * Active-session header with logo, lesson title, join PIN code, Display/End/Split View/Settings buttons.
  * Reads values from SessionContext when available, falling back to explicit props for testing.
@@ -85,69 +179,15 @@ export function SessionHeaderActive(props: {
           </span>
         </div>
 
-        {/* Right: action buttons */}
+        {/* Right: theme toggle + hamburger menu */}
         <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
           <ThemeToggle />
-
-          <button
-            onClick={onDisplay}
-            className="px-3 py-1.5 rounded-[8px] text-xs font-medium transition-all duration-150"
-            style={{
-              background: 'rgba(45,158,45,0.12)',
-              color: 'var(--color-primary-600)',
-              border: '1px solid rgba(45,158,45,0.25)',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-500)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'white';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.12)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-600)';
-            }}
-          >
-            Display
-          </button>
-
-          <button
-            onClick={onSplitView}
-            className="px-3 py-1.5 rounded-[8px] text-xs font-medium transition-all duration-150"
-            style={{
-              background: 'var(--surface-raised)',
-              border: '1px solid var(--border-default)',
-              color: 'var(--text-secondary)',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-400)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-default)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
-            }}
-          >
-            Split View
-          </button>
-
-          <button
-            className="px-3 py-1.5 rounded-[8px] text-xs font-medium transition-all duration-150"
-            style={{
-              background: 'var(--surface-raised)',
-              border: '1px solid var(--border-default)',
-              color: 'var(--text-secondary)',
-            }}
-          >
-            Settings
-          </button>
-
-          <button
-            onClick={onEnd}
-            disabled={endingLesson}
-            className="px-3 py-1.5 rounded-[8px] text-xs font-semibold text-white transition-all duration-150 disabled:opacity-60"
-            style={{ background: 'oklch(0.577 0.245 27.325)' }}
-          >
-            {endingLesson ? 'Ending…' : 'End'}
-          </button>
+          <HamburgerMenu
+            onDisplay={onDisplay}
+            onSplitView={onSplitView}
+            onEnd={onEnd}
+            endingLesson={endingLesson}
+          />
         </div>
       </div>
     </header>

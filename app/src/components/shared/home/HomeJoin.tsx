@@ -2,10 +2,32 @@
 // Also displays instructor Log in / Sign up navigation in the header.
 'use client';
 
+import type React from 'react';
 import { useHomeJoin } from '@/hooks/useHomeJoin';
 import { AppLogo } from '@/components/ui/AppLogo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
+
+/** Blur-text animation — each character fades in from blur with a stagger (ReactBits style). */
+function BlurText({ text, className = '', style }: { text: string; className?: string; style?: React.CSSProperties }) {
+  const chars = text.split('');
+  return (
+    <span className={className} aria-label={text} style={style}>
+      {chars.map((char, i) => (
+        <span
+          key={i}
+          style={{
+            display: 'inline-block',
+            animation: 'blurIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both',
+            animationDelay: `${200 + i * 45}ms`,
+          }}
+        >
+          {char === ' ' ? '\u00A0' : char}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 /** Renders the student home page with a PIN entry card and instructor navigation links. */
 export function HomeJoin() {
@@ -82,7 +104,16 @@ export function HomeJoin() {
 
         {/* Hero */}
         <div className="text-center mb-10 enter">
-          <AppLogo size="xl" variant="full" className="mx-auto mb-6" />
+          <AppLogo size="xl" variant="simple" className="mx-auto mb-3" />
+          <BlurText
+            text="AI-Assisted Learning"
+            className="block text-lg tracking-[0.08em] mb-6"
+            style={{
+              fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif',
+              color: 'var(--text-secondary)',
+              letterSpacing: '0.12em',
+            }}
+          />
           <p className="text-base max-w-sm mx-auto" style={{ color: 'var(--text-muted)' }}>
             Enter your instructor&apos;s session PIN to join the live discussion.
           </p>

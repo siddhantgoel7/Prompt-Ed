@@ -185,23 +185,22 @@ function TimerTab({
             </button>
           </div>
         )}
-      </div>
 
-      {/* Close Discussion — filled red, compact */}
-      <button
-        onClick={() => onClose(activeDiscussionId)}
-        data-testid="close-discussion-button"
-        className="w-full px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-150"
-        style={{
-          background: 'rgba(239,68,68,0.15)',
-          border: '1px solid rgba(239,68,68,0.30)',
-          color: 'var(--recording-text, #dc2626)',
-        }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.24)'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.15)'; }}
-      >
-        Close Discussion
-      </button>
+        {/* Divider */}
+        <div className="w-full" style={{ height: '1px', background: 'var(--border-subtle)' }} />
+
+        {/* Close Discussion — solid red, compact, inside the card */}
+        <button
+          onClick={() => onClose(activeDiscussionId)}
+          data-testid="close-discussion-button"
+          className="px-5 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150"
+          style={{ background: '#dc2626', boxShadow: '0 2px 8px rgba(220,38,38,0.35)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#b91c1c'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#dc2626'; }}
+        >
+          Close Discussion
+        </button>
+      </div>
 
       <StartDiscussionDialog
         open={showEditDialog}

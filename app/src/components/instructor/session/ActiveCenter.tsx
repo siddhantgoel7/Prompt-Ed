@@ -348,18 +348,20 @@ export function ActiveCenter(props: Partial<{
               </select>
 
               <AIPreferencesDialog />
-              <Button
-                onClick={() => onGenerate()}
-                disabled={isGenerating || recorder.isRecording}
-                size="sm"
-                className="px-4 py-1.5 rounded-full font-semibold disabled:opacity-50 btn-primary-glow"
-                style={{
-                  background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-                  color: 'white',
-                }}
-              >
-                {isGenerating ? 'Generating…' : 'Generate Prompts'}
-              </Button>
+              <div className="rotating-glow-wrap">
+                <Button
+                  onClick={() => onGenerate()}
+                  disabled={isGenerating || recorder.isRecording}
+                  size="sm"
+                  className="px-4 py-1.5 rounded-full font-semibold disabled:opacity-50"
+                  style={{
+                    background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+                    color: 'white',
+                  }}
+                >
+                  {isGenerating ? 'Generating…' : 'Generate Prompts'}
+                </Button>
+              </div>
             </div>
 
             {generationWarning && (
