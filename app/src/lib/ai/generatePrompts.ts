@@ -4,19 +4,17 @@ import type { AIProvider } from './providers';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PromptType } from '@/types/discussion';
 import type { CandidateSet, GeneratedPrompt, MCOption, AIPromptPreferences } from '@/types/ai';
-import { retrieveChunksBySimilarity, retrieveRecentChunks, type RetrievedChunk } from './retrieveChunks';
+import { retrieveChunksBySimilarity, retrieveRecentChunks, blendEmbeddings, normalizeEmbedding, filterExcludedChunks, type RetrievedChunk } from './retrieveChunks';
 import { buildSystemPrompt, buildUserPrompt, CANDIDATE_COUNT } from './prompts/discussionPrompt';
 
 /**
  * Orchestrates the full RAG → generate pipeline.
  *
  * Flow:
- *   if transcriptText: embed it → retrieveChunksBySimilarity
- *   if no transcriptText OR retrieval empty: retrieveRecentChunks + add warning
+ *   if transcriptText: embed it → blend with focusAreas (70/30) → retrieveChunksBySimilarity → filterExcludedChunks
+ *   if no transcriptText but focusAreas: embed focusAreas → retrieveChunksBySimilarity → filterExcludedChunks
+ *   final fallback: retrieveRecentChunks + warning
  *   → buildUserPrompt → gpt-4o-mini → parse CANDIDATE_COUNT candidates
- *
- * FUTURE: when Sprint 4 weighted retrieval is implemented, replace the
- * retrieval calls here with the blended 40/40/20 retriever.
  *
  * @see US 1.18, 1.19
  */
@@ -35,17 +33,42 @@ export async function generatePrompts(
     if (transcriptText.trim()) {
       // Semantic retrieval: embed transcript text, find similar chunks
       const embeddingResponse = await aiProvider.generateEmbedding(transcriptText.trim());
-      const queryEmbedding = embeddingResponse[0];
+      let queryEmbedding = embeddingResponse[0];
+
+      // Blend with focusAreas embedding to steer retrieval toward instructor's intent.
+      // Handles synonyms ("side effects" / "adverse reactions") that substring matching cannot.
+      if (preferences?.focusAreas?.trim()) {
+        const focusResponse = await aiProvider.generateEmbedding(preferences.focusAreas.trim());
+        const blended = blendEmbeddings(queryEmbedding, focusResponse[0], 0.7);
+        queryEmbedding = normalizeEmbedding(blended);
+      }
+
       retrieved = await retrieveChunksBySimilarity(lessonId, queryEmbedding, supabase);
+
+      // Post-fetch exclusion: remove chunks matching instructor's exclude keywords.
+      // Substring-based because negation in embedding space is unreliable.
+      if (preferences?.excludeAreas) {
+        retrieved = filterExcludedChunks(retrieved, preferences.excludeAreas);
+      }
     }
 
     // Fallback to recent chunks if no transcript or retrieval returned nothing
     if (retrieved.length === 0) {
-      retrieved = await retrieveRecentChunks(lessonId, supabase);
-      if (!transcriptText.trim()) {
-        warning = 'No transcript provided. Generating from uploaded file content only.';
-      } else {
-        warning = 'Could not retrieve similar content. Using recent lesson content.';
+      // When no transcript but focusAreas is set, use focusAreas as the query.
+      // This makes preferences work for the file-upload-without-transcript workflow.
+      if (preferences?.focusAreas?.trim()) {
+        const focusResponse = await aiProvider.generateEmbedding(preferences.focusAreas.trim());
+        retrieved = await retrieveChunksBySimilarity(lessonId, focusResponse[0], supabase);
+        if (preferences.excludeAreas) {
+          retrieved = filterExcludedChunks(retrieved, preferences.excludeAreas);
+        }
+      }
+      // Final fallback: no transcript and no focusAreas (or focusAreas retrieval also empty)
+      if (retrieved.length === 0) {
+        retrieved = await retrieveRecentChunks(lessonId, supabase);
+        warning = transcriptText.trim()
+          ? 'Could not retrieve similar content. Using recent lesson content.'
+          : 'No transcript provided. Generating from uploaded file content only.';
       }
     }
 
