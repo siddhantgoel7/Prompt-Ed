@@ -43,7 +43,7 @@ test.describe('Student Join Flow', () => {
     await expect(pinInput).toBeVisible();
 
     // Verify empty state shows "PIN is 6 digits." hint
-    await expect(page.getByText('PIN is 6 digits.')).toBeVisible();
+    await expect(page.getByText('PIN is 6 digits')).toBeVisible();
   });
 
   // 22.4
@@ -60,7 +60,7 @@ test.describe('Student Join Flow', () => {
     await expect(page.getByRole('button', { name: 'Join' })).toBeDisabled();
 
     // Should show empty hint since non-digits are filtered
-    await expect(page.getByText('PIN is 6 digits.')).toBeVisible();
+    await expect(page.getByText('PIN is 6 digits')).toBeVisible();
   });
 
   // 22.5
@@ -73,7 +73,7 @@ test.describe('Student Join Flow', () => {
     await pinInput.fill('123');
 
     await expect(page.getByRole('button', { name: 'Join' })).toBeDisabled();
-    await expect(page.getByText('Enter exactly 6 digits.')).toBeVisible();
+    await expect(page.getByText('Enter exactly 6 digits')).toBeVisible();
   });
 
   // 22.6
@@ -86,6 +86,6 @@ test.describe('Student Join Flow', () => {
     await pinInput.fill('123456');
 
     await expect(page.getByRole('button', { name: 'Join' })).toBeEnabled();
-    await expect(page.getByText('Looks good.')).toBeVisible();
+    await expect(page.getByText('✓ Looks good')).toBeVisible();
   });
 });

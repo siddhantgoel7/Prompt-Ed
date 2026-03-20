@@ -33,7 +33,19 @@ jest.mock('@/components/instructor/session/ActiveRightPanel', () => ({
   ActiveRightPanel: () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
-    return <div>RightPanel count={vm.responses?.length ?? 0}</div>;
+    return (
+      <div>
+        RightPanel count={vm.responses?.length ?? 0}
+        {vm.activeDiscussion && (
+          <button
+            data-testid="close-discussion-button"
+            onClick={() => vm.handleCloseDiscussion()}
+          >
+            Close Discussion
+          </button>
+        )}
+      </div>
+    );
   },
 }));
 

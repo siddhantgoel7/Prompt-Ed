@@ -85,7 +85,7 @@ test.describe('Instructor Reconnect & Autosave Resilience', () => {
         await page.getByText('Resilient Lesson').click();
 
         await expect(page.getByText('I survived a refresh!')).toBeVisible();
-        await expect(page.locator('span.bg-green-100', { hasText: 'Active' })).toBeVisible();
+        await expect(page.locator('span', { hasText: 'Active' }).first()).toBeVisible();
     });
 
 });

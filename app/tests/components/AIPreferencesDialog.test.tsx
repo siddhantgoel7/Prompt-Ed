@@ -89,7 +89,11 @@ describe('AIPreferencesDialog Component [US 1.22]', () => {
         render(<AIPreferencesDialog />);
         fireEvent.click(screen.getByRole('button', { name: /Settings/i }));
 
-        const loadingText = await screen.findByText('Loading preferences...');
-        expect(loadingText).toBeInTheDocument();
+        // Loading state shows dot bounce animation instead of text
+        const dialog = await screen.findByRole('dialog');
+        expect(dialog).toBeInTheDocument();
+        // Dot bounce spinner should be present (rounded-full animated dots)
+        const dots = dialog.querySelectorAll('.rounded-full');
+        expect(dots.length).toBeGreaterThanOrEqual(3);
     });
 });

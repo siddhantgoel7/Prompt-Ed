@@ -86,18 +86,20 @@ function renderPanel({
 
 describe('[US 1.39] List and Metrics tabs', () => {
 
-  it('[AT1] success: "List format" and "Metrics" tabs shown when discussion is active', () => {
+  it('[AT1] success: "Responses" and "Metrics" tabs shown when discussion is active', () => {
     renderPanel({ activeDiscussion: FREE_TEXT_DISCUSSION });
 
-    expect(screen.getByRole('tab', { name: /List format/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Responses/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Metrics/i })).toBeInTheDocument();
   });
 
-  it('[AT2] failure: tabs not shown when no active discussion', () => {
+  it('[AT2] failure: no active discussion shows empty state in responses tab', () => {
     renderPanel({ activeDiscussion: null });
 
-    expect(screen.queryByRole('tab', { name: /Metrics/i })).not.toBeInTheDocument();
-    expect(screen.getByText(/No active discussion selected/i)).toBeInTheDocument();
+    // Tabs are always rendered (Responses, Metrics, Timer)
+    expect(screen.getByRole('tab', { name: /Responses/i })).toBeInTheDocument();
+    // No active discussion shows empty state message
+    expect(screen.getByText(/No active discussion/i)).toBeInTheDocument();
   });
 
 });
@@ -144,7 +146,7 @@ describe('[US 1.40] MC response distribution counts', () => {
 
     // Filter to only <span> elements — the distribution rows use spans,
     // while response card text uses <p> elements
-    const rows = screen.getAllByText(/Option [ABC]:/).filter(
+    const rows = screen.getAllByText(/Option [ABC]/).filter(
       el => el.tagName.toLowerCase() === 'span'
     );
     expect(rows).toHaveLength(3);

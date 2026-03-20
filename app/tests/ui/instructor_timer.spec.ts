@@ -188,8 +188,11 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
         // Confirm with default timer
         await page.getByRole('button', { name: /Start Discussion/i }).last().click();
 
-        // Timer section should appear
-        await expect(page.getByTestId('discussion-timer-section')).toBeVisible({ timeout: 8_000 });
+        // Navigate to Timer tab to see the timer section
+        await page.getByRole('tab', { name: /Timer/i }).click();
+
+        // Timer display should appear in Timer tab
+        await expect(page.getByTestId('instructor-timer')).toBeVisible({ timeout: 8_000 });
     });
 
     // 7
@@ -233,9 +236,11 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
         await page.getByRole('checkbox').click();
         await page.getByRole('button', { name: /Start Discussion/i }).last().click();
 
-        // Timer section with No Time Limit label
-        await expect(page.getByTestId('discussion-timer-section')).toBeVisible({ timeout: 8_000 });
-        await expect(page.getByTestId('no-time-limit-label')).toBeVisible({ timeout: 5_000 });
+        // Navigate to Timer tab to see the timer section
+        await page.getByRole('tab', { name: /Timer/i }).click();
+
+        // Timer tab shows No Time Limit label
+        await expect(page.getByTestId('no-time-limit-label')).toBeVisible({ timeout: 8_000 });
     });
 
     // 8
@@ -277,6 +282,8 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
         await page.getByRole('checkbox').click(); // No time limit
         await page.getByRole('button', { name: /Start Discussion/i }).last().click();
 
+        // Navigate to Timer tab where Close Discussion button lives
+        await page.getByRole('tab', { name: /Timer/i }).click();
         await expect(page.getByTestId('close-discussion-button')).toBeVisible({ timeout: 8_000 });
     });
 });

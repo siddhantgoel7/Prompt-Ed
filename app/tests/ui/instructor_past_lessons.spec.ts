@@ -172,7 +172,7 @@ test.describe('Instructor Past Lessons', () => {
         await expect(page.getByText('Historical Lesson')).toBeVisible({ timeout: 15000 });
 
         // Identify the card first
-        const discussionCard = page.locator('div.rounded-xl.border', { hasText: 'What is 2+2?' });
+        const discussionCard = page.locator('div.rounded-2xl', { hasText: 'What is 2+2?' }).first();
 
         // 3. Verify the heading exists
         // We use a regex for "Discussions" to be safe, and ensure it's a heading
