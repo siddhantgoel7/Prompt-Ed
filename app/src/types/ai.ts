@@ -8,6 +8,7 @@ export interface AIPromptPreferences {
   style: 'socratic' | 'factual' | 'clinical_scenario';
   length: 'brief' | 'standard' | 'detailed';
   focusAreas?: string;
+  excludeAreas?: string; // comma-separated topics to exclude via post-fetch filter
 }
 
 // Upload pipeline state for a lesson file
@@ -29,6 +30,9 @@ export interface GeneratedPrompt {
   promptText: string;
   promptType: PromptType;
   mcOptions?: MCOption[]; // only present when promptType === 'multiple_choice'
+  bloomsLevel?: 'remember' | 'understand' | 'apply' | 'analyze' | 'evaluate' | 'create';
+  topicArea?: string;   // e.g., "beta-blocker mechanism"
+  rationale?: string;   // why this question is pedagogically valuable
 }
 
 // Result of a generate call
