@@ -13,7 +13,7 @@ export async function GET() {
 
         const { data, error } = await supabase
             .from('instructor_ai_preferences')
-            .select('difficulty, style, length, focus_areas')
+            .select('difficulty, style, length, focus_areas, exclude_areas')
             .eq('user_id', user.id)
             .single();
 
@@ -25,6 +25,7 @@ export async function GET() {
                     style: 'socratic',
                     length: 'standard',
                     focusAreas: '',
+                    excludeAreas: '',
                 };
                 return NextResponse.json(defaults);
             }
@@ -35,7 +36,8 @@ export async function GET() {
             difficulty: data.difficulty as AIPromptPreferences['difficulty'],
             style: data.style as AIPromptPreferences['style'],
             length: data.length as AIPromptPreferences['length'],
-            focusAreas: data.focus_areas || '',
+            focusAreas: data.focus_areas ?? '',
+            excludeAreas: data.exclude_areas ?? '',
         };
 
         return NextResponse.json(prefs);
@@ -56,7 +58,8 @@ export async function PUT(req: NextRequest) {
 
         const body = await req.json() as AIPromptPreferences;
 
-        // Optional validation logic could go here
+        const focusAreas = (body.focusAreas ?? '').trim().slice(0, 500) || null;
+        const excludeAreas = (body.excludeAreas ?? '').trim().slice(0, 500) || null;
 
         const { error } = await supabase
             .from('instructor_ai_preferences')
@@ -65,7 +68,8 @@ export async function PUT(req: NextRequest) {
                 difficulty: body.difficulty,
                 style: body.style,
                 length: body.length,
-                focus_areas: body.focusAreas || null,
+                focus_areas: focusAreas,
+                exclude_areas: excludeAreas,
                 updated_at: new Date().toISOString(),
             });
 
