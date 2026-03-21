@@ -167,7 +167,7 @@ export function SignUpForm() {
           required
           className="input-glass"
         />
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-xs text-content-muted">
           Must be at least 8 characters
         </p>
       </div>
@@ -180,7 +180,7 @@ export function SignUpForm() {
           onChange={(e) => setField('agreeToTerms', e.target.checked)}
           className="mt-0.5 w-4 h-4 rounded accent-[var(--color-primary-500)]"
         />
-        <label htmlFor="agreeToTerms" className="text-sm" style={{ color: 'var(--text-muted)' }}>
+        <label htmlFor="agreeToTerms" className="text-sm text-content-muted">
           I agree to the Terms and Privacy Policy
         </label>
       </div>
@@ -196,20 +196,19 @@ export function SignUpForm() {
       </button>
 
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-px" style={{ background: 'var(--border-default)' }} />
-        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>OR</span>
-        <div className="flex-1 h-px" style={{ background: 'var(--border-default)' }} />
+        <div className="flex-1 h-px bg-line-default" />
+        <span className="text-xs text-content-muted">OR</span>
+        <div className="flex-1 h-px bg-line-default" />
       </div>
 
       <OAuthButton loading={loading} onClick={handleGoogleSignUp} providerLabel="Google" />
 
-      <p className="text-sm text-center" style={{ color: 'var(--text-muted)' }}>
+      <p className="text-sm text-center text-content-muted">
         Already have an account?{' '}
         <button
           type="button"
           onClick={() => router.push('/login_instructor')}
-          className="font-medium transition-colors duration-150 hover:underline"
-          style={{ color: 'var(--color-primary-500)' }}
+          className="font-medium transition-colors duration-150 hover:underline text-brand-500"
         >
           Sign In
         </button>

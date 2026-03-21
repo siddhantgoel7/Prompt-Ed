@@ -249,7 +249,7 @@ export function ActiveCenter(props: Partial<{
 
           <TabsContent value="ai" className="space-y-3 mt-0">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <span className="text-sm font-semibold text-content-primary">
                 Generate with AI
               </span>
 
@@ -303,7 +303,7 @@ export function ActiveCenter(props: Partial<{
             </div>
 
             {sttStatus === 'transcribing' && (
-              <p className="text-xs animate-pulse" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs animate-pulse text-content-muted">
                 Transcribing audio…
               </p>
             )}
@@ -320,11 +320,9 @@ export function ActiveCenter(props: Partial<{
                 setTranscriptText(e.target.value); // Keep in sync for STT context
               }}
               placeholder="Spoken content will appear here after recording, or type a topic manually"
-              className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[50px] transition-all duration-150"
+              className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[50px] transition-all duration-150 bg-surface-raised text-content-primary"
               style={{
-                background: 'var(--surface-raised)',
                 border: '1px solid var(--border-default)',
-                color: 'var(--text-primary)',
               }}
               rows={2}
             />
@@ -334,11 +332,9 @@ export function ActiveCenter(props: Partial<{
               <select
                 value={promptType}
                 onChange={(e) => setPromptType(e.target.value as PromptType)}
-                className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150"
+                className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary"
                 style={{
-                  background: 'var(--surface-raised)',
                   border: '1px solid var(--border-default)',
-                  color: 'var(--text-primary)',
                 }}
               >
                 <option value="long_answer">Long Answer</option>
@@ -396,7 +392,7 @@ export function ActiveCenter(props: Partial<{
                           >
                             {c.promptType.replace('_', ' ')}
                           </span>
-                          <span className="text-xs font-medium" style={{ color: 'var(--color-primary-500)' }}>
+                          <span className="text-xs font-medium text-brand-500">
                             Selected (Editing)
                           </span>
                         </div>
@@ -406,11 +402,9 @@ export function ActiveCenter(props: Partial<{
                             setPromptInput(e.target.value);
                             setTranscriptText(e.target.value);
                           }}
-                          className="w-full px-3 py-2.5 text-sm rounded-[10px] min-h-[80px] resize-y leading-snug transition-all duration-150"
+                          className="w-full px-3 py-2.5 text-sm rounded-[10px] min-h-[80px] resize-y leading-snug transition-all duration-150 bg-surface-raised text-content-primary"
                           style={{
-                            background: 'var(--surface-raised)',
                             border: '1px solid var(--border-default)',
-                            color: 'var(--text-primary)',
                           }}
                           placeholder="Edit this prompt..."
                         />
@@ -474,11 +468,9 @@ export function ActiveCenter(props: Partial<{
               <select
                 value={promptType}
                 onChange={(e) => setPromptType(e.target.value as PromptType)}
-                className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150"
+                className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary"
                 style={{
-                  background: 'var(--surface-raised)',
                   border: '1px solid var(--border-default)',
-                  color: 'var(--text-primary)',
                 }}
               >
                 <option value="long_answer">Long Answer</option>
@@ -494,11 +486,9 @@ export function ActiveCenter(props: Partial<{
                 setTranscriptText(e.target.value);
               }}
               placeholder="Type your question here manually..."
-              className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[80px] transition-all duration-150"
+              className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[80px] transition-all duration-150 bg-surface-raised text-content-primary"
               style={{
-                background: 'var(--surface-raised)',
                 border: '1px solid var(--border-default)',
-                color: 'var(--text-primary)',
               }}
               rows={3}
             />
@@ -535,7 +525,7 @@ export function ActiveCenter(props: Partial<{
 
         {/* Start Discussion button */}
         {!activeDiscussionId && (
-          <div className="pt-3 flex justify-end" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+          <div className="pt-3 flex justify-end border-t border-line-subtle">
             <button
               onClick={() => setShowTimerDialog(true)}
               disabled={!promptInput.trim() || !isConnected}

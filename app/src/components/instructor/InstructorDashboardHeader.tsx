@@ -14,13 +14,7 @@ export function InstructorDashboardHeader({
 }) {
   return (
     <header
-      className="sticky top-0 z-50"
-      style={{
-        background: 'var(--surface-glass)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid var(--border-default)',
-      }}
+      className="glass sticky top-0 z-50"
     >
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3">
         <AppLogo size="sm" />
@@ -31,11 +25,9 @@ export function InstructorDashboardHeader({
           <button
             onClick={onLogout}
             disabled={loggingOut}
-            className="px-4 py-2 rounded-[10px] text-sm font-medium transition-all duration-150 disabled:opacity-60"
+            className="px-4 py-2 rounded-[10px] text-sm font-medium transition-all duration-150 disabled:opacity-60 bg-surface-raised text-content-secondary"
             style={{
-              background: 'var(--surface-raised)',
               border: '1px solid var(--border-default)',
-              color: 'var(--text-secondary)',
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-400)';

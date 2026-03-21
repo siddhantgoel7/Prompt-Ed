@@ -15,18 +15,11 @@ export function StudentSessionShell({
 
   return (
     <div
-      className="min-h-screen flex flex-col"
-      style={{ background: 'var(--surface-base)' }}
+      className="min-h-screen flex flex-col bg-surface-base"
     >
       {/* Top bar */}
       <header
-        className="sticky top-0 z-50 px-4 py-2.5 flex items-center justify-between"
-        style={{
-          background: 'var(--surface-glass)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          borderBottom: '1px solid var(--border-default)',
-        }}
+        className="glass sticky top-0 z-50 px-4 py-2.5 flex items-center justify-between"
       >
         <AppLogo size="sm" />
         <div className="flex items-center gap-2">
@@ -47,7 +40,7 @@ export function StudentSessionShell({
           {/* Session title */}
           {title && (
             <div className="text-center">
-              <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              <h1 className="text-xl md:text-2xl font-bold text-content-primary">
                 {title}
               </h1>
             </div>
@@ -59,7 +52,7 @@ export function StudentSessionShell({
 
       {/* Footer */}
       <footer className="py-4 text-center">
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-xs text-content-muted">
           PromptED · AI-Assisted Teaching
         </p>
       </footer>

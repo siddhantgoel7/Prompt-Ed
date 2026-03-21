@@ -119,11 +119,10 @@ export function ResponseCard({
     <>
       <p
         className={cn(
-          'whitespace-pre-wrap break-words transition-all duration-300',
+          'whitespace-pre-wrap break-words transition-all duration-300 text-content-primary',
           isSelected ? s.selectedText : s.unselectedText,
           variant === 'full' && 'leading-relaxed',
         )}
-        style={{ color: 'var(--text-primary)' }}
       >
         {responseText}
       </p>
@@ -131,20 +130,18 @@ export function ResponseCard({
       {variant === 'compact' ? (
         <p
           className={cn(
-            'font-medium uppercase tracking-wider transition-all duration-300',
+            'font-medium uppercase tracking-wider transition-all duration-300 text-content-muted',
             isSelected ? s.selectedTimestamp : s.unselectedTimestamp,
           )}
-          style={{ color: 'var(--text-muted)' }}
         >
           {timeString}
         </p>
       ) : (
         <div
           className={cn(
-            'flex justify-end items-center gap-2 font-medium transition-all duration-300',
+            'flex justify-end items-center gap-2 font-medium transition-all duration-300 text-content-muted',
             isSelected ? s.selectedTimestamp : s.unselectedTimestamp,
           )}
-          style={{ color: 'var(--text-muted)' }}
         >
           <span suppressHydrationWarning>{timeString}</span>
         </div>
@@ -154,9 +151,8 @@ export function ResponseCard({
         <div
           className={cn(
             s.actionBarSpacing,
-            'flex items-center justify-end animate-in fade-in slide-in-from-top-1 duration-200',
+            'flex items-center justify-end animate-in fade-in slide-in-from-top-1 duration-200 border-t border-line-default',
           )}
-          style={{ borderTop: '1px solid var(--border-default)' }}
         >
           <ActionButton
             mode={mode}

@@ -65,8 +65,7 @@ export function FilterToggle({
         <button
           type="button"
           onClick={onShowAll}
-          className={cn('transition-colors', s.showAll)}
-          style={{ color: 'var(--text-muted)' }}
+          className={cn('transition-colors text-content-muted', s.showAll)}
           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; }}
         >

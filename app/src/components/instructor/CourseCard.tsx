@@ -33,12 +33,8 @@ export function CourseCard({
 }) {
   return (
     <div
-      className="relative overflow-hidden rounded-2xl card-hover cursor-pointer group"
+      className="glass relative overflow-hidden rounded-2xl card-hover cursor-pointer group"
       style={{
-        background: 'var(--surface-glass)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        border: '1px solid var(--border-default)',
         boxShadow: '0 2px 16px var(--color-primary-alpha-06), 0 1px 3px var(--color-black-alpha-06)',
       }}
     >
@@ -47,11 +43,9 @@ export function CourseCard({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150"
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 bg-surface-raised text-content-secondary"
               style={{
-                background: 'var(--surface-raised)',
                 border: '1px solid var(--border-default)',
-                color: 'var(--text-secondary)',
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -99,12 +93,11 @@ export function CourseCard({
 
       {/* Content */}
       <div className="p-5" onClick={onAccess}>
-        <p className="text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-xs mb-1.5 text-content-muted">
           Created {formatDate(course.date_created)}
         </p>
         <h3
-          className="text-base font-semibold mb-4 leading-snug line-clamp-2"
-          style={{ color: 'var(--text-primary)' }}
+          className="text-base font-semibold mb-4 leading-snug line-clamp-2 text-content-primary"
         >
           {course.title}
         </h3>

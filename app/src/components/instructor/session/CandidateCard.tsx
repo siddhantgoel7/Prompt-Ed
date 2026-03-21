@@ -39,28 +39,28 @@ export function CandidateCard({
             <div className="flex items-start justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                     <span
-                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize"
-                        style={{ background: 'var(--color-primary-alpha-12)', color: 'var(--color-primary-600)' }}
+                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize text-brand-600"
+                        style={{ background: 'var(--color-primary-alpha-12)' }}
                     >
                         {candidate.promptType.replace('_', ' ')}
                     </span>
                     {isSelected && (
-                        <span className="text-xs font-medium" style={{ color: 'var(--color-primary-500)' }}>
+                        <span className="text-xs font-medium text-brand-500">
                             Selected
                         </span>
                     )}
                 </div>
             </div>
 
-            <p className="leading-snug text-sm" style={{ color: 'var(--text-primary)' }}>
+            <p className="leading-snug text-sm text-content-primary">
                 {candidate.promptText}
             </p>
 
             {candidate.mcOptions && candidate.mcOptions.length > 0 && (
                 <ul className="mt-2 space-y-1">
                     {candidate.mcOptions.map((opt) => (
-                        <li key={opt.label} className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                            <span className="font-semibold mr-1" style={{ color: 'var(--text-secondary)' }}>
+                        <li key={opt.label} className="text-xs text-content-muted">
+                            <span className="font-semibold mr-1 text-content-secondary">
                                 {opt.label}.
                             </span>
                             {opt.text}

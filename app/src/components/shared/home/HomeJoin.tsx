@@ -28,16 +28,10 @@ export function HomeJoin() {
   const joining = view === 'joining';
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--surface-base)' }}>
+    <div className="min-h-screen flex flex-col bg-surface-base">
       {/* Header */}
       <header
-        className="sticky top-0 z-50"
-        style={{
-          background: 'var(--surface-glass)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          borderBottom: '1px solid var(--border-default)',
-        }}
+        className="glass sticky top-0 z-50"
       >
         <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
           <AppLogo size="sm" />
@@ -47,11 +41,9 @@ export function HomeJoin() {
 
             <button
               onClick={goLogIn}
-              className="px-4 py-2 rounded-[10px] text-sm font-medium transition-all duration-150"
+              className="px-4 py-2 rounded-[10px] text-sm font-medium transition-all duration-150 bg-surface-raised text-content-secondary"
               style={{
-                background: 'var(--surface-raised)',
                 border: '1px solid var(--border-default)',
-                color: 'var(--text-secondary)',
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-400)';
@@ -97,14 +89,13 @@ export function HomeJoin() {
           <AppLogo size="xl" variant="simple" className="mx-auto mb-3" />
           <BlurText
             text="AI-Assisted Learning"
-            className="block text-lg tracking-[0.08em] mb-6"
+            className="block text-lg tracking-[0.08em] mb-6 text-content-secondary"
             style={{
               fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif',
-              color: 'var(--text-secondary)',
               letterSpacing: '0.12em',
             }}
           />
-          <p className="text-base max-w-sm mx-auto" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-base max-w-sm mx-auto text-content-muted">
             Enter your instructor&apos;s session PIN to join the live discussion.
           </p>
         </div>
@@ -114,10 +105,10 @@ export function HomeJoin() {
           className="glass w-full max-w-md rounded-2xl p-8 enter"
           style={{ animationDelay: '60ms', boxShadow: '0 4px 32px var(--color-black-alpha-08)' }}
         >
-          <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+          <h2 className="text-xl font-bold mb-1 text-content-primary">
             Join a Session
           </h2>
-          <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-sm mb-6 text-content-muted">
             Enter the 6-digit PIN provided by your instructor.
           </p>
 
@@ -130,16 +121,15 @@ export function HomeJoin() {
                 borderLeft: '3px solid var(--color-error-500)',
               }}
             >
-              <p className="text-sm font-semibold" style={{ color: 'var(--color-error-600)' }}>Can&apos;t join</p>
-              <p className="text-sm" style={{ color: 'var(--color-error-500)' }}>{error}</p>
+              <p className="text-sm font-semibold text-err-600">Can&apos;t join</p>
+              <p className="text-sm text-err-500">{error}</p>
             </div>
           ) : null}
 
           <div className="space-y-1.5 mb-4">
             <label
               htmlFor="pin"
-              className="block text-sm font-medium"
-              style={{ color: 'var(--text-secondary)' }}
+              className="block text-sm font-medium text-content-secondary"
             >
               PIN Code
             </label>
@@ -152,16 +142,14 @@ export function HomeJoin() {
               onChange={(e) => onChangeCode(e.target.value)}
               disabled={joining}
               maxLength={6}
-              className="w-full px-4 py-3.5 rounded-[10px] text-center text-2xl font-bold tracking-[0.5em] transition-all duration-150"
+              className="w-full px-4 py-3.5 rounded-[10px] text-center text-2xl font-bold tracking-[0.5em] transition-all duration-150 bg-surface-raised text-content-primary"
               style={{
-                background: 'var(--surface-raised)',
                 border: '1px solid var(--border-default)',
-                color: 'var(--text-primary)',
                 fontFamily: 'monospace',
               }}
             />
             {/* data-testid="pin-hint" is the test anchor — avoids unicode ✓ character dependency */}
-            <p data-testid="pin-hint" className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            <p data-testid="pin-hint" className="text-xs text-content-muted">
               {code.length === 0
                 ? 'PIN is 6 digits'
                 : pinOk
@@ -181,12 +169,11 @@ export function HomeJoin() {
             {joining ? 'Joining…' : 'Join Session'}
           </button>
 
-          <p className="text-xs text-center mt-4" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs text-center mt-4 text-content-muted">
             Instructors: use{' '}
             <button
               onClick={goLogIn}
-              className="font-medium hover:underline"
-              style={{ color: 'var(--color-primary-500)' }}
+              className="font-medium hover:underline text-brand-500"
             >
               Log in
             </button>{' '}
@@ -197,7 +184,7 @@ export function HomeJoin() {
 
       {/* Footer */}
       <footer className="py-4 text-center">
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-xs text-content-muted">
           Department of Pharmacology · University of Alberta
         </p>
       </footer>

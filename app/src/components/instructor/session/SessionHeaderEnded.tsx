@@ -45,15 +45,9 @@ export function SessionHeaderEnded(props: {
 
   return (
     <header
-      className="sticky top-0 z-50 px-6 py-4 flex items-center justify-between"
-      style={{
-        background: 'var(--surface-glass)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid var(--border-default)',
-      }}
+      className="glass sticky top-0 z-50 px-6 py-4 flex items-center justify-between"
     >
-      <h1 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</h1>
+      <h1 className="text-xl font-semibold text-content-primary">{title}</h1>
 
       <div className="flex items-center gap-3">
         <Button onClick={onBackToLessons} disabled={!onBackToLessons} variant="outline" className="text-xs h-8">

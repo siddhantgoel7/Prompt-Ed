@@ -22,27 +22,25 @@ export function LessonsPage({ courseId }: { courseId: string }) {
   if (!page.course) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: 'var(--surface-base)' }}
+        className="min-h-screen flex items-center justify-center bg-surface-base"
       >
-        <p style={{ color: 'var(--text-muted)' }}>Course not found</p>
+        <p className="text-content-muted">Course not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--surface-base)' }}>
+    <div className="min-h-screen bg-surface-base">
       <LessonsPageHeader title="PromptED" onBack={page.back} />
 
       <main className="mx-auto w-full max-w-6xl px-4 md:px-6 py-10">
         <div className="mb-8">
           <h2
-            className="text-2xl md:text-3xl font-bold tracking-tight"
-            style={{ color: 'var(--text-primary)' }}
+            className="text-2xl md:text-3xl font-bold tracking-tight text-content-primary"
           >
             {page.course.title}
           </h2>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-sm mt-1 text-content-muted">
             {page.lessons.length === 0
               ? 'No lessons yet — create your first'
               : `${page.lessons.length} lesson${page.lessons.length === 1 ? '' : 's'}`}

@@ -40,23 +40,21 @@ function SummaryBar({
 
   return (
     <div
-      className="grid grid-cols-3 gap-4 px-6 py-4"
-      style={{ borderBottom: '1px solid var(--border-default)', background: 'var(--surface-raised)' }}
+      className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-line-default bg-surface-raised"
     >
       <div className="flex flex-col items-center justify-center py-2">
-        <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{totalDiscussions}</span>
-        <span className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Discussions Created</span>
+        <span className="text-2xl font-bold text-content-primary">{totalDiscussions}</span>
+        <span className="text-xs mt-0.5 text-content-muted">Discussions Created</span>
       </div>
       <div
-        className="flex flex-col items-center justify-center py-2"
-        style={{ borderLeft: '1px solid var(--border-default)', borderRight: '1px solid var(--border-default)' }}
+        className="flex flex-col items-center justify-center py-2 border-x border-line-default"
       >
-        <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{totalResponses}</span>
-        <span className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Total Responses</span>
+        <span className="text-2xl font-bold text-content-primary">{totalResponses}</span>
+        <span className="text-xs mt-0.5 text-content-muted">Total Responses</span>
       </div>
       <div className="flex flex-col items-center justify-center py-2">
-        <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{duration ?? '—'}</span>
-        <span className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Session Duration</span>
+        <span className="text-2xl font-bold text-content-primary">{duration ?? '—'}</span>
+        <span className="text-xs mt-0.5 text-content-muted">Session Duration</span>
       </div>
     </div>
   );
@@ -109,7 +107,7 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
   }
 
   const content = (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--surface-base)' }}>
+    <div className="min-h-screen flex flex-col bg-surface-base">
       <SessionHeaderEnded onSplitView={() => setSplitView(true)} />
 
       {vm.endError && (
@@ -140,19 +138,19 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
         {/* Left — Discussions */}
         <section className="flex flex-col min-h-0">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Discussions</h2>
-            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{vm.lessonDiscussions.length} prompts</span>
+            <h2 className="text-base font-semibold text-content-primary">Discussions</h2>
+            <span className="text-xs text-content-muted">{vm.lessonDiscussions.length} prompts</span>
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-3 pr-1">
             {vm.historyLoading && (
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Loading lesson history...</p>
+              <p className="text-sm text-content-muted">Loading lesson history...</p>
             )}
             {vm.historyError && (
-              <p className="text-sm" style={{ color: '#ef4444' }}>{vm.historyError}</p>
+              <p className="text-sm text-err-500">{vm.historyError}</p>
             )}
             {!vm.historyLoading && !vm.historyError && reversedDiscussions.length === 0 && (
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No discussions recorded.</p>
+              <p className="text-sm text-content-muted">No discussions recorded.</p>
             )}
             {!vm.historyLoading &&
               !vm.historyError &&
@@ -179,27 +177,26 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
               border: '1px solid var(--border-default)',
             }}
           >
-            <h2 className="text-base font-semibold mb-3 shrink-0" style={{ color: 'var(--text-primary)' }}>Transcript</h2>
+            <h2 className="text-base font-semibold mb-3 shrink-0 text-content-primary">Transcript</h2>
             <div className="flex-1 overflow-y-auto space-y-2">
               {transcriptsLoading && (
-                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Loading transcripts...</p>
+                <p className="text-sm text-content-muted">Loading transcripts...</p>
               )}
               {transcriptsError && (
-                <p className="text-sm" style={{ color: '#ef4444' }}>{transcriptsError}</p>
+                <p className="text-sm text-err-500">{transcriptsError}</p>
               )}
               {!transcriptsLoading && !transcriptsError && transcripts.length === 0 && (
-                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No transcripts used.</p>
+                <p className="text-sm text-content-muted">No transcripts used.</p>
               )}
               {transcripts.map((t, i) => (
                 <div
                   key={t.id}
-                  className="rounded-xl p-3"
-                  style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}
+                  className="rounded-xl p-3 bg-surface-raised border border-line-subtle"
                 >
-                  <p className="text-xs mb-1 font-medium" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-xs mb-1 font-medium text-content-muted">
                     Segment {i + 1} · {new Date(t.metadata?.recordedAt ?? t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed text-content-secondary">
                     {t.content}
                   </p>
                 </div>
@@ -216,20 +213,19 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
               border: '1px solid var(--border-default)',
             }}
           >
-            <h2 className="text-base font-semibold mb-3 shrink-0" style={{ color: 'var(--text-primary)' }}>Lecture Material</h2>
+            <h2 className="text-base font-semibold mb-3 shrink-0 text-content-primary">Lecture Material</h2>
             <div className="flex-1 overflow-y-auto space-y-2">
               {files.length === 0 ? (
-                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No lecture material uploaded.</p>
+                <p className="text-sm text-content-muted">No lecture material uploaded.</p>
               ) : (
                 files.map((f) => (
                   <div
                     key={f.id}
-                    className="flex items-center justify-between rounded-xl p-3"
-                    style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}
+                    className="flex items-center justify-between rounded-xl p-3 bg-surface-raised border border-line-subtle"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{f.fileName}</p>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      <p className="text-sm font-medium truncate text-content-primary">{f.fileName}</p>
+                      <p className="text-xs mt-0.5 text-content-muted">
                         {f.fileType.toUpperCase()} · {new Date(f.uploadedAt).toLocaleDateString()}
                       </p>
                     </div>

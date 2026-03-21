@@ -24,12 +24,11 @@ export function CoursesSection({
       <div className="mb-8 flex items-center justify-between gap-4">
         <div>
           <h2
-            className="text-2xl md:text-3xl font-bold tracking-tight"
-            style={{ color: 'var(--text-primary)' }}
+            className="text-2xl md:text-3xl font-bold tracking-tight text-content-primary"
           >
             Your Courses
           </h2>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-sm mt-1 text-content-muted">
             {courses.length === 0
               ? 'Get started by adding your first course'
               : `${courses.length} course${courses.length === 1 ? '' : 's'}`}
@@ -66,8 +65,8 @@ export function CoursesSection({
               <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
             </svg>
           </div>
-          <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>No courses yet</p>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          <p className="font-semibold mb-1 text-content-primary">No courses yet</p>
+          <p className="text-sm text-content-muted">
             Click &ldquo;Add Course&rdquo; to get started
           </p>
         </div>

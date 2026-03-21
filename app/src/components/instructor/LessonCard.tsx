@@ -61,7 +61,7 @@ export function LessonCard(
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
         </div>
-        <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>
+        <span className="text-sm font-semibold text-content-secondary">
           New Lesson
         </span>
       </button>
@@ -99,8 +99,7 @@ export function LessonCard(
             e.stopPropagation();
             props.onDelete();
           }}
-          className="w-7 h-7 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-150"
-          style={{ color: 'var(--text-muted)' }}
+          className="w-7 h-7 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-150 text-content-muted"
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-alpha-10)';
             (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-error-600)';
@@ -122,12 +121,11 @@ export function LessonCard(
       {/* Lesson info */}
       <div>
         <h3
-          className="text-sm font-semibold leading-snug line-clamp-1 mb-0.5"
-          style={{ color: 'var(--text-primary)' }}
+          className="text-sm font-semibold leading-snug line-clamp-1 mb-0.5 text-content-primary"
         >
           {lesson.title}
         </h3>
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-xs text-content-muted">
           {formatDate(lesson.date_created)}
         </p>
       </div>

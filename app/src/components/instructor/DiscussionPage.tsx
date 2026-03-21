@@ -232,16 +232,14 @@ export function DiscussionPage({
 
   return (
     <div
-      className="min-h-screen"
-      style={{ background: 'var(--surface-base)' }}
+      className="min-h-screen bg-surface-base"
     >
       <div className="max-w-7xl mx-auto p-4 md:p-8">
         {/* Back navigation */}
         <div className="mb-6">
           <Link
             href={`/session/${lessonId}`}
-            className="inline-flex items-center text-sm font-medium transition-colors duration-150"
-            style={{ color: 'var(--text-muted)' }}
+            className="inline-flex items-center text-sm font-medium transition-colors duration-150 text-content-muted"
             onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-primary-500)'; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--text-muted)'; }}
           >
@@ -262,11 +260,7 @@ export function DiscussionPage({
             }}
           >
             <h2
-              className="text-lg font-bold mb-4 pb-3"
-              style={{
-                color: 'var(--text-primary)',
-                borderBottom: '1px solid var(--border-subtle)',
-              }}
+              className="text-lg font-bold mb-4 pb-3 text-content-primary border-b border-line-subtle"
             >
               Metrics
             </h2>
@@ -281,14 +275,12 @@ export function DiscussionPage({
           <div className="flex-1 w-full min-w-0">
             {/* Header */}
             <div
-              className="flex flex-col gap-4 mb-6 pb-6"
-              style={{ borderBottom: '1px solid var(--border-default)' }}
+              className="flex flex-col gap-4 mb-6 pb-6 border-b border-line-default"
             >
               <div className="flex justify-between items-start gap-4">
                 <div className="space-y-1 flex-1">
                   <h1
-                    className="text-2xl font-bold leading-tight"
-                    style={{ color: 'var(--text-primary)' }}
+                    className="text-2xl font-bold leading-tight text-content-primary"
                   >
                     {initialDiscussion.prompt_text}
                   </h1>
@@ -340,7 +332,7 @@ export function DiscussionPage({
                 }}
               >
                 <div className="mb-4 flex items-center justify-between">
-                  <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  <h3 className="font-semibold text-content-primary">
                     Multiple Choice Options
                   </h3>
                   {correctOptionLabel && (
@@ -389,7 +381,7 @@ export function DiscussionPage({
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold" style={{ color: 'var(--text-muted)' }}>
+                          <span className="text-sm font-semibold text-content-muted">
                             {count} responses
                           </span>
                         </div>
@@ -403,8 +395,7 @@ export function DiscussionPage({
             {/* Responses List */}
             <div className="space-y-4">
               <div
-                className="flex justify-between items-center text-sm mb-2"
-                style={{ color: 'var(--text-muted)' }}
+                className="flex justify-between items-center text-sm mb-2 text-content-muted"
               >
                 <div className="flex items-center gap-2">
                   <span>Realtime Status:</span>
@@ -419,11 +410,9 @@ export function DiscussionPage({
 
               {responses.length === 0 && flaggedResponses.length === 0 ? (
                 <div
-                  className="text-center p-12 rounded-2xl"
+                  className="text-center p-12 rounded-2xl bg-surface-raised text-content-muted"
                   style={{
-                    background: 'var(--surface-raised)',
                     border: '2px dashed var(--border-default)',
-                    color: 'var(--text-muted)',
                   }}
                 >
                   <p>No responses recorded yet.</p>

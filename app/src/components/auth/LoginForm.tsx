@@ -104,19 +104,18 @@ export function LoginForm() {
 
       {/* Divider between email/password and OAuth */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-px" style={{ background: 'var(--border-default)' }} />
-        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>OR</span>
-        <div className="flex-1 h-px" style={{ background: 'var(--border-default)' }} />
+        <div className="flex-1 h-px bg-line-default" />
+        <span className="text-xs text-content-muted">OR</span>
+        <div className="flex-1 h-px bg-line-default" />
       </div>
 
       <OAuthButton loading={loading} onClick={handleGoogleSignIn} providerLabel="Google" />
 
-      <p className="text-sm text-center" style={{ color: 'var(--text-muted)' }}>
+      <p className="text-sm text-center text-content-muted">
         Don&apos;t have an account?{' '}
         <button
           onClick={() => router.push('/create_instructor')}
-          className="font-medium transition-colors duration-150 hover:underline"
-          style={{ color: 'var(--color-primary-500)' }}
+          className="font-medium transition-colors duration-150 hover:underline text-brand-500"
           type="button"
         >
           Sign Up

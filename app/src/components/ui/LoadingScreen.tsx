@@ -21,9 +21,8 @@ import Image from 'next/image';
 export function LoadingScreen() {
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center gap-6"
+      className="min-h-screen flex flex-col items-center justify-center gap-6 bg-surface-base"
       data-testid="loading-screen"
-      style={{ background: 'var(--surface-base)' }}
     >
       {/* Logo with a slow scale+opacity pulse — defined as @keyframes logoBreath in globals.css */}
       <div style={{ animation: 'logoBreath 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite' }}>

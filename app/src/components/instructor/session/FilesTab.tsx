@@ -81,7 +81,7 @@ export function FilesTab({
             ) : (
                 <div className="space-y-2">
                     {files.map((f) => (
-                        <div key={f.id} className="flex items-center justify-between gap-2 p-2 rounded-xl" style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
+                        <div key={f.id} className="flex items-center justify-between gap-2 p-2 rounded-xl bg-surface-raised border border-line-subtle">
                             <div className="min-w-0 flex-1">
                                 <p className="text-xs font-medium truncate" title={f.fileName}>{f.fileName}</p>
                                 <div className="flex items-center gap-2 mt-1">
@@ -92,8 +92,7 @@ export function FilesTab({
                             <button
                                 onClick={() => onDeleteFile(f.id)}
                                 disabled={isUploading}
-                                className="shrink-0 p-1 rounded disabled:opacity-50 transition-colors duration-150"
-                                style={{ color: 'var(--text-muted)' }}
+                                className="shrink-0 p-1 rounded disabled:opacity-50 transition-colors duration-150 text-content-muted"
                                 onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--recording-text, #dc2626)'; (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-alpha-08)'; }}
                                 onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                                 title="Delete file"

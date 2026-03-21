@@ -31,10 +31,9 @@ export function StudentResponseForm({
     <div className="space-y-3">
       {showTextarea && (
         <div
-          className="rounded-2xl overflow-hidden"
+          className="rounded-2xl overflow-hidden bg-surface-raised"
           style={{
             border: '1px solid var(--border-default)',
-            background: 'var(--surface-raised)',
           }}
         >
           <textarea
@@ -43,15 +42,10 @@ export function StudentResponseForm({
             placeholder="Type your response here…"
             rows={5}
             disabled={submitting}
-            className="w-full px-4 py-3.5 text-sm resize-none bg-transparent outline-none"
-            style={{ color: 'var(--text-primary)' }}
+            className="w-full px-4 py-3.5 text-sm resize-none bg-transparent outline-none text-content-primary"
           />
           <div
-            className="px-4 py-2 flex items-center justify-between text-xs"
-            style={{
-              borderTop: '1px solid var(--border-subtle)',
-              color: 'var(--text-muted)',
-            }}
+            className="px-4 py-2 flex items-center justify-between text-xs border-t border-line-subtle text-content-muted"
           >
             <span>{chars} characters</span>
             <span className="hidden sm:inline">Be concise and specific</span>

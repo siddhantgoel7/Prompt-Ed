@@ -34,10 +34,10 @@ export function StudentWaitingCard({ text }: { text?: string }) {
         </div>
       </div>
 
-      <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
+      <p className="font-semibold mb-1 text-content-primary">
         Waiting for next question
       </p>
-      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+      <p className="text-sm text-content-muted">
         {text || 'The instructor will publish a discussion prompt shortly…'}
       </p>
     </div>

@@ -73,6 +73,13 @@
   --color-line-default: var(--border-default);
   --color-line-subtle:  var(--border-subtle);
 
+  /* ── Error / warning palette tokens ── */
+  --color-err-500:  var(--color-error-500);
+  --color-err-600:  var(--color-error-600);
+  --color-err-700:  var(--color-error-700);
+  --color-warn-500: var(--color-warning-500);
+  --color-warn-600: var(--color-warning-600);
+
   /* ── Pastel accent tokens → bg-accent-* / text-accent-* utilities ── */
   --color-accent-mint:     var(--accent-mint);
   --color-accent-sage:     var(--accent-sage);

@@ -52,30 +52,29 @@ export function DiscussionHistory({
                             }}
                         >
                                 <div className="flex items-start justify-between mb-2">
-                                    <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>#{originalIndex}</span>
+                                    <span className="text-xs font-semibold text-content-muted">#{originalIndex}</span>
 
                                     {d.status === 'active' ? (
                                         <span
-                                            className="text-xs font-medium px-2 py-0.5 rounded-full"
-                                            style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-500)' }}
+                                            className="text-xs font-medium px-2 py-0.5 rounded-full text-brand-500"
+                                            style={{ background: 'rgba(45,158,45,0.12)' }}
                                         >
                                             Active
                                         </span>
                                     ) : (
                                         <span
-                                            className="text-xs font-medium px-2 py-0.5 rounded-full"
-                                            style={{ background: 'var(--surface-overlay)', color: 'var(--text-muted)' }}
+                                            className="text-xs font-medium px-2 py-0.5 rounded-full bg-surface-overlay text-content-muted"
                                         >
                                             Closed
                                         </span>
                                     )}
                                 </div>
 
-                                <p className="text-sm mb-2 leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                                <p className="text-sm mb-2 leading-relaxed text-content-primary">
                                     {truncateText(d.prompt_text)}
                                 </p>
 
-                                <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+                                <div className="flex items-center gap-2 text-xs text-content-muted">
                                     <span className="font-medium">{d.response_count}</span>
                                     <span>{d.response_count === 1 ? 'response' : 'responses'}</span>
 

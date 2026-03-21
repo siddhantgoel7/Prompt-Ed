@@ -26,13 +26,12 @@ export function MultipleChoiceEditor({
 }: MultipleChoiceEditorProps) {
     return (
         <div
-            className="mt-2 p-4 rounded-xl"
+            className="mt-2 p-4 rounded-xl bg-surface-raised"
             style={{
-                background: 'var(--surface-raised)',
                 border: '1px solid var(--border-default)',
             }}
         >
-            <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-muted)' }}>
+            <h3 className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
                 Options &amp; Correct Answer
             </h3>
 
@@ -76,12 +75,10 @@ export function MultipleChoiceEditor({
             </div>
 
             <div
-                className="mt-3 pt-3"
-                style={{ borderTop: '1px solid var(--border-subtle)' }}
+                className="mt-3 pt-3 border-t border-line-subtle"
             >
                 <label
-                    className="flex items-center gap-2 text-xs font-medium cursor-pointer"
-                    style={{ color: 'var(--text-secondary)' }}
+                    className="flex items-center gap-2 text-xs font-medium cursor-pointer text-content-secondary"
                 >
                     <input
                         type="checkbox"

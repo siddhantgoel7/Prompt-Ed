@@ -55,7 +55,7 @@ function DiscussionList({
   const renderList = (list: DiscussionWithResponseCount[]) => {
     if (list.length === 0) {
       return (
-        <p className="text-sm py-6 text-center" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-sm py-6 text-center text-content-muted">
           No discussions
         </p>
       );
@@ -66,9 +66,8 @@ function DiscussionList({
           <button
             key={d.id}
             onClick={() => onSelect(d.id)}
-            className="w-full text-left rounded-xl p-3 transition-all duration-150"
+            className="w-full text-left rounded-xl p-3 transition-all duration-150 bg-surface-raised"
             style={{
-              background: 'var(--surface-raised)',
               border: '1px solid var(--border-default)',
             }}
             onMouseEnter={(e) => {
@@ -79,30 +78,29 @@ function DiscussionList({
             }}
           >
             <div className="flex items-start justify-between mb-1.5">
-              <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
+              <span className="text-xs font-semibold text-content-muted">
                 #{idx + 1}
               </span>
               {d.status === 'active' ? (
                 <span
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{ background: 'rgba(45,158,45,0.15)', color: 'var(--color-primary-600)' }}
+                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-brand-600"
+                  style={{ background: 'rgba(45,158,45,0.15)' }}
                 >
                   Active
                 </span>
               ) : (
                 <span
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{ background: 'var(--surface-overlay)', color: 'var(--text-muted)' }}
+                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-overlay text-content-muted"
                 >
                   Closed
                 </span>
               )}
             </div>
-            <p className="text-sm leading-relaxed mb-1.5" style={{ color: 'var(--text-primary)' }}>
+            <p className="text-sm leading-relaxed mb-1.5 text-content-primary">
               {truncateText(d.prompt_text)}
             </p>
-            <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
-              <span className="font-semibold" style={{ color: 'var(--text-secondary)' }}>
+            <div className="flex items-center gap-1.5 text-xs text-content-muted">
+              <span className="font-semibold text-content-secondary">
                 {d.response_count}
               </span>
               <span>{d.response_count === 1 ? 'response' : 'responses'}</span>
@@ -155,13 +153,11 @@ function DiscussionDetail({
     <div className="flex flex-col h-full">
       {/* Detail header */}
       <div
-        className="px-4 pt-3 pb-3 flex-shrink-0"
-        style={{ borderBottom: '1px solid var(--border-subtle)' }}
+        className="px-4 pt-3 pb-3 flex-shrink-0 border-b border-line-subtle"
       >
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-xs font-medium mb-3 transition-colors duration-150"
-          style={{ color: 'var(--text-muted)' }}
+          className="flex items-center gap-1.5 text-xs font-medium mb-3 transition-colors duration-150 text-content-muted"
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';
           }}
@@ -175,21 +171,20 @@ function DiscussionDetail({
           Back
         </button>
 
-        <p className="text-sm font-medium leading-relaxed mb-2" style={{ color: 'var(--text-primary)' }}>
+        <p className="text-sm font-medium leading-relaxed mb-2 text-content-primary">
           {discussion.prompt_text}
         </p>
 
         {discussion.status === 'active' ? (
           <span
-            className="inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full"
-            style={{ background: 'rgba(45,158,45,0.15)', color: 'var(--color-primary-600)' }}
+            className="inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full text-brand-600"
+            style={{ background: 'rgba(45,158,45,0.15)' }}
           >
             Active
           </span>
         ) : (
           <span
-            className="inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full"
-            style={{ background: 'var(--surface-overlay)', color: 'var(--text-muted)' }}
+            className="inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-overlay text-content-muted"
           >
             Closed
           </span>
@@ -204,7 +199,7 @@ function DiscussionDetail({
             <div className="skeleton-shimmer h-16 w-full rounded-xl" />
           </div>
         ) : responses.length === 0 ? (
-          <p className="text-sm py-6 text-center" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-sm py-6 text-center text-content-muted">
             No responses yet.
           </p>
         ) : (
@@ -212,16 +207,12 @@ function DiscussionDetail({
             {responses.map((r) => (
               <div
                 key={r.id}
-                className="rounded-xl p-3"
-                style={{
-                  background: 'var(--surface-raised)',
-                  border: '1px solid var(--border-subtle)',
-                }}
+                className="rounded-xl p-3 bg-surface-raised border border-line-subtle"
               >
-                <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
+                <p className="text-sm text-content-primary">
                   {r.response_text}
                 </p>
-                <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+                <p className="text-xs mt-1 text-content-muted">
                   {new Date(r.created_at).toLocaleTimeString()}
                 </p>
               </div>
@@ -307,20 +298,14 @@ function Pane({
 
   return (
     <div
-      className="flex-1 flex flex-col min-w-0"
-      style={{ borderRight: '1px solid var(--border-default)' }}
+      className="flex-1 flex flex-col min-w-0 border-r border-line-default"
     >
       {/* Pane label */}
       <div
-        className="px-4 py-2 flex-shrink-0"
-        style={{
-          background: 'var(--surface-overlay)',
-          borderBottom: '1px solid var(--border-default)',
-        }}
+        className="px-4 py-2 flex-shrink-0 bg-surface-overlay border-b border-line-default"
       >
         <span
-          className="text-xs font-semibold uppercase tracking-wider"
-          style={{ color: 'var(--text-muted)' }}
+          className="text-xs font-semibold uppercase tracking-wider text-content-muted"
         >
           {label}
         </span>
@@ -353,26 +338,17 @@ function Pane({
 export function SplitView({ discussions, lessonId, onBack }: SplitViewProps) {
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: 'var(--surface-base)' }}
+      className="fixed inset-0 z-50 flex flex-col bg-surface-base"
     >
       {/* Top bar */}
       <header
-        className="flex-shrink-0 px-4 py-2.5 flex items-center justify-between"
-        style={{
-          background: 'var(--surface-glass)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          borderBottom: '1px solid var(--border-default)',
-        }}
+        className="glass flex-shrink-0 px-4 py-2.5 flex items-center justify-between"
       >
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-medium transition-all duration-150"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-medium transition-all duration-150 bg-surface-raised text-content-secondary"
           style={{
-            background: 'var(--surface-raised)',
             border: '1px solid var(--border-default)',
-            color: 'var(--text-secondary)',
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-400)';
@@ -392,8 +368,8 @@ export function SplitView({ discussions, lessonId, onBack }: SplitViewProps) {
         <AppLogo size="sm" />
 
         <span
-          className="text-xs font-semibold px-3 py-1.5 rounded-full"
-          style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-600)' }}
+          className="text-xs font-semibold px-3 py-1.5 rounded-full text-brand-600"
+          style={{ background: 'rgba(45,158,45,0.12)' }}
         >
           Split View
         </span>

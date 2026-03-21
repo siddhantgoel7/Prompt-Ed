@@ -41,22 +41,18 @@ export function ActiveSidebar(props: {
 
   return (
     <aside
-      className="flex flex-col flex-shrink-0 transition-all duration-200"
+      className="flex flex-col flex-shrink-0 transition-all duration-200 bg-surface-raised border-r border-line-default"
       style={{
         width: collapsed ? '52px' : '280px',
-        borderRight: '1px solid var(--border-default)',
-        background: 'var(--surface-raised)',
       }}
     >
       {/* Collapse toggle */}
       <div
-        className="flex items-center px-3 py-2.5 flex-shrink-0"
-        style={{ borderBottom: '1px solid var(--border-subtle)' }}
+        className="flex items-center px-3 py-2.5 flex-shrink-0 border-b border-line-subtle"
       >
         {!collapsed && (
           <span
-            className="text-xs font-semibold uppercase tracking-wider flex-1"
-            style={{ color: 'var(--text-muted)' }}
+            className="text-xs font-semibold uppercase tracking-wider flex-1 text-content-muted"
           >
             Session Panel
           </span>
@@ -64,8 +60,7 @@ export function ActiveSidebar(props: {
         <button
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="w-7 h-7 flex items-center justify-center rounded-lg transition-all duration-150 flex-shrink-0"
-          style={{ color: 'var(--text-muted)' }}
+          className="w-7 h-7 flex items-center justify-center rounded-lg transition-all duration-150 flex-shrink-0 text-content-muted"
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.10)';
             (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';

@@ -166,21 +166,20 @@ export function StudentPromptCard({
     >
       {/* Prompt header */}
       <div
-        className="px-5 py-4"
+        className="px-5 py-4 border-b border-line-subtle"
         style={{
           borderLeft: '3px solid var(--color-primary-500)',
-          borderBottom: '1px solid var(--border-subtle)',
         }}
       >
-        <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--color-primary-500)' }}>
+        <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-brand-500">
           Discussion Prompt
         </p>
-        <p className="text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+        <p className="text-base leading-relaxed text-content-primary">
           {discussion.prompt_text}
         </p>
 
         {isMC && (
-          <p className="text-xs mt-2 italic" style={{ color: 'var(--color-primary-400)' }}>
+          <p className="text-xs mt-2 italic text-brand-400">
             Select one of the options below
           </p>
         )}

@@ -42,7 +42,7 @@ export function ConnectionStatus(props: {
           className="h-2 w-2 rounded-full animate-pulse"
           style={{ background: 'var(--color-primary-400)' }}
         />
-        <span className="text-xs font-medium" style={{ color: 'var(--color-primary-600)' }}>
+        <span className="text-xs font-medium text-brand-600">
           Connected
         </span>
       </div>
@@ -60,7 +60,7 @@ export function ConnectionStatus(props: {
       }}
     >
       <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-      <span className="text-sm font-medium" style={{ color: 'var(--color-error-600)' }}>
+      <span className="text-sm font-medium text-err-600">
         {reconnecting ? 'Reconnecting…' : 'Disconnected'}
       </span>
       {!reconnecting ? (

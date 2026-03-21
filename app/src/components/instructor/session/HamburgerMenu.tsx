@@ -81,11 +81,10 @@ export function HamburgerMenu({
               key={item.label}
               onClick={item.onClick}
               disabled={item.disabled}
-              className="w-full px-4 py-2.5 text-left text-sm font-medium transition-colors duration-100 disabled:opacity-50"
+              className="w-full px-4 py-2.5 text-left text-sm font-medium transition-colors duration-100 disabled:opacity-50 border-b border-line-subtle"
               style={{
                 color: item.danger ? 'var(--color-error-500)' : 'var(--text-primary)',
                 background: 'transparent',
-                borderBottom: '1px solid var(--border-subtle)',
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.background = item.danger

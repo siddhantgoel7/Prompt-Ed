@@ -117,8 +117,7 @@ export function EndedDiscussionCard({
       {/* Inline response list (toggled by "Show Responses") */}
       {expanded && responseCount > 0 && (
         <div
-          className="mt-3 space-y-2 pt-3"
-          style={{ borderTop: '1px solid var(--border-subtle)' }}
+          className="mt-3 space-y-2 pt-3 border-t border-line-subtle"
         >
           {responses.map((r: { id: string; response_text: string; created_at: string }) => (
             <div key={r.id} className="rounded-xl p-2.5 bg-surface-raised">

@@ -358,10 +358,10 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
                         borderLeft: '3px solid var(--color-primary-400)',
                       }}
                     >
-                      <p className="text-xs font-semibold mb-1.5" style={{ color: 'var(--color-primary-600)' }}>
+                      <p className="text-xs font-semibold mb-1.5 text-brand-600">
                         Your response
                       </p>
-                      <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--text-secondary)' }}>
+                      <p className="text-sm whitespace-pre-wrap text-content-secondary">
                         {submittedAnswerText}
                       </p>
                     </div>
