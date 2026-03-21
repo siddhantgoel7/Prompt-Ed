@@ -21,9 +21,24 @@ export function StudentPromptCard({
   discussion: Discussion;
   selectedOption?: string | null;
   onSelectOption?: (label: string) => void;
+  /** The label (e.g. "A") the student already submitted; triggers submitted-state styling. */
   submittedOption?: string | null;
+  /**
+   * When true, reveals which option was correct after submission.
+   * Only set once the discussion is closed or the instructor enables feedback.
+   * Never set during an active discussion — students must not see the answer early.
+   */
   showCorrectness?: boolean;
+  /**
+   * The label of the correct answer (e.g. "B"). Only passed when showCorrectness is true.
+   * Populated from discussion.correct_option — this field is stripped from the broadcast
+   * payload sent to students and is only available after submission or from instructor data.
+   */
   correctOption?: string | null;
+  /**
+   * When true, disables all option buttons so the student cannot change their answer.
+   * Set after submission or when the discussion is closed.
+   */
   disabled?: boolean;
 }) {
   const isMC =
@@ -77,6 +92,24 @@ export function StudentPromptCard({
       color: 'var(--text-secondary)',
       cursor: 'pointer',
     };
+  }
+
+  /** Returns a semantic state string for the option button — used as data-state for tests. */
+  function getOptionState(label: string): string {
+    if (submittedOption) {
+      const isThis = label === submittedOption;
+      const isCorrectOpt = label === correctOption;
+      if (showCorrectness) {
+        if (isThis && isCorrectOpt) return 'correct-submitted';
+        if (isThis && !isCorrectOpt) return 'wrong-submitted';
+        if (isCorrectOpt) return 'correct-highlight';
+        return 'other';
+      }
+      return isThis ? 'submitted' : 'other';
+    }
+    if (selectedOption === label) return 'selected';
+    if (disabled) return 'disabled';
+    return 'unselected';
   }
 
   function getRadioStyle(label: string): React.CSSProperties {
@@ -159,6 +192,8 @@ export function StudentPromptCard({
           {discussion.mc_options.map((opt: MCOptionSafe) => (
             <button
               key={opt.label}
+              data-testid={`mc-option-${opt.label}`}
+              data-state={getOptionState(opt.label)}
               onClick={() => {
                 if (!submittedOption && !disabled) {
                   onSelectOption?.(opt.label);

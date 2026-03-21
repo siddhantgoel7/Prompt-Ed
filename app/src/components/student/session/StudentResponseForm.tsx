@@ -17,6 +17,12 @@ export function StudentResponseForm({
   disabled: boolean;
   submitting: boolean;
   validationMessage?: string;
+  /**
+   * When true (default), renders the textarea for free-text input.
+   * Set to false for MC questions — the Submit button and validation message are still
+   * shown, but the textarea is hidden because MC answers are submitted via option
+   * selection in StudentPromptCard rather than typed text.
+   */
   showTextarea?: boolean;
 }) {
   const chars = value.length;

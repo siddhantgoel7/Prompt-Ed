@@ -89,12 +89,12 @@ function makeBase(overrides: Record<string, unknown> = {}) {
     };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function makeActive(discussion: any = MC_FEEDBACK_ON, timerOverrides: Record<string, unknown> = {}) {
     return makeBase({ activeDiscussion: discussion, view: 'active', ...timerOverrides });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function makeSubmitted(discussion: any = MC_FEEDBACK_ON, timerOverrides: Record<string, unknown> = {}) {
     return makeBase({ activeDiscussion: discussion, view: 'submitted', ...timerOverrides });
 }
@@ -124,6 +124,8 @@ describe('MC UI — No textarea for multiple choice', () => {
 });
 
 // ── MC Scenario 1: no timer + feedback enabled ────────────────────────────────
+// Note: banner text is "Great job!" (correct) / "Not quite!" (incorrect).
+// These strings replaced the previous "Good Job! 🎉" / "Oops!" copy — update these tests if the copy ever changes again.
 
 describe('MC Submitted View — Scenario 1: no timer + feedback enabled', () => {
     beforeEach(() => jest.clearAllMocks());
@@ -152,14 +154,16 @@ describe('MC Submitted View — Scenario 1: no timer + feedback enabled', () => 
         submitAndRerender('A');
         const banner = screen.getByTestId('mc-feedback-banner');
         expect(banner).toBeInTheDocument();
-        expect(banner.getAttribute('style')).toMatch(/45.*158.*45/);
+        // data-variant="correct" is the semantic signal — avoids brittle color-code regex assertions
+        expect(banner).toHaveAttribute('data-variant', 'correct');
     });
 
     it('[SV-MC1-4] success: incorrect answer banner has red styling', () => {
         submitAndRerender('B');
         const banner = screen.getByTestId('mc-feedback-banner');
         expect(banner).toBeInTheDocument();
-        expect(banner.getAttribute('style')).toMatch(/239.*68.*68/);
+        // data-variant="incorrect" is the semantic signal — avoids brittle color-code regex assertions
+        expect(banner).toHaveAttribute('data-variant', 'incorrect');
     });
 
     it('[SV-MC1-5] success: full question is shown during feedback window', () => {
@@ -169,29 +173,26 @@ describe('MC Submitted View — Scenario 1: no timer + feedback enabled', () => 
 
     it('[SV-MC1-6] success: correct option is highlighted distinctly when wrong answer submitted', () => {
         submitAndRerender('B');
-        const optionButtons = screen.getAllByRole('button');
-        const correctBtn = optionButtons.find(btn => btn.textContent?.includes('A.'));
+        // data-testid avoids text-content matching; data-state="correct-highlight" is the semantic signal
+        const correctBtn = screen.getByTestId('mc-option-A');
         expect(correctBtn).toBeInTheDocument();
-        // Correct option has green tint highlight
-        expect(correctBtn?.getAttribute('style')).toMatch(/45.*158.*45/);
+        expect(correctBtn).toHaveAttribute('data-state', 'correct-highlight');
     });
 
     it('[SV-MC1-7] success: submitted wrong option is highlighted red', () => {
         submitAndRerender('B');
-        const optionButtons = screen.getAllByRole('button');
-        const wrongBtn = optionButtons.find(btn => btn.textContent?.includes('B.'));
+        // data-state="wrong-submitted" is the semantic signal — avoids brittle color-code regex assertions
+        const wrongBtn = screen.getByTestId('mc-option-B');
         expect(wrongBtn).toBeInTheDocument();
-        // Wrong submitted option has red tint
-        expect(wrongBtn?.getAttribute('style')).toMatch(/239.*68.*68/);
+        expect(wrongBtn).toHaveAttribute('data-state', 'wrong-submitted');
     });
 
     it('[SV-MC1-8] success: submitted correct option is highlighted green', () => {
         submitAndRerender('A');
-        const optionButtons = screen.getAllByRole('button');
-        const correctBtn = optionButtons.find(btn => btn.textContent?.includes('A.'));
+        // data-state="correct-submitted" is the semantic signal — avoids brittle color-code regex assertions
+        const correctBtn = screen.getByTestId('mc-option-A');
         expect(correctBtn).toBeInTheDocument();
-        // Correct submitted option has green tint
-        expect(correctBtn?.getAttribute('style')).toMatch(/45.*158.*45/);
+        expect(correctBtn).toHaveAttribute('data-state', 'correct-submitted');
     });
 });
 
@@ -271,11 +272,10 @@ describe('MC Submitted View — Scenario 3: no feedback', () => {
         mockHook.mockReturnValue(makeSubmitted(MC_FEEDBACK_OFF));
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
-        const optionButtons = screen.getAllByRole('button');
-        const submittedBtn = optionButtons.find(btn => btn.textContent?.includes('B.'));
+        // data-state="submitted" confirms submitted-without-correctness styling — stronger than .toBeTruthy()
+        const submittedBtn = screen.getByTestId('mc-option-B');
         expect(submittedBtn).toBeInTheDocument();
-        // Submitted option has a distinct style (no correctness indicator)
-        expect(submittedBtn?.getAttribute('style')).toBeTruthy();
+        expect(submittedBtn).toHaveAttribute('data-state', 'submitted');
     });
 
     it('[SV-MC3-2] success: no feedback banner shown when feedback disabled', () => {

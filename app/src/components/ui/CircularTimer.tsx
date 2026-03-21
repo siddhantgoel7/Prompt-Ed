@@ -83,19 +83,12 @@ export function CircularTimer({ timerEndTime, timerTotalSeconds, testId }: Circu
 
   return (
     <div
-      className="inline-flex items-center gap-3 px-5 py-2.5"
+      className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-line-default bg-surface-glass backdrop-blur"
       data-testid={testId}
       aria-label={isExpired ? "Time's up" : `Time remaining: ${formatTime(remaining)}`}
-      style={{
-        borderRadius: '999px',
-        border: '1px solid var(--border-default)',
-        background: 'var(--surface-glass)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-      }}
     >
       {/* Circular SVG arc — purely decorative; aria-label on the wrapper covers accessibility. */}
-      <svg viewBox="0 0 52 52" width="40" height="40" aria-hidden="true" style={{ flexShrink: 0 }}>
+      <svg viewBox="0 0 52 52" width="40" height="40" aria-hidden="true" className="shrink-0">
         {/* Static background track ring */}
         <circle cx="26" cy="26" r={radius} fill="none" stroke="var(--border-default)" strokeWidth="4" />
         {/* Animated progress arc — rotated -90° so it starts at 12 o'clock */}
@@ -117,7 +110,7 @@ export function CircularTimer({ timerEndTime, timerTotalSeconds, testId }: Circu
         <span className="text-base font-bold font-mono tabular-nums" style={{ color: textColor }}>
           {isExpired ? '00:00' : formatTime(remaining)}
         </span>
-        <span className="text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-[10px] font-medium text-content-muted">
           {isExpired ? "Time's up" : 'remaining'}
         </span>
       </div>

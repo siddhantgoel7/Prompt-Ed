@@ -176,6 +176,7 @@ export function ResponseCard({
         'rounded-xl cursor-pointer transition-all duration-300 ease-in-out',
         isSelected ? cn(s.selectedPadding, 'my-4 z-10 relative') : s.unselectedPadding,
       )}
+      data-highlighted={isSelected ? 'true' : undefined}
       style={isSelected ? selectedStyle : unselectedStyle}
       onClick={onToggle}
     >

@@ -1,5 +1,9 @@
 // Post-session review page showing all discussions with responses, transcript segments,
 // and uploaded lecture files. Includes a Split View and export controls.
+//
+// EndedDiscussionCard is extracted to EndedDiscussionCard.tsx — it has its own
+// state (expand toggle, analytics modal, loading flag) and a fetch call, making
+// it complex enough to warrant its own file.
 'use client';
 
 import * as React from 'react';
@@ -8,10 +12,8 @@ import { SplitView } from '@/components/instructor/session/SplitView';
 import { Button } from '@/components/ui/button';
 import type { SessionVM } from '@/hooks/useSessionPage';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
-import type { Response } from '@/types/response';
-import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 import { SessionContext, SessionProvider } from './SessionContext';
-import { DiscussionAnalyticsModal } from './DiscussionAnalyticsModal';
+import { EndedDiscussionCard } from './EndedDiscussionCard';
 
 // ---------------------------------------------------------------------------
 // Summary bar
@@ -56,150 +58,6 @@ function SummaryBar({
         <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{duration ?? '—'}</span>
         <span className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Session Duration</span>
       </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Discussion cards for ended view
-// ---------------------------------------------------------------------------
-
-function EndedDiscussionCard({
-  discussion,
-  index,
-  total,
-}: {
-  discussion: SessionVM['lessonDiscussions'][number];
-  index: number;
-  total: number;
-}) {
-  const [analyticsOpen, setAnalyticsOpen] = React.useState(false);
-  const [modalResponses, setModalResponses] = React.useState<Response[]>([]);
-  const [loadingResponses, setLoadingResponses] = React.useState(false);
-  const [expanded, setExpanded] = React.useState(false);
-
-  const responses = discussion.responses || [];
-  const responseCount = responses.length;
-  const snapshot = discussion.participant_snapshot;
-  const responseRate = snapshot && snapshot > 0
-    ? Math.round((responseCount / snapshot) * 100)
-    : null;
-
-  async function openAnalytics() {
-    setLoadingResponses(true);
-    try {
-      const data = await fetchResponsesApi(discussion.id, true);
-      setModalResponses(data);
-      setAnalyticsOpen(true);
-    } finally {
-      setLoadingResponses(false);
-    }
-  }
-
-  return (
-    <div
-      className="rounded-2xl transition-shadow hover:shadow-md"
-      style={{
-        background: 'var(--surface-glass)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        border: '1px solid var(--border-default)',
-        padding: '16px',
-      }}
-    >
-      {/* Top row */}
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
-            Prompt #{total - index}
-          </span>
-          <span
-            className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-            style={{ background: 'var(--surface-raised)', color: 'var(--text-muted)' }}
-          >
-            Closed
-          </span>
-        </div>
-        <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>
-          {new Date(discussion.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
-      </div>
-
-      {/* Prompt text */}
-      <p className="text-sm font-medium mb-3 leading-snug" style={{ color: 'var(--text-primary)' }}>
-        {discussion.prompt_text}
-      </p>
-
-      {/* Stats row */}
-      <div className="flex items-center gap-3 text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
-        <span className="flex items-center gap-1">
-          <span className="font-semibold" style={{ color: 'var(--text-secondary)' }}>{responseCount}</span> responses
-        </span>
-        {responseRate !== null && (
-          <span className="flex items-center gap-1">
-            <span className="font-semibold" style={{ color: 'var(--text-secondary)' }}>{responseRate}%</span> rate
-          </span>
-        )}
-        {snapshot && (
-          <span className="flex items-center gap-1">
-            <span className="font-semibold" style={{ color: 'var(--text-secondary)' }}>{snapshot}</span> students
-          </span>
-        )}
-      </div>
-
-      {/* Action buttons */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={openAnalytics}
-          disabled={loadingResponses}
-          className="text-xs h-7 px-3 rounded-[8px] font-medium transition-all duration-150 disabled:opacity-50"
-          style={{
-            background: 'var(--surface-raised)',
-            border: '1px solid var(--border-default)',
-            color: 'var(--text-secondary)',
-          }}
-        >
-          {loadingResponses ? 'Loading…' : 'View Analytics'}
-        </button>
-        {responseCount > 0 && (
-          <button
-            onClick={() => setExpanded((p) => !p)}
-            className="text-xs h-7 px-3 rounded-[8px] font-medium transition-all duration-150"
-            style={{ color: 'var(--text-muted)', background: 'transparent' }}
-          >
-            {expanded ? 'Hide Responses' : `Show Responses (${responseCount})`}
-          </button>
-        )}
-      </div>
-
-      {/* Inline response list */}
-      {expanded && responseCount > 0 && (
-        <div
-          className="mt-3 space-y-2 pt-3"
-          style={{ borderTop: '1px solid var(--border-subtle)' }}
-        >
-          {responses.map((r: { id: string; response_text: string; created_at: string }) => (
-            <div
-              key={r.id}
-              className="rounded-xl p-2.5"
-              style={{ background: 'var(--surface-raised)' }}
-            >
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{r.response_text}</p>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                {new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <DiscussionAnalyticsModal
-        open={analyticsOpen}
-        onClose={() => setAnalyticsOpen(false)}
-        discussion={discussion}
-        responses={modalResponses}
-        studentCount={snapshot ?? 0}
-      />
     </div>
   );
 }

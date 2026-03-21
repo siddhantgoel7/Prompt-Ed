@@ -30,13 +30,22 @@ jest.mock('@/components/instructor/session/ActiveSidebar', () => ({
 }));
 
 jest.mock('@/components/instructor/session/ActiveRightPanel', () => ({
+  // Real ActiveRightPanel has three tabs: Responses | Metrics | Timer.
+  // The "Close Discussion" button lives inside the Timer tab (TimerTab component).
+  // This mock simulates that UX flow: tests must click "Timer" tab before the button appears.
   ActiveRightPanel: () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useState } = require('react');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
+    const [activeTab, setActiveTab] = useState('list');
     return (
       <div>
         RightPanel count={vm.responses?.length ?? 0}
-        {vm.activeDiscussion && (
+        {/* Timer tab button — matches the real tab label in ActiveRightPanel */}
+        <button onClick={() => setActiveTab('timer')}>Timer</button>
+        {/* Close Discussion button is inside the Timer tab in the real UI */}
+        {activeTab === 'timer' && vm.activeDiscussion && (
           <button
             data-testid="close-discussion-button"
             onClick={() => vm.handleCloseDiscussion()}
@@ -245,7 +254,10 @@ describe('Multiple Discussions per Lesson (Acceptance) [US 1.25]', () => {
 
     render(<SessionActiveView vm={vm} />);
 
-    // Close Discussion button is now in DiscussionTimerSection (moved from ActiveCenter)
+    // In the real UI, Close Discussion lives in the Timer tab — navigate there first.
+    // (In production: ActiveRightPanel tabs Responses | Metrics | Timer; close button is in TimerTab.)
+    fireEvent.click(screen.getByRole('button', { name: /Timer/i }));
+
     const closeBtn = screen.getByTestId('close-discussion-button');
     expect(closeBtn).toBeInTheDocument();
 

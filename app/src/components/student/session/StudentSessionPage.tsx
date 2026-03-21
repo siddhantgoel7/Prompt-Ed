@@ -252,6 +252,7 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
                   <>
                     <div
                       data-testid="mc-feedback-banner"
+                      data-variant={isSubmitCorrect ? 'correct' : 'incorrect'}
                       className="text-center text-xl font-bold p-5 rounded-2xl enter"
                       style={isSubmitCorrect ? {
                         background: 'rgba(45,158,45,0.12)',

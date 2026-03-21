@@ -1,5 +1,15 @@
 'use client';
 
+// Full-screen split view overlay that renders two independent discussion-browsing panes
+// side by side, each with its own realtime response subscription.
+//
+// Logical sections (in order):
+//   Types          — SplitViewProps, PaneState
+//   DiscussionList — tab UI listing active/closed discussions; clicking one selects it
+//   DiscussionDetail — prompt text, status badge, and scrollable response list
+//   Pane           — one half of the split; owns selection state + realtime subscription
+//   SplitView      — full-screen layout: header + two Panes
+
 import * as React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,8 +21,9 @@ import type { Response } from '@/types/response';
 import { truncateText } from '@/lib/utils';
 import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 
-// Full-screen split view overlay that renders two independent discussion-browsing panes
-// side by side, each with its own realtime response subscription.
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 interface SplitViewProps {
   discussions: DiscussionWithResponseCount[];
@@ -25,6 +36,10 @@ interface PaneState {
   responses: Response[];
   loading: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// DiscussionList
+// ---------------------------------------------------------------------------
 
 /** Lists discussions grouped into Active and Closed tabs; clicking one selects it. */
 function DiscussionList({
@@ -120,6 +135,10 @@ function DiscussionList({
   );
 }
 
+// ---------------------------------------------------------------------------
+// DiscussionDetail
+// ---------------------------------------------------------------------------
+
 /** Shows the prompt text, status badge, and scrollable response list for a selected discussion. */
 function DiscussionDetail({
   discussion,
@@ -214,6 +233,10 @@ function DiscussionDetail({
   );
 }
 
+// ---------------------------------------------------------------------------
+// Pane
+// ---------------------------------------------------------------------------
+
 /** One half of the split view — manages its own selected discussion and realtime responses. */
 function Pane({
   label,
@@ -232,6 +255,9 @@ function Pane({
 
   const { channel, isConnected } = useRealtime(lessonId, 'instructor');
 
+  // Fetch responses whenever the selected discussion changes.
+  // `cancelled` is a closure flag that prevents stale async results from a previous
+  // selection from overwriting the new selection's state after the effect cleans up.
   React.useEffect(() => {
     if (!state.selectedDiscussionId) return;
 
@@ -251,11 +277,17 @@ function Pane({
     return () => { cancelled = true; };
   }, [state.selectedDiscussionId]);
 
+  // `selectedIdRef` mirrors state.selectedDiscussionId so that the realtime broadcast
+  // handler below can read the current selected ID without being recreated every time
+  // the selection changes (the handler is registered once, on mount).
   const selectedIdRef = React.useRef(state.selectedDiscussionId);
   React.useEffect(() => {
     selectedIdRef.current = state.selectedDiscussionId;
   }, [state.selectedDiscussionId]);
 
+  // Subscribe to realtime response broadcasts for this pane.
+  // The listener is intentionally NOT returned with an unsubscribe — Supabase channel
+  // cleanup is handled at the hook level in useRealtime when the component unmounts.
   React.useEffect(() => {
     if (!channel || !isConnected) return;
 
@@ -263,6 +295,7 @@ function Pane({
       const newResponse = payload.payload?.response;
       if (newResponse && newResponse.discussion_id === selectedIdRef.current) {
         setState((prev) => {
+          // Deduplicate just in case — Supabase Realtime can replay broadcast events on reconnect.
           if (prev.responses.some((r) => r.id === newResponse.id)) return prev;
           return { ...prev, responses: [...prev.responses, newResponse] };
         });
@@ -311,6 +344,10 @@ function Pane({
     </div>
   );
 }
+
+// ---------------------------------------------------------------------------
+// SplitView
+// ---------------------------------------------------------------------------
 
 /** Full-screen overlay rendering two Panes side by side for simultaneous discussion monitoring. */
 export function SplitView({ discussions, lessonId, onBack }: SplitViewProps) {

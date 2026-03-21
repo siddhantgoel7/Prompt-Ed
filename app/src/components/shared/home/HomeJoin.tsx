@@ -3,53 +3,19 @@
 // Also surfaces instructor Log in / Sign up links in the header for non-students.
 //
 // Animation notes:
-//   "AI-Assisted Learning" uses BlurText — each character animates from
-//   filter:blur(10px)/opacity:0 to clear, staggered by 45 ms per character.
+//   "AI-Assisted Learning" uses BlurText (src/components/ui/BlurText.tsx) — each
+//   character animates from filter:blur(10px)/opacity:0 to clear, staggered 45 ms.
 //   The @keyframes blurIn animation is defined in globals.css.
 //
 //   The hero section and join card use the .enter class (fadeSlideUp, globals.css)
 //   with a 60 ms delay on the card so they arrive sequentially, not simultaneously.
 'use client';
 
-import type React from 'react';
 import { useHomeJoin } from '@/hooks/useHomeJoin';
 import { AppLogo } from '@/components/ui/AppLogo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
-
-/**
- * Character-by-character blur entrance animation (inspired by ReactBits blur-text).
- *
- * Each character starts at filter:blur(10px) + opacity:0 and transitions to clear,
- * with a 45 ms stagger so the text "types in" from left to right.
- * The animation starts after a 200 ms initial delay so the logo lands first.
- *
- * Spaces are replaced with \u00A0 (non-breaking space) so inline-block rendering
- * does not collapse them and word spacing is preserved.
- *
- * @keyframes blurIn is defined in globals.css — NOT injected inline here.
- */
-function BlurText({ text, className = '', style }: { text: string; className?: string; style?: React.CSSProperties }) {
-  const chars = text.split('');
-  return (
-    // aria-label on the wrapper gives screen readers the full string at once,
-    // so they don't read one character at a time.
-    <span className={className} aria-label={text} style={style}>
-      {chars.map((char, i) => (
-        <span
-          key={i}
-          style={{
-            display: 'inline-block',
-            animation: 'blurIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both',
-            animationDelay: `${200 + i * 45}ms`,
-          }}
-        >
-          {char === ' ' ? '\u00A0' : char}
-        </span>
-      ))}
-    </span>
-  );
-}
+import { BlurText } from '@/components/ui/BlurText';
 
 /** Renders the student home page with a PIN entry card and instructor navigation links. */
 export function HomeJoin() {
@@ -194,7 +160,8 @@ export function HomeJoin() {
                 fontFamily: 'monospace',
               }}
             />
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            {/* data-testid="pin-hint" is the test anchor — avoids unicode ✓ character dependency */}
+            <p data-testid="pin-hint" className="text-xs" style={{ color: 'var(--text-muted)' }}>
               {code.length === 0
                 ? 'PIN is 6 digits'
                 : pinOk

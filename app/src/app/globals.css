@@ -45,6 +45,40 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* ── Design system surface tokens → bg-surface-* utilities ── */
+  --color-surface-base:    var(--surface-base);
+  --color-surface-raised:  var(--surface-raised);
+  --color-surface-glass:   var(--surface-glass);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-hover-primary:   var(--surface-hover-primary);
+
+  /* ── Text / content tokens → text-content-* utilities ── */
+  --color-content-primary:   var(--text-primary);
+  --color-content-secondary: var(--text-secondary);
+  --color-content-muted:     var(--text-muted);
+
+  /* ── Brand green palette → text-brand-* / bg-brand-* utilities ──
+     Prefixed 'brand' to avoid colliding with shadcn --color-primary. */
+  --color-brand-50:  var(--color-primary-50);
+  --color-brand-100: var(--color-primary-100);
+  --color-brand-200: var(--color-primary-200);
+  --color-brand-300: var(--color-primary-300);
+  --color-brand-400: var(--color-primary-400);
+  --color-brand-500: var(--color-primary-500);
+  --color-brand-600: var(--color-primary-600);
+  --color-brand-700: var(--color-primary-700);
+
+  /* ── Border tokens → border-line-* utilities ── */
+  --color-line-default: var(--border-default);
+  --color-line-subtle:  var(--border-subtle);
+
+  /* ── Pastel accent tokens → bg-accent-* / text-accent-* utilities ── */
+  --color-accent-mint:     var(--accent-mint);
+  --color-accent-sage:     var(--accent-sage);
+  --color-accent-blush:    var(--accent-blush);
+  --color-accent-sky:      var(--accent-sky);
+  --color-accent-lavender: var(--accent-lavender);
 }
 
 /* ─── Design System Tokens ─────────────────────────────────────────── */

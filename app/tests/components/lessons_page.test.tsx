@@ -229,7 +229,8 @@ describe('LessonsPage', () => {
       mockSupabase.auth.getUser.mockImplementation(() => new Promise(() => {}));
 
       render(<LessonsPage courseId={courseId} />);
-      expect(screen.getByAltText('PromptED')).toBeInTheDocument();
+      // Use data-testid="loading-screen" (set on LoadingScreen component) rather than logo alt text
+      expect(screen.getByTestId('loading-screen')).toBeInTheDocument();
     });
 
     // 16.6

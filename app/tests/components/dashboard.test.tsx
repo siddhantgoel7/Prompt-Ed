@@ -59,7 +59,8 @@ describe('Dashboard Component', () => {
     )
 
     render(<Dashboard />)
-    expect(screen.getByAltText('PromptED')).toBeInTheDocument()
+    // Use data-testid="loading-screen" (set on LoadingScreen component) rather than logo alt text
+    expect(screen.getByTestId('loading-screen')).toBeInTheDocument()
   })
 
   // 15.2

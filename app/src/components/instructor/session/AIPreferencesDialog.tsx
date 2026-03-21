@@ -63,7 +63,8 @@ export function AIPreferencesDialog() {
 
                 {isLoading ? (
                     <div className="py-6 flex justify-center">
-                      <div className="flex items-center gap-1.5">
+                      {/* data-testid="loading-dots" is the test anchor — avoids .rounded-full class selector */}
+                      <div data-testid="loading-dots" className="flex items-center gap-1.5">
                         {[0, 1, 2].map((i) => (
                           <span
                             key={i}

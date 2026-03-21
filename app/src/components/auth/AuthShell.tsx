@@ -18,8 +18,7 @@ type AuthShellProps = PropsWithChildren<{
 export function AuthShell({ title, description, children }: AuthShellProps) {
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
-      style={{ background: 'var(--surface-base)' }}
+      className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden bg-surface-base"
     >
       {/* Decorative background blobs */}
       <div
@@ -54,13 +53,12 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
         >
           <div className="space-y-1">
             <h1
-              className="text-2xl font-bold tracking-tight"
-              style={{ color: 'var(--text-primary)' }}
+              className="text-2xl font-bold tracking-tight text-content-primary"
             >
               {title}
             </h1>
             {description ? (
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-sm text-content-muted">
                 {description}
               </p>
             ) : null}
@@ -71,7 +69,7 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
       </div>
 
       {/* Footer */}
-      <p className="mt-8 text-xs text-center" style={{ color: 'var(--text-muted)' }}>
+      <p className="mt-8 text-xs text-center text-content-muted">
         Department of Pharmacology · University of Alberta
       </p>
     </div>

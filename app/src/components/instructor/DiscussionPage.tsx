@@ -143,11 +143,18 @@ export function DiscussionPage({
   initialIsActive
 }: DiscussionClientProps) {
 
+  // ── Initialize State with Server Data (Hydration) ──────────────────────────
+  // Server-fetched data is seeded into useState so that realtime updates can
+  // mutate it without triggering a full server re-fetch. Using server data
+  // directly (without useState) would freeze the list after the initial render.
   const [responses, setResponses] = useState<Response[]>(initialResponses);
   const [flaggedResponses, setFlaggedResponses] = useState<Response[]>(initialFlaggedResponses);
   const [isActive] = useState(initialIsActive);
 
   const handleRemoveResponse = useCallback((responseId: string) => {
+    // Capture the response via a functional updater (runs synchronously inside setResponses),
+    // then add it to flaggedResponses at the top level. React 18+ batches both setState
+    // calls into a single render, preventing duplicate keys during the transition.
     let flaggedItem: Response | undefined;
     setResponses((prev) => {
       flaggedItem = prev.find((r) => r.id === responseId);
@@ -156,6 +163,8 @@ export function DiscussionPage({
     if (flaggedItem) {
       const item = flaggedItem;
       setFlaggedResponses((prev) => {
+        // Deduplicate just in case — Supabase Realtime can replay broadcast events
+        // on reconnect, so the same response may arrive more than once.
         if (prev.some((r) => r.id === responseId)) return prev;
         return [{ ...item, flagged_at: new Date().toISOString() }, ...prev];
       });
@@ -164,6 +173,8 @@ export function DiscussionPage({
 
   const handleRestoreResponse = useCallback(async (responseId: string) => {
     await unflagResponseApi(responseId);
+    // Same functional-updater + React 18 batching pattern as handleRemoveResponse:
+    // capture the item synchronously inside the updater, then add it to the live list.
     let restoredItem: Response | undefined;
     setFlaggedResponses((prev) => {
       restoredItem = prev.find((r) => r.id === responseId);
@@ -172,6 +183,8 @@ export function DiscussionPage({
     if (restoredItem) {
       const item = restoredItem;
       setResponses((prev) => {
+        // Deduplicate just in case — Supabase Realtime can deliver the same event
+        // more than once after a reconnect.
         if (prev.some((r) => r.id === responseId)) return prev;
         return [{ ...item, flagged_at: null }, ...prev];
       });
@@ -187,6 +200,8 @@ export function DiscussionPage({
       const newResponse = payload.payload?.response;
       if (newResponse && newResponse.discussion_id === discussionId) {
         setResponses((prev) => {
+          // Deduplicate just in case — Supabase Realtime can deliver the same broadcast
+          // event twice on reconnect. Returning prev skips the re-render entirely.
           if (prev.some(r => r.id === newResponse.id)) return prev;
           return [newResponse, ...prev];
         });

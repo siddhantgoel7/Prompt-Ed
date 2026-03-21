@@ -86,6 +86,7 @@ test.describe('Student Join Flow', () => {
     await pinInput.fill('123456');
 
     await expect(page.getByRole('button', { name: 'Join' })).toBeEnabled();
-    await expect(page.getByText('✓ Looks good')).toBeVisible();
+    // Use data-testid="pin-hint" instead of exact text match — avoids unicode ✓ character dependency
+    await expect(page.getByTestId('pin-hint')).toContainText('Looks good');
   });
 });

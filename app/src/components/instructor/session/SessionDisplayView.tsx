@@ -22,55 +22,27 @@ export function SessionDisplayView(props: {
 
   return (
     <main
-      className="min-h-screen px-8 py-10 md:px-12 md:py-12"
-      style={{ background: 'var(--surface-base)', color: 'var(--text-primary)' }}
+      className="min-h-screen px-8 py-10 md:px-12 md:py-12 bg-surface-base text-content-primary"
     >
       <header className="mb-10 text-center">
-        <p className="text-xs uppercase tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>Live Session</p>
-        <h1 className="mt-2 text-3xl md:text-5xl font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</h1>
+        <p className="text-xs uppercase tracking-[0.2em] text-content-muted">Live Session</p>
+        <h1 className="mt-2 text-3xl md:text-5xl font-semibold text-content-primary">{title}</h1>
       </header>
 
       <section className="mx-auto max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
         {/* PIN card */}
-        <div
-          className="rounded-2xl p-8 md:p-12 text-center"
-          style={{
-            background: 'var(--surface-glass)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid var(--border-default)',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
-          }}
-        >
-          <p
-            className="text-sm uppercase tracking-[0.2em]"
-            style={{ color: 'var(--text-muted)' }}
-          >
+        <div className="glass rounded-2xl p-8 md:p-12 text-center shadow-[0_4px_24px_rgba(0,0,0,0.12)]">
+          <p className="text-sm uppercase tracking-[0.2em] text-content-muted">
             Join PIN
           </p>
-          <p
-            className="mt-4 text-6xl md:text-8xl font-bold tracking-[0.12em]"
-            style={{ color: 'var(--color-primary-500)' }}
-          >
+          <p className="mt-4 text-6xl md:text-8xl font-bold tracking-[0.12em] text-brand-500">
             {pinCode ?? '------'}
           </p>
         </div>
 
         {/* QR card */}
-        <div
-          className="rounded-2xl p-8 md:p-12 text-center"
-          style={{
-            background: 'var(--surface-glass)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid var(--border-default)',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
-          }}
-        >
-          <p
-            className="text-sm uppercase tracking-[0.2em]"
-            style={{ color: 'var(--text-muted)' }}
-          >
+        <div className="glass rounded-2xl p-8 md:p-12 text-center shadow-[0_4px_24px_rgba(0,0,0,0.12)]">
+          <p className="text-sm uppercase tracking-[0.2em] text-content-muted">
             Scan To Join
           </p>
           <div className="mt-4 flex items-center justify-center">
@@ -85,18 +57,15 @@ export function SessionDisplayView(props: {
               />
             ) : (
               <div
-                className="w-64 h-64 md:w-80 md:h-80 flex items-center justify-center text-sm rounded-xl"
-                style={{
-                  border: '1px dashed var(--border-default)',
-                  color: 'var(--text-muted)',
-                }}
+                className="w-64 h-64 md:w-80 md:h-80 flex items-center justify-center text-sm rounded-xl text-content-muted"
+                style={{ border: '1px dashed var(--border-default)' }}
               >
                 Generating QR...
               </div>
             )}
           </div>
           {joinUrl ? (
-            <p className="mt-4 text-sm break-all" style={{ color: 'var(--text-secondary)' }}>
+            <p className="mt-4 text-sm break-all text-content-secondary">
               {joinUrl}
             </p>
           ) : null}
