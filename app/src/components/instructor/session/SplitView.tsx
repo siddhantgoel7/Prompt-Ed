@@ -14,6 +14,10 @@ import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 // Full-screen split view overlay that renders two independent discussion-browsing panes
 // side by side, each with its own realtime response subscription.
 
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
+
 interface SplitViewProps {
   discussions: DiscussionWithResponseCount[];
   lessonId: string;
@@ -25,6 +29,10 @@ interface PaneState {
   responses: Response[];
   loading: boolean;
 }
+
+/* ------------------------------------------------------------------ */
+/*  DiscussionList – reusable list shown inside each pane              */
+/* ------------------------------------------------------------------ */
 
 /** Lists discussions grouped into Active and Closed tabs; clicking one selects it. */
 function DiscussionList({
@@ -120,6 +128,10 @@ function DiscussionList({
   );
 }
 
+/* ------------------------------------------------------------------ */
+/*  DiscussionDetail – shows prompt + responses for a selected disc.   */
+/* ------------------------------------------------------------------ */
+
 /** Shows the prompt text, status badge, and scrollable response list for a selected discussion. */
 function DiscussionDetail({
   discussion,
@@ -214,6 +226,10 @@ function DiscussionDetail({
   );
 }
 
+/* ------------------------------------------------------------------ */
+/*  Pane – manages selection + detail state for one side               */
+/* ------------------------------------------------------------------ */
+
 /** One half of the split view — manages its own selected discussion and realtime responses. */
 function Pane({
   label,
@@ -232,6 +248,7 @@ function Pane({
 
   const { channel, isConnected } = useRealtime(lessonId, 'instructor');
 
+  // Fetch responses when a discussion is selected
   React.useEffect(() => {
     if (!state.selectedDiscussionId) return;
 
@@ -251,11 +268,13 @@ function Pane({
     return () => { cancelled = true; };
   }, [state.selectedDiscussionId]);
 
+  // Track the selected discussion ID in a ref so the listener stays stable
   const selectedIdRef = React.useRef(state.selectedDiscussionId);
   React.useEffect(() => {
     selectedIdRef.current = state.selectedDiscussionId;
   }, [state.selectedDiscussionId]);
 
+  // Listen for real-time new responses (single listener per channel)
   React.useEffect(() => {
     if (!channel || !isConnected) return;
 
@@ -311,6 +330,10 @@ function Pane({
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/*  SplitView – full-screen overlay                                    */
+/* ------------------------------------------------------------------ */
 
 /** Full-screen overlay rendering two Panes side by side for simultaneous discussion monitoring. */
 export function SplitView({ discussions, lessonId, onBack }: SplitViewProps) {

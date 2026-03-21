@@ -21,9 +21,13 @@ export function StudentPromptCard({
   discussion: Discussion;
   selectedOption?: string | null;
   onSelectOption?: (label: string) => void;
+  /** The option label the student submitted (shows highlight without feedback). */
   submittedOption?: string | null;
+  /** When true, highlights submitted option green/red and reveals correct answer in green. */
   showCorrectness?: boolean;
+  /** The correct option label (required when showCorrectness is true). */
   correctOption?: string | null;
+  /** Prevents option selection clicks. */
   disabled?: boolean;
 }) {
   const isMC =

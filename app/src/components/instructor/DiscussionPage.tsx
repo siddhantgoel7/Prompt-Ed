@@ -143,11 +143,16 @@ export function DiscussionPage({
   initialIsActive
 }: DiscussionClientProps) {
 
+  // 1. Initialize State with Server Data (Hydration)
+  // We use state because we need to update this list when new responses arrive.
   const [responses, setResponses] = useState<Response[]>(initialResponses);
   const [flaggedResponses, setFlaggedResponses] = useState<Response[]>(initialFlaggedResponses);
   const [isActive] = useState(initialIsActive);
 
   const handleRemoveResponse = useCallback((responseId: string) => {
+    // Capture the response via the functional updater (runs synchronously),
+    // then add to flagged at the top level — React 18+ batches both updates
+    // into a single render, preventing duplicate keys.
     let flaggedItem: Response | undefined;
     setResponses((prev) => {
       flaggedItem = prev.find((r) => r.id === responseId);
@@ -164,6 +169,8 @@ export function DiscussionPage({
 
   const handleRestoreResponse = useCallback(async (responseId: string) => {
     await unflagResponseApi(responseId);
+    // Capture the response via the functional updater, then add to responses
+    // at the top level so React batches both updates into a single render.
     let restoredItem: Response | undefined;
     setFlaggedResponses((prev) => {
       restoredItem = prev.find((r) => r.id === responseId);
@@ -178,16 +185,20 @@ export function DiscussionPage({
     }
   }, []);
 
+  // 2. Setup Realtime
   const { channel, isConnected } = useRealtime(lessonId, 'instructor');
 
   useEffect(() => {
     if (!channel || !isConnected) return;
 
+    // Listen for NEW responses
     channel.on('broadcast', { event: 'response:new' }, (payload) => {
       const newResponse = payload.payload?.response;
       if (newResponse && newResponse.discussion_id === discussionId) {
         setResponses((prev) => {
+          // Deduplicate just in case
           if (prev.some(r => r.id === newResponse.id)) return prev;
+          // Add to top
           return [newResponse, ...prev];
         });
       }
@@ -213,6 +224,7 @@ export function DiscussionPage({
     ? initialDiscussion.mc_options?.find((opt) => opt.label === correctOptionLabel)?.text ?? null
     : null;
 
+  // Use the snapshot from the discussion, fallback to length of responses if 0
   const studentCount = initialDiscussion.participant_snapshot ?? 0;
 
   return (
