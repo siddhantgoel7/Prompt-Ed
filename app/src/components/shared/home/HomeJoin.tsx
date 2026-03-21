@@ -1,5 +1,14 @@
-// Home page component for students to join a live session by entering a 6-digit PIN.
-// Also displays instructor Log in / Sign up navigation in the header.
+// Student home page — the first screen every student sees.
+// Allows joining a live session by entering a 6-digit PIN provided by their instructor.
+// Also surfaces instructor Log in / Sign up links in the header for non-students.
+//
+// Animation notes:
+//   "AI-Assisted Learning" uses BlurText — each character animates from
+//   filter:blur(10px)/opacity:0 to clear, staggered by 45 ms per character.
+//   The @keyframes blurIn animation is defined in globals.css.
+//
+//   The hero section and join card use the .enter class (fadeSlideUp, globals.css)
+//   with a 60 ms delay on the card so they arrive sequentially, not simultaneously.
 'use client';
 
 import type React from 'react';
@@ -8,10 +17,23 @@ import { AppLogo } from '@/components/ui/AppLogo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 
-/** Blur-text animation — each character fades in from blur with a stagger (ReactBits style). */
+/**
+ * Character-by-character blur entrance animation (inspired by ReactBits blur-text).
+ *
+ * Each character starts at filter:blur(10px) + opacity:0 and transitions to clear,
+ * with a 45 ms stagger so the text "types in" from left to right.
+ * The animation starts after a 200 ms initial delay so the logo lands first.
+ *
+ * Spaces are replaced with \u00A0 (non-breaking space) so inline-block rendering
+ * does not collapse them and word spacing is preserved.
+ *
+ * @keyframes blurIn is defined in globals.css — NOT injected inline here.
+ */
 function BlurText({ text, className = '', style }: { text: string; className?: string; style?: React.CSSProperties }) {
   const chars = text.split('');
   return (
+    // aria-label on the wrapper gives screen readers the full string at once,
+    // so they don't read one character at a time.
     <span className={className} aria-label={text} style={style}>
       {chars.map((char, i) => (
         <span
@@ -92,12 +114,14 @@ export function HomeJoin() {
 
       {/* Main content */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-16 relative overflow-hidden">
-        {/* Background blobs */}
+        {/* Decorative background blobs */}
         <div
+          aria-hidden="true"
           className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(45,158,45,0.10), transparent 65%)' }}
         />
         <div
+          aria-hidden="true"
           className="absolute bottom-0 right-0 w-80 h-80 rounded-full pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(61,181,61,0.08), transparent 65%)' }}
         />
@@ -121,15 +145,8 @@ export function HomeJoin() {
 
         {/* Join card */}
         <div
-          className="w-full max-w-md rounded-2xl p-8 enter"
-          style={{
-            animationDelay: '60ms',
-            background: 'var(--surface-glass)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid var(--border-default)',
-            boxShadow: '0 4px 32px rgba(0,0,0,0.08)',
-          }}
+          className="glass w-full max-w-md rounded-2xl p-8 enter"
+          style={{ animationDelay: '60ms', boxShadow: '0 4px 32px rgba(0,0,0,0.08)' }}
         >
           <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
             Join a Session

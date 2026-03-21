@@ -8,7 +8,6 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
@@ -29,8 +28,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
         w-9 h-9 flex items-center justify-center rounded-[10px]
         border border-border bg-muted
         text-muted-foreground hover:text-foreground
-        hover:bg-[rgba(45,158,45,0.12)] hover:border-primary
-        transition-all duration-150
+        btn-icon-hover transition-all duration-150
         ${className}
       `}
     >

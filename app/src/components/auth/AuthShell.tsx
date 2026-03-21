@@ -1,4 +1,10 @@
-// Shared layout wrapper for auth pages (login, sign-up) that centers a glassmorphism card on screen.
+// Shared layout shell for all auth pages (login, sign-up).
+// Provides the background, decorative blobs, theme toggle, logo, centered card, and footer
+// so individual auth forms (LoginForm, SignUpForm) only need to render their own fields.
+//
+// The glassmorphism card uses the .glass utility class (globals.css) for the
+// background/backdrop/border block, keeping the JSX style prop to just the box-shadow.
+// Decorative blob divs are aria-hidden so screen readers skip them.
 import { PropsWithChildren } from 'react';
 import { AppLogo } from '@/components/ui/AppLogo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -17,10 +23,12 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
     >
       {/* Decorative background blobs */}
       <div
+        aria-hidden="true"
         className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-20 pointer-events-none"
         style={{ background: 'radial-gradient(circle, var(--color-primary-300), transparent 70%)' }}
       />
       <div
+        aria-hidden="true"
         className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full opacity-15 pointer-events-none"
         style={{ background: 'radial-gradient(circle, var(--color-primary-400), transparent 70%)' }}
       />
@@ -41,14 +49,8 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
         style={{ animationDelay: '60ms' }}
       >
         <div
-          className="rounded-2xl p-8 space-y-6"
-          style={{
-            background: 'var(--surface-glass)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid var(--border-default)',
-            boxShadow: '0 4px 32px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.06) inset',
-          }}
+          className="glass rounded-2xl p-8 space-y-6"
+          style={{ boxShadow: '0 4px 32px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.06) inset' }}
         >
           <div className="space-y-1">
             <h1

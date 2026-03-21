@@ -76,6 +76,9 @@
   --border-subtle:   rgba(0, 0, 0, 0.05);
   --border-default:  rgba(0, 0, 0, 0.10);
 
+  /* Semantic hover / interactive surfaces */
+  --surface-hover-primary: rgba(45, 158, 45, 0.12);
+
   /* Light Mode Text */
   --text-primary:   #1a2e1a;
   --text-secondary: #4a6b4a;
@@ -122,6 +125,7 @@
 .dark {
   /* Dark Mode Surfaces */
   --surface-base:    #0d1117;
+  --surface-hover-primary: rgba(45, 158, 45, 0.18);
   --surface-raised:  #161b22;
   --surface-overlay: #1c2230;
   --surface-glass:   rgba(22, 27, 34, 0.65);
@@ -228,6 +232,17 @@
   to   { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
+/* Loading screen animations — defined globally so they work in any component */
+@keyframes logoBreath {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(0.96); }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40%           { transform: translateY(-6px); opacity: 1; }
+}
+
 @keyframes pop {
   0%   { transform: scale(1); }
   50%  { transform: scale(1.35); }
@@ -256,7 +271,15 @@
   animation: fadeSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Glass card */
+/* Glassmorphism surface — border-radius must be set on the element */
+.glass {
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-default);
+}
+
+/* Glass card — standard 16px radius + canonical shadow */
 .glass-card {
   background: var(--surface-glass);
   backdrop-filter: blur(12px);
@@ -268,6 +291,12 @@
 
 .dark .glass-card {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+/* Icon button hover (theme toggle, action icons) */
+.btn-icon-hover:hover {
+  background: var(--surface-hover-primary);
+  border-color: var(--color-primary-400);
 }
 
 /* Primary button glow on hover */
@@ -347,6 +376,43 @@
   color: var(--color-primary-300);
 }
 
+/* ─── Shared Auth Form Utilities ─────────────────────────────────────── */
+
+/* Form field label */
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Glass-surface text input */
+.input-glass {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+
+/* Primary gradient submit button */
+.btn-submit {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  transition: all 0.15s ease;
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400));
+}
+
+.btn-submit:disabled { opacity: 0.6; }
+.btn-submit:hover:not(:disabled) { box-shadow: 0 0 16px rgba(45, 158, 45, 0.4); }
+
 /* Sidebar collapsed transition */
 .sidebar-collapsed {
   width: 52px !important;
@@ -369,12 +435,18 @@
 .stagger > * {
   animation: fadeSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.stagger > *:nth-child(1) { animation-delay: 0ms; }
-.stagger > *:nth-child(2) { animation-delay: 60ms; }
-.stagger > *:nth-child(3) { animation-delay: 120ms; }
-.stagger > *:nth-child(4) { animation-delay: 180ms; }
-.stagger > *:nth-child(5) { animation-delay: 240ms; }
-.stagger > *:nth-child(6) { animation-delay: 300ms; }
+.stagger > *:nth-child(1)  { animation-delay: 0ms; }
+.stagger > *:nth-child(2)  { animation-delay: 60ms; }
+.stagger > *:nth-child(3)  { animation-delay: 120ms; }
+.stagger > *:nth-child(4)  { animation-delay: 180ms; }
+.stagger > *:nth-child(5)  { animation-delay: 240ms; }
+.stagger > *:nth-child(6)  { animation-delay: 300ms; }
+.stagger > *:nth-child(7)  { animation-delay: 360ms; }
+.stagger > *:nth-child(8)  { animation-delay: 420ms; }
+.stagger > *:nth-child(9)  { animation-delay: 480ms; }
+.stagger > *:nth-child(10) { animation-delay: 540ms; }
+.stagger > *:nth-child(11) { animation-delay: 600ms; }
+.stagger > *:nth-child(12) { animation-delay: 660ms; }
 
 /* Logo adaptive for dark mode */
 .logo-dark-adaptive {

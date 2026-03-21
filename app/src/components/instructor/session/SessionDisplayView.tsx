@@ -1,4 +1,13 @@
-// Full-page instructor display view for projecting join information (PIN + QR code).
+// Full-page view for projecting session join information onto a classroom screen.
+// Opened when the instructor clicks "Display QR/Code" in the session header menu.
+// Renders in a new tab/window so the instructor's session view stays untouched.
+//
+// Layout: two glassmorphism cards side by side on large screens, stacked on mobile.
+//   Left  — large PIN number in primary green (easy to read from the back of a room)
+//   Right — QR code that students can scan to join directly without typing the PIN
+//
+// Dark/light mode: all colours use CSS variables (var(--surface-*), var(--text-*)) so
+// the page respects the instructor's theme preference — no hardcoded bg-white/text-black.
 'use client';
 
 import { useStudentJoinQR } from '@/hooks/useStudentJoinQR';

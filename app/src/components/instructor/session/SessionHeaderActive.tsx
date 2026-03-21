@@ -1,4 +1,17 @@
-// Header bar for an active lesson session with the lesson title, join code, and control buttons.
+// Sticky header for an active lesson session.
+// Contains three zones:
+//   Left   — PromptED logo + lesson title (truncated on small screens)
+//   Center — Live join PIN + mini QR thumbnail (links to the join URL in a new tab)
+//   Right  — ThemeToggle + HamburgerMenu (Display QR/Code, Split View, Settings, End Session)
+//
+// The HamburgerMenu collapses all session action buttons behind a 3-line icon so the
+// header stays uncluttered on small viewports. ThemeToggle remains outside the menu
+// because theme switching is a persistent preference, not a one-off session action.
+//
+// Data sourcing (dual-mode for testability):
+//   In production the component reads everything from SessionContext.
+//   In Jest tests SessionContext is not available, so explicit props are used as fallback.
+//   This avoids the need to wrap every test in a context provider.
 'use client';
 
 import * as React from 'react';
@@ -7,7 +20,19 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useStudentJoinQR } from '@/hooks/useStudentJoinQR';
 import { SessionContext } from './SessionContext';
 
-/** Hamburger dropdown menu for session action buttons. */
+/**
+ * Hamburger (☰) dropdown menu housing session action buttons.
+ *
+ * Items:
+ *   "Display QR/Code" — opens full-screen projector view (SessionDisplayView)
+ *   "Split View"      — enters split-screen mode showing slide + responses side by side
+ *   "Settings"        — placeholder (not yet wired)
+ *   "End Session"     — ends the lesson; shown in red as a destructive action
+ *
+ * The menu closes on any outside click via a document-level mousedown listener.
+ * The listener is only registered while the menu is open (guard: `if (!open) return`)
+ * to avoid unnecessary global event overhead.
+ */
 function HamburgerMenu({
   onDisplay,
   onSplitView,
@@ -17,12 +42,15 @@ function HamburgerMenu({
   onDisplay?: () => void;
   onSplitView?: () => void;
   onEnd?: () => void;
+  /** True while the end-lesson request is in-flight — disables the button to prevent double-firing. */
   endingLesson?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
 
-  // Close on outside click
+  // Close the dropdown when the user clicks anywhere outside the menu wrapper.
+  // The listener is added only when open=true and cleaned up when open=false,
+  // so it never runs while the menu is hidden.
   React.useEffect(() => {
     if (!open) return;
     function handleClick(e: MouseEvent) {
@@ -34,8 +62,8 @@ function HamburgerMenu({
 
   const menuItems: { label: string; onClick?: () => void; danger?: boolean; disabled?: boolean }[] = [
     { label: 'Display QR/Code', onClick: () => { onDisplay?.(); setOpen(false); } },
-    { label: 'Split View', onClick: () => { onSplitView?.(); setOpen(false); } },
-    { label: 'Settings' },
+    { label: 'Split View',      onClick: () => { onSplitView?.(); setOpen(false); } },
+    { label: 'Settings' }, // TODO: wire up settings panel
     { label: endingLesson ? 'Ending…' : 'End Session', onClick: () => { onEnd?.(); setOpen(false); }, danger: true, disabled: endingLesson },
   ];
 

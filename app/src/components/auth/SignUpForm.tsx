@@ -1,5 +1,16 @@
 // Instructor sign-up form with email/password fields, UAlberta domain enforcement,
 // duplicate-account checking, and Google OAuth as an alternative.
+//
+// Validation order (intentional — cheapest checks run first):
+//   1. agreeToTerms — no network call needed
+//   2. password length — no network call needed
+//   3. @ualberta.ca domain — no network call needed
+//   4. /api/auth/check-email — one round-trip to detect existing accounts before
+//      calling Supabase, so we can show a friendlier error than Supabase's generic one
+//   5. signUpWithEmail — the actual Supabase auth call
+//
+// Styling shares .form-label, .input-glass, and .btn-submit from globals.css to stay
+// consistent with LoginForm without duplicating style objects.
 'use client';
 
 import { useState } from 'react';
@@ -45,6 +56,7 @@ export function SignUpForm() {
     setError(null);
     setLoading(true);
 
+    // --- Client-side guards (no network) ---
     if (!formData.agreeToTerms) {
       setError('You must agree to the Terms and Conditions');
       setLoading(false);
@@ -57,12 +69,16 @@ export function SignUpForm() {
       return;
     }
 
+    // Only UAlberta instructors are allowed to register via email/password.
     if (!formData.email.endsWith('@ualberta.ca')) {
       setError('You must use a UAlberta email address (@ualberta.ca)');
       setLoading(false);
       return;
     }
 
+    // --- Duplicate-account check (one round-trip before Supabase) ---
+    // We check /api/auth/check-email first because Supabase's own duplicate error
+    // message is generic; this lets us show a more helpful "use Google instead" prompt.
     const checkRes = await fetch('/api/auth/check-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -76,6 +92,7 @@ export function SignUpForm() {
       return;
     }
 
+    // --- Supabase sign-up ---
     const { error } = await signUpWithEmail(
       formData.email,
       formData.password,
@@ -88,6 +105,7 @@ export function SignUpForm() {
       return;
     }
 
+    // Success — switch to email confirmation screen.
     setConfirmedEmail(formData.email);
     setLoading(false);
   };
@@ -113,36 +131,21 @@ export function SignUpForm() {
     );
   }
 
-  const inputClass = `
-    w-full px-4 py-3 rounded-[10px] text-sm transition-all duration-150
-  `;
-  const inputStyle = {
-    background: 'var(--surface-raised)',
-    border: '1px solid var(--border-default)',
-    color: 'var(--text-primary)',
-  };
-  const labelStyle = { color: 'var(--text-secondary)' };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
-        <label htmlFor="fullName" className="block text-sm font-medium" style={labelStyle}>
-          Full Name
-        </label>
+        <label htmlFor="fullName" className="form-label">Full Name</label>
         <input
           id="fullName"
           value={formData.fullName}
           onChange={(e) => setField('fullName', e.target.value)}
           required
-          className={inputClass}
-          style={inputStyle}
+          className="input-glass"
         />
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="email" className="block text-sm font-medium" style={labelStyle}>
-          Email
-        </label>
+        <label htmlFor="email" className="form-label">Email</label>
         <input
           id="email"
           type="email"
@@ -150,23 +153,19 @@ export function SignUpForm() {
           onChange={(e) => setField('email', e.target.value)}
           placeholder="your@ualberta.ca"
           required
-          className={inputClass}
-          style={inputStyle}
+          className="input-glass"
         />
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="password" className="block text-sm font-medium" style={labelStyle}>
-          Password
-        </label>
+        <label htmlFor="password" className="form-label">Password</label>
         <input
           id="password"
           type="password"
           value={formData.password}
           onChange={(e) => setField('password', e.target.value)}
           required
-          className={inputClass}
-          style={inputStyle}
+          className="input-glass"
         />
         <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
           Must be at least 8 characters
@@ -192,14 +191,7 @@ export function SignUpForm() {
         </Alert>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full py-3.5 rounded-[10px] text-sm font-semibold text-white transition-all duration-150 disabled:opacity-60 btn-primary-glow"
-        style={{
-          background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-        }}
-      >
+      <button type="submit" disabled={loading} className="btn-submit">
         {loading ? 'Signing up…' : 'Create Account'}
       </button>
 

@@ -1,4 +1,6 @@
 // Email/password login form for instructors, with Google OAuth as an alternative option.
+// Styling uses shared CSS utility classes from globals.css (.form-label, .input-glass,
+// .btn-submit) to keep the JSX concise and stay in sync with SignUpForm.
 'use client';
 
 import { useState } from 'react';
@@ -20,6 +22,7 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  /** Generic field setter — avoids a separate onChange handler per field. */
   const setField = (name: keyof LoginFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -37,6 +40,7 @@ export function LoginForm() {
       return;
     }
 
+    // On success Supabase sets the auth cookie automatically; redirect to dashboard.
     router.push('/instructor_dashboard');
   };
 
@@ -49,19 +53,15 @@ export function LoginForm() {
     if (error) {
       setError(error.message);
       setLoading(false);
+      // On success the OAuth redirect handles navigation — no explicit push needed.
     }
   };
 
   return (
     <form onSubmit={handleSignIn} className="space-y-5">
+      {/* Email field — HTML5 required + type="email" handles basic validation */}
       <div className="space-y-1.5">
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          Email
-        </label>
+        <label htmlFor="email" className="form-label">Email</label>
         <input
           id="email"
           name="email"
@@ -71,23 +71,13 @@ export function LoginForm() {
           placeholder="your@ualberta.ca"
           required
           autoComplete="email"
-          className="w-full px-4 py-3 rounded-[10px] text-sm transition-all duration-150"
-          style={{
-            background: 'var(--surface-raised)',
-            border: '1px solid var(--border-default)',
-            color: 'var(--text-primary)',
-          }}
+          className="input-glass"
         />
       </div>
 
+      {/* Password field */}
       <div className="space-y-1.5">
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          Password
-        </label>
+        <label htmlFor="password" className="form-label">Password</label>
         <input
           id="password"
           name="password"
@@ -96,32 +86,23 @@ export function LoginForm() {
           onChange={(e) => setField('password', e.target.value)}
           required
           autoComplete="current-password"
-          className="w-full px-4 py-3 rounded-[10px] text-sm transition-all duration-150"
-          style={{
-            background: 'var(--surface-raised)',
-            border: '1px solid var(--border-default)',
-            color: 'var(--text-primary)',
-          }}
+          className="input-glass"
         />
       </div>
 
+      {/* Supabase error (e.g. invalid credentials, network error) */}
       {error ? (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full py-3.5 rounded-[10px] text-sm font-semibold text-white transition-all duration-150 disabled:opacity-60 btn-primary-glow"
-        style={{
-          background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-        }}
-      >
+      {/* Primary submit — disabled while the Supabase request is in-flight */}
+      <button type="submit" disabled={loading} className="btn-submit">
         {loading ? 'Signing in…' : 'Sign In'}
       </button>
 
+      {/* Divider between email/password and OAuth */}
       <div className="flex items-center gap-3">
         <div className="flex-1 h-px" style={{ background: 'var(--border-default)' }} />
         <span className="text-xs" style={{ color: 'var(--text-muted)' }}>OR</span>

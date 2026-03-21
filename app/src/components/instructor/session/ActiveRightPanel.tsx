@@ -2,6 +2,15 @@
 
 // Right panel of the active session view: live student responses, analytics, and timer.
 // Supports collapsing to a narrow icon strip.
+//
+// Tab layout:
+//   "Responses"  (value="list")      — live student responses with highlight/flag controls
+//   "Metrics"    (value="analytics") — response count, MC breakdown, participation stats
+//   "Timer"      (value="timer")     — countdown display + extend/edit controls + Close Discussion
+//
+// The circular timer display is provided by the shared CircularTimer component
+// (src/components/ui/CircularTimer.tsx), which is also used by the student-facing
+// DiscussionTimer. Both roles see the same arc, urgency colour, and threshold logic.
 
 import * as React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,86 +24,23 @@ import { ResponseCard } from '@/components/instructor/ResponseCard';
 import { FilterToggle } from '@/components/instructor/FilterToggle';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
-
-// ---------------------------------------------------------------------------
-// Pill-shaped timer (mirrors student DiscussionTimer UI)
-// ---------------------------------------------------------------------------
-
-function formatTime(secs: number): string {
-  const m = Math.floor(secs / 60);
-  const s = secs % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-}
-
-function InstructorTimer({ timerEndTime, timerTotalSeconds }: { timerEndTime: number; timerTotalSeconds: number }) {
-  const [remaining, setRemaining] = React.useState<number>(() =>
-    Math.max(0, Math.ceil((timerEndTime - Date.now()) / 1000))
-  );
-
-  React.useEffect(() => {
-    function tick() {
-      setRemaining(Math.max(0, Math.ceil((timerEndTime - Date.now()) / 1000)));
-    }
-    tick();
-    const id = setInterval(tick, 500);
-    return () => clearInterval(id);
-  }, [timerEndTime]);
-
-  const radius = 22;
-  const circumference = 2 * Math.PI * radius;
-  const progress = timerTotalSeconds > 0 ? Math.max(0, remaining / timerTotalSeconds) : 0;
-  const strokeDashoffset = circumference * (1 - progress);
-  const isExpired = remaining <= 0;
-  const isUrgent = progress < 0.20 && !isExpired;
-
-  const arcColor = isExpired || isUrgent ? 'var(--accent-blush)' : 'var(--color-primary-400)';
-  const textColor = isExpired || isUrgent ? '#c0392b' : 'var(--text-primary)';
-
-  return (
-    <div
-      className="inline-flex items-center gap-3 px-5 py-2.5"
-      data-testid="instructor-timer"
-      style={{
-        borderRadius: '999px',
-        border: '1px solid var(--border-default)',
-        background: 'var(--surface-glass)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-      }}
-    >
-      {/* Circular arc */}
-      <svg viewBox="0 0 52 52" width="40" height="40" style={{ flexShrink: 0 }}>
-        <circle cx="26" cy="26" r={radius} fill="none" stroke="var(--border-default)" strokeWidth="4" />
-        <circle
-          cx="26" cy="26" r={radius}
-          fill="none"
-          stroke={arcColor}
-          strokeWidth="4"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          transform="rotate(-90 26 26)"
-          style={{ transition: 'stroke-dashoffset 0.9s linear, stroke 0.4s ease' }}
-        />
-      </svg>
-
-      {/* Time text */}
-      <div className="flex flex-col items-start leading-tight">
-        <span className="text-base font-bold font-mono tabular-nums" style={{ color: textColor }}>
-          {isExpired ? '00:00' : formatTime(remaining)}
-        </span>
-        <span className="text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>
-          {isExpired ? "Time's up" : 'remaining'}
-        </span>
-      </div>
-    </div>
-  );
-}
+import { CircularTimer } from '@/components/ui/CircularTimer';
 
 // ---------------------------------------------------------------------------
 // Timer tab content
 // ---------------------------------------------------------------------------
 
+/**
+ * Content rendered inside the "Timer" tab of the right panel.
+ *
+ * States:
+ *   No active discussion — shows an empty state with a clock icon.
+ *   Active, with timer   — shows CircularTimer + Edit / +10s controls + Close Discussion.
+ *   Active, no timer     — shows the "∞ No time limit" pill + Close Discussion.
+ *
+ * Close Discussion is placed inside the timer card (not below it) so the instructor
+ * always sees it without scrolling, regardless of which timer state is active.
+ */
 function TimerTab({
   activeDiscussionId,
   timerEndTime,
@@ -104,12 +50,18 @@ function TimerTab({
   onEditTimer,
 }: {
   activeDiscussionId: string | null;
+  /** Null when the discussion was started without a time limit. */
   timerEndTime: number | null;
+  /** Null when the discussion was started without a time limit. */
   timerTotalSeconds: number | null;
+  /** Called with the discussion ID when the instructor closes the discussion manually. */
   onClose: (id: string) => void;
+  /** Adds `extra` seconds to the running timer by updating the DB end time. */
   onExtendTimer?: (extra: number) => Promise<void>;
+  /** Replaces the timer entirely; pass null to remove the time limit. */
   onEditTimer?: (newSecs: number | null) => Promise<void>;
 }) {
+  // Controls whether the edit-timer dialog (StartDiscussionDialog reused) is visible.
   const [showEditDialog, setShowEditDialog] = React.useState(false);
 
   if (!activeDiscussionId) {
@@ -141,7 +93,7 @@ function TimerTab({
       >
         {/* Timer display */}
         {hasTimer ? (
-          <InstructorTimer timerEndTime={timerEndTime!} timerTotalSeconds={timerTotalSeconds!} />
+          <CircularTimer timerEndTime={timerEndTime!} timerTotalSeconds={timerTotalSeconds!} testId="instructor-timer" />
         ) : (
           <div
             className="inline-flex items-center gap-3 px-5 py-2.5"
