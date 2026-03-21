@@ -18,7 +18,7 @@ export interface ResponseCardProps {
   isSelected: boolean;
   isBeingFlagged: boolean;
   onToggle: () => void;
-  onFlag: () => void;
+  onFlag?: () => void;
 }
 
 const variantStyles = {
@@ -154,13 +154,15 @@ export function ResponseCard({
             'flex items-center justify-end animate-in fade-in slide-in-from-top-1 duration-200 border-t border-line-default',
           )}
         >
-          <ActionButton
-            mode={mode}
-            isBeingFlagged={isBeingFlagged}
-            onFlag={onFlag}
-            className={s.flagButton}
-            iconClassName={s.flagIcon}
-          />
+          {onFlag ? (
+            <ActionButton
+              mode={mode}
+              isBeingFlagged={isBeingFlagged}
+              onFlag={onFlag}
+              className={s.flagButton}
+              iconClassName={s.flagIcon}
+            />
+          ) : null}
         </div>
       )}
     </>
