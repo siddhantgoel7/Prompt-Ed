@@ -226,7 +226,9 @@ describe('[US 2.11] Timer Expired State', () => {
     it('[US 2.11][AC3-AT5] success: MC with feedback_enabled shows correct answer in expired message', () => {
         mockHook.mockReturnValue(makeExpiredHookValue(MC_DISCUSSION_WITH_TIMER as unknown as typeof BASE_DISCUSSION));
         render(<StudentSessionPage lessonId="lesson-1" />);
-        expect(screen.getByText(/Correct Answer: A\. Angiotensin Converting Enzyme/i)).toBeInTheDocument();
+        // Text is split by a <span> tag, so check the parent element's full text content
+        const expiredMsg = screen.getByTestId('timer-expired-message');
+        expect(expiredMsg.textContent).toContain('Correct Answer: A. Angiotensin Converting Enzyme');
     });
 
     // 9
@@ -247,8 +249,8 @@ describe('[US 2.11] MC Feedback Timing with Timer', () => {
     it('[US 2.11][AC3-AT7] success: MC feedback is NOT shown in submitted view while timer is still running', () => {
         mockHook.mockReturnValue(makeSubmittedWithTimerHookValue(false));
         render(<StudentSessionPage lessonId="lesson-1" />);
-        expect(screen.queryByText(/Good Job/i)).not.toBeInTheDocument();
-        expect(screen.queryByText(/Oops/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Great job/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Not quite/i)).not.toBeInTheDocument();
     });
 
     // 11
@@ -277,7 +279,7 @@ describe('[US 2.11] MC Feedback Timing with Timer', () => {
         mockHook.mockReturnValue(makeSubmittedWithTimerHookValue(true));
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
-        expect(screen.getByText(/Good Job/i)).toBeInTheDocument();
+        expect(screen.getByText(/Great job/i)).toBeInTheDocument();
     });
 });
 

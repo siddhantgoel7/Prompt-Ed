@@ -3,8 +3,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import { StudentSessionShell } from './StudentSessionShell';
 import { StudentStatusAlert } from './StudentStatusAlert';
 import { StudentPromptCard } from './StudentPromptCard';
@@ -155,22 +153,38 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
       {view !== 'loading' && view !== 'error' ? (
         <div className="flex items-center gap-2">
           {view === 'ended' ? (
-            <Badge variant="secondary" className="bg-red-100 text-red-800">
+            <span
+              className="text-xs font-medium px-3 py-1 rounded-full"
+              style={{ background: 'var(--color-error-alpha-12)', color: 'var(--color-error-600)' }}
+            >
               Ended
-            </Badge>
+            </span>
           ) : (
-            <Badge variant="secondary" className="bg-green-100 text-green-800">
+            <span
+              className="text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1.5"
+              style={{ background: 'var(--color-primary-alpha-12)', color: 'var(--color-primary-600)' }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
               Active
-            </Badge>
+            </span>
           )}
         </div>
       ) : null}
 
       {view === 'loading' ? (
-        <div className="space-y-3">
-          <Skeleton className="h-8 w-2/3 mx-auto" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-36 w-full" />
+        <div className="flex flex-col items-center justify-center py-16 gap-4">
+          <div className="flex items-center gap-1.5">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="block w-2 h-2 rounded-full"
+                style={{
+                  background: 'var(--color-primary-400)',
+                  animation: `dotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+                }}
+              />
+            ))}
+          </div>
         </div>
       ) : null}
 
@@ -238,9 +252,19 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
                   <>
                     <div
                       data-testid="mc-feedback-banner"
-                      className={`text-center text-xl font-bold p-4 rounded-lg ${isSubmitCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                      data-variant={isSubmitCorrect ? 'correct' : 'incorrect'}
+                      className="text-center text-xl font-bold p-5 rounded-2xl enter"
+                      style={isSubmitCorrect ? {
+                        background: 'var(--color-primary-alpha-12)',
+                        border: '1px solid var(--color-primary-alpha-25)',
+                        color: 'var(--color-primary-700)',
+                      } : {
+                        background: 'var(--color-error-alpha-10)',
+                        border: '1px solid var(--color-error-alpha-25)',
+                        color: 'var(--color-error-600)',
+                      }}
                     >
-                      {isSubmitCorrect ? 'Good Job! 🎉' : 'Oops! 😔'}
+                      {isSubmitCorrect ? 'Great job!' : 'Not quite!'}
                     </div>
                     <StudentPromptCard
                       discussion={activeDiscussion}
@@ -325,9 +349,21 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
                 <>
                   <StudentPromptCard discussion={activeDiscussion} disabled />
                   {submittedAnswerText && (
-                    <div className="p-4 rounded-lg border bg-gray-50" data-testid="submitted-answer-display">
-                      <p className="text-xs font-medium text-muted-foreground mb-2">Your response</p>
-                      <p className="text-sm whitespace-pre-wrap">{submittedAnswerText}</p>
+                    <div
+                      data-testid="submitted-answer-display"
+                      className="rounded-xl p-4"
+                      style={{
+                        background: 'var(--color-primary-alpha-06)',
+                        border: '1px solid var(--color-primary-alpha-15)',
+                        borderLeft: '3px solid var(--color-primary-400)',
+                      }}
+                    >
+                      <p className="text-xs font-semibold mb-1.5 text-brand-600">
+                        Your response
+                      </p>
+                      <p className="text-sm whitespace-pre-wrap text-content-secondary">
+                        {submittedAnswerText}
+                      </p>
                     </div>
                   )}
                 </>

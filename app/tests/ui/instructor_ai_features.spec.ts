@@ -68,7 +68,7 @@ test.describe('Instructor AI Features & Tools', () => {
     // 43.2
     test('[US 1.17] success: toggle STT transcript capture', async ({ page }) => {
         test.skip(!!process.env.CI, 'Flaky in CI');
-        const startRecord = page.locator('button:has-text("Start Recording")').or(page.locator('button', { hasText: /Start Recording/i }));
+        const startRecord = page.locator('button:has-text("Record")').or(page.locator('button', { hasText: /^Record$/i }));
         await expect(startRecord).toBeVisible({ timeout: 15000 });
         await expect(page.locator('textarea[placeholder*="Spoken content"]')).toBeVisible({ timeout: 15000 });
     });

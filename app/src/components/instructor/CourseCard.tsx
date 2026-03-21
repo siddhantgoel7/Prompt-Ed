@@ -3,9 +3,6 @@
 
 import * as React from 'react';
 import type { Course } from '@/types/course';
-
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,10 +12,14 @@ import {
 
 /** Formats an ISO date string to a locale date string for display. */
 function formatDate(dateIso: string) {
-  return new Date(dateIso).toLocaleDateString();
+  return new Date(dateIso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
-/** Displays a course thumbnail, creation date, title, and action buttons (access, edit, delete). */
+/** Displays a course card with title, creation date, and action buttons (access, edit, delete). */
 export function CourseCard({
   course,
   onAccess,
@@ -31,43 +32,98 @@ export function CourseCard({
   onDelete: () => void;
 }) {
   return (
-    <Card className="overflow-hidden border border-gray-200 relative">
-      <div className="absolute top-4 right-4 z-10">
+    <div
+      className="glass relative overflow-hidden rounded-2xl card-hover cursor-pointer group"
+      style={{
+        boxShadow: '0 2px 16px var(--color-primary-alpha-06), 0 1px 3px var(--color-black-alpha-06)',
+      }}
+    >
+      {/* Top action menu */}
+      <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              Actions
-            </Button>
+            <button
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 bg-surface-raised text-content-secondary"
+              style={{
+                border: '1px solid var(--border-default)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="5" r="1.5"/>
+                <circle cx="12" cy="12" r="1.5"/>
+                <circle cx="12" cy="19" r="1.5"/>
+              </svg>
+            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete} className="text-red-600">
+            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(); }}>
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              className="text-destructive"
+            >
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <div className="bg-gray-300 h-48 flex items-center justify-center">
-        <div className="bg-white p-4 rounded">
-          <svg className="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-              clipRule="evenodd"
-            />
+      {/* Course thumbnail area */}
+      <div
+        className="h-36 flex items-center justify-center relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, var(--color-primary-alpha-15), var(--color-primary-400-alpha-08))' }}
+      >
+        <div
+          className="w-14 h-14 rounded-2xl flex items-center justify-center"
+          style={{ background: 'var(--color-primary-alpha-18)' }}
+        >
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
           </svg>
         </div>
+        {/* Decorative corner orb */}
+        <div
+          className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full opacity-20"
+          style={{ background: 'var(--color-primary-300)' }}
+        />
       </div>
 
-      <div className="p-6">
-        <p className="text-sm text-gray-500 mb-2">Date Created: {formatDate(course.date_created)}</p>
-        <h3 className="text-xl font-semibold mb-4">{course.title}</h3>
+      {/* Content */}
+      <div className="p-5" onClick={onAccess}>
+        <p className="text-xs mb-1.5 text-content-muted">
+          Created {formatDate(course.date_created)}
+        </p>
+        <h3
+          className="text-base font-semibold mb-4 leading-snug line-clamp-2 text-content-primary"
+        >
+          {course.title}
+        </h3>
 
-        <Button className="w-full" onClick={onAccess}>
-          Access
-        </Button>
+        <button
+          onClick={onAccess}
+          className="w-full py-2 rounded-[10px] text-sm font-semibold transition-all duration-150"
+          style={{
+            background: 'var(--color-primary-alpha-12)',
+            color: 'var(--color-primary-600)',
+            border: '1px solid var(--color-primary-alpha-20)',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-500)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'white';
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'transparent';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-12)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-600)';
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-alpha-20)';
+          }}
+        >
+          Open Course
+        </button>
       </div>
-    </Card>
+    </div>
   );
 }

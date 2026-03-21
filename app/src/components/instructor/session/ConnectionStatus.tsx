@@ -2,7 +2,6 @@
 'use client';
 
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
 
 import { SessionContext } from './SessionContext';
 
@@ -30,23 +29,48 @@ export function ConnectionStatus(props: {
 
   if (isConnected) {
     return (
-      <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg border bg-white px-3 py-2 shadow-sm">
-        <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-        <span className="text-xs text-muted-foreground">Connected</span>
+      <div
+        className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-2 rounded-full"
+        style={{
+          background: 'var(--surface-glass)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid var(--color-primary-alpha-25)',
+          boxShadow: '0 2px 12px var(--color-black-alpha-10)',
+        }}
+      >
+        <span
+          className="h-2 w-2 rounded-full animate-pulse"
+          style={{ background: 'var(--color-primary-400)' }}
+        />
+        <span className="text-xs font-medium text-brand-600">
+          Connected
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 shadow-lg">
+    <div
+      className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-2 rounded-full"
+      style={{
+        background: 'var(--color-error-alpha-08)',
+        backdropFilter: 'blur(8px)',
+        border: '1px solid var(--color-error-alpha-25)',
+        boxShadow: '0 2px 12px var(--color-black-alpha-10)',
+      }}
+    >
       <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-      <span className="text-sm font-medium text-red-800">
-        {reconnecting ? 'Reconnecting\u2026' : 'Disconnected'}
+      <span className="text-sm font-medium text-err-600">
+        {reconnecting ? 'Reconnecting…' : 'Disconnected'}
       </span>
       {!reconnecting ? (
-        <Button size="sm" variant="outline" className="ml-1 h-7 text-xs" onClick={handleClick}>
+        <button
+          onClick={handleClick}
+          className="ml-1 px-2.5 py-1 text-xs rounded-full font-medium text-white transition-all duration-150"
+          style={{ background: 'var(--color-error-500)' }}
+        >
           Reconnect
-        </Button>
+        </button>
       ) : null}
     </div>
   );

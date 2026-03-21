@@ -42,12 +42,12 @@ export function FilesTab({
     const getStatusBadge = (status: UploadStatus) => {
         switch (status) {
             case 'ready':
-                return <Badge className="bg-green-100 text-green-800 text-xs">Ready</Badge>;
+                return <Badge className="text-xs" style={{ background: 'var(--color-primary-alpha-15)', color: 'var(--color-primary-500)', border: 'none' }}>Ready</Badge>;
             case 'processing':
             case 'uploading':
-                return <Badge className="bg-amber-100 text-amber-800 text-xs">Processing</Badge>;
+                return <Badge className="text-xs" style={{ background: 'var(--color-warning-alpha-15)', color: 'var(--color-warning-600)', border: 'none' }}>Processing</Badge>;
             case 'failed':
-                return <Badge className="bg-red-100 text-red-800 text-xs">Failed</Badge>;
+                return <Badge className="text-xs" style={{ background: 'var(--color-error-alpha-12)', color: 'var(--recording-text, #dc2626)', border: 'none' }}>Failed</Badge>;
         }
     };
 
@@ -64,7 +64,8 @@ export function FilesTab({
             <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="w-full px-3 py-2 text-sm bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 text-sm font-semibold text-white rounded-[10px] disabled:opacity-50 disabled:cursor-not-allowed btn-primary-glow transition-all duration-150"
+                style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))' }}
             >
                 {isUploading ? 'Uploading\u2026' : 'Upload File (PDF/PPTX)'}
             </button>
@@ -80,7 +81,7 @@ export function FilesTab({
             ) : (
                 <div className="space-y-2">
                     {files.map((f) => (
-                        <div key={f.id} className="flex items-center justify-between gap-2 p-2 border rounded-lg bg-white">
+                        <div key={f.id} className="flex items-center justify-between gap-2 p-2 rounded-xl bg-surface-raised border border-line-subtle">
                             <div className="min-w-0 flex-1">
                                 <p className="text-xs font-medium truncate" title={f.fileName}>{f.fileName}</p>
                                 <div className="flex items-center gap-2 mt-1">
@@ -91,7 +92,9 @@ export function FilesTab({
                             <button
                                 onClick={() => onDeleteFile(f.id)}
                                 disabled={isUploading}
-                                className="shrink-0 p-1 hover:bg-red-50 hover:text-red-600 rounded disabled:opacity-50"
+                                className="shrink-0 p-1 rounded disabled:opacity-50 transition-colors duration-150 text-content-muted"
+                                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--recording-text, #dc2626)'; (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-alpha-08)'; }}
+                                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                                 title="Delete file"
                             >
                                 <X className="h-3 w-3" />

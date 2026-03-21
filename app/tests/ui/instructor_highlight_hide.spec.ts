@@ -146,10 +146,12 @@ test.describe('Instructor Highlight & Hide Responses', () => {
 
     await response.click();
 
-    // After highlight: prominent styling — larger text, semibold, yellow card
+    // After highlight: prominent styling — larger text, semibold, highlighted card
     await expect(response).toHaveClass(/font-semibold/);
     await expect(response).toHaveClass(/text-2xl/);
-    await expect(page.locator('.bg-yellow-50').first()).toBeVisible();
+    // data-highlighted="true" is the semantic anchor — avoids the .z-10 utility class selector
+    // which breaks if the stacking-context implementation ever changes
+    await expect(page.locator('[data-highlighted="true"]').first()).toBeVisible();
   });
 
   test('[US 1.36][AC1-AT4] un-highlighting a response returns to base styling', async ({ page }) => {

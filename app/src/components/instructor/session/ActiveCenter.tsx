@@ -3,7 +3,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
@@ -50,7 +49,7 @@ export function ActiveCenter(props: Partial<{
   const promptInput = context ? context.promptInput : props.promptInput!;
   const setPromptInput = context ? context.setPromptInput : props.setPromptInput!;
   const isConnected = context ? context.isConnected : props.isConnected!;
-  const onPublish = context ? (timerSeconds: number | null) => context.handlePublishDiscussion(timerSeconds) : (timerSeconds: number | null) => props.onPublish!();
+  const onPublish = context ? (timerSeconds: number | null) => context.handlePublishDiscussion(timerSeconds) : (_timerSeconds: number | null) => props.onPublish!();
   const transcriptText = context ? context.transcriptText : props.transcriptText!;
   const setTranscriptText = context ? context.setTranscriptText : props.setTranscriptText!;
   const promptType = context ? context.promptType : props.promptType!;
@@ -231,9 +230,17 @@ export function ActiveCenter(props: Partial<{
   };
 
   return (
-    <div className="flex-1 p-6 space-y-4 overflow-y-auto">
+    <div className="flex-1 p-4 md:p-6 space-y-4">
 
-      <div className="space-y-3 border rounded-lg p-4 bg-gray-50">
+      <div
+        className="space-y-3 rounded-2xl p-4"
+        style={{
+          background: 'var(--surface-glass)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          border: '1px solid var(--border-default)',
+        }}
+      >
         <Tabs value={creationMode} onValueChange={(v) => setCreationMode(v as 'ai' | 'manual')} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="ai">AI Generation</TabsTrigger>
@@ -242,43 +249,66 @@ export function ActiveCenter(props: Partial<{
 
           <TabsContent value="ai" className="space-y-3 mt-0">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold">Generate with AI</span>
+              <span className="text-sm font-semibold text-content-primary">
+                Generate with AI
+              </span>
 
-              {/* STT recording button (US 1.17) */}
+              {/* STT recording button */}
               <div className="flex items-center gap-2">
                 {recorder.isRecording && (
-                  <span className="flex items-center gap-1 text-xs text-red-600 font-medium">
-                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
+                  <span
+                    className="flex items-center gap-1 text-xs font-medium"
+                    style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}
+                  >
+                    <span
+                      className="w-2 h-2 rounded-full animate-pulse inline-block"
+                      style={{ background: 'currentColor' }}
+                    />
                     {recorder.fmt(recorder.elapsed)}
                   </span>
                 )}
                 {!recorder.isRecording ? (
-                  <Button
+                  <button
                     onClick={recorder.start}
                     disabled={isGenerating || sttStatus === 'transcribing'}
-                    size="sm"
-                    variant="outline"
-                    className="text-xs h-7 px-3 border-red-300 text-red-700 hover:bg-red-50"
+                    className="text-xs h-7 px-3 rounded-[8px] font-medium transition-all duration-150 disabled:opacity-50 flex items-center gap-1.5"
+                    style={{
+                      background: 'rgba(239,68,68,0.10)',
+                      border: '1px solid rgba(239,68,68,0.30)',
+                      color: 'var(--recording-text, oklch(0.55 0.22 27))',
+                    }}
                   >
-                    🎙 Start Recording
-                  </Button>
+                    {/* Mic icon */}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3Z" />
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                      <line x1="12" x2="12" y1="19" y2="22" />
+                    </svg>
+                    Record
+                  </button>
                 ) : (
-                  <Button
+                  <button
                     onClick={handleStopAndTranscribe}
-                    size="sm"
-                    className="text-xs h-7 px-3 bg-gray-900 text-white hover:bg-gray-800"
+                    className="text-xs h-7 px-3 rounded-[8px] font-medium text-white transition-all duration-150 flex items-center gap-1.5"
+                    style={{ background: 'var(--color-primary-600)' }}
                   >
-                    ⏹ Stop &amp; Transcribe
-                  </Button>
+                    {/* Stop icon */}
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                    </svg>
+                    Stop &amp; Transcribe
+                  </button>
                 )}
               </div>
             </div>
 
             {sttStatus === 'transcribing' && (
-              <p className="text-xs text-gray-500 animate-pulse">Transcribing audio…</p>
+              <p className="text-xs animate-pulse text-content-muted">
+                Transcribing audio…
+              </p>
             )}
             {sttStatus === 'error' && sttError && (
-              <p className="text-xs text-red-600">{sttError}</p>
+              <p className="text-xs" style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}>{sttError}</p>
             )}
 
             {/* Prompt / context input */}
@@ -290,7 +320,10 @@ export function ActiveCenter(props: Partial<{
                 setTranscriptText(e.target.value); // Keep in sync for STT context
               }}
               placeholder="Spoken content will appear here after recording, or type a topic manually"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none overflow-hidden min-h-[50px]"
+              className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[50px] transition-all duration-150 bg-surface-raised text-content-primary"
+              style={{
+                border: '1px solid var(--border-default)',
+              }}
               rows={2}
             />
 
@@ -299,7 +332,10 @@ export function ActiveCenter(props: Partial<{
               <select
                 value={promptType}
                 onChange={(e) => setPromptType(e.target.value as PromptType)}
-                className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-black"
+                className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary"
+                style={{
+                  border: '1px solid var(--border-default)',
+                }}
               >
                 <option value="long_answer">Long Answer</option>
                 <option value="short_answer">Short Answer</option>
@@ -307,18 +343,31 @@ export function ActiveCenter(props: Partial<{
               </select>
 
               <AIPreferencesDialog />
-              <Button
-                onClick={() => onGenerate()}
-                disabled={isGenerating || recorder.isRecording}
-                size="sm"
-                className="px-4 py-1.5 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
-              >
-                {isGenerating ? 'Generating…' : 'Generate Prompts'}
-              </Button>
+              <div className="rotating-glow-wrap">
+                <Button
+                  onClick={() => onGenerate()}
+                  disabled={isGenerating || recorder.isRecording}
+                  size="sm"
+                  className="px-4 py-1.5 rounded-full font-semibold disabled:opacity-50"
+                  style={{
+                    background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+                    color: 'white',
+                  }}
+                >
+                  {isGenerating ? 'Generating…' : 'Generate Prompts'}
+                </Button>
+              </div>
             </div>
 
             {generationWarning && (
-              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+              <p
+                className="text-xs rounded-lg px-3 py-2"
+                style={{
+                  background: 'rgba(245,158,11,0.10)',
+                  border: '1px solid rgba(245,158,11,0.25)',
+                  color: '#b45309',
+                }}
+              >
                 {generationWarning}
               </p>
             )}
@@ -329,12 +378,23 @@ export function ActiveCenter(props: Partial<{
                 {candidates.map((c: GeneratedPrompt, i: number) => (
                   <div key={i}>
                     {selectedIndex === i ? (
-                      <div className="p-3 bg-gray-50 border-2 border-black rounded-lg text-sm transition-colors">
+                      <div
+                        className="p-3 rounded-xl text-sm"
+                        style={{
+                          background: 'rgba(45,158,45,0.06)',
+                          border: '2px solid var(--color-primary-400)',
+                        }}
+                      >
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="secondary" className="text-xs capitalize">
+                          <span
+                            className="text-xs font-medium px-2 py-0.5 rounded-full capitalize"
+                            style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-600)' }}
+                          >
                             {c.promptType.replace('_', ' ')}
-                          </Badge>
-                          <span className="text-xs text-green-600 font-medium">Selected (Editing)</span>
+                          </span>
+                          <span className="text-xs font-medium text-brand-500">
+                            Selected (Editing)
+                          </span>
                         </div>
                         <textarea
                           value={promptInput}
@@ -342,7 +402,10 @@ export function ActiveCenter(props: Partial<{
                             setPromptInput(e.target.value);
                             setTranscriptText(e.target.value);
                           }}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-black min-h-[80px] resize-y leading-snug bg-white"
+                          className="w-full px-3 py-2.5 text-sm rounded-[10px] min-h-[80px] resize-y leading-snug transition-all duration-150 bg-surface-raised text-content-primary"
+                          style={{
+                            border: '1px solid var(--border-default)',
+                          }}
                           placeholder="Edit this prompt..."
                         />
                       </div>
@@ -370,14 +433,16 @@ export function ActiveCenter(props: Partial<{
                     )}
 
                     {selectedIndex === i && (
-                      <Button
-                        size="sm"
+                      <button
                         onClick={() => { setPendingCandidate(c); setShowTimerDialog(true); }}
                         disabled={!promptInput.trim() || !isConnected}
-                        className="mt-2 w-full bg-black text-white rounded-lg text-xs py-1.5 hover:bg-gray-800 disabled:opacity-50"
+                        className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
+                        style={{
+                          background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+                        }}
                       >
                         Publish This Question →
-                      </Button>
+                      </button>
                     )}
                   </div>
                 ))}
@@ -403,7 +468,10 @@ export function ActiveCenter(props: Partial<{
               <select
                 value={promptType}
                 onChange={(e) => setPromptType(e.target.value as PromptType)}
-                className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-black"
+                className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary"
+                style={{
+                  border: '1px solid var(--border-default)',
+                }}
               >
                 <option value="long_answer">Long Answer</option>
                 <option value="short_answer">Short Answer</option>
@@ -418,7 +486,10 @@ export function ActiveCenter(props: Partial<{
                 setTranscriptText(e.target.value);
               }}
               placeholder="Type your question here manually..."
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none overflow-hidden min-h-[80px]"
+              className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[80px] transition-all duration-150 bg-surface-raised text-content-primary"
+              style={{
+                border: '1px solid var(--border-default)',
+              }}
               rows={3}
             />
 
@@ -440,22 +511,32 @@ export function ActiveCenter(props: Partial<{
         </Tabs>
 
         {publishError && (
-          <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
+          <p
+            className="text-xs rounded-lg px-3 py-2"
+            style={{
+              background: 'rgba(239,68,68,0.08)',
+              border: '1px solid rgba(239,68,68,0.25)',
+              color: '#dc2626',
+            }}
+          >
             {publishError}
           </p>
         )}
 
-        {/* Start Discussion button — Close Discussion moved to DiscussionTimerSection */}
+        {/* Start Discussion button */}
         {!activeDiscussionId && (
-          <div className="pt-4 border-t border-gray-200">
-            <Button
+          <div className="pt-3 flex justify-end border-t border-line-subtle">
+            <button
               onClick={() => setShowTimerDialog(true)}
               disabled={!promptInput.trim() || !isConnected}
-              className="w-full px-4 py-2 bg-black text-white rounded-full font-semibold hover:bg-gray-800 disabled:opacity-50"
               data-testid="start-discussion-button"
+              className="px-4 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
+              style={{
+                background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+              }}
             >
               Start Discussion
-            </Button>
+            </button>
           </div>
         )}
 

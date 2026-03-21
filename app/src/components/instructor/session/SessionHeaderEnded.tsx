@@ -44,8 +44,10 @@ export function SessionHeaderEnded(props: {
     ?? (courseId ? () => router.push(`/lessons_page/${courseId}`) : undefined);
 
   return (
-    <header className="border-b border-gray-300 px-6 py-4 flex items-center justify-between">
-      <h1 className="text-xl font-semibold">{title}</h1>
+    <header
+      className="glass sticky top-0 z-50 px-6 py-4 flex items-center justify-between"
+    >
+      <h1 className="text-xl font-semibold text-content-primary">{title}</h1>
 
       <div className="flex items-center gap-3">
         <Button onClick={onBackToLessons} disabled={!onBackToLessons} variant="outline" className="text-xs h-8">

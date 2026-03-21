@@ -141,13 +141,13 @@ describe('AI Features (Acceptance)', () => {
         it('success: Start Recording triggers audio capture', async () => {
             render(<ActiveCenter {...defaultCenterProps} />);
 
-            const startBtn = screen.getByRole('button', { name: /Start Recording/i });
+            const startBtn = screen.getByRole('button', { name: /^Record$/i });
             await act(async () => {
                 fireEvent.click(startBtn);
             });
 
             expect(mockGetUserMedia).toHaveBeenCalledWith({ audio: true });
-            expect(screen.getByRole('button', { name: /Stop & Transcribe/i })).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /Stop.*Transcribe/i })).toBeInTheDocument();
         });
 
         // 34.5
@@ -155,10 +155,10 @@ describe('AI Features (Acceptance)', () => {
             render(<ActiveCenter {...defaultCenterProps} />);
 
             await act(async () => {
-                fireEvent.click(screen.getByRole('button', { name: /Start Recording/i }));
+                fireEvent.click(screen.getByRole('button', { name: /^Record$/i }));
             });
 
-            const stopBtn = screen.getByRole('button', { name: /Stop & Transcribe/i });
+            const stopBtn = screen.getByRole('button', { name: /Stop.*Transcribe/i });
 
             (global.fetch as jest.Mock).mockResolvedValue({
                 ok: true,

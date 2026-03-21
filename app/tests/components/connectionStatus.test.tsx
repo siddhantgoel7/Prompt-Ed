@@ -20,8 +20,9 @@ describe('ConnectionStatus', () => {
 
     expect(screen.getByText('Connected')).toBeInTheDocument();
     const dot = screen.getByText('Connected').previousElementSibling!;
-    expect(dot.className).toContain('bg-green-500');
     expect(dot.className).toContain('animate-pulse');
+    // Connected dot uses CSS variable for green color (dark mode compatible)
+    expect(dot.className).toContain('rounded-full');
   });
 
   // 2. Shows "Disconnected" with red dot and Reconnect button when disconnected
@@ -75,10 +76,10 @@ describe('ConnectionStatus', () => {
       <ConnectionStatus isConnected={true} onReconnect={jest.fn()} />
     );
 
-    // Connected state - green pulsing dot
+    // Connected state - pulsing dot (uses CSS variable for color)
     const connectedDot = screen.getByText('Connected').previousElementSibling!;
     expect(connectedDot.className).toContain('animate-pulse');
-    expect(connectedDot.className).toContain('bg-green-500');
+    expect(connectedDot.className).toContain('rounded-full');
 
     // Disconnected state - red pulsing dot
     rerender(<ConnectionStatus isConnected={false} onReconnect={jest.fn()} />);
