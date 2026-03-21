@@ -3,8 +3,6 @@ import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SplitView } from '@/components/instructor/session/SplitView';
 import { createClient } from '@/lib/supabase/client';
-import { useRealtime } from '@/lib/realtime/useRealtime';
-import { createMockRealtimeChannel } from '../../jest.setup';
 import {
   mockDiscussion,
   mockClosedDiscussion,
@@ -16,7 +14,6 @@ import {
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 
 jest.mock('@/lib/supabase/client');
-jest.mock('@/lib/realtime/useRealtime');
 
 const originalConsoleError = console.error;
 const originalConsoleLog = console.log;
@@ -34,18 +31,11 @@ const closedDisc: DiscussionWithResponseCount = withResponseCount(mockClosedDisc
 const discussions: DiscussionWithResponseCount[] = [activeDisc, closedDisc];
 
 describe('SplitView Component', () => {
-  let mockChannel: ReturnType<typeof createMockRealtimeChannel>;
   let mockSupabase: any;
   const onBack = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockChannel = createMockRealtimeChannel();
-    (useRealtime as jest.Mock).mockReturnValue({
-      channel: mockChannel,
-      isConnected: true,
-    });
 
     mockSupabase = {
       from: jest.fn().mockReturnValue({
@@ -303,19 +293,17 @@ describe('SplitView Component', () => {
     });
   });
 
-  describe('Real-time Response Updates', () => {
-    it('[US 1.34] receives real-time responses for the selected discussion', async () => {
-      mockSupabase.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            is: jest.fn().mockReturnValue({
-              order: jest.fn().mockResolvedValue({ data: [], error: null }),
-            }),
-          }),
-        }),
-      });
-
-      render(<SplitView discussions={discussions} lessonId="lesson-456" onBack={onBack} />);
+  describe('Live Active Discussion Responses', () => {
+    it('[US 1.34] uses provided live responses for the active discussion', async () => {
+      const { rerender } = render(
+        <SplitView
+          discussions={discussions}
+          lessonId="lesson-456"
+          onBack={onBack}
+          liveActiveDiscussionId={activeDisc.id}
+          liveActiveResponses={[]}
+        />,
+      );
 
       const cards = screen.getAllByText(/What is the main purpose/i);
       fireEvent.click(cards[0]);
@@ -324,82 +312,26 @@ describe('SplitView Component', () => {
         expect(screen.getByText('No responses yet.')).toBeInTheDocument();
       });
 
-      mockChannel._trigger('response:new', {
-        response: {
-          id: 'realtime-resp-1',
-          discussion_id: 'discussion-123',
-          response_text: 'This is a real-time response!',
-          created_at: new Date().toISOString(),
-        },
-      });
+      rerender(
+        <SplitView
+          discussions={discussions}
+          lessonId="lesson-456"
+          onBack={onBack}
+          liveActiveDiscussionId={activeDisc.id}
+          liveActiveResponses={[
+            {
+              id: 'live-r1',
+              discussion_id: activeDisc.id,
+              response_text: 'This is a live response from session state.',
+              created_at: new Date().toISOString(),
+            } as any,
+          ]}
+        />,
+      );
 
       await waitFor(() => {
-        expect(screen.getByText('This is a real-time response!')).toBeInTheDocument();
+        expect(screen.getByText('This is a live response from session state.')).toBeInTheDocument();
       });
-    });
-
-    it('[US 1.34] ignores real-time responses for a different discussion', async () => {
-      mockSupabase.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            is: jest.fn().mockReturnValue({
-              order: jest.fn().mockResolvedValue({ data: [], error: null }),
-            }),
-          }),
-        }),
-      });
-
-      render(<SplitView discussions={discussions} lessonId="lesson-456" onBack={onBack} />);
-
-      const cards = screen.getAllByText(/What is the main purpose/i);
-      fireEvent.click(cards[0]);
-
-      await waitFor(() => {
-        expect(screen.getByText('No responses yet.')).toBeInTheDocument();
-      });
-
-      mockChannel._trigger('response:new', {
-        response: {
-          id: 'other-resp',
-          discussion_id: 'discussion-other',
-          response_text: 'Should not appear',
-          created_at: new Date().toISOString(),
-        },
-      });
-
-      await new Promise((r) => setTimeout(r, 50));
-      expect(screen.getByText('No responses yet.')).toBeInTheDocument();
-      expect(screen.queryByText('Should not appear')).not.toBeInTheDocument();
-    });
-
-    it('[US 1.34] deduplicates real-time responses', async () => {
-      mockSupabase.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            is: jest.fn().mockReturnValue({
-              order: jest.fn().mockResolvedValue({
-                data: [mockResponse],
-                error: null,
-              }),
-            }),
-          }),
-        }),
-      });
-
-      render(<SplitView discussions={discussions} lessonId="lesson-456" onBack={onBack} />);
-
-      const cards = screen.getAllByText(/What is the main purpose/i);
-      fireEvent.click(cards[0]);
-
-      await waitFor(() => {
-        expect(screen.getByText(mockResponse.response_text)).toBeInTheDocument();
-      });
-
-      mockChannel._trigger('response:new', { response: mockResponse });
-
-      await new Promise((r) => setTimeout(r, 50));
-      const matches = screen.getAllByText(mockResponse.response_text);
-      expect(matches).toHaveLength(1);
     });
   });
 
