@@ -19,6 +19,7 @@ export function SessionDisplayView(props: {
 }) {
   const { lessonId, title, pinCode } = props;
   const { joinUrl, qrDataUrl } = useStudentJoinQR(lessonId, 520);
+  const homepageUrl = joinUrl ? new URL(joinUrl).origin : null;
 
   return (
     <main
@@ -38,6 +39,11 @@ export function SessionDisplayView(props: {
           <p className="mt-4 text-6xl md:text-8xl font-bold tracking-[0.12em] text-brand-500">
             {pinCode ?? '------'}
           </p>
+          {homepageUrl ? (
+            <p className="mt-4 text-sm text-content-secondary break-all">
+              {homepageUrl}
+            </p>
+          ) : null}
         </div>
 
         {/* QR card */}
@@ -64,11 +70,6 @@ export function SessionDisplayView(props: {
               </div>
             )}
           </div>
-          {joinUrl ? (
-            <p className="mt-4 text-sm break-all text-content-secondary">
-              {joinUrl}
-            </p>
-          ) : null}
         </div>
       </section>
     </main>
