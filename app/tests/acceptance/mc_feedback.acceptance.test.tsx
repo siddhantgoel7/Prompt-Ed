@@ -144,7 +144,8 @@ describe('[US 2.10] MC Feedback — Correct Answer (Acceptance)', () => {
         renderAndSubmit('A');
         const banner = screen.getByTestId('mc-feedback-banner');
         expect(banner).toBeInTheDocument();
-        expect(banner.getAttribute('style')).toMatch(/45.*158.*45/);
+        // Check semantic state attribute rather than color values
+        expect(banner).toHaveAttribute('data-variant', 'correct');
     });
 
     // 29.4
@@ -189,7 +190,8 @@ describe('[US 2.10] MC Feedback — Incorrect Answer (Acceptance)', () => {
         renderAndSubmit('C'); // correct is A
         const banner = screen.getByTestId('mc-feedback-banner');
         expect(banner).toBeInTheDocument();
-        expect(banner.getAttribute('style')).toMatch(/239.*68.*68/);
+        // Check semantic state attribute rather than color values
+        expect(banner).toHaveAttribute('data-variant', 'incorrect');
     });
 
     // 29.10

@@ -131,8 +131,8 @@ describe('ResponseCard — flagged mode visual styling', () => {
     const { container } = renderCard({ mode: 'flagged', isSelected: true });
 
     const card = container.firstChild as HTMLElement;
-    // Selected flagged state uses red inline style
-    expect(card.getAttribute('style')).toMatch(/239.*68.*68/);
+    // Selected flagged state uses red styling — check semantic attribute, not color values
+    expect(card).toHaveAttribute('data-variant', 'flagged-selected');
     // Should have z-10 for elevation
     expect(card.className).toMatch(/z-10/);
   });

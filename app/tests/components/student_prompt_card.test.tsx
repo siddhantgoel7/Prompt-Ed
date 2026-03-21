@@ -140,8 +140,8 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
                 btn.textContent?.includes('A.')
             );
             expect(selectedBtn).toBeInTheDocument();
-            // Selected option has a distinct background via inline style (green tint)
-            expect(selectedBtn?.getAttribute('style')).toMatch(/45.*158.*45/);
+            // Selected option has a distinct background — check semantic state attribute, not color values
+            expect(screen.getByTestId('mc-option-A')).toHaveAttribute('data-state', 'selected');
         });
 
         // 30.10

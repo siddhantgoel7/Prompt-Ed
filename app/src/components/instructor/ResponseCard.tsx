@@ -173,6 +173,7 @@ export function ResponseCard({
         isSelected ? cn(s.selectedPadding, 'my-4 z-10 relative') : s.unselectedPadding,
       )}
       data-highlighted={isSelected ? 'true' : undefined}
+      data-variant={isSelected ? (isFlagged ? 'flagged-selected' : 'highlighted-selected') : undefined}
       style={isSelected ? selectedStyle : unselectedStyle}
       onClick={onToggle}
     >
