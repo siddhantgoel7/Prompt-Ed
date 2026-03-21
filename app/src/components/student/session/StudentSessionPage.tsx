@@ -3,8 +3,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import { StudentSessionShell } from './StudentSessionShell';
 import { StudentStatusAlert } from './StudentStatusAlert';
 import { StudentPromptCard } from './StudentPromptCard';

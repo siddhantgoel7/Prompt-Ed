@@ -2,11 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
-import { useRouter } from 'next/navigation';
-
 
 export function useStudentJoinQR(lessonId: string | undefined, width: number) {
-  const router = useRouter()
   const joinUrl =
     lessonId && typeof window !== 'undefined'
       ? `${window.location.origin}/student/${lessonId}`

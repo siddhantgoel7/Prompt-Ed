@@ -3,7 +3,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
@@ -50,7 +49,7 @@ export function ActiveCenter(props: Partial<{
   const promptInput = context ? context.promptInput : props.promptInput!;
   const setPromptInput = context ? context.setPromptInput : props.setPromptInput!;
   const isConnected = context ? context.isConnected : props.isConnected!;
-  const onPublish = context ? (timerSeconds: number | null) => context.handlePublishDiscussion(timerSeconds) : (timerSeconds: number | null) => props.onPublish!();
+  const onPublish = context ? (timerSeconds: number | null) => context.handlePublishDiscussion(timerSeconds) : (_timerSeconds: number | null) => props.onPublish!();
   const transcriptText = context ? context.transcriptText : props.transcriptText!;
   const setTranscriptText = context ? context.setTranscriptText : props.setTranscriptText!;
   const promptType = context ? context.promptType : props.promptType!;

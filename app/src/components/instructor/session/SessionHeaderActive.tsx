@@ -196,6 +196,8 @@ export function SessionHeaderActive(props: {
               style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
             >
               {qrDataUrl ? (
+                // QR is a base64 data URL — cannot be optimised by next/image.
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={qrDataUrl} alt="Join QR" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-[8px] font-mono" style={{ color: 'var(--text-muted)' }}>QR</span>

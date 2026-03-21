@@ -75,6 +75,9 @@ export function SessionDisplayView(props: {
           </p>
           <div className="mt-4 flex items-center justify-center">
             {qrDataUrl ? (
+              // QR code is a dynamically-generated base64 data URL — next/image cannot
+              // optimize data: URLs, so a plain <img> is appropriate here.
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={qrDataUrl}
                 alt="Join lesson QR code"
