@@ -121,11 +121,17 @@ function parseAIResponse(raw: string, promptType: PromptType): GeneratedPrompt[]
       promptText?: string;
       promptType?: string;
       mcOptions?: MCOption[];
+      bloomsLevel?: GeneratedPrompt['bloomsLevel'];
+      topicArea?: string;
+      rationale?: string;
     };
 
     const result: GeneratedPrompt = {
       promptText: candidate.promptText ?? 'Discussion question',
       promptType: promptType,
+      ...(candidate.bloomsLevel && { bloomsLevel: candidate.bloomsLevel }),
+      ...(candidate.topicArea && { topicArea: candidate.topicArea }),
+      ...(candidate.rationale && { rationale: candidate.rationale }),
     };
 
     if (promptType === 'multiple_choice' && Array.isArray(candidate.mcOptions)) {
