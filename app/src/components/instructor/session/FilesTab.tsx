@@ -42,12 +42,12 @@ export function FilesTab({
     const getStatusBadge = (status: UploadStatus) => {
         switch (status) {
             case 'ready':
-                return <Badge className="text-xs" style={{ background: 'rgba(45,158,45,0.15)', color: 'var(--color-primary-500)', border: 'none' }}>Ready</Badge>;
+                return <Badge className="text-xs" style={{ background: 'var(--color-primary-alpha-15)', color: 'var(--color-primary-500)', border: 'none' }}>Ready</Badge>;
             case 'processing':
             case 'uploading':
-                return <Badge className="text-xs" style={{ background: 'rgba(245,158,11,0.15)', color: '#b45309', border: 'none' }}>Processing</Badge>;
+                return <Badge className="text-xs" style={{ background: 'var(--color-warning-alpha-15)', color: 'var(--color-warning-600)', border: 'none' }}>Processing</Badge>;
             case 'failed':
-                return <Badge className="text-xs" style={{ background: 'rgba(239,68,68,0.12)', color: 'var(--recording-text, #dc2626)', border: 'none' }}>Failed</Badge>;
+                return <Badge className="text-xs" style={{ background: 'var(--color-error-alpha-12)', color: 'var(--recording-text, #dc2626)', border: 'none' }}>Failed</Badge>;
         }
     };
 
@@ -94,7 +94,7 @@ export function FilesTab({
                                 disabled={isUploading}
                                 className="shrink-0 p-1 rounded disabled:opacity-50 transition-colors duration-150"
                                 style={{ color: 'var(--text-muted)' }}
-                                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--recording-text, #dc2626)'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)'; }}
+                                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--recording-text, #dc2626)'; (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-alpha-08)'; }}
                                 onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                                 title="Delete file"
                             >

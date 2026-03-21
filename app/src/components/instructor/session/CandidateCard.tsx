@@ -19,7 +19,7 @@ export function CandidateCard({
             onClick={onSelect}
             className="w-full text-left p-3 rounded-xl text-sm transition-all duration-150"
             style={{
-                background: isSelected ? 'rgba(45,158,45,0.06)' : 'var(--surface-raised)',
+                background: isSelected ? 'var(--color-primary-alpha-06)' : 'var(--surface-raised)',
                 border: isSelected
                     ? '2px solid var(--color-primary-400)'
                     : '1px solid var(--border-default)',
@@ -40,7 +40,7 @@ export function CandidateCard({
                 <div className="flex items-center gap-2">
                     <span
                         className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize"
-                        style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-600)' }}
+                        style={{ background: 'var(--color-primary-alpha-12)', color: 'var(--color-primary-600)' }}
                     >
                         {candidate.promptType.replace('_', ' ')}
                     </span>

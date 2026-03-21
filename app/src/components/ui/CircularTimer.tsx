@@ -79,7 +79,7 @@ export function CircularTimer({ timerEndTime, timerTotalSeconds, testId }: Circu
 
   // --accent-blush is defined in :root but not overridden in .dark; see globals.css note.
   const arcColor = isExpired || isUrgent ? 'var(--accent-blush)' : 'var(--color-primary-400)';
-  const textColor = isExpired || isUrgent ? '#c0392b' : 'var(--text-primary)';
+  const textColor = isExpired || isUrgent ? 'var(--color-timer-expired)' : 'var(--text-primary)';
 
   return (
     <div

@@ -34,8 +34,8 @@ export function ConnectionStatus(props: {
         style={{
           background: 'var(--surface-glass)',
           backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(45,158,45,0.25)',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+          border: '1px solid var(--color-primary-alpha-25)',
+          boxShadow: '0 2px 12px var(--color-black-alpha-10)',
         }}
       >
         <span
@@ -53,21 +53,21 @@ export function ConnectionStatus(props: {
     <div
       className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-2 rounded-full"
       style={{
-        background: 'rgba(239,68,68,0.08)',
+        background: 'var(--color-error-alpha-08)',
         backdropFilter: 'blur(8px)',
-        border: '1px solid rgba(239,68,68,0.25)',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+        border: '1px solid var(--color-error-alpha-25)',
+        boxShadow: '0 2px 12px var(--color-black-alpha-10)',
       }}
     >
       <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-      <span className="text-sm font-medium" style={{ color: '#dc2626' }}>
+      <span className="text-sm font-medium" style={{ color: 'var(--color-error-600)' }}>
         {reconnecting ? 'Reconnecting…' : 'Disconnected'}
       </span>
       {!reconnecting ? (
         <button
           onClick={handleClick}
           className="ml-1 px-2.5 py-1 text-xs rounded-full font-medium text-white transition-all duration-150"
-          style={{ background: '#ef4444' }}
+          style={{ background: 'var(--color-error-500)' }}
         >
           Reconnect
         </button>

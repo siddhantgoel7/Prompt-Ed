@@ -155,14 +155,14 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
           {view === 'ended' ? (
             <span
               className="text-xs font-medium px-3 py-1 rounded-full"
-              style={{ background: 'rgba(239,68,68,0.12)', color: '#dc2626' }}
+              style={{ background: 'var(--color-error-alpha-12)', color: 'var(--color-error-600)' }}
             >
               Ended
             </span>
           ) : (
             <span
               className="text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1.5"
-              style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-600)' }}
+              style={{ background: 'var(--color-primary-alpha-12)', color: 'var(--color-primary-600)' }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
               Active
@@ -255,13 +255,13 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
                       data-variant={isSubmitCorrect ? 'correct' : 'incorrect'}
                       className="text-center text-xl font-bold p-5 rounded-2xl enter"
                       style={isSubmitCorrect ? {
-                        background: 'rgba(45,158,45,0.12)',
-                        border: '1px solid rgba(45,158,45,0.25)',
+                        background: 'var(--color-primary-alpha-12)',
+                        border: '1px solid var(--color-primary-alpha-25)',
                         color: 'var(--color-primary-700)',
                       } : {
-                        background: 'rgba(239,68,68,0.10)',
-                        border: '1px solid rgba(239,68,68,0.25)',
-                        color: '#dc2626',
+                        background: 'var(--color-error-alpha-10)',
+                        border: '1px solid var(--color-error-alpha-25)',
+                        color: 'var(--color-error-600)',
                       }}
                     >
                       {isSubmitCorrect ? 'Great job!' : 'Not quite!'}
@@ -353,8 +353,8 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
                       data-testid="submitted-answer-display"
                       className="rounded-xl p-4"
                       style={{
-                        background: 'rgba(45,158,45,0.06)',
-                        border: '1px solid rgba(45,158,45,0.15)',
+                        background: 'var(--color-primary-alpha-06)',
+                        border: '1px solid var(--color-primary-alpha-15)',
                         borderLeft: '3px solid var(--color-primary-400)',
                       }}
                     >

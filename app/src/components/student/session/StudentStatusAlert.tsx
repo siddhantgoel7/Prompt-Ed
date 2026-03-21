@@ -16,22 +16,22 @@ export function StudentStatusAlert({
 
   const style: React.CSSProperties = isDestructive
     ? {
-        background: 'rgba(239,68,68,0.08)',
-        border: '1px solid rgba(239,68,68,0.25)',
-        borderLeft: '3px solid #ef4444',
+        background: 'var(--color-error-alpha-08)',
+        border: '1px solid var(--color-error-alpha-25)',
+        borderLeft: '3px solid var(--color-error-500)',
         borderRadius: '12px',
         padding: '12px 16px',
       }
     : {
-        background: 'rgba(45,158,45,0.08)',
-        border: '1px solid rgba(45,158,45,0.20)',
+        background: 'var(--color-primary-alpha-08)',
+        border: '1px solid var(--color-primary-alpha-20)',
         borderLeft: '3px solid var(--color-primary-400)',
         borderRadius: '12px',
         padding: '12px 16px',
       };
 
-  const titleColor = isDestructive ? '#dc2626' : 'var(--color-primary-600)';
-  const descColor = isDestructive ? '#ef4444' : 'var(--text-secondary)';
+  const titleColor = isDestructive ? 'var(--color-error-600)' : 'var(--color-primary-600)';
+  const descColor = isDestructive ? 'var(--color-error-500)' : 'var(--text-secondary)';
 
   return (
     <div style={style} role="alert">

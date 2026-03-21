@@ -60,7 +60,7 @@ export function HamburgerMenu({
         aria-expanded={open}
         className="w-9 h-9 flex flex-col items-center justify-center gap-[5px] rounded-[10px] transition-all duration-150"
         style={{
-          background: open ? 'rgba(45,158,45,0.12)' : 'var(--surface-raised)',
+          background: open ? 'var(--color-primary-alpha-12)' : 'var(--surface-raised)',
           border: open ? '1px solid rgba(45,158,45,0.35)' : '1px solid var(--border-default)',
           color: open ? 'var(--color-primary-500)' : 'var(--text-secondary)',
         }}
@@ -83,14 +83,14 @@ export function HamburgerMenu({
               disabled={item.disabled}
               className="w-full px-4 py-2.5 text-left text-sm font-medium transition-colors duration-100 disabled:opacity-50"
               style={{
-                color: item.danger ? '#ef4444' : 'var(--text-primary)',
+                color: item.danger ? 'var(--color-error-500)' : 'var(--text-primary)',
                 background: 'transparent',
                 borderBottom: '1px solid var(--border-subtle)',
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.background = item.danger
-                  ? 'rgba(239,68,68,0.10)'
-                  : 'rgba(45,158,45,0.08)';
+                  ? 'var(--color-error-alpha-10)'
+                  : 'var(--color-primary-alpha-08)';
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.background = 'transparent';

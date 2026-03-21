@@ -95,6 +95,60 @@
   --color-primary-800: #124012;
   --color-primary-900: #0a280a;
 
+  /* Error / Danger palette */
+  --color-error-700: #b91c1c;
+  --color-error-600: #dc2626;
+  --color-error-500: #ef4444;
+  --color-timer-expired: #c0392b;   /* expired-timer text — slightly more orange than error-600 */
+
+  /* Warning / Amber palette */
+  --color-warning-600: #b45309;
+  --color-warning-500: #f59e0b;
+
+  /* ── Primary green alpha tints ──────────────────────────────────────
+     Avoids repeating rgba(45, 158, 45, 0.NN) across every component.
+     Named after the opacity percentage (05 = 5%). */
+  --color-primary-alpha-05: rgba(45, 158, 45, 0.05);
+  --color-primary-alpha-06: rgba(45, 158, 45, 0.06);
+  --color-primary-alpha-08: rgba(45, 158, 45, 0.08);
+  --color-primary-alpha-10: rgba(45, 158, 45, 0.10);
+  --color-primary-alpha-12: rgba(45, 158, 45, 0.12);
+  --color-primary-alpha-14: rgba(45, 158, 45, 0.14);
+  --color-primary-alpha-15: rgba(45, 158, 45, 0.15);
+  --color-primary-alpha-18: rgba(45, 158, 45, 0.18);
+  --color-primary-alpha-20: rgba(45, 158, 45, 0.20);
+  --color-primary-alpha-25: rgba(45, 158, 45, 0.25);
+  --color-primary-alpha-40: rgba(45, 158, 45, 0.40);  /* glow effects */
+  /* primary-400 (#3db53d = rgb(61,181,61)) tint used in HomeJoin hover */
+  --color-primary-400-alpha-08: rgba(61, 181, 61, 0.08);
+
+  /* ── Error / red alpha tints ─────────────────────────────────────── */
+  --color-error-alpha-08: rgba(239, 68, 68, 0.08);
+  --color-error-alpha-10: rgba(239, 68, 68, 0.10);
+  --color-error-alpha-12: rgba(239, 68, 68, 0.12);
+  --color-error-alpha-15: rgba(239, 68, 68, 0.15);
+  --color-error-alpha-25: rgba(239, 68, 68, 0.25);
+  --color-error-alpha-50: rgba(239, 68, 68, 0.50);
+  /* error-600 (#dc2626 = rgb(220,38,38)) tint used in TimerTab box-shadow */
+  --color-error-600-alpha-35: rgba(220, 38, 38, 0.35);
+
+  /* ── Warning / amber alpha tints ─────────────────────────────────── */
+  --color-warning-alpha-12: rgba(245, 158, 11, 0.12);
+  --color-warning-alpha-15: rgba(245, 158, 11, 0.15);
+
+  /* ── Yellow highlight alpha tints (selected ResponseCard) ─────────── */
+  --color-highlight-alpha-10: rgba(250, 204, 21, 0.10);
+  --color-highlight-alpha-12: rgba(250, 204, 21, 0.12);
+  --color-highlight-alpha-55: rgba(250, 204, 21, 0.55);
+
+  /* ── Neutral overlays (shadows, glass borders) ───────────────────── */
+  --color-black-alpha-06: rgba(0, 0, 0, 0.06);
+  --color-black-alpha-08: rgba(0, 0, 0, 0.08);
+  --color-black-alpha-10: rgba(0, 0, 0, 0.10);
+  --color-black-alpha-30: rgba(0, 0, 0, 0.30);
+  --color-white-alpha-04: rgba(255, 255, 255, 0.04);
+  --color-white-alpha-06: rgba(255, 255, 255, 0.06);
+
   /* Pastel Accents */
   --accent-mint:     #b8f0c8;
   --accent-sage:     #8ecba8;
@@ -244,7 +298,7 @@
   select:focus-visible {
     outline: none;
     border-color: var(--color-primary-500) !important;
-    box-shadow: 0 0 0 3px rgba(45, 158, 45, 0.15);
+    box-shadow: 0 0 0 3px var(--color-primary-alpha-15);
   }
 }
 
@@ -289,7 +343,7 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(45, 158, 45, 0.4); }
+  0%, 100% { box-shadow: 0 0 0 0 var(--color-primary-alpha-40); }
   50%       { box-shadow: 0 0 0 8px rgba(45, 158, 45, 0); }
 }
 
@@ -320,11 +374,11 @@
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-default);
   border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  box-shadow: 0 4px 24px var(--color-black-alpha-08), 0 1px 0 var(--color-white-alpha-04) inset;
 }
 
 .dark .glass-card {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  box-shadow: 0 4px 24px var(--color-black-alpha-30), 0 1px 0 var(--color-white-alpha-04) inset;
 }
 
 /* Icon button hover (theme toggle, action icons) */
@@ -335,7 +389,7 @@
 
 /* Primary button glow on hover */
 .btn-primary-glow:hover {
-  box-shadow: 0 0 16px rgba(45, 158, 45, 0.4);
+  box-shadow: 0 0 16px var(--color-primary-alpha-40);
 }
 
 /* ─── Rotating Glow Button Wrapper ──────────────────────────────────── */
@@ -398,7 +452,7 @@
 
 /* Tag / chip */
 .tag {
-  background: rgba(45, 158, 45, 0.12);
+  background: var(--color-primary-alpha-12);
   color: var(--color-primary-600);
   border-radius: 20px;
   padding: 3px 10px;
@@ -445,7 +499,7 @@
 }
 
 .btn-submit:disabled { opacity: 0.6; }
-.btn-submit:hover:not(:disabled) { box-shadow: 0 0 16px rgba(45, 158, 45, 0.4); }
+.btn-submit:hover:not(:disabled) { box-shadow: 0 0 16px var(--color-primary-alpha-40); }
 
 /* Sidebar collapsed transition */
 .sidebar-collapsed {

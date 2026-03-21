@@ -47,7 +47,7 @@ export function FlaggedFilterToggle({
           s.button,
         )}
         style={showFlagged ? {
-          background: 'rgba(239,68,68,0.10)',
+          background: 'var(--color-error-alpha-10)',
           color: 'var(--recording-text, #dc2626)',
           borderColor: 'rgba(239,68,68,0.30)',
         } : {

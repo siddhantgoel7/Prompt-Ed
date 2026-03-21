@@ -74,12 +74,12 @@ function ActionButton({
       )}
       style={isFlagged ? {
         color: 'var(--color-primary-600)',
-        background: 'rgba(45,158,45,0.10)',
-        border: '1px solid rgba(45,158,45,0.30)',
+        background: 'var(--color-primary-alpha-10)',
+        border: '1px solid var(--color-primary-alpha-25)',
       } : {
         color: 'var(--recording-text, #dc2626)',
-        background: 'rgba(239,68,68,0.08)',
-        border: '1px solid rgba(239,68,68,0.25)',
+        background: 'var(--color-error-alpha-08)',
+        border: '1px solid var(--color-error-alpha-25)',
       }}
     >
       {isFlagged ? <RotateCcw className={iconClassName} /> : <Flag className={iconClassName} />}
@@ -107,8 +107,8 @@ export function ResponseCard({
 
   // Selected state styles — tinted backgrounds that work in both light + dark mode
   const selectedStyle = isFlagged
-    ? { background: 'rgba(239,68,68,0.10)', border: '2px solid rgba(239,68,68,0.50)', boxShadow: '0 4px 24px rgba(239,68,68,0.12)' }
-    : { background: 'rgba(250,204,21,0.10)', border: '2px solid rgba(250,204,21,0.55)', boxShadow: '0 4px 24px rgba(250,204,21,0.12)' };
+    ? { background: 'var(--color-error-alpha-10)', border: '2px solid var(--color-error-alpha-50)', boxShadow: '0 4px 24px var(--color-error-alpha-12)' }
+    : { background: 'var(--color-highlight-alpha-10)', border: '2px solid var(--color-highlight-alpha-55)', boxShadow: '0 4px 24px var(--color-highlight-alpha-12)' };
 
   const unselectedStyle = {
     background: 'var(--surface-raised)',

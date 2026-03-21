@@ -49,7 +49,7 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
       >
         <div
           className="glass rounded-2xl p-8 space-y-6"
-          style={{ boxShadow: '0 4px 32px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.06) inset' }}
+          style={{ boxShadow: '0 4px 32px var(--color-black-alpha-10), 0 1px 0 var(--color-white-alpha-06) inset' }}
         >
           <div className="space-y-1">
             <h1

@@ -19,7 +19,7 @@ export function StudentWaitingCard({ text }: { text?: string }) {
         <div className="relative">
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(45,158,45,0.15)' }}
+            style={{ background: 'var(--color-primary-alpha-15)' }}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"/>

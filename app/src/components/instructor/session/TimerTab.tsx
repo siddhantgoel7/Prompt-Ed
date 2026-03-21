@@ -41,7 +41,7 @@ export function TimerTab({
   if (!activeDiscussionId) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
-        <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(45,158,45,0.08)' }}>
+        <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'var(--color-primary-alpha-08)' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-400)" strokeWidth="1.8" strokeLinecap="round">
             <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
           </svg>
@@ -85,9 +85,9 @@ export function TimerTab({
               onClick={() => setShowEditDialog(true)}
               data-testid="edit-timer-button"
               className="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150"
-              style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'rgba(45,158,45,0.06)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.14)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.06)'; }}
+              style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'var(--color-primary-alpha-06)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-14)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-06)'; }}
             >
               Edit
             </button>
@@ -95,9 +95,9 @@ export function TimerTab({
               onClick={() => onExtendTimer?.(10)}
               data-testid="extend-timer-button"
               className="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150"
-              style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'rgba(45,158,45,0.06)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.14)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.06)'; }}
+              style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'var(--color-primary-alpha-06)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-14)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-06)'; }}
             >
               +10s
             </button>
@@ -112,9 +112,9 @@ export function TimerTab({
           onClick={() => onClose(activeDiscussionId)}
           data-testid="close-discussion-button"
           className="px-5 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150"
-          style={{ background: '#dc2626', boxShadow: '0 2px 8px rgba(220,38,38,0.35)' }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#b91c1c'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#dc2626'; }}
+          style={{ background: 'var(--color-error-600)', boxShadow: '0 2px 8px var(--color-error-600-alpha-35)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-700)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-600)'; }}
         >
           Close Discussion
         </button>

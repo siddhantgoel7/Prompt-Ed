@@ -84,12 +84,12 @@ export function HomeJoin() {
         <div
           aria-hidden="true"
           className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(45,158,45,0.10), transparent 65%)' }}
+          style={{ background: 'radial-gradient(circle, var(--color-primary-alpha-10), transparent 65%)' }}
         />
         <div
           aria-hidden="true"
           className="absolute bottom-0 right-0 w-80 h-80 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(61,181,61,0.08), transparent 65%)' }}
+          style={{ background: 'radial-gradient(circle, var(--color-primary-400-alpha-08), transparent 65%)' }}
         />
 
         {/* Hero */}
@@ -112,7 +112,7 @@ export function HomeJoin() {
         {/* Join card */}
         <div
           className="glass w-full max-w-md rounded-2xl p-8 enter"
-          style={{ animationDelay: '60ms', boxShadow: '0 4px 32px rgba(0,0,0,0.08)' }}
+          style={{ animationDelay: '60ms', boxShadow: '0 4px 32px var(--color-black-alpha-08)' }}
         >
           <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
             Join a Session
@@ -125,13 +125,13 @@ export function HomeJoin() {
             <div
               className="rounded-xl p-3 mb-4"
               style={{
-                background: 'rgba(239,68,68,0.08)',
-                border: '1px solid rgba(239,68,68,0.25)',
-                borderLeft: '3px solid #ef4444',
+                background: 'var(--color-error-alpha-08)',
+                border: '1px solid var(--color-error-alpha-25)',
+                borderLeft: '3px solid var(--color-error-500)',
               }}
             >
-              <p className="text-sm font-semibold" style={{ color: '#dc2626' }}>Can&apos;t join</p>
-              <p className="text-sm" style={{ color: '#ef4444' }}>{error}</p>
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-error-600)' }}>Can&apos;t join</p>
+              <p className="text-sm" style={{ color: 'var(--color-error-500)' }}>{error}</p>
             </div>
           ) : null}
 

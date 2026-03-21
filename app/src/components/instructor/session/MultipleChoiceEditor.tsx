@@ -61,7 +61,7 @@ export function MultipleChoiceEditor({
                                 onChange={(e) => onOptionTextChange(opt.label, e.target.value)}
                                 className="flex-1 px-2.5 py-1.5 rounded-[8px] text-xs transition-all duration-150"
                                 style={{
-                                    background: isCorrect ? 'rgba(45,158,45,0.06)' : 'var(--surface-base)',
+                                    background: isCorrect ? 'var(--color-primary-alpha-06)' : 'var(--surface-base)',
                                     border: isCorrect
                                         ? '1.5px solid var(--color-primary-400)'
                                         : '1px solid var(--border-default)',

@@ -66,16 +66,16 @@ export function StudentPromptCard({
 
       if (showCorrectness) {
         if (isThis && isCorrectOpt)
-          return { ...base, background: 'rgba(45,158,45,0.18)', border: '2px solid var(--color-primary-500)', color: 'var(--color-primary-700)' };
+          return { ...base, background: 'var(--color-primary-alpha-18)', border: '2px solid var(--color-primary-500)', color: 'var(--color-primary-700)' };
         if (isThis && !isCorrectOpt)
-          return { ...base, background: 'rgba(239,68,68,0.12)', border: '2px solid #ef4444', color: '#dc2626' };
+          return { ...base, background: 'var(--color-error-alpha-12)', border: '2px solid var(--color-error-500)', color: 'var(--color-error-600)' };
         if (isCorrectOpt)
-          return { ...base, background: 'rgba(45,158,45,0.10)', border: '2px solid var(--color-primary-400)', color: 'var(--color-primary-600)' };
+          return { ...base, background: 'var(--color-primary-alpha-10)', border: '2px solid var(--color-primary-400)', color: 'var(--color-primary-600)' };
         return { ...base, background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-muted)', opacity: 0.6 };
       }
 
       if (isThis)
-        return { ...base, background: 'rgba(45,158,45,0.10)', border: '2px solid var(--color-primary-300)', color: 'var(--text-secondary)' };
+        return { ...base, background: 'var(--color-primary-alpha-10)', border: '2px solid var(--color-primary-300)', color: 'var(--text-secondary)' };
       return { ...base, background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-muted)', opacity: 0.5 };
     }
 
@@ -83,11 +83,11 @@ export function StudentPromptCard({
       return { ...base, background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-secondary)' };
 
     if (selectedOption === label)
-      return { ...base, background: 'rgba(45,158,45,0.18)', border: '2px solid var(--color-primary-500)', color: 'var(--text-primary)', cursor: 'pointer' };
+      return { ...base, background: 'var(--color-primary-alpha-18)', border: '2px solid var(--color-primary-500)', color: 'var(--text-primary)', cursor: 'pointer' };
 
     return {
       ...base,
-      background: 'rgba(45,158,45,0.05)',
+      background: 'var(--color-primary-alpha-05)',
       border: '1.5px solid var(--border-default)',
       color: 'var(--text-secondary)',
       cursor: 'pointer',
@@ -128,8 +128,8 @@ export function StudentPromptCard({
         bg = 'var(--color-primary-500)';
         border = '2px solid var(--color-primary-500)';
       } else if (isThisSubmitted && showCorrectness && !isCorrectOpt) {
-        bg = '#ef4444';
-        border = '2px solid #ef4444';
+        bg = 'var(--color-error-500)';
+        border = '2px solid var(--color-error-500)';
       } else if (isThisSubmitted) {
         bg = 'var(--color-primary-300)';
         border = '2px solid var(--color-primary-300)';
@@ -161,7 +161,7 @@ export function StudentPromptCard({
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: '1px solid var(--border-default)',
-        boxShadow: '0 2px 16px rgba(45,158,45,0.06)',
+        boxShadow: '0 2px 16px var(--color-primary-alpha-06)',
       }}
     >
       {/* Prompt header */}

@@ -19,11 +19,11 @@ type StatusConfig = { label: string; bg: string; text: string };
 function statusToBadge(status?: string): StatusConfig {
   switch (status) {
     case 'active':
-      return { label: 'Active', bg: 'rgba(45,158,45,0.15)', text: 'var(--color-primary-600)' };
+      return { label: 'Active', bg: 'var(--color-primary-alpha-15)', text: 'var(--color-primary-600)' };
     case 'ended':
-      return { label: 'Ended', bg: 'rgba(239,68,68,0.12)', text: '#dc2626' };
+      return { label: 'Ended', bg: 'var(--color-error-alpha-12)', text: 'var(--color-error-600)' };
     case 'draft':
-      return { label: 'Draft', bg: 'rgba(245,158,11,0.12)', text: '#b45309' };
+      return { label: 'Draft', bg: 'var(--color-warning-alpha-12)', text: 'var(--color-warning-600)' };
     default:
       return { label: 'Unknown', bg: 'var(--surface-raised)', text: 'var(--text-muted)' };
   }
@@ -54,7 +54,7 @@ export function LessonCard(
       >
         <div
           className="w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-150"
-          style={{ background: 'rgba(45,158,45,0.12)' }}
+          style={{ background: 'var(--color-primary-alpha-12)' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="2.5" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19"/>
@@ -80,7 +80,7 @@ export function LessonCard(
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: '1px solid var(--border-default)',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+        boxShadow: '0 2px 12px var(--color-black-alpha-06)',
       }}
     >
       {/* Status badge */}
@@ -102,8 +102,8 @@ export function LessonCard(
           className="w-7 h-7 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-150"
           style={{ color: 'var(--text-muted)' }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.1)';
-            (e.currentTarget as HTMLButtonElement).style.color = '#dc2626';
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-alpha-10)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-error-600)';
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLButtonElement).style.background = 'transparent';

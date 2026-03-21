@@ -39,7 +39,7 @@ export function CourseCard({
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         border: '1px solid var(--border-default)',
-        boxShadow: '0 2px 16px rgba(45,158,45,0.06), 0 1px 3px rgba(0,0,0,0.06)',
+        boxShadow: '0 2px 16px var(--color-primary-alpha-06), 0 1px 3px var(--color-black-alpha-06)',
       }}
     >
       {/* Top action menu */}
@@ -79,11 +79,11 @@ export function CourseCard({
       {/* Course thumbnail area */}
       <div
         className="h-36 flex items-center justify-center relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, rgba(45,158,45,0.15), rgba(61,181,61,0.08))' }}
+        style={{ background: 'linear-gradient(135deg, var(--color-primary-alpha-15), var(--color-primary-400-alpha-08))' }}
       >
         <div
           className="w-14 h-14 rounded-2xl flex items-center justify-center"
-          style={{ background: 'rgba(45,158,45,0.18)' }}
+          style={{ background: 'var(--color-primary-alpha-18)' }}
         >
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
@@ -113,9 +113,9 @@ export function CourseCard({
           onClick={onAccess}
           className="w-full py-2 rounded-[10px] text-sm font-semibold transition-all duration-150"
           style={{
-            background: 'rgba(45,158,45,0.12)',
+            background: 'var(--color-primary-alpha-12)',
             color: 'var(--color-primary-600)',
-            border: '1px solid rgba(45,158,45,0.2)',
+            border: '1px solid var(--color-primary-alpha-20)',
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-500)';
@@ -123,9 +123,9 @@ export function CourseCard({
             (e.currentTarget as HTMLButtonElement).style.borderColor = 'transparent';
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.12)';
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-12)';
             (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-600)';
-            (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(45,158,45,0.2)';
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-alpha-20)';
           }}
         >
           Open Course
