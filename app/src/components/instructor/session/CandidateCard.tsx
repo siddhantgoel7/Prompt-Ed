@@ -3,6 +3,7 @@
 
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // DEBUG
 import type { GeneratedPrompt } from '@/types/ai';
 
 // ─── Candidate card (teammate's design) ──────────────────────────────────────
@@ -27,9 +28,23 @@ export function CandidateCard({
         >
             <div className="flex items-start justify-between mb-1">
                 <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs capitalize">
-                        {candidate.promptType.replace('_', ' ')}
-                    </Badge>
+                    {/* DEBUG */}
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Badge variant="secondary" className="text-xs capitalize cursor-default">
+                                    {candidate.promptType.replace('_', ' ')}
+                                </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                {candidate.bloomsLevel && <p><span className="font-semibold">Bloom&apos;s:</span> {candidate.bloomsLevel}</p>}
+                                {candidate.topicArea && <p><span className="font-semibold">Topic:</span> {candidate.topicArea}</p>}
+                                {candidate.rationale && <p><span className="font-semibold">Rationale:</span> {candidate.rationale}</p>}
+                                {!candidate.bloomsLevel && !candidate.topicArea && !candidate.rationale && <p>No metadata</p>}
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    {/* END DEBUG */}
                     {isSelected && <span className="text-xs text-green-600 font-medium">Selected</span>}
                 </div>
             </div>

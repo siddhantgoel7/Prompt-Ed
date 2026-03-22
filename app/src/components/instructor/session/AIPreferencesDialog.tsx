@@ -12,7 +12,7 @@ import {
     DialogTrigger,
     DialogFooter,
 } from '@/components/ui/dialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // DEBUG
 import { useAIPreferences } from '@/hooks/useAIPreferences';
 import { AIPromptPreferences } from '@/types/ai';
 
@@ -69,7 +69,7 @@ export function AIPreferencesDialog() {
                 {isLoading ? (
                     <div className="py-6 text-center text-sm text-gray-500">Loading preferences...</div>
                 ) : (
-                    <TooltipProvider>
+                    <TooltipProvider> {/* DEBUG */}
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Tooltip>

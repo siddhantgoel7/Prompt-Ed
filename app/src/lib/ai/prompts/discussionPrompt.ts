@@ -16,10 +16,15 @@ export const CANDIDATE_COUNT = 5;
 /**
  * The AI's persona and instructions.
  * Maps difficulty to explicit Bloom's taxonomy levels with pharmacology-specific guidance.
+ *
+ * @param promptType - When provided, only the few-shot example matching the requested type is
+ *   included. This prevents the model from treating other question types as valid output formats
+ *   (e.g., generating short_answer candidates when multiple_choice was requested).
  */
-export function buildSystemPrompt(preferences?: AIPromptPreferences): string {
+export function buildSystemPrompt(preferences?: AIPromptPreferences, promptType?: PromptType): string {
   const difficultyBlock = buildDifficultyBlock(preferences?.difficulty);
   const styleBlock = buildStyleBlock(preferences?.style);
+  const fewShotExample = buildFewShotExample(promptType);
 
   return `You are an expert pharmacology teaching assistant helping a university instructor generate discussion questions for a live lecture.
 
@@ -30,15 +35,16 @@ export function buildSystemPrompt(preferences?: AIPromptPreferences): string {
 4. STYLE: ${styleBlock}
 5. AUDIENCE: University-level students in pharmacology or medical disciplines.
 6. FORMAT: Questions must be clear, specific, and answerable within a 2-3 minute class discussion.
-7. DIVERSITY: Vary topic, cognitive level, and structure across candidates — do not generate variations of the same question.
-8. MC DISTRACTORS: For multiple_choice questions, distractors must be plausible — use common misconceptions, mechanisms that are partially correct under different conditions, or related-but-wrong drug classes. Never use trivially wrong or obviously absurd options.
-9. OUTPUT: Respond with valid JSON only. Do not wrap in backticks or include any conversational text.
+7. DIVERSITY: Vary topic, phrasing, and cognitive level across candidates — do not generate variations of the same question. Do NOT vary the question type — all candidates must use the type specified in <question_type_rules>.
+8. QUESTION TYPE LOCK: ALL ${CANDIDATE_COUNT} candidates must use the exact promptType specified in <question_type_rules>. Producing any candidate of a different type is an error.
+9. MC DISTRACTORS: For multiple_choice questions, distractors must be plausible — use common misconceptions, mechanisms that are partially correct under different conditions, or related-but-wrong drug classes. Never use trivially wrong or obviously absurd options.
+10. OUTPUT: Respond with valid JSON only. Do not wrap in backticks or include any conversational text.
 </rules>
 
 <output_schema>
 Each candidate object must include:
 - "promptText": string — the discussion question
-- "promptType": string — the question type literal
+- "promptType": string — must match the type in <question_type_rules> for every candidate
 - "bloomsLevel": one of "remember" | "understand" | "apply" | "analyze" | "evaluate" | "create"
 - "topicArea": string — the specific pharmacology topic this question addresses (e.g., "beta-blocker mechanism", "RAAS pathway")
 - "rationale": string — one sentence explaining why this question is pedagogically valuable
@@ -46,12 +52,29 @@ Each candidate object must include:
 </output_schema>
 
 <few_shot_examples>
-Multiple choice example:
-[{"promptText": "A patient taking propranolol reports cold extremities and fatigue. Which receptor mechanism best explains these side effects?", "promptType": "multiple_choice", "bloomsLevel": "apply", "topicArea": "beta-blocker adverse effects", "rationale": "Applies receptor pharmacology to a clinical presentation, distinguishing beta-1 from beta-2 effects.", "mcOptions": [{"label": "A", "text": "Competitive antagonism at beta-1 adrenergic receptors reduces cardiac output", "is_correct": false}, {"label": "B", "text": "Non-selective beta blockade reduces peripheral vasodilation via beta-2 inhibition", "is_correct": true}, {"label": "C", "text": "Alpha-1 blockade causes reflex tachycardia and peripheral vasoconstriction", "is_correct": false}, {"label": "D", "text": "Muscarinic M2 agonism slows conduction and reduces contractility", "is_correct": false}]}]
-
-Short answer example:
-[{"promptText": "Explain why a non-selective beta-blocker is contraindicated in a patient with asthma.", "promptType": "short_answer", "bloomsLevel": "understand", "topicArea": "beta-blocker contraindications", "rationale": "Tests understanding of receptor selectivity and its clinical consequences rather than pure recall."}]
+${fewShotExample}
 </few_shot_examples>`;
+}
+
+/**
+ * Returns a single few-shot example matching the requested promptType.
+ * Showing only the relevant example prevents the model from treating other types
+ * as valid output formats (e.g., generating short_answer when multiple_choice was requested).
+ * Falls back to short_answer for undefined/unknown types.
+ */
+function buildFewShotExample(promptType?: PromptType): string {
+  switch (promptType) {
+    case 'multiple_choice':
+      return `Multiple choice example:
+[{"promptText": "A patient taking propranolol reports cold extremities and fatigue. Which receptor mechanism best explains these side effects?", "promptType": "multiple_choice", "bloomsLevel": "apply", "topicArea": "beta-blocker adverse effects", "rationale": "Applies receptor pharmacology to a clinical presentation, distinguishing beta-1 from beta-2 effects.", "mcOptions": [{"label": "A", "text": "Competitive antagonism at beta-1 adrenergic receptors reduces cardiac output", "is_correct": false}, {"label": "B", "text": "Non-selective beta blockade reduces peripheral vasodilation via beta-2 inhibition", "is_correct": true}, {"label": "C", "text": "Alpha-1 blockade causes reflex tachycardia and peripheral vasoconstriction", "is_correct": false}, {"label": "D", "text": "Muscarinic M2 agonism slows conduction and reduces contractility", "is_correct": false}]}]`;
+    case 'long_answer':
+      return `Long answer example:
+[{"promptText": "A patient is prescribed two drugs that act on the same receptor pathway. Explain the mechanistic basis for their potential interaction and how the combined pharmacodynamic effect differs from monotherapy.", "promptType": "long_answer", "bloomsLevel": "analyze", "topicArea": "drug interactions", "rationale": "Requires integrating two drug mechanisms to predict a combined effect, connecting pharmacodynamics to a clinical outcome."}]`;
+    case 'short_answer':
+    default:
+      return `Short answer example:
+[{"promptText": "Explain why a non-selective beta-blocker is contraindicated in a patient with asthma.", "promptType": "short_answer", "bloomsLevel": "understand", "topicArea": "beta-blocker contraindications", "rationale": "Tests understanding of receptor selectivity and its clinical consequences rather than pure recall."}]`;
+  }
 }
 
 /** Maps difficulty preference to Bloom's taxonomy language with example question starters. */
