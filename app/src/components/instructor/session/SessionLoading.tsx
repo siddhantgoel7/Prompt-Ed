@@ -1,12 +1,10 @@
 // Full-screen loading state shown while the session page fetches lesson data.
-import * as React from 'react';
+// Tests detect this state via data-testid="loading-screen" on the LoadingScreen
+// component — do not remove that attribute or change the component without
+// updating the corresponding test assertions.
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
 
-/** Renders a centered "Loading..." message while session data is being fetched. */
+/** Renders a full-screen loading animation while session data is being fetched. */
 export function SessionLoading() {
-  // Keep exact string for tests
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p className="text-gray-500">Loading...</p>
-    </div>
-  );
+  return <LoadingScreen />;
 }

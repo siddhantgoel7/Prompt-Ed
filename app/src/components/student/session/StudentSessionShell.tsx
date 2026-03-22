@@ -3,23 +3,59 @@
 'use client';
 
 import { PropsWithChildren } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
+import { AppLogo } from '@/components/ui/AppLogo';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
-/** Renders a full-screen centered card with the lesson title as the header. */
 export function StudentSessionShell({
   title,
   children,
 }: PropsWithChildren<{ title?: string }>) {
+  const router = useRouter();
+
   return (
-    <div className="min-h-[calc(100vh-1px)] bg-muted/30 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl shadow-sm">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-center text-xl md:text-2xl">
-            {title || 'Session'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">{children}</CardContent>
-      </Card>
+    <div
+      className="min-h-screen flex flex-col bg-surface-base"
+    >
+      {/* Top bar */}
+      <header
+        className="glass sticky top-0 z-50 px-4 py-2.5 flex items-center justify-between"
+      >
+        <AppLogo size="sm" />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            onClick={() => router.push('/')}
+            className="px-3 py-1.5 rounded-[8px] text-xs font-medium text-white transition-all duration-150"
+            style={{ background: 'oklch(0.577 0.245 27.325)' }}
+          >
+            Leave
+          </button>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="flex-1 flex items-start justify-center p-4 pt-8">
+        <div className="w-full max-w-2xl space-y-4">
+          {/* Session title */}
+          {title && (
+            <div className="text-center">
+              <h1 className="text-xl md:text-2xl font-bold text-content-primary">
+                {title}
+              </h1>
+            </div>
+          )}
+
+          {children}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="py-4 text-center">
+        <p className="text-xs text-content-muted">
+          PromptED · AI-Assisted Teaching
+        </p>
+      </footer>
     </div>
   );
 }

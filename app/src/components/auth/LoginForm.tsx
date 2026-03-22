@@ -1,14 +1,11 @@
 // Email/password login form for instructors, with Google OAuth as an alternative option.
+// Styling uses shared CSS utility classes from globals.css (.form-label, .input-glass,
+// .btn-submit) to keep the JSX concise and stay in sync with SignUpForm.
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmail, signInWithGoogle } from '@/lib/supabase/auth';
-
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { OAuthButton } from './OAuthButton';
 
@@ -25,6 +22,7 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  /** Generic field setter — avoids a separate onChange handler per field. */
   const setField = (name: keyof LoginFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -42,6 +40,7 @@ export function LoginForm() {
       return;
     }
 
+    // On success Supabase sets the auth cookie automatically; redirect to dashboard.
     router.push('/instructor_dashboard');
   };
 
@@ -54,68 +53,74 @@ export function LoginForm() {
     if (error) {
       setError(error.message);
       setLoading(false);
+      // On success the OAuth redirect handles navigation — no explicit push needed.
     }
   };
 
   return (
-    <>
-      <form onSubmit={handleSignIn} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => setField('email', e.target.value)}
-            placeholder="your@email.com"
-            required
-            autoComplete="email"
-          />
-        </div>
+    <form onSubmit={handleSignIn} className="space-y-5">
+      {/* Email field — HTML5 required + type="email" handles basic validation */}
+      <div className="space-y-1.5">
+        <label htmlFor="email" className="form-label">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setField('email', e.target.value)}
+          placeholder="your@ualberta.ca"
+          required
+          autoComplete="email"
+          className="input-glass"
+        />
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={(e) => setField('password', e.target.value)}
-            required
-            autoComplete="current-password"
-          />
-        </div>
+      {/* Password field */}
+      <div className="space-y-1.5">
+        <label htmlFor="password" className="form-label">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          value={formData.password}
+          onChange={(e) => setField('password', e.target.value)}
+          required
+          autoComplete="current-password"
+          className="input-glass"
+        />
+      </div>
 
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
+      {/* Supabase error (e.g. invalid credentials, network error) */}
+      {error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
 
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Signing in...' : 'Sign In'}
-        </Button>
-      </form>
+      {/* Primary submit — disabled while the Supabase request is in-flight */}
+      <button type="submit" disabled={loading} className="btn-submit">
+        {loading ? 'Signing in…' : 'Sign In'}
+      </button>
 
-      <div className="flex items-center gap-2">
-        <Separator className="flex-1" />
-        <span className="text-sm text-muted-foreground">OR</span>
-        <Separator className="flex-1" />
+      {/* Divider between email/password and OAuth */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px bg-line-default" />
+        <span className="text-xs text-content-muted">OR</span>
+        <div className="flex-1 h-px bg-line-default" />
       </div>
 
       <OAuthButton loading={loading} onClick={handleGoogleSignIn} providerLabel="Google" />
 
-      <p className="text-sm text-center text-muted-foreground">
-        Don’t have an account?{' '}
+      <p className="text-sm text-center text-content-muted">
+        Don&apos;t have an account?{' '}
         <button
           onClick={() => router.push('/create_instructor')}
-          className="underline underline-offset-4 hover:text-foreground"
+          className="font-medium transition-colors duration-150 hover:underline text-brand-500"
           type="button"
         >
           Sign Up
         </button>
       </p>
-    </>
+    </form>
   );
 }

@@ -1,7 +1,8 @@
-// Parses PPTX files into plain text by extracting slide body, speaker notes,
-// and optionally describing embedded images via GPT-4o vision (one call per slide).
+// Parses PPTX files into structured sections by extracting slide body, speaker notes,
+// and optionally describing embedded images via a vision model (one call per slide).
 import JSZip from 'jszip';
 import type { AIProvider } from '@/lib/ai/providers';
+import type { ParsedSection } from '@/types/ai';
 
 const NO_VISUAL_CONTENT = 'NO_VISUAL_CONTENT';
 const VISION_DEBUG = process.env.VISION_DEBUG === 'true';
@@ -18,15 +19,17 @@ const VISION_MIME_MAP: Record<string, 'image/png' | 'image/jpeg' | 'image/webp'>
 
 /**
  * Extracts text AND visual content from a PPTX buffer.
+ * Returns one ParsedSection per content type per slide (slide_body, slide_notes,
+ * visual_description), preserving slide provenance for downstream chunk metadata.
  *
  * Per-slide pipeline:
- *   1. Body text  → [Slide N Body]
- *   2. Speaker notes → [Slide N Notes]
- *   3. Embedded images (PNG/JPG/WEBP) + body + notes → ONE GPT-4o call
- *      → [Slide N Visual Content]
+ *   1. Body text  → ParsedSection { contentOrigin: 'slide_body', slideNumber: N }
+ *   2. Speaker notes → ParsedSection { contentOrigin: 'slide_notes', slideNumber: N }
+ *   3. Embedded images (PNG/JPG/WEBP) + body + notes → ONE vision model call
+ *      → ParsedSection { contentOrigin: 'visual_description', slideNumber: N }
  *
  * Why one call per slide (not one call per image):
- *   - GPT-4o sees body text, notes, and ALL images simultaneously, so it can
+ *   - The vision model sees body text, notes, and ALL images simultaneously, so it can
  *     cross-reference diagram labels with slide text without losing context.
  *   - Reduces API calls from (images × slides) to (slides with images).
  *   - The model is explicitly told not to repeat what's already in text/notes,
@@ -36,7 +39,7 @@ const VISION_MIME_MAP: Record<string, 'image/png' | 'image/jpeg' | 'image/webp'>
  *   - OpenAI file inputs only support PDF natively; PPTX is not a supported format.
  *   - We extract images directly from the ZIP and send them as image_url parts.
  */
-export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promise<string> {
+export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promise<ParsedSection[]> {
   const zip = await JSZip.loadAsync(buffer);
 
   const slideFiles = Object.keys(zip.files)
@@ -45,11 +48,12 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
 
   dlog(`[pptxParser] slidesFound=${slideFiles.length} aiProvider=${!!aiProvider}`);
 
-  const parts: string[] = [];
-
-  for (const slideFile of slideFiles) {
+  // Process all slides in parallel — vision calls (one per slide) are the bottleneck,
+  // so running them concurrently reduces total time from O(slides) to O(1) round-trips.
+  // Promise.all preserves input order so slide numbering stays correct.
+  const slidesSections = await Promise.all(slideFiles.map(async (slideFile) => {
     const n = slideNum(slideFile);
-    const slideParts: string[] = [];
+    const sections: ParsedSection[] = [];
 
     dlog(`[pptxParser] ── slide ${n} ──────────────────────`);
 
@@ -57,7 +61,7 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
     const slideXml = await zip.files[slideFile].async('text');
     const bodyText = extractTextNodes(slideXml);
     if (bodyText) {
-      slideParts.push(`[Slide ${n} Body] ${bodyText}`);
+      sections.push({ content: stripControlChars(bodyText), contentOrigin: 'slide_body', slideNumber: n });
       dlog(`[pptxParser] slide=${n} bodyText len=${bodyText.length}: "${bodyText.slice(0, 80)}..."`);
     } else {
       dlog(`[pptxParser] slide=${n} bodyText: (empty)`);
@@ -80,7 +84,7 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
     }
 
     if (notesText) {
-      slideParts.push(`[Slide ${n} Notes] ${notesText}`);
+      sections.push({ content: stripControlChars(notesText), contentOrigin: 'slide_notes', slideNumber: n });
       dlog(`[pptxParser] slide=${n} notes len=${notesText.length}: "${notesText.slice(0, 80)}..."`);
     } else {
       dlog(`[pptxParser] slide=${n} notes: (empty)`);
@@ -122,7 +126,7 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
       if (images.length === 0) {
         dlog(`[pptxParser] slide=${n} vision: SKIPPED (no supported images)`);
       } else {
-        // One GPT-4o call: body text + notes + all images together
+        // One vision model call: body text + notes + all images together
         dlog(`[pptxParser] slide=${n} calling generatePptxSlideVisualDescription with ${images.length} image(s)`);
         try {
           const description = await aiProvider.generatePptxSlideVisualDescription(
@@ -139,7 +143,7 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
           );
 
           if (!isNoVisual) {
-            slideParts.push(`[Slide ${n} Visual Content] ${description}`);
+            sections.push({ content: stripControlChars(description), contentOrigin: 'visual_description', slideNumber: n });
           }
         } catch (err) {
           console.warn(`[pptxParser] slide=${n} vision call failed, skipping:`, err);
@@ -147,16 +151,13 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
       }
     }
 
-    if (slideParts.length > 0) {
-      parts.push(slideParts.join('\n'));
-    }
+    dlog(`[pptxParser] slide=${n} done — sections emitted: ${sections.length}`);
+    return sections;
+  }));
 
-    dlog(`[pptxParser] slide=${n} done — parts emitted: ${slideParts.length}`);
-  }
-
-  const combined = parts.join('\n');
-  dlog(`[pptxParser] COMPLETE — total chars=${combined.length}`);
-  return stripControlChars(combined);
+  const allSections = slidesSections.flat();
+  dlog(`[pptxParser] COMPLETE — total sections=${allSections.length}`);
+  return allSections;
 }
 
 // ── XML helpers ────────────────────────────────────────────────────────────────

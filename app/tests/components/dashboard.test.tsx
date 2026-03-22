@@ -59,7 +59,8 @@ describe('Dashboard Component', () => {
     )
 
     render(<Dashboard />)
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    // Use data-testid="loading-screen" (set on LoadingScreen component) rather than logo alt text
+    expect(screen.getByTestId('loading-screen')).toBeInTheDocument()
   })
 
   // 15.2
@@ -106,7 +107,7 @@ describe('Dashboard Component', () => {
     render(<Dashboard />)
 
     await waitFor(() => {
-      expect(screen.getByText('Your Courses!')).toBeInTheDocument()
+      expect(screen.getByText('Your Courses')).toBeInTheDocument()
     })
   })
 
@@ -193,10 +194,10 @@ describe('Dashboard Component', () => {
     render(<Dashboard />)
 
     await waitFor(() => {
-      expect(screen.getByText('Your Courses!')).toBeInTheDocument()
+      expect(screen.getByText('Your Courses')).toBeInTheDocument()
     })
 
-    const addButton = screen.getByText('Add a course')
+    const addButton = screen.getByText('Add Course')
     await userEvent.click(addButton)
 
     await waitFor(() => {
@@ -229,10 +230,10 @@ describe('Dashboard Component', () => {
     render(<Dashboard />)
 
     await waitFor(() => {
-      expect(screen.getByText('Log-Out')).toBeInTheDocument()
+      expect(screen.getByText('Log Out')).toBeInTheDocument()
     })
 
-    const logoutButton = screen.getByText('Log-Out')
+    const logoutButton = screen.getByText('Log Out')
     await userEvent.click(logoutButton)
 
     await waitFor(() => {

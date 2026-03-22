@@ -27,20 +27,6 @@ jest.mock('@/components/instructor/session/SplitView', () => ({
   ),
 }));
 
-jest.mock('@/components/instructor/session/JoinCodeOverlay', () => ({
-  JoinCodeOverlay: () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
-    return vm.displayState ? (
-      <div>
-        <div>Join Code Overlay</div>
-        <div>CODE: {vm.lesson.pin_code}</div>
-        <button onClick={vm.handleDisplay}>Close Overlay</button>
-      </div>
-    ) : null;
-  },
-}));
-
 jest.mock('@/components/instructor/session/ActiveSidebar', () => ({
   ActiveSidebar: () => <div>Sidebar</div>,
 }));
@@ -135,20 +121,11 @@ describe('SessionActiveView (Acceptance)', () => {
   });
 
   // 5.2
-  it('[US 1.31][AT1] success: display overlay shows join code when displayState=true', () => {
-    const vm = makeVM({ displayState: true, lesson: { pin_code: '999999' } as any });
+  it('[US 1.31][AT1] success: clicking Display calls vm.handleDisplay', () => {
+    const vm = makeVM();
     render(<SessionActiveView vm={vm} />);
 
-    expect(screen.getByText(/Join Code Overlay/i)).toBeInTheDocument();
-    expect(screen.getByText(/CODE:\s*999999/i)).toBeInTheDocument();
-  });
-
-  // 5.3
-  it('[US 1.31][AT1] success: closing overlay calls handleDisplay (toggles off)', () => {
-    const vm = makeVM({ displayState: true });
-    render(<SessionActiveView vm={vm} />);
-
-    fireEvent.click(screen.getByRole('button', { name: /Close Overlay/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Display/i }));
     expect(vm.handleDisplay).toHaveBeenCalled();
   });
 

@@ -17,7 +17,9 @@
     "api:swagger": "swagger-ui-watcher ../docs/openapi.yaml --port 8080"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.2.2",
+    "@langchain/core": "^1.1.33",
     "@langchain/textsplitters": "^1.0.1",
     "@napi-rs/canvas": "^0.1.95",
     "@supabase/auth-helpers-nextjs": "^0.15.0",
@@ -43,6 +45,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
+    "recharts": "^3.8.0",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.4.0",
@@ -52,9 +55,11 @@
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/jest": "^30.0.0",
     "@types/jszip": "^3.4.0",
     "@types/node": "^20",
@@ -64,6 +69,7 @@
     "@types/testing-library__jest-dom": "^5.14.9",
     "@types/uuid": "^10.0.0",
     "babel-plugin-react-compiler": "1.0.0",
+    "canvas-confetti": "^1.9.4",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "eslint-config-prettier": "^10.1.8",

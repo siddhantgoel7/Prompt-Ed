@@ -84,7 +84,7 @@ test.describe('Student Session API Scoping & Real-time Status', () => {
         await page.getByLabel('PIN code').fill('999999');
         await page.getByRole('button', { name: 'Join' }).click();
 
-        await expect(page.getByText(/Waiting for the instructor to publish a discussion/i)).toBeVisible({ timeout: 15000 });
+        await expect(page.getByText(/Waiting for next question/i)).toBeVisible({ timeout: 15000 });
         await expect(page.getByText('Active', { exact: true })).toBeVisible({ timeout: 15000 });
     });
 

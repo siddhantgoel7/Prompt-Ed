@@ -258,8 +258,7 @@ describe('Student Session Page (Acceptance)', () => {
 
     rerender(<StudentSessionPage lessonId="lesson-1" />);
 
-    expect(screen.getByText(/✅ Correct!/i)).toBeInTheDocument();
-    expect(screen.getByText(/You selected the correct answer/i)).toBeInTheDocument();
+    expect(screen.getByText(/Great job/i)).toBeInTheDocument();
   });
 
   // 12.11
@@ -325,8 +324,7 @@ describe('Student Session Page (Acceptance)', () => {
 
     rerender(<StudentSessionPage lessonId="lesson-1" />);
 
-    expect(screen.getByText(/❌ Incorrect/i)).toBeInTheDocument();
-    expect(screen.getByText(/Correct Answer: Option B/i)).toBeInTheDocument();
+    expect(screen.getByText(/Not quite/i)).toBeInTheDocument();
   });
 
   // 12.12
@@ -389,7 +387,7 @@ describe('Student Session Page (Acceptance)', () => {
     rerender(<StudentSessionPage lessonId="lesson-1" />);
 
     expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
-    expect(screen.queryByText(/✅ Correct!/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/❌ Incorrect/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Great job/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Not quite/i)).not.toBeInTheDocument();
   });
 });

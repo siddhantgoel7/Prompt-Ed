@@ -1,10 +1,9 @@
 // Active session layout — composes the header, sidebar, center panel, right panel,
-// join code overlay, and connection status indicator into the full instructor session UI.
+// and connection status indicator into the full instructor session UI.
 'use client';
 // MERGED: wires all AI props from VM to components
 
 import * as React from 'react';
-import { JoinCodeOverlay } from '@/components/instructor/session/JoinCodeOverlay';
 import { SessionHeaderActive } from '@/components/instructor/session/SessionHeaderActive';
 import { ActiveSidebar } from '@/components/instructor/session/ActiveSidebar';
 import { ActiveCenter } from '@/components/instructor/session/ActiveCenter';
@@ -27,22 +26,40 @@ export function SessionActiveView(props: { vm?: SessionVM }) {
         discussions={vm.discussions}
         lessonId={lesson.id}
         onBack={() => setSplitView(false)}
+        liveActiveDiscussionId={vm.activeDiscussion?.id ?? null}
+        liveActiveResponses={vm.responses}
       />
     );
     return context ? splitContent : <SessionProvider vm={vm}>{splitContent}</SessionProvider>;
   }
 
   const content = (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div
+      className="min-h-screen flex flex-col bg-surface-base"
+    >
       <SessionHeaderActive onSplitView={() => setSplitView(true)} />
 
-      {vm.endError ? <p className="text-sm text-red-600 px-6 py-2">{vm.endError}</p> : null}
+      {vm.endError ? (
+        <p
+          className="text-sm px-6 py-2"
+          style={{ color: 'oklch(0.577 0.245 27.325)', background: 'rgba(239,68,68,0.08)' }}
+        >
+          {vm.endError}
+        </p>
+      ) : null}
 
-      <JoinCodeOverlay />
-
-      <div className="flex-1 flex flex-col md:flex-row">
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left sidebar */}
         <ActiveSidebar />
-        <ActiveCenter />
+
+        {/* Center */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <div className="flex-1 overflow-y-auto">
+            <ActiveCenter />
+          </div>
+        </div>
+
+        {/* Right panel */}
         <ActiveRightPanel />
       </div>
 

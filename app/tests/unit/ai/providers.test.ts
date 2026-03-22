@@ -206,7 +206,7 @@ describe('[US 1.18 + 1.23] OpenAIProvider.generateChatCompletion', () => {
       { role: 'user', content: 'Generate a short answer question.' },
     ]);
 
-    expect(result).toBe('{"candidates": []}');
+    expect(result.content).toBe('{"candidates": []}');
   });
 
   // 38.13
@@ -247,7 +247,7 @@ describe('[US 1.18 + 1.23] OpenAIProvider.generateChatCompletion', () => {
     mockCreate.mockResolvedValue({ choices: [{ message: { content: null } }] });
 
     const result = await provider.generateChatCompletion([{ role: 'user', content: 'prompt' }]);
-    expect(result).toBe('');
+    expect(result.content).toBe('');
   });
 });
 

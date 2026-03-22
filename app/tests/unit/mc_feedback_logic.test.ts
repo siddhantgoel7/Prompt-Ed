@@ -50,17 +50,11 @@ function shouldShowFeedback(
 }
 
 /**
- * Returns the display message shown to the student after submission.
- * Mirrors lines 161-167 of StudentSessionPage.tsx.
+ * Returns the headline shown to the student in the feedback banner after submission.
+ * Mirrors the banner text in StudentSessionPage.tsx submitted view.
  */
-function getFeedbackMessage(
-    isCorrect: boolean,
-    correctOption: string
-): { headline: string; detail: string } {
-    if (isCorrect) {
-        return { headline: '✅ Correct!', detail: 'You selected the correct answer.' };
-    }
-    return { headline: '❌ Incorrect', detail: `Correct Answer: Option ${correctOption}` };
+function getFeedbackMessage(isCorrect: boolean): { headline: string } {
+    return { headline: isCorrect ? 'Good Job! 🎉' : 'Oops! 😔' };
 }
 
 // ---------------------------------------------------------------------------
@@ -186,28 +180,26 @@ describe('MC Feedback Logic — Unit Tests [US 2.10]', () => {
     describe('getFeedbackMessage()', () => {
 
         // 28.17
-        it('[US 2.10][UT17] success: correct answer shows confirmation headline', () => {
-            const { headline, detail } = getFeedbackMessage(true, 'B');
-            expect(headline).toBe('✅ Correct!');
-            expect(detail).toBe('You selected the correct answer.');
+        it('[US 2.10][UT17] success: correct answer shows Good Job! headline', () => {
+            const { headline } = getFeedbackMessage(true);
+            expect(headline).toBe('Good Job! 🎉');
         });
 
         // 28.18
-        it('[US 2.10][UT18] failure: incorrect answer shows error headline', () => {
-            const { headline } = getFeedbackMessage(false, 'B');
-            expect(headline).toBe('❌ Incorrect');
+        it('[US 2.10][UT18] failure: incorrect answer shows Oops! headline', () => {
+            const { headline } = getFeedbackMessage(false);
+            expect(headline).toBe('Oops! 😔');
         });
 
         // 28.19
-        it('[US 2.10][UT19] failure: incorrect answer reveals the correct option label', () => {
-            const { detail } = getFeedbackMessage(false, 'B');
-            expect(detail).toBe('Correct Answer: Option B');
+        it('[US 2.10][UT19] success: correct and incorrect produce different headlines', () => {
+            expect(getFeedbackMessage(true).headline).not.toBe(getFeedbackMessage(false).headline);
         });
 
         // 28.20
-        it('[US 2.10][UT20] failure: correct option label varies with the actual correct answer', () => {
-            expect(getFeedbackMessage(false, 'D').detail).toBe('Correct Answer: Option D');
-            expect(getFeedbackMessage(false, 'A').detail).toBe('Correct Answer: Option A');
+        it('[US 2.10][UT20] success: false always returns Oops! regardless of other context', () => {
+            expect(getFeedbackMessage(false).headline).toBe('Oops! 😔');
+            expect(getFeedbackMessage(false).headline).toBe('Oops! 😔');
         });
     });
 });

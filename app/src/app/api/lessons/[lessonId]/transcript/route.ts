@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import OpenAI from 'openai';
+import type { ChunkMetadata } from '@/types/ai';
 
 const MAX_AUDIO_SIZE = 25 * 1024 * 1024;
 
@@ -96,7 +97,12 @@ export async function POST(
         content_type: 'transcript',
         content: transcript,
         embedding: JSON.stringify(embedding),
-        metadata: { source: 'transcript', recordedAt: new Date().toISOString() },
+        metadata: {
+          contentOrigin: 'transcript',
+          chunkType: 'text',
+          chunkIndex: 0,
+          recordedAt: new Date().toISOString(),
+        } satisfies ChunkMetadata,
       });
     } catch (err) {
       console.error('[transcript] Background embed/store error:', err);

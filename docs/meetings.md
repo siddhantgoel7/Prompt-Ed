@@ -402,6 +402,118 @@
 ### Action Items
 - N/A
 
+---
+
+## Meeting 16 — Sprint 4 Client Demo & UI Feedback
+
+**Date:** March 10, 2026  
+**Time:** 5:00 PM  
+**Place:** Zoom  
+
+**Attendees:** Nikita, Tomiwa, Siddhant, Shahbaz, Muaadh, Aldo, Kristian  
+**Absent:** None  
+
+### Agenda
+- Project demo
+
+### Decisions
+- Current UI is satisfactory
+- Focus development on reducing AI generation time
+- Provide more descriptive answer explanations instead of simple option identifiers (e.g., "Option A")
+- Use provided midterms to establish a baseline for question complexity and types
+- Evaluate feasibility of repositioning closed discussion feature for persistent visibility
+- Discontinue support for JSON and PDF output formats
+- Relocate PIN/QR code display to a dedicated separate tab
+
+### Action Items
+- Implement a feature to map transcript content to corresponding discussion points
+- Remove or redesign the Analytics tab — currently redundant and lacks utility
+
+---
+
+## Meeting 17 — Sprint 4 Standup
+
+**Date:** March 11, 2026  
+**Time:** 10:00 AM  
+**Place:** UCOMM 4  
+
+**Attendees:** Nikita, Tomiwa, Siddhant, Shahbaz, Muaadh, Aldo, Kristian  
+**Absent:** None  
+
+### Agenda
+- Project demo
+
+### Decisions
+- AI generation time averages approximately 30 seconds
+
+### Action Items
+- N/A
+
+---
+
+## Meeting 18 — Sprint 4 Standup & Beta Testing Review
+
+**Date:** March 18, 2026  
+**Time:** 10:00 AM  
+**Place:** UCOMM 4  
+
+**Attendees:** Nikita, Tomiwa, Siddhant, Shahbaz, Muaadh, Kristian  
+**Absent:** Aldo (called in sick)  
+
+### Agenda
+- Standup
+- Review whether students can see how many students got an MC answer right or wrong
+- Client has started beta testing
+- Client added a handful of user stories after initial beta testing
+- Team workload and burnout risk discussion
+
+### Decisions
+- AI generation time averages approximately 30 seconds
+- Add screenshots for UI accessibility documentation (more images, less text)
+- All 7 team members need self-hosted runners
+- 75% of requirements should be completed by end of Sprint 4
+- Core functionalities must all be tested (not necessarily every single test case)
+
+### Action Items
+- When assigning tasks, include deadlines and mark when each task is actually completed
+
+---
+
+## Meeting 19 — Sprint 4 Client Feedback & Feature Planning
+
+**Date:** March 20, 2026  
+**Time:** 5:15 PM  
+**Place:** Online  
+
+**Attendees:** Nikita, Tomiwa, Siddhant, Muaadh, Kristian, Aldo  
+**Absent:** Shahbaz  
+
+### Agenda
+- Instructor feedback after using the platform with a 425-student class
+- Review progress on AI features, UI responsiveness, and file upload efficiency
+- Discuss improvements to AI-generated content and randomness
+- Explore new feature ideas (boilerplate questions, response grouping, QR changes)
+- Plan next steps for testing and enhancements
+
+### Decisions
+- Prioritize improving randomness in AI-generated questions (internal solution or external API such as random.org)
+- Increase prompt context length to improve quality and diversity of AI-generated questions
+- Add a "boilerplate questions" feature for instructors to quickly select questions at the start of class
+- Create a pre-generated multiple-choice questions tab
+- Continue improving UI responsiveness
+- Update QR code to display only the host portion of the URL
+
+### Action Items
+- Investigate and implement improved randomness solution
+- Experiment with longer prompt contexts for AI generation
+- Design and implement boilerplate question selection feature
+- Develop pre-generated MCQ tab
+- Explore feasibility of grouping short-answer responses (e.g., via word clouds)
+- Assess limitations of semantic grouping for long-answer responses
+- Prepare and conduct role-play testing in the next meeting
+
+---
+
 ## Meeting Summary
 
 ### Sprint 1 (Planning Phase)
@@ -415,3 +527,7 @@
 ### Sprint 3 (AI Integration Phase)
 - **Meetings 13–15**: Sprint standups, app demos, AI pipeline discussions, and usability planning
 - **Key Outcomes**: AI prompt generation implemented, UAlberta SSO integrated, modular AI provider architecture established, UI accessibility principles documented, project deployed to cloud
+
+### Sprint 4 (Export, Metrics & Polish Phase)
+- **Meetings 16–19**: Client demos, standup meetings, beta testing review, and feature planning
+- **Key Outcomes**: UI approved by client, AI generation performance identified as key focus, beta testing initiated with 425-student class, boilerplate questions and pre-generated MCQ tab planned, QR/PIN UI relocated, JSON/PDF export discontinued

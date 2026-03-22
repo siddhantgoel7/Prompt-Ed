@@ -1,6 +1,8 @@
-// Parses PDF files into text using pdfjs-serverless, then optionally sends the whole
-// PDF to GPT-4o for a single-pass visual description of any pages with diagrams or images.
+// Parses PDF files into structured sections using pdfjs-serverless, then optionally sends the
+// whole PDF to a vision model for a single-pass visual description of diagram/image pages.
 import type { AIProvider } from '@/lib/ai/providers';
+import type { ParsedSection } from '@/types/ai';
+import { GeminiProvider } from '@/lib/ai/providers';
 import { createCanvas, Path2D } from '@napi-rs/canvas';
 
 const NO_VISUAL_CONTENT = 'NO_VISUAL_CONTENT';
@@ -22,9 +24,13 @@ function registerCanvasGlobals() {
 
 /**
  * Extracts text and visual content from a PDF buffer.
- * Returns a page-annotated string with [Page N Text] and optional [Page N Visual Content] sections.
+ * Returns one ParsedSection per page per content type (page_text, visual_description),
+ * preserving page provenance for downstream chunk metadata.
  */
-export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise<string> {
+export async function parsePdf(
+  buffer: Buffer,
+  aiProvider?: AIProvider,
+): Promise<ParsedSection[]> {
   registerCanvasGlobals();
 
   const pdfjs = await import('pdfjs-serverless');
@@ -56,17 +62,21 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
   dlog(`[pdfParser] pages=${pdf.numPages} aiProvider=${!!aiProvider}`);
 
   // ── Step 1: Extract text from every page (pdfjs, always works) ─────────────
-  const pageTexts: string[] = [];
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    const text = (content.items as Array<{ str: string }>)
-      .map((item) => item.str)
-      .join(' ')
-      .trim();
-    pageTexts.push(text);
-    dlog(`[pdfParser] page=${i} textLen=${text.length}`);
-  }
+  // Process all pages in parallel — reduces total time from O(pages) to O(1) round-trips.
+  // Promise.all preserves input order so page numbering stays correct.
+  const pageTexts = await Promise.all(
+    Array.from({ length: pdf.numPages }, async (_, idx) => {
+      const i = idx + 1;
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const text = (content.items as Array<{ str: string }>)
+        .map((item) => item.str)
+        .join(' ')
+        .trim();
+      dlog(`[pdfParser] page=${i} textLen=${text.length}`);
+      return text;
+    })
+  );
 
   // ── Step 2: One-shot visual pass — send whole PDF to GPT-4o ────────────────
   // Why one whole-PDF call instead of per-page rendering:
@@ -79,32 +89,32 @@ export async function parsePdf(buffer: Buffer, aiProvider?: AIProvider): Promise
   let visualDescriptionsByPage: Map<number, string> = new Map();
 
   if (aiProvider) {
+    // Prefer GeminiProvider for PDF vision when GOOGLE_AI_API_KEY is available —
+    // same quality as GPT-4o at ~90% lower cost.
+    const visionProvider: AIProvider = process.env.GOOGLE_AI_API_KEY
+      ? new GeminiProvider()
+      : aiProvider;
     try {
-      const descriptions = await aiProvider.generatePdfVisualDescriptions(buffer, pdf.numPages);
-      visualDescriptionsByPage = descriptions;
-      dlog(`[pdfParser] PDF vision pass complete — got descriptions for ${descriptions.size} pages`);
+      visualDescriptionsByPage = await visionProvider.generatePdfVisualDescriptions(buffer, pdf.numPages);
+      dlog(`[pdfParser] PDF vision pass complete — got descriptions for ${visualDescriptionsByPage.size} pages`);
     } catch (err) {
       console.warn('[pdfParser] PDF vision pass failed, continuing with text only:', err);
     }
   }
 
-  // ── Step 3: Merge text + visual descriptions per page ──────────────────────
-  const parts: string[] = [];
+  // ── Step 3: Emit per-page sections with provenance metadata ─────────────────
+  // Each section is a discrete unit (text layer or visual description) tagged with
+  // its page number and content origin so the upload route can store them separately.
+  const sections: ParsedSection[] = [];
   for (let i = 1; i <= pdf.numPages; i++) {
-    const pageParts: string[] = [];
     if (pageTexts[i - 1]) {
-      pageParts.push(`[Page ${i} Text] ${pageTexts[i - 1]}`);
+      sections.push({ content: pageTexts[i - 1], contentOrigin: 'page_text', pageNumber: i });
     }
     const visual = visualDescriptionsByPage.get(i);
     if (visual && visual !== NO_VISUAL_CONTENT) {
-      pageParts.push(`[Page ${i} Visual Content] ${visual}`);
+      sections.push({ content: visual, contentOrigin: 'visual_description', pageNumber: i });
     }
-    if (pageParts.length > 0) parts.push(pageParts.join('\n'));
   }
 
-  const result = parts.join('\n').trim();
-  if (!result) {
-    throw new Error('No text or visual content found in this PDF.');
-  }
-  return result;
+  return sections;
 }

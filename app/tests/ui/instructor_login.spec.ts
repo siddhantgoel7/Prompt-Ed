@@ -98,7 +98,7 @@ test.describe('Instructor Login and Signup', () => {
       await expect(page.getByText('I agree to the Terms and Privacy Policy')).toBeVisible();
 
       // Sign Up button
-      await expect(page.getByRole('button', { name: 'Sign Up' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Create Account' })).toBeVisible();
     });
 
     // 20.7
@@ -110,7 +110,7 @@ test.describe('Instructor Login and Signup', () => {
       // Check the terms checkbox (it's a raw <input type="checkbox">, not a Radix checkbox)
       await page.locator('input[type="checkbox"]').check();
 
-      await page.getByRole('button', { name: 'Sign Up' }).click();
+      await page.getByRole('button', { name: 'Create Account' }).click();
 
       await expect(page.getByText('Password must be at least 8 characters')).toBeVisible({ timeout: 5000 });
     });
@@ -122,7 +122,7 @@ test.describe('Instructor Login and Signup', () => {
       await page.getByLabel('Password').fill('validpassword123');
       // Leave checkbox unchecked
 
-      await page.getByRole('button', { name: 'Sign Up' }).click();
+      await page.getByRole('button', { name: 'Create Account' }).click();
 
       await expect(page.getByText('You must agree to the Terms and Conditions')).toBeVisible({ timeout: 5000 });
     });

@@ -30,10 +30,31 @@ jest.mock('@/components/instructor/session/ActiveSidebar', () => ({
 }));
 
 jest.mock('@/components/instructor/session/ActiveRightPanel', () => ({
+  // Real ActiveRightPanel has three tabs: Responses | Metrics | Timer.
+  // The "Close Discussion" button lives inside the Timer tab (TimerTab component).
+  // This mock simulates that UX flow: tests must click "Timer" tab before the button appears.
   ActiveRightPanel: () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useState } = require('react');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const vm = require('@/components/instructor/session/SessionContext').useSessionContext();
-    return <div>RightPanel count={vm.responses?.length ?? 0}</div>;
+    const [activeTab, setActiveTab] = useState('list');
+    return (
+      <div>
+        RightPanel count={vm.responses?.length ?? 0}
+        {/* Timer tab button — matches the real tab label in ActiveRightPanel */}
+        <button onClick={() => setActiveTab('timer')}>Timer</button>
+        {/* Close Discussion button is inside the Timer tab in the real UI */}
+        {activeTab === 'timer' && vm.activeDiscussion && (
+          <button
+            data-testid="close-discussion-button"
+            onClick={() => vm.handleCloseDiscussion()}
+          >
+            Close Discussion
+          </button>
+        )}
+      </div>
+    );
   },
 }));
 
@@ -51,7 +72,7 @@ jest.mock('@/components/instructor/session/ActiveCenter', () => ({
           onChange={(e: any) => vm.setPromptInput(e.target.value)}
         />
         <button onClick={vm.handlePublishDiscussion}>Publish</button>
-        <button onClick={vm.handleCloseDiscussion}>Close</button>
+        {/* Close Discussion button moved to DiscussionTimerSection */}
       </div>
     );
   },
@@ -144,7 +165,7 @@ describe('Multiple Discussions per Lesson (Acceptance) [US 1.25]', () => {
     expect(vm.handlePublishDiscussion).toHaveBeenCalled();
   });
 
-  // 9.2
+  // 9.2 — responses are hidden behind "Show Responses" toggle in new design
   it('[US 1.25][AT2] success: each discussion tracked separately', () => {
     const vm = makeEndedVM({
       lessonDiscussions: [
@@ -171,14 +192,19 @@ describe('Multiple Discussions per Lesson (Acceptance) [US 1.25]', () => {
 
     render(<SessionEndedView vm={vm} />);
 
-    // Both discussions visible and tracked separately
+    // Both discussion prompts are always visible
     expect(screen.getByText(/First question/i)).toBeInTheDocument();
     expect(screen.getByText(/Second question/i)).toBeInTheDocument();
+
+    // Responses are behind the toggle — expand each discussion
+    const toggles = screen.getAllByText(/Show Responses/i);
+    toggles.forEach(toggle => fireEvent.click(toggle));
+
     expect(screen.getByText(/Answer to first/i)).toBeInTheDocument();
     expect(screen.getByText(/Answer to second/i)).toBeInTheDocument();
   });
 
-  // 9.3
+  // 9.3 — "Discussions and Responses" heading no longer exists, section is now "Discussions"
   it('[US 1.25][AT3] success: all discussions visible in lesson data', () => {
     const vm = makeEndedVM({
       lessonDiscussions: [
@@ -211,7 +237,7 @@ describe('Multiple Discussions per Lesson (Acceptance) [US 1.25]', () => {
     expect(screen.getByText(/Discussion A/i)).toBeInTheDocument();
     expect(screen.getByText(/Discussion B/i)).toBeInTheDocument();
     expect(screen.getByText(/Discussion C/i)).toBeInTheDocument();
-    expect(screen.getByText(/Discussions and Responses/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^Discussions$/i })).toBeInTheDocument();
   });
 
   // 9.4
@@ -228,8 +254,11 @@ describe('Multiple Discussions per Lesson (Acceptance) [US 1.25]', () => {
 
     render(<SessionActiveView vm={vm} />);
 
-    // Close button available for current discussion
-    const closeBtn = screen.getByRole('button', { name: /Close/i });
+    // In the real UI, Close Discussion lives in the Timer tab — navigate there first.
+    // (In production: ActiveRightPanel tabs Responses | Metrics | Timer; close button is in TimerTab.)
+    fireEvent.click(screen.getByRole('button', { name: /Timer/i }));
+
+    const closeBtn = screen.getByTestId('close-discussion-button');
     expect(closeBtn).toBeInTheDocument();
 
     fireEvent.click(closeBtn);

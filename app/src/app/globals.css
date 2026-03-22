@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -45,84 +45,581 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* ── Design system surface tokens → bg-surface-* utilities ── */
+  --color-surface-base:    var(--surface-base);
+  --color-surface-raised:  var(--surface-raised);
+  --color-surface-glass:   var(--surface-glass);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-hover-primary:   var(--surface-hover-primary);
+
+  /* ── Text / content tokens → text-content-* utilities ── */
+  --color-content-primary:   var(--text-primary);
+  --color-content-secondary: var(--text-secondary);
+  --color-content-muted:     var(--text-muted);
+
+  /* ── Brand green palette → text-brand-* / bg-brand-* utilities ──
+     Prefixed 'brand' to avoid colliding with shadcn --color-primary. */
+  --color-brand-50:  var(--color-primary-50);
+  --color-brand-100: var(--color-primary-100);
+  --color-brand-200: var(--color-primary-200);
+  --color-brand-300: var(--color-primary-300);
+  --color-brand-400: var(--color-primary-400);
+  --color-brand-500: var(--color-primary-500);
+  --color-brand-600: var(--color-primary-600);
+  --color-brand-700: var(--color-primary-700);
+
+  /* ── Border tokens → border-line-* utilities ── */
+  --color-line-default: var(--border-default);
+  --color-line-subtle:  var(--border-subtle);
+
+  /* ── Error / warning palette tokens ── */
+  --color-err-500:  var(--color-error-500);
+  --color-err-600:  var(--color-error-600);
+  --color-err-700:  var(--color-error-700);
+  --color-warn-500: var(--color-warning-500);
+  --color-warn-600: var(--color-warning-600);
+
+  /* ── Pastel accent tokens → bg-accent-* / text-accent-* utilities ── */
+  --color-accent-mint:     var(--accent-mint);
+  --color-accent-sage:     var(--accent-sage);
+  --color-accent-blush:    var(--accent-blush);
+  --color-accent-sky:      var(--accent-sky);
+  --color-accent-lavender: var(--accent-lavender);
 }
 
+/* ─── Design System Tokens ─────────────────────────────────────────── */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Tree Green Palette */
+  --color-primary-50:  #f0faf0;
+  --color-primary-100: #d6f5d6;
+  --color-primary-200: #a8e6a8;
+  --color-primary-300: #6dce6d;
+  --color-primary-400: #3db53d;
+  --color-primary-500: #2d9e2d;
+  --color-primary-600: #237a23;
+  --color-primary-700: #1a5c1a;
+  --color-primary-800: #124012;
+  --color-primary-900: #0a280a;
+
+  /* Error / Danger palette */
+  --color-error-700: #b91c1c;
+  --color-error-600: #dc2626;
+  --color-error-500: #ef4444;
+  --color-timer-expired: #c0392b;   /* expired-timer text — slightly more orange than error-600 */
+
+  /* Warning / Amber palette */
+  --color-warning-600: #b45309;
+  --color-warning-500: #f59e0b;
+
+  /* ── Primary green alpha tints ──────────────────────────────────────
+     Avoids repeating rgba(45, 158, 45, 0.NN) across every component.
+     Named after the opacity percentage (05 = 5%). */
+  --color-primary-alpha-05: rgba(45, 158, 45, 0.05);
+  --color-primary-alpha-06: rgba(45, 158, 45, 0.06);
+  --color-primary-alpha-08: rgba(45, 158, 45, 0.08);
+  --color-primary-alpha-10: rgba(45, 158, 45, 0.10);
+  --color-primary-alpha-12: rgba(45, 158, 45, 0.12);
+  --color-primary-alpha-14: rgba(45, 158, 45, 0.14);
+  --color-primary-alpha-15: rgba(45, 158, 45, 0.15);
+  --color-primary-alpha-18: rgba(45, 158, 45, 0.18);
+  --color-primary-alpha-20: rgba(45, 158, 45, 0.20);
+  --color-primary-alpha-25: rgba(45, 158, 45, 0.25);
+  --color-primary-alpha-40: rgba(45, 158, 45, 0.40);  /* glow effects */
+  /* primary-400 (#3db53d = rgb(61,181,61)) tint used in HomeJoin hover */
+  --color-primary-400-alpha-08: rgba(61, 181, 61, 0.08);
+
+  /* ── Error / red alpha tints ─────────────────────────────────────── */
+  --color-error-alpha-08: rgba(239, 68, 68, 0.08);
+  --color-error-alpha-10: rgba(239, 68, 68, 0.10);
+  --color-error-alpha-12: rgba(239, 68, 68, 0.12);
+  --color-error-alpha-15: rgba(239, 68, 68, 0.15);
+  --color-error-alpha-25: rgba(239, 68, 68, 0.25);
+  --color-error-alpha-50: rgba(239, 68, 68, 0.50);
+  /* error-600 (#dc2626 = rgb(220,38,38)) tint used in TimerTab box-shadow */
+  --color-error-600-alpha-35: rgba(220, 38, 38, 0.35);
+
+  /* ── Warning / amber alpha tints ─────────────────────────────────── */
+  --color-warning-alpha-12: rgba(245, 158, 11, 0.12);
+  --color-warning-alpha-15: rgba(245, 158, 11, 0.15);
+
+  /* ── Yellow highlight alpha tints (selected ResponseCard) ─────────── */
+  --color-highlight-alpha-10: rgba(250, 204, 21, 0.10);
+  --color-highlight-alpha-12: rgba(250, 204, 21, 0.12);
+  --color-highlight-alpha-55: rgba(250, 204, 21, 0.55);
+
+  /* ── Neutral overlays (shadows, glass borders) ───────────────────── */
+  --color-black-alpha-06: rgba(0, 0, 0, 0.06);
+  --color-black-alpha-08: rgba(0, 0, 0, 0.08);
+  --color-black-alpha-10: rgba(0, 0, 0, 0.10);
+  --color-black-alpha-30: rgba(0, 0, 0, 0.30);
+  --color-white-alpha-04: rgba(255, 255, 255, 0.04);
+  --color-white-alpha-06: rgba(255, 255, 255, 0.06);
+
+  /* Pastel Accents */
+  --accent-mint:     #b8f0c8;
+  --accent-sage:     #8ecba8;
+  --accent-blush:    #f5c6d0;
+  --accent-sky:      #c0dff7;
+  --accent-lavender: #d4c6f5;
+
+  /* Light Mode Surfaces */
+  --surface-base:    #f6faf6;
+  --surface-raised:  #ffffff;
+  --surface-overlay: #f0f7f0;
+  --surface-glass:   rgba(255, 255, 255, 0.75);
+  --border-subtle:   rgba(0, 0, 0, 0.05);
+  --border-default:  rgba(0, 0, 0, 0.10);
+
+  /* Semantic hover / interactive surfaces */
+  --surface-hover-primary: rgba(45, 158, 45, 0.12);
+
+  /* Light Mode Text */
+  --text-primary:   #1a2e1a;
+  --text-secondary: #4a6b4a;
+  --text-muted:     #7a9a7a;
+
+  /* Mode-aware recording indicator (darker red in light mode) */
+  --recording-text: #b91c1c;
+
+  /* Shadcn/UI mapped variables (light) */
+  --radius: 0.75rem;
+  --background:            oklch(0.97 0.005 145);
+  --foreground:            oklch(0.14 0.04 145);
+  --card:                  oklch(1 0 0);
+  --card-foreground:       oklch(0.14 0.04 145);
+  --popover:               oklch(1 0 0);
+  --popover-foreground:    oklch(0.14 0.04 145);
+  --primary:               oklch(0.55 0.18 145);
+  --primary-foreground:    oklch(1 0 0);
+  --secondary:             oklch(0.93 0.02 145);
+  --secondary-foreground:  oklch(0.30 0.08 145);
+  --muted:                 oklch(0.93 0.02 145);
+  --muted-foreground:      oklch(0.52 0.06 145);
+  --accent:                oklch(0.93 0.02 145);
+  --accent-foreground:     oklch(0.30 0.08 145);
+  --destructive:           oklch(0.577 0.245 27.325);
+  --border:                oklch(0.89 0.02 145);
+  --input:                 oklch(0.89 0.02 145);
+  --ring:                  oklch(0.55 0.18 145);
+  --chart-1:               oklch(0.55 0.18 145);
+  --chart-2:               oklch(0.65 0.15 155);
+  --chart-3:               oklch(0.75 0.12 160);
+  --chart-4:               oklch(0.82 0.09 150);
+  --chart-5:               oklch(0.45 0.20 145);
+  --sidebar:               oklch(0.97 0.005 145);
+  --sidebar-foreground:    oklch(0.14 0.04 145);
+  --sidebar-primary:       oklch(0.55 0.18 145);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent:        oklch(0.93 0.02 145);
+  --sidebar-accent-foreground: oklch(0.30 0.08 145);
+  --sidebar-border:        oklch(0.89 0.02 145);
+  --sidebar-ring:          oklch(0.55 0.18 145);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Dark Mode Surfaces */
+  --surface-base:    #0d1117;
+  --surface-hover-primary: rgba(45, 158, 45, 0.18);
+  --surface-raised:  #161b22;
+  --surface-overlay: #1c2230;
+  --surface-glass:   rgba(22, 27, 34, 0.65);
+  --border-subtle:   rgba(255, 255, 255, 0.06);
+  --border-default:  rgba(255, 255, 255, 0.12);
+
+  /* Dark Mode Text */
+  --text-primary:   #e8f5e8;
+  --text-secondary: #8b9e8b;
+  --text-muted:     #556655;
+
+  /* Mode-aware recording indicator (lighter red in dark mode) */
+  --recording-text: #f87171;
+
+  /* Shadcn/UI mapped variables (dark) */
+  --background:            oklch(0.10 0.01 250);
+  --foreground:            oklch(0.92 0.02 145);
+  --card:                  oklch(0.14 0.01 250);
+  --card-foreground:       oklch(0.92 0.02 145);
+  --popover:               oklch(0.16 0.01 250);
+  --popover-foreground:    oklch(0.92 0.02 145);
+  --primary:               oklch(0.62 0.19 145);
+  --primary-foreground:    oklch(1 0 0);
+  --secondary:             oklch(0.20 0.01 250);
+  --secondary-foreground:  oklch(0.92 0.02 145);
+  --muted:                 oklch(0.20 0.01 250);
+  --muted-foreground:      oklch(0.60 0.05 145);
+  --accent:                oklch(0.20 0.01 250);
+  --accent-foreground:     oklch(0.92 0.02 145);
+  --destructive:           oklch(0.704 0.191 22.216);
+  --border:                oklch(1 0 0 / 12%);
+  --input:                 oklch(1 0 0 / 15%);
+  --ring:                  oklch(0.62 0.19 145);
+  --chart-1:               oklch(0.62 0.19 145);
+  --chart-2:               oklch(0.72 0.15 155);
+  --chart-3:               oklch(0.80 0.12 160);
+  --chart-4:               oklch(0.85 0.09 150);
+  --chart-5:               oklch(0.50 0.22 145);
+  --sidebar:               oklch(0.14 0.01 250);
+  --sidebar-foreground:    oklch(0.92 0.02 145);
+  --sidebar-primary:       oklch(0.62 0.19 145);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent:        oklch(0.20 0.01 250);
+  --sidebar-accent-foreground: oklch(0.92 0.02 145);
+  --sidebar-border:        oklch(1 0 0 / 12%);
+  --sidebar-ring:          oklch(0.62 0.19 145);
 }
 
+/* ─── Base Layer ────────────────────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
-    @apply bg-background text-foreground;
+    background-color: var(--surface-base);
+    color: var(--text-primary);
+    font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-primary);
+  }
+
+  /* Inputs focus ring */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: none;
+    border-color: var(--color-primary-500) !important;
+    box-shadow: 0 0 0 3px var(--color-primary-alpha-15);
+  }
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Blur-in: each character fades in from blurred state (ReactBits blur-text style) */
+@keyframes blurIn {
+  from { filter: blur(10px); opacity: 0; transform: translateY(4px); }
+  to   { filter: blur(0px);  opacity: 1; transform: translateY(0); }
+}
+
+/* Rotating glow border for Generate Prompts button */
+@keyframes rotate-glow {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Loading screen animations — defined globally so they work in any component */
+@keyframes logoBreath {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(0.96); }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40%           { transform: translateY(-6px); opacity: 1; }
+}
+
+@keyframes pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--color-primary-alpha-40); }
+  50%       { box-shadow: 0 0 0 8px rgba(45, 158, 45, 0); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── Utility Classes ────────────────────────────────────────────────── */
+
+/* Entrance animation */
+.enter {
+  animation: fadeSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Glassmorphism surface — border-radius must be set on the element */
+.glass {
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-default);
+}
+
+/* Glass card — standard 16px radius + canonical shadow */
+.glass-card {
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px var(--color-black-alpha-08), 0 1px 0 var(--color-white-alpha-04) inset;
+}
+
+.dark .glass-card {
+  box-shadow: 0 4px 24px var(--color-black-alpha-30), 0 1px 0 var(--color-white-alpha-04) inset;
+}
+
+/* Icon button hover (theme toggle, action icons) */
+.btn-icon-hover:hover {
+  background: var(--surface-hover-primary);
+  border-color: var(--color-primary-400);
+}
+
+/* Primary button glow on hover */
+.btn-primary-glow:hover {
+  box-shadow: 0 0 16px var(--color-primary-alpha-40);
+}
+
+/* ─── Rotating Glow Button Wrapper ──────────────────────────────────── */
+.rotating-glow-wrap {
+  position: relative;
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 2px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.rotating-glow-wrap::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: 50%;
+  left: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--color-primary-200) 30deg,
+    var(--color-primary-400) 60deg,
+    var(--color-primary-300) 90deg,
+    transparent 130deg
+  );
+  animation: rotate-glow 2.5s linear infinite;
+  z-index: 0;
+}
+
+.rotating-glow-wrap > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Generating state — amber ring, faster spin */
+.rotating-glow-wrap.generating::before {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    #fde68a 30deg,
+    #f59e0b 60deg,
+    #fbbf24 90deg,
+    transparent 130deg
+  );
+  animation-duration: 1.2s;
+}
+
+/* Generating text — wave bounce + shimmer, one char at a time */
+@keyframes generating-char-shimmer {
+  0%, 40%, 100% { color: rgba(255, 255, 255, 0.55); }
+  20%            { color: rgba(255, 255, 255, 1);    }
+}
+
+@keyframes generating-char-wave {
+  0%, 40%, 100% { transform: translateY(0);    color: rgba(255, 255, 255, 0.55); }
+  20%            { transform: translateY(-2px); color: rgba(255, 255, 255, 1);    }
+}
+
+.generating-shimmer,
+.generating-char {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.generating-shimmer {
+  animation: generating-char-shimmer 1.4s ease-in-out infinite;
+}
+
+.generating-char {
+  animation: generating-char-wave 1.4s ease-in-out infinite;
+}
+
+/* Pause rotation when button is disabled — but not while generating */
+.rotating-glow-wrap:not(.generating):has(button:disabled)::before,
+.rotating-glow-wrap:not(.generating):has([disabled])::before {
+  animation-play-state: paused;
+  opacity: 0.4;
+}
+
+/* Skeleton shimmer */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface-raised) 25%,
+    var(--border-subtle) 50%,
+    var(--surface-raised) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* Interactive element transitions */
+.interactive {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tag / chip */
+.tag {
+  background: var(--color-primary-alpha-12);
+  color: var(--color-primary-600);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dark .tag {
+  color: var(--color-primary-300);
+}
+
+/* ─── Shared Auth Form Utilities ─────────────────────────────────────── */
+
+/* Form field label */
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Glass-surface text input */
+.input-glass {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+
+/* Primary gradient submit button */
+.btn-submit {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  transition: all 0.15s ease;
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400));
+}
+
+.btn-submit:disabled { opacity: 0.6; }
+.btn-submit:hover:not(:disabled) { box-shadow: 0 0 16px var(--color-primary-alpha-40); }
+
+/* Sidebar collapsed transition */
+.sidebar-collapsed {
+  width: 52px !important;
+  overflow: hidden;
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary-300) !important;
+}
+
+/* Stagger children utility */
+.stagger > * {
+  animation: fadeSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.stagger > *:nth-child(1)  { animation-delay: 0ms; }
+.stagger > *:nth-child(2)  { animation-delay: 60ms; }
+.stagger > *:nth-child(3)  { animation-delay: 120ms; }
+.stagger > *:nth-child(4)  { animation-delay: 180ms; }
+.stagger > *:nth-child(5)  { animation-delay: 240ms; }
+.stagger > *:nth-child(6)  { animation-delay: 300ms; }
+.stagger > *:nth-child(7)  { animation-delay: 360ms; }
+.stagger > *:nth-child(8)  { animation-delay: 420ms; }
+.stagger > *:nth-child(9)  { animation-delay: 480ms; }
+.stagger > *:nth-child(10) { animation-delay: 540ms; }
+.stagger > *:nth-child(11) { animation-delay: 600ms; }
+.stagger > *:nth-child(12) { animation-delay: 660ms; }
+
+/* Logo adaptive for dark mode */
+.logo-dark-adaptive {
+  filter: none;
+}
+.dark .logo-dark-adaptive {
+  filter: brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(100deg) brightness(0.85);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-400);
+}
+
+/* Custom select styling */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+  appearance: none;
+  -webkit-appearance: none;
 }

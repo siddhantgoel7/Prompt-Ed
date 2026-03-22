@@ -17,13 +17,15 @@ test.describe('Student Submit Response', () => {
 
   // 24.1
   test('[US 2.09][US 2.07] prompt visible -> can submit response', async ({ page }) => {
-    // Wait for either waiting card or response form
+    // Wait for waiting card, text response box, or MC option buttons
     const waiting = page.getByText('Waiting for the instructor to publish a discussion');
     const responseBox = page.getByPlaceholder('Type your response here...');
+    const mcOptionA = page.locator('button').filter({ hasText: /^A\./ });
 
     await Promise.race([
       waiting.waitFor({ state: 'visible', timeout: 10000 }),
       responseBox.waitFor({ state: 'visible', timeout: 10000 }),
+      mcOptionA.waitFor({ state: 'visible', timeout: 10000 }),
     ]);
 
     // If waiting for discussion, skip gracefully
@@ -32,30 +34,35 @@ test.describe('Student Submit Response', () => {
       return;
     }
 
-    // Active discussion: prompt visible + response form usable
-    await expect(responseBox).toBeVisible();
-
-    // If it's a multiple choice, select an option to bypass validation
+    // Active discussion — check if it's MC or text
     const mcOption = page.locator('button', { hasText: /^(A\.|B\.|C\.|D\.)/ }).first();
     if (await mcOption.isVisible()) {
+      // MC question: select an option and submit
       await mcOption.click();
+      await page.getByRole('button', { name: 'Submit response' }).click();
+      // After MC submit with feedback enabled, shows feedback banner immediately
+      await expect(
+        page.getByText('Good Job! 🎉').or(page.getByText('Oops! 😔')).or(page.getByText('Response submitted'))
+      ).toBeVisible({ timeout: 8000 });
+    } else {
+      // Text response: fill textarea and submit
+      await expect(responseBox).toBeVisible();
+      await responseBox.fill('My response from Playwright');
+      await page.getByRole('button', { name: 'Submit response' }).click();
+      await expect(page.getByText('Response submitted')).toBeVisible({ timeout: 5000 });
     }
-
-    await responseBox.fill('My response from Playwright');
-    await page.getByRole('button', { name: 'Submit response' }).click();
-
-    // After submit, "Response submitted" alert appears
-    await expect(page.getByText('Response submitted')).toBeVisible({ timeout: 5000 });
   });
 
   // 24.2
   test('[US 2.07] failure: blank response blocked', async ({ page }) => {
     const waiting = page.getByText('Waiting for the instructor to publish a discussion');
     const responseBox = page.getByPlaceholder('Type your response here...');
+    const mcOptionA = page.locator('button').filter({ hasText: /^A\./ });
 
     await Promise.race([
       waiting.waitFor({ state: 'visible', timeout: 10000 }),
       responseBox.waitFor({ state: 'visible', timeout: 10000 }),
+      mcOptionA.waitFor({ state: 'visible', timeout: 10000 }),
     ]);
 
     test.skip(await waiting.isVisible(), 'No active discussion in this environment.');
@@ -77,10 +84,12 @@ test.describe('Student Submit Response', () => {
   test('[US 2.07] failure: whitespace-only response should be blocked', async ({ page }) => {
     const waiting = page.getByText('Waiting for the instructor to publish a discussion');
     const responseBox = page.getByPlaceholder('Type your response here...');
+    const mcOptionA = page.locator('button').filter({ hasText: /^A\./ });
 
     await Promise.race([
       waiting.waitFor({ state: 'visible', timeout: 10000 }),
       responseBox.waitFor({ state: 'visible', timeout: 10000 }),
+      mcOptionA.waitFor({ state: 'visible', timeout: 10000 }),
     ]);
 
     test.skip(await waiting.isVisible(), 'No active discussion in this environment.');

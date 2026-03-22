@@ -1,19 +1,26 @@
 // Instructor sign-up form with email/password fields, UAlberta domain enforcement,
 // duplicate-account checking, and Google OAuth as an alternative.
+//
+// Validation order (intentional — cheapest checks run first):
+//   1. agreeToTerms — no network call needed
+//   2. password length — no network call needed
+//   3. @ualberta.ca domain — no network call needed
+//   4. /api/auth/check-email — one round-trip to detect existing accounts before
+//      calling Supabase, so we can show a friendlier error than Supabase's generic one
+//   5. signUpWithEmail — the actual Supabase auth call
+//
+// Styling shares .form-label, .input-glass, and .btn-submit from globals.css to stay
+// consistent with LoginForm without duplicating style objects.
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signUpWithEmail, signInWithGoogle } from '@/lib/supabase/auth';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { OAuthButton } from './OAuthButton';
 import { EmailConfirmation } from './EmailConfirmation';
-import {useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 type SignUpFormData = {
   fullName: string;
@@ -49,6 +56,7 @@ export function SignUpForm() {
     setError(null);
     setLoading(true);
 
+    // --- Client-side guards (no network) ---
     if (!formData.agreeToTerms) {
       setError('You must agree to the Terms and Conditions');
       setLoading(false);
@@ -61,12 +69,16 @@ export function SignUpForm() {
       return;
     }
 
+    // Only UAlberta instructors are allowed to register via email/password.
     if (!formData.email.endsWith('@ualberta.ca')) {
       setError('You must use a UAlberta email address (@ualberta.ca)');
       setLoading(false);
       return;
     }
 
+    // --- Duplicate-account check (one round-trip before Supabase) ---
+    // We check /api/auth/check-email first because Supabase's own duplicate error
+    // message is generic; this lets us show a more helpful "use Google instead" prompt.
     const checkRes = await fetch('/api/auth/check-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -80,6 +92,7 @@ export function SignUpForm() {
       return;
     }
 
+    // --- Supabase sign-up ---
     const { error } = await signUpWithEmail(
       formData.email,
       formData.password,
@@ -92,6 +105,7 @@ export function SignUpForm() {
       return;
     }
 
+    // Success — switch to email confirmation screen.
     setConfirmedEmail(formData.email);
     setLoading(false);
   };
@@ -118,87 +132,87 @@ export function SignUpForm() {
   }
 
   return (
-    <>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name</Label>
-          <Input
-            id="fullName"
-            value={formData.fullName}
-            onChange={(e) => setField('fullName', e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => setField('email', e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            value={formData.password}
-            onChange={(e) => setField('password', e.target.value)}
-            required
-          />
-          <p className="text-xs text-muted-foreground">
-            Must be at least 8 characters
-          </p>
-        </div>
-
-        <div className="flex items-start gap-2">
-          <input
-            type="checkbox"
-            checked={formData.agreeToTerms}
-            onChange={(e) => setField('agreeToTerms', e.target.checked)}
-          />
-          <span className="text-sm text-muted-foreground">
-            I agree to the Terms and Privacy Policy
-          </span>
-        </div>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Signing up...' : 'Sign Up'}
-        </Button>
-      </form>
-
-      <div className="flex items-center gap-2">
-        <Separator className="flex-1" />
-        <span className="text-sm text-muted-foreground">OR</span>
-        <Separator className="flex-1" />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <label htmlFor="fullName" className="form-label">Full Name</label>
+        <input
+          id="fullName"
+          value={formData.fullName}
+          onChange={(e) => setField('fullName', e.target.value)}
+          required
+          className="input-glass"
+        />
       </div>
 
-      <OAuthButton
-        loading={loading}
-        onClick={handleGoogleSignUp}
-        providerLabel="Google"
-      />
+      <div className="space-y-1.5">
+        <label htmlFor="email" className="form-label">Email</label>
+        <input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setField('email', e.target.value)}
+          placeholder="your@ualberta.ca"
+          required
+          className="input-glass"
+        />
+      </div>
 
-      <p className="text-sm text-center text-muted-foreground">
+      <div className="space-y-1.5">
+        <label htmlFor="password" className="form-label">Password</label>
+        <input
+          id="password"
+          type="password"
+          value={formData.password}
+          onChange={(e) => setField('password', e.target.value)}
+          required
+          className="input-glass"
+        />
+        <p className="text-xs text-content-muted">
+          Must be at least 8 characters
+        </p>
+      </div>
+
+      <div className="flex items-start gap-2.5 pt-1">
+        <input
+          type="checkbox"
+          id="agreeToTerms"
+          checked={formData.agreeToTerms}
+          onChange={(e) => setField('agreeToTerms', e.target.checked)}
+          className="mt-0.5 w-4 h-4 rounded accent-[var(--color-primary-500)]"
+        />
+        <label htmlFor="agreeToTerms" className="text-sm text-content-muted">
+          I agree to the Terms and Privacy Policy
+        </label>
+      </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <button type="submit" disabled={loading} className="btn-submit">
+        {loading ? 'Signing up…' : 'Create Account'}
+      </button>
+
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px bg-line-default" />
+        <span className="text-xs text-content-muted">OR</span>
+        <div className="flex-1 h-px bg-line-default" />
+      </div>
+
+      <OAuthButton loading={loading} onClick={handleGoogleSignUp} providerLabel="Google" />
+
+      <p className="text-sm text-center text-content-muted">
         Already have an account?{' '}
         <button
           type="button"
           onClick={() => router.push('/login_instructor')}
-          className="underline underline-offset-4 hover:text-foreground"
+          className="font-medium transition-colors duration-150 hover:underline text-brand-500"
         >
           Sign In
         </button>
       </p>
-    </>
+    </form>
   );
 }
