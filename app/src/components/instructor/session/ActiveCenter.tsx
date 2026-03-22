@@ -20,6 +20,7 @@ import { StartDiscussionDialog } from './StartDiscussionDialog';
 // [DEBUG] imports for copy report and sweep mode
 import { useAIPreferences } from '@/hooks/useAIPreferences';
 import { generateCandidatesApi } from '@/lib/api/aiApi';
+import { TEMPERATURE_BY_TYPE } from '@/lib/ai/prompts/discussionPrompt';
 import { escapeCsv } from '@/lib/utils/csv';
 import type { AIPromptPreferences, GeneratedPrompt as GP, TokenUsage } from '@/types/ai';
 // [END DEBUG]
@@ -328,26 +329,29 @@ export function ActiveCenter(props: Partial<{
           for (const l of LENGTHS)
             combos.push({ promptType: pt, difficulty: d, style: s, length: l });
 
-    const results: SweepResult[] = [];
+    let completedCount = 0;
+    setSweepProgress({ current: 0, total: combos.length, label: 'Starting…' });
 
-    for (let i = 0; i < combos.length; i++) {
-      const combo = combos[i];
-      const label = `${TYPE_LABEL[combo.promptType]} — ${cap(combo.difficulty)}, ${cap(combo.style)}, ${cap(combo.length)}`;
-      setSweepProgress({ current: i + 1, total: combos.length, label });
-
-      const startMs = Date.now();
-      try {
-        const data = await generateCandidatesApi(lessonId, combo.promptType, transcriptText, {
-          difficulty: combo.difficulty,
-          style: combo.style,
-          length: combo.length,
-          focusAreas: preferences.focusAreas,
-        });
-        results.push({ combo, timeMs: Date.now() - startMs, candidates: data.candidates, warning: data.warning, tokenUsage: data.tokenUsage, model: data.model });
-      } catch (err) {
-        results.push({ combo, timeMs: Date.now() - startMs, candidates: [], error: err instanceof Error ? err.message : 'Failed' });
-      }
-    }
+    const results = await Promise.all(
+      combos.map(async (combo) => {
+        const startMs = Date.now();
+        try {
+          const data = await generateCandidatesApi(lessonId, combo.promptType, transcriptText, {
+            difficulty: combo.difficulty,
+            style: combo.style,
+            length: combo.length,
+            focusAreas: preferences.focusAreas,
+          });
+          completedCount++;
+          setSweepProgress({ current: completedCount, total: combos.length, label: `${completedCount} of ${combos.length} completed` });
+          return { combo, timeMs: Date.now() - startMs, candidates: data.candidates, warning: data.warning, tokenUsage: data.tokenUsage, model: data.model } as SweepResult;
+        } catch (err) {
+          completedCount++;
+          setSweepProgress({ current: completedCount, total: combos.length, label: `${completedCount} of ${combos.length} completed` });
+          return { combo, timeMs: Date.now() - startMs, candidates: [], error: err instanceof Error ? err.message : 'Failed' } as SweepResult;
+        }
+      })
+    );
 
     setSweepProgress(null);
 
@@ -361,7 +365,6 @@ export function ActiveCenter(props: Partial<{
       return Math.sqrt(vals.map(v => (v - mean) ** 2).reduce((a, b) => a + b, 0) / vals.length);
     };
     const wordCount = (text: string) => text.split(/\s+/).filter(Boolean).length;
-    const TEMPERATURE = '0.7';
     // [END DEBUG]
 
     // Build TXT
@@ -371,7 +374,7 @@ export function ActiveCenter(props: Partial<{
       const label = `${TYPE_LABEL[r.combo.promptType]} — ${cap(r.combo.difficulty)}, ${cap(r.combo.style)}, ${cap(r.combo.length)} — ${timeSec}s`;
       txtLines.push(`=== ${i + 1}. ${label} ===`);
       if (r.error) { txtLines.push(`ERROR: ${r.error}`, ''); return; }
-      if (r.model) txtLines.push(`Model: ${r.model} | Temperature: ${TEMPERATURE}`);
+      if (r.model) txtLines.push(`Model: ${r.model} | Temperature: ${TEMPERATURE_BY_TYPE[r.combo.promptType]}`);
       if (r.tokenUsage) {
         // [DEBUG] cost in TXT
         const costUsd = (r.tokenUsage.promptTokens * 0.15 / 1_000_000) + (r.tokenUsage.completionTokens * 0.60 / 1_000_000);
@@ -453,7 +456,7 @@ export function ActiveCenter(props: Partial<{
 
       if (r.error || r.candidates.length === 0) {
         csvLines.push([
-          i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE,
+          i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE_BY_TYPE[r.combo.promptType],
           timeSec, mdl, ptok, ctok, ttok,
           fallbackUsed, r.error ?? r.warning ?? '', costUsd ? costUsd.toFixed(6) : '', '',
           '', '', '', '', '',
@@ -478,7 +481,7 @@ export function ActiveCenter(props: Partial<{
         const mcDLen = mcD ? mcD.length : '';
         // [END DEBUG]
         csvLines.push([
-          i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE,
+          i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE_BY_TYPE[r.combo.promptType],
           timeSec, mdl, ptok, ctok, ttok,
           fallbackUsed, r.warning ?? '', costUsd.toFixed(6), costPerHOQ,
           uniqueTopics, bSpread, meanWC, lenVar, mcBias,
