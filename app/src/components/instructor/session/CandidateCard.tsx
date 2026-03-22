@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // DEBUG
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { GeneratedPrompt } from '@/types/ai';
 
 /** Renders a clickable card for an AI-generated prompt candidate, showing the question and MC options. */
@@ -39,26 +39,22 @@ export function CandidateCard({
         >
             <div className="flex items-start justify-between mb-1.5">
                 <div className="flex items-center gap-2">
-                    {/* DEBUG */}
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <span
-                                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize text-brand-600 cursor-default"
-                                    style={{ background: 'var(--color-primary-alpha-12)' }}
-                                >
-                                    {candidate.promptType.replace('_', ' ')}
-                                </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                {candidate.bloomsLevel && <p><span className="font-semibold">Bloom&apos;s:</span> {candidate.bloomsLevel}</p>}
-                                {candidate.topicArea && <p><span className="font-semibold">Topic:</span> {candidate.topicArea}</p>}
-                                {candidate.rationale && <p><span className="font-semibold">Rationale:</span> {candidate.rationale}</p>}
-                                {!candidate.bloomsLevel && !candidate.topicArea && !candidate.rationale && <p>No metadata</p>}
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                    {/* END DEBUG */}
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span
+                                className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize text-brand-600 cursor-default"
+                                style={{ background: 'var(--color-primary-alpha-12)' }}
+                            >
+                                {candidate.promptType.replace('_', ' ')}
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {candidate.bloomsLevel && <p><span className="font-semibold">Bloom&apos;s:</span> {candidate.bloomsLevel}</p>}
+                            {candidate.topicArea && <p><span className="font-semibold">Topic:</span> {candidate.topicArea}</p>}
+                            {candidate.rationale && <p><span className="font-semibold">Rationale:</span> {candidate.rationale}</p>}
+                            {!candidate.bloomsLevel && !candidate.topicArea && !candidate.rationale && <p>No metadata</p>}
+                        </TooltipContent>
+                    </Tooltip>
                     {isSelected && (
                         <span className="text-xs font-medium text-brand-500">
                             Selected

@@ -12,7 +12,7 @@ import {
     DialogTrigger,
     DialogFooter,
 } from '@/components/ui/dialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // DEBUG
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAIPreferences } from '@/hooks/useAIPreferences';
 import { AIPromptPreferences } from '@/types/ai';
 
@@ -81,8 +81,7 @@ export function AIPreferencesDialog() {
                       </div>
                     </div>
                 ) : (
-                    <TooltipProvider> {/* DEBUG */}
-                        <div className="grid gap-4 py-4">
+                    <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Tooltip>
                                     <TooltipTrigger asChild>
@@ -177,8 +176,7 @@ export function AIPreferencesDialog() {
                                 </div>
                             </div>
 
-                        </div>
-                    </TooltipProvider>
+                    </div>
                 )}
 
                 <DialogFooter>
