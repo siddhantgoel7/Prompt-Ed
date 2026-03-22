@@ -260,7 +260,7 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 | --------------------------------------- | ---------------- | ------------ | ------------ |
 | AI prompt editing UI + save flow        | 1.20             | Kris/ Sid    | Mar 17       |
 | AI preference settings + persistence    | 1.22             | Sid          | Mar 17       |
-| AI Optimization                         | Feature          | Kris         | Mar 17       |
+| AI Optimization, Prompt & Output tuning | Feature          | Kris         | Mar 17       |
 | File Upload Optimization                | Feature          | Nikita       | Mar 17       |
 | Response timer + time-limit enforcement | 1.29, 2.11       | Muaadh       | Mar 15       |
 | QR display and scan flow improvements   | 1.32, 2.05       | Tommy        | Mar 11       |
