@@ -1,3 +1,4 @@
+// Editor component for configuring multiple choice options and selecting the correct answer.
 import * as React from 'react';
 
 export interface MCOptionData {

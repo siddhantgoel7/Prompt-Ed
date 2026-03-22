@@ -1,5 +1,6 @@
 'use client';
 
+// Toggle button that filters the discussion list to show only flagged questions.
 import { Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

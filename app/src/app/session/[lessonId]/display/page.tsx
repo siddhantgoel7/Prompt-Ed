@@ -1,3 +1,5 @@
+// Server component that authenticates the instructor and loads lesson data
+// before rendering the session display view.
 import { redirect, notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { SessionDisplayView } from '@/components/instructor/session/SessionDisplayView';

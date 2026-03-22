@@ -1,5 +1,6 @@
 'use client';
 
+// Toggle button that filters the discussion list to show only highlighted questions.
 import { Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

@@ -1,3 +1,4 @@
+// Client-side API functions for AI generation and audio transcription.
 import type { CandidateSet } from '@/types/ai';
 import type { PromptType } from '@/types/discussion';
 

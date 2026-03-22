@@ -1,3 +1,4 @@
+// Hook for loading and saving the user's AI prompt preferences (difficulty, style, length).
 import { useState, useEffect } from 'react';
 import { AIPromptPreferences } from '@/types/ai';
 
