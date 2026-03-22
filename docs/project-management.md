@@ -87,7 +87,7 @@ Sprint 2 delivers the **walking skeleton** of the system with core lesson and di
 * Real-Time Infrastructure: Establish Socket connection for sending and receiving discussion prompts/responses in real time.
 * Course and Discussion Management: Basic CRUD for courses and discussion topics
 
-### Completed User Stories (22 total)
+### Completed User Stories (23 total)
 
 | **User Story** | **Description**                 | **Story Points** | **Assignee** |
 | -------------- | ------------------------------- | ---------------- | ------------ | 
@@ -98,6 +98,7 @@ Sprint 2 delivers the **walking skeleton** of the system with core lesson and di
 | 1.08           | Delete past lesson              | 2                | Nikita/Muaadh | 
 | 1.09           | End lesson                      | 3                | Shabaz | 
 | 1.10           | Auto-save lesson                | 5                | Shabaz | 
+| 1.11           | Resume unfinished lesson        | 3                | Shabaz | 
 | 1.21           | Manual prompt entry             | 3                | Shabaz | 
 | 1.25           | Multiple discussions per lesson | 3                | Kristian | 
 | 1.27           | Display discussion prompt       | 1                | Aldo/Kristian | 
@@ -114,13 +115,12 @@ Sprint 2 delivers the **walking skeleton** of the system with core lesson and di
 | 2.07           | Submit text responses           | 2                | Aldo | 
 | 2.09           | See discussion prompt           | 1                | Aldo/Kristian | 
 
-### Partially Implemented - Carried to Sprint 3 (12 total)
+### Partially Implemented - Carried to Sprint 3 (11 total)
 
 | **User Story** | **Description**                  | **Story Points** | **Status** |
 | -------------- | -------------------------------- | ---------------- | ---------- |
 | 1.02           | Login via UAlberta SSO           | 3                | Partial (moved to Sprint 3) |
 | 1.04           | Private lesson viewing           | 3                | Partial (moved to Sprint 3) |
-| 1.11           | Resume unfinished lesson         | 3                | Partial (moved to Sprint 5) |
 | 1.16           | Upload files                     | 5                | Partial (moved to Sprint 3) |
 | 1.26           | Only students in lesson see prompts | 2             | Partial (Tommy - already implemented) |
 | 1.39           | List format view                 | 3                | Partial (moved to Sprint 4) |
@@ -128,7 +128,7 @@ Sprint 2 delivers the **walking skeleton** of the system with core lesson and di
 | 1.42           | Export prompts & responses       | 2                | Partial (moved to Sprint 4) |
 | 2.04           | See only current lesson prompts  | 1                | Partial (Tommy - already implemented) |
 | 2.12           | Lesson ended notification        | 1                | Partial (moved to Sprint 4) |
-| 2.15           | See lesson/discussion status     | 1                | Partial (moved to Sprint 5) |
+| 2.15           | See lesson/discussion status     | 1                | Partial (moved to Sprint 3) |
 | 2.17           | Confirmation message             | 1                | Partial (moved to Sprint 5) |
 
 **Sprint 2 Velocity:** ~50 story points completed
@@ -193,7 +193,7 @@ Sprint 3 delivers **AI integration** of the system with authentication upgrades,
 | End-to-end testing for AI lesson workflow | All                                | Team                     | Mar 8        |
 | UI and documentation                               | All                                | Aldo/Nikita                     | Mar 8        |
 
-### Completed User Stories (15 total)
+### Completed User Stories (16 total)
 
 | **User Story** | **Description**                           | **Story Points** | **Assignee**   |
 | -------------- | ----------------------------------------- | ---------------- | -------------- |
@@ -212,8 +212,9 @@ Sprint 3 delivers **AI integration** of the system with authentication upgrades,
 | 2.04           | See only current lesson prompts           | 1                | Tommy          |
 | 2.08           | Select multiple choice options            | 2                | Tommy, Sid          |
 | 2.10           | See MC question feedback                  | 1                | Tommy, Sid          |
+| 2.15           | See lesson/discussion status              | 1                | Tommy          |
 
-**Sprint 3 Velocity:** ~49 story points completed
+**Sprint 3 Velocity:** ~50 story points completed
 
 ---
 
@@ -224,7 +225,7 @@ Sprint 3 delivers **AI integration** of the system with authentication upgrades,
 Sprint 4 delivers **data export, session history, and engagement metrics** with stronger classroom flow controls.
 
 ## Major Milestones:
-* Data Export: Functionality to export responses, statistics, and prompts to CSV/PDF.
+* Data Export: Functionality to export responses, statistics, and prompts to CSV.
 * Classroom Flow Control: Implementation of Timers, Time Limits, and QR Code scanning for easy access.
 * Session Stability: Rejoin logic to handle connection drops and helpful error messages.
 * Performance Metrics: View of student engagement and participation stats.
@@ -238,6 +239,7 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 | 1.22           | AI generation preferences  | 5                |
 | 1.29           | Time limits for responses  | 3                |
 | 1.32           | Display QR code            | 3                |
+| 1.33           | Display lesson materials   | 3                |
 | 1.35           | Hide inappropriate responses| 1               |
 | 1.36           | Highlight response         | 1                |
 | 1.39           | List format view           | 3                |
@@ -245,6 +247,7 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 | 1.41           | Export responses           | 2                |
 | 1.42           | Export prompts & responses | 2                |
 | 1.43           | Export statistics          | 2                |
+| 1.44           | Metrics for MC questions   | 2                |
 | 2.05           | Scan QR code               | 3                |
 | 2.11           | Timer for prompts          | 1                |
 | 2.12           | Lesson ended notification  | 1                |
@@ -252,7 +255,7 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 | 2.14           | Rejoin lesson (Already Implemented)             | 3                | 
 | 2.17           | Confirmation message       | 1                |
 
-**Estimated Sprint Velocity:** ~45 points completed
+**Estimated Sprint Velocity:** ~48 points completed
 
 ### Tasks
 
@@ -261,13 +264,15 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 | AI prompt editing UI + save flow        | 1.20             | Kris/ Sid    | Mar 17       |
 | AI preference settings + persistence    | 1.22             | Sid          | Mar 17       |
 | AI Optimization, Prompt & Output tuning | Feature          | Kris/ Nikita | Mar 17       |
+| Display lesson materials                | 1.33             | Aldo         | Mar 14       |
 | Response timer + time-limit enforcement | 1.29, 2.11       | Muaadh       | Mar 15       |
 | QR display and scan flow improvements   | 1.32, 2.05       | Tommy        | Mar 11       |
 | Response highlight interactions         | 1.36             | Aldo         | Mar 14       |
 | Hide Inappropriate Responses            | 1.35             | Aldo         | Mar 14       |
 | List-view response panel                | 1.39             | Nikita       | Mar 13       |
 | Engagement metrics calculations         | 1.40             | Nikita/ Sid  | Mar 11       |
-| Export responses (CSV/PDF/JSON)         | 1.41             | Shahbaz/ Sid | Mar 12       |
+| MC question metrics                     | 1.44             | Nikita/ Sid  | Mar 13       |
+| Export responses (CSV)                  | 1.41             | Shahbaz/ Sid | Mar 12       |
 | Export prompts + responses              | 1.42             | Shahbaz/ Sid | Mar 11       |
 | Export lesson statistics                | 1.43             | Shahbaz/ Sid | Mar 10       |
 | Leave/rejoin/ended-session stability    | 2.12, 2.13, 2.14 | Mo & Nikita (Already impllemented) | Mar 18       |
