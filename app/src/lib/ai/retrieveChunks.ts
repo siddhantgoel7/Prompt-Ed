@@ -116,29 +116,3 @@ export function normalizeEmbedding(v: number[]): number[] {
   if (norm === 0) return v.slice();
   return v.map((x) => x / norm);
 }
-
-/**
- * Parses a comma-separated preference string into a normalized keyword array.
- * Filters out blanks and single-character tokens; lowercases all tokens.
- */
-export function parseKeywords(s: string): string[] {
-  return s
-    .split(',')
-    .map((t) => t.trim().toLowerCase())
-    .filter((t) => t.length > 1);
-}
-
-/**
- * Post-fetch exclusion filter.
- * Removes any chunk whose content contains an exclude keyword (case-insensitive substring).
- * Returns the array unchanged if excludeAreas is absent or empty.
- */
-export function filterExcludedChunks(chunks: RetrievedChunk[], excludeAreas?: string): RetrievedChunk[] {
-  if (!excludeAreas?.trim()) return chunks;
-  const keywords = parseKeywords(excludeAreas);
-  if (keywords.length === 0) return chunks;
-  const lower = (s: string) => s.toLowerCase();
-  return chunks.filter((chunk) =>
-    !keywords.some((kw) => lower(chunk.content).includes(kw))
-  );
-}
