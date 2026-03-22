@@ -29,6 +29,15 @@ export interface GeneratedPrompt {
   promptText: string;
   promptType: PromptType;
   mcOptions?: MCOption[]; // only present when promptType === 'multiple_choice'
+  bloomsLevel?: 'remember' | 'understand' | 'apply' | 'analyze' | 'evaluate' | 'create';
+  topicArea?: string;   // e.g., "beta-blocker mechanism"
+  rationale?: string;   // why this question is pedagogically valuable
+}
+
+export interface TokenUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
 }
 
 // Result of a generate call
@@ -36,6 +45,8 @@ export interface CandidateSet {
   candidates: GeneratedPrompt[];
   // Present when AI had degraded context (e.g. no files, no transcriptText)
   warning?: string;
+  tokenUsage?: TokenUsage;
+  model?: string;
 }
 
 // Metadata stored with each lesson file

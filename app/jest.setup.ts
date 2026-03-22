@@ -1,5 +1,12 @@
 import '@testing-library/jest-dom'
 
+// ResizeObserver is not available in jsdom but is used by Recharts
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 // Mock canvas-confetti (browser-only library not available in jsdom)
 jest.mock('canvas-confetti', () => ({
   __esModule: true,

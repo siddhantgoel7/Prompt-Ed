@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '../utils/renderWithProviders';
 import { DiscussionTimerSection } from '@/components/instructor/session/DiscussionTimerSection';
 
 const DISCUSSION_ID = 'disc-abc';

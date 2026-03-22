@@ -2,6 +2,8 @@
 'use client';
 
 import * as React from 'react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 import type { GeneratedPrompt } from '@/types/ai';
 
 /** Renders a clickable card for an AI-generated prompt candidate, showing the question and MC options. */
@@ -44,6 +46,17 @@ export function CandidateCard({
                     >
                         {candidate.promptType.replace('_', ' ')}
                     </span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="w-3 h-3 text-muted-foreground shrink-0" aria-label="About this question type" />
+                        </TooltipTrigger>
+                        <TooltipContent align="start">
+                            {candidate.bloomsLevel && <p><span className="font-semibold">Bloom&apos;s:</span> {candidate.bloomsLevel}</p>}
+                            {candidate.topicArea && <p><span className="font-semibold">Topic:</span> {candidate.topicArea}</p>}
+                            {candidate.rationale && <p><span className="font-semibold">Rationale:</span> {candidate.rationale}</p>}
+                            {!candidate.bloomsLevel && !candidate.topicArea && !candidate.rationale && <p>No metadata</p>}
+                        </TooltipContent>
+                    </Tooltip>
                     {isSelected && (
                         <span className="text-xs font-medium text-brand-500">
                             Selected

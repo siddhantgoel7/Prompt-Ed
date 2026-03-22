@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/server';
 import { OpenAIProvider } from '@/lib/ai/providers';
 import type { PromptType } from '@/types/discussion';
 import type { CandidateSet, AIPromptPreferences } from '@/types/ai';
-
 /**
  * POST /api/lessons/[lessonId]/generate
  * Generates AI discussion prompt candidates using RAG.
@@ -55,7 +54,7 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const body = await req.json() as { promptType?: PromptType; transcriptText?: string };
+    const body = await req.json() as { promptType?: PromptType; transcriptText?: string; preferencesOverride?: AIPromptPreferences };
     const promptType = body.promptType ?? 'long_answer';
     const transcriptText = body.transcriptText ?? '';
 
@@ -64,21 +63,23 @@ export async function POST(
       return NextResponse.json({ error: 'Invalid promptType' }, { status: 400 });
     }
 
-    // Fetch AI preferences for the instructor
-    let preferences: AIPromptPreferences | undefined;
-    const { data: prefData } = await supabase
-      .from('instructor_ai_preferences')
-      .select('difficulty, style, length, focus_areas')
-      .eq('user_id', user.id)
-      .single();
+    // Use preferencesOverride if provided (sweep mode), otherwise fetch from DB
+    let preferences: AIPromptPreferences | undefined = body.preferencesOverride;
+    if (!preferences) {
+      const { data: prefData } = await supabase
+        .from('instructor_ai_preferences')
+        .select('difficulty, style, length, focus_areas')
+        .eq('user_id', user.id)
+        .single();
 
-    if (prefData) {
-      preferences = {
-        difficulty: prefData.difficulty as AIPromptPreferences['difficulty'],
-        style: prefData.style as AIPromptPreferences['style'],
-        length: prefData.length as AIPromptPreferences['length'],
-        focusAreas: prefData.focus_areas,
-      };
+      if (prefData) {
+        preferences = {
+          difficulty: prefData.difficulty as AIPromptPreferences['difficulty'],
+          style: prefData.style as AIPromptPreferences['style'],
+          length: prefData.length as AIPromptPreferences['length'],
+          focusAreas: prefData.focus_areas,
+        };
+      }
     }
 
     let result: CandidateSet;

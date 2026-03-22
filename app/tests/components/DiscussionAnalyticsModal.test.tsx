@@ -1,7 +1,7 @@
 // [US 1.39] list view of responses — sequential display with timestamps
 // [US 1.40] metrics view — participation rate, avg response length, timeline
 
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '../utils/renderWithProviders';
 import { DiscussionAnalyticsModal } from '@/components/instructor/session/DiscussionAnalyticsModal';
 import type { Discussion } from '@/types/discussion';
 import type { Response } from '@/types/response';

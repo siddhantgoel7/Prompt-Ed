@@ -14,33 +14,164 @@ import type { AIPromptPreferences } from '@/types/ai';
 export const CANDIDATE_COUNT = 5;
 
 /**
- * The AI's persona and instructions.
- * Edit to change how the AI frames discussion questions,
- * style, pharmacology-specific handling, etc.
+ * Per-type temperature for gpt-4o-mini.
+ * short_answer: lower temperature for precise, focused questions.
+ * multiple_choice: mid temperature — needs creativity for distractors but not too loose.
+ * long_answer: higher temperature to encourage exploratory, multi-angle questions.
  */
-export function buildSystemPrompt(preferences?: AIPromptPreferences): string {
-  const styleInstruction = preferences?.style === 'factual'
-    ? 'Focus on direct recall and foundational facts.'
-    : preferences?.style === 'clinical_scenario'
-      ? 'Frame questions around clinical scenarios, patient cases, or real-world application.'
-      : 'Use a Socratic approach, encouraging questioning and reasoning rather than just direct answers.';
+export const TEMPERATURE_BY_TYPE: Record<PromptType, number> = {
+  short_answer: 0.7,
+  multiple_choice: 0.7,
+  long_answer: 0.7,
+};
 
-  const difficultyInstruction = preferences?.difficulty === 'basic'
-    ? 'Keep questions simple, testing basic understanding and core concepts.'
-    : preferences?.difficulty === 'advanced'
-      ? 'Make questions challenging, testing critical analysis, nuanced comparisons, and deep mechanisms.'
-      : 'Make questions intermediate level, focusing on practical application and moderate complexity.';
+/**
+ * The AI's persona and instructions.
+ * Maps difficulty to explicit Bloom's taxonomy levels with pharmacology-specific guidance.
+ *
+ * @param promptType - When provided, only the few-shot example matching the requested type is
+ *   included. This prevents the model from treating other question types as valid output formats
+ *   (e.g., generating short_answer candidates when multiple_choice was requested).
+ */
+export function buildSystemPrompt(preferences?: AIPromptPreferences, promptType?: PromptType): string {
+  const difficultyBlock = buildDifficultyBlock(preferences?.difficulty);
+  const styleBlock = buildStyleBlock(preferences?.style, preferences?.difficulty);
+  const lengthBlock = buildLengthBlock(preferences?.length, promptType);
+  const fewShotExample = buildFewShotExample(promptType);
 
-  return `You are an expert teaching assistant helping a university instructor generate discussion questions for a live lecture.
+  return `You are an expert pharmacology teaching assistant helping a university instructor generate discussion questions for a live lecture.
 
 <rules>
-1. Grounding: Questions must be strictly grounded in the provided lecture content and transcript.
-2. Cognitive Level: Encourage critical thinking, application, and deeper understanding. ${difficultyInstruction}
-3. Style: ${styleInstruction}
-4. Audience: Appropriate for university-level students in medical/pharmacology disciplines.
-5. Format: Clear, specific, and answerable within a 2-3 minute class discussion.
-6. Output: Always respond with valid JSON only. Do not wrap in backticks or include any conversational text.
-</rules>`;
+1. GROUNDING: Every question must be directly traceable to content in <context> or <transcript>. Do not introduce drug names, dosages, mechanisms, or clinical facts not mentioned in the provided content.
+2. ACCURACY: Drug mechanisms must match the provided content exactly. Clinical scenarios must be medically plausible. Do not confuse drug classes or receptor subtypes.
+3. COGNITIVE LEVEL: ${difficultyBlock}
+4. STYLE: ${styleBlock}
+5. AUDIENCE: University-level students in pharmacology or medical disciplines.
+6. FORMAT: Each question must be ${lengthBlock}. Be specific and answerable in a class discussion.
+7. DIVERSITY: Vary topic and phrasing across candidates — do not generate variations of the same question. Assign Bloom's levels exactly as specified in the <bloom_distribution> block in the user turn.
+8. QUESTION TYPE LOCK: ALL ${CANDIDATE_COUNT} candidates must use the exact promptType specified in <question_type_rules>. Producing any candidate of a different type is an error.
+9. MC DISTRACTORS: For multiple_choice questions, each wrong answer must use exactly one of these four distractor strategies:
+   (1) Mechanism confusion — correct drug or target, wrong receptor subtype, pathway step, or molecular mechanism
+   (2) Location confusion — correct mechanism, wrong tissue, organ, or physiological compartment where it acts
+   (3) Dose confusion — correct drug and mechanism, wrong dosing rationale or therapeutic window reasoning
+   (4) Partial truth — statement that is true in a different context, for a related drug, or only under different conditions
+   Each of the three distractors must use a different strategy. Never reuse the same strategy twice in one question. Never use trivially wrong or obviously absurd options. Aim for roughly similar option lengths — do not artificially truncate correct answers or pad distractors.
+10. MC ANSWER POSITION: Prefer to distribute the correct answer across different label positions (A, B, C, D) across the ${CANDIDATE_COUNT} candidates. Avoid placing is_correct: true on the same label repeatedly.
+11. META-LECTURE: Do not generate questions about course logistics, exam schedules, assignment deadlines, or how the lecture itself is structured. Focus exclusively on the pharmacological content being taught.
+12. STT NOISE: Transcripts are generated by speech-to-text and may contain artifacts. Skip passages that consist mainly of filler words ("um", "uh", "like", "you know"), repeated fragments, or sentences that do not contain a grammatically complete pharmacological statement. Do not quote such passages directly in any question.
+13. OUTPUT: Respond with valid JSON only. Do not wrap in backticks or include any conversational text.
+</rules>
+
+<output_schema>
+Return a JSON object with a single top-level key "candidates" whose value is the array of question objects.
+Each candidate object must include:
+- "promptText": string — the discussion question
+- "promptType": string — must match the type in <question_type_rules> for every candidate
+- "bloomsLevel": one of "remember" | "understand" | "apply" | "analyze" | "evaluate" | "create"
+- "topicArea": string — a 2-5 word noun phrase naming the specific pharmacology topic (e.g., "beta-blocker mechanism", "RAAS pathway")
+- "rationale": string — one sentence explaining why this question is pedagogically valuable
+- "mcOptions": (multiple_choice only) array of exactly 4 objects with "label", "text", "is_correct"
+</output_schema>
+
+<few_shot_examples>
+${fewShotExample}
+</few_shot_examples>`;
+}
+
+/**
+ * Returns few-shot example(s) matching the requested promptType.
+ * MC gets five examples covering all four label positions (A×1, B×1, C×1, D×2).
+ * D appears twice because it is historically the most underrepresented position.
+ * Each example annotates which distractor strategy each wrong option uses.
+ * Falls back to short_answer for undefined/unknown types.
+ */
+function buildFewShotExample(promptType?: PromptType): string {
+  switch (promptType) {
+    case 'multiple_choice':
+      return `Multiple choice examples. Correct answer position varies across examples — follow the same distribution in your output.
+
+Example 1 (correct at A | bloomsLevel: remember | distractors: B=location confusion, C=mechanism confusion, D=mechanism confusion):
+{"candidates": [{"promptText": "Which receptor subtype primarily mediates the reduction in heart rate seen with beta-blocker therapy?", "promptType": "multiple_choice", "bloomsLevel": "remember", "topicArea": "beta-adrenergic receptor subtypes", "rationale": "Tests targeted recall of receptor subtype specificity.", "mcOptions": [{"label": "A", "text": "Beta-1 adrenergic receptor in sinoatrial node pacemaker cells", "is_correct": true}, {"label": "B", "text": "Beta-2 adrenergic receptor in bronchial smooth muscle", "is_correct": false}, {"label": "C", "text": "Alpha-1 adrenergic receptor in peripheral vasculature", "is_correct": false}, {"label": "D", "text": "Muscarinic M2 receptor in the atrioventricular node", "is_correct": false}]}]}
+
+Example 2 (correct at D | bloomsLevel: apply | distractors: A=location confusion, B=partial truth, C=mechanism confusion):
+{"candidates": [{"promptText": "A patient taking a non-selective beta-blocker reports cold extremities and fatigue. Which mechanism best explains these side effects?", "promptType": "multiple_choice", "bloomsLevel": "apply", "topicArea": "beta-blocker adverse effects", "rationale": "Applies receptor pharmacology to a clinical presentation, distinguishing beta-1 from beta-2 peripheral effects.", "mcOptions": [{"label": "A", "text": "Beta-1 blockade in the kidney reduces renin release, lowering systemic vascular resistance", "is_correct": false}, {"label": "B", "text": "Competitive antagonism at beta-1 receptors reduces cardiac output and oxygen delivery", "is_correct": false}, {"label": "C", "text": "Alpha-1 blockade causes reflex vasodilation and reduces peripheral resistance", "is_correct": false}, {"label": "D", "text": "Non-selective beta-2 blockade in peripheral vasculature prevents vasodilation, causing cold extremities and fatigue", "is_correct": true}]}]}
+
+Example 3 (correct at B | bloomsLevel: understand | distractors: A=mechanism confusion, C=location confusion, D=partial truth):
+{"candidates": [{"promptText": "Why do ACE inhibitors commonly cause a dry cough?", "promptType": "multiple_choice", "bloomsLevel": "understand", "topicArea": "ACE inhibitor adverse effects", "rationale": "Distinguishes the correct bradykinin mechanism from plausible alternatives involving the same drug class.", "mcOptions": [{"label": "A", "text": "Angiotensin II accumulates and stimulates AT1 receptors in bronchial smooth muscle, triggering reflex coughing", "is_correct": false}, {"label": "B", "text": "Bradykinin accumulates because ACE normally degrades it; excess bradykinin stimulates pulmonary cough receptors", "is_correct": true}, {"label": "C", "text": "ACE inhibition in the kidney upregulates prostaglandin E2 synthesis, which sensitises airway cough receptors", "is_correct": false}, {"label": "D", "text": "Reduced angiotensin II triggers compensatory aldosterone release that directly irritates airway epithelium", "is_correct": false}]}]}
+
+Example 4 (correct at C | bloomsLevel: apply | distractors: A=mechanism confusion+location confusion, B=partial truth, D=location confusion):
+{"candidates": [{"promptText": "A patient stabilised on warfarin begins rifampin therapy. Which pharmacokinetic change requires a warfarin dose increase?", "promptType": "multiple_choice", "bloomsLevel": "apply", "topicArea": "drug-drug interaction — CYP induction", "rationale": "Applies enzyme induction pharmacokinetics to a clinically significant interaction, distinguishing induction from inhibition and identifying the correct metabolic site.", "mcOptions": [{"label": "A", "text": "Rifampin inhibits CYP2C9 in the gut wall, reducing warfarin absorption and raising free drug levels", "is_correct": false}, {"label": "B", "text": "Rifampin displaces warfarin from albumin binding in the plasma, transiently raising free warfarin concentration", "is_correct": false}, {"label": "C", "text": "Rifampin induces hepatic CYP2C9, accelerating warfarin metabolism and reducing its anticoagulant effect", "is_correct": true}, {"label": "D", "text": "Rifampin activates renal P-glycoprotein, increasing warfarin tubular secretion and reducing its bioavailability", "is_correct": false}]}]}
+
+Example 5 (correct at D | bloomsLevel: analyze | distractors: A=mechanism confusion, B=partial truth, C=location confusion):
+{"candidates": [{"promptText": "When initiating a drug with a large volume of distribution and a long half-life, why is a loading dose clinically useful?", "promptType": "multiple_choice", "bloomsLevel": "analyze", "topicArea": "pharmacokinetics — loading dose", "rationale": "Requires distinguishing volume of distribution from clearance and understanding why time-to-steady-state drives the clinical need for a loading dose.", "mcOptions": [{"label": "A", "text": "A loading dose saturates plasma protein binding sites, preventing drug redistribution into peripheral tissues", "is_correct": false}, {"label": "B", "text": "A loading dose bypasses hepatic first-pass metabolism by overwhelming CYP enzyme capacity on initial passage", "is_correct": false}, {"label": "C", "text": "A loading dose increases renal clearance by transiently saturating tubular reabsorption mechanisms", "is_correct": false}, {"label": "D", "text": "A loading dose rapidly achieves therapeutic plasma concentrations that would otherwise take many half-lives to reach at maintenance dose alone", "is_correct": true}]}]}`;
+    case 'long_answer':
+      return `Long answer example:
+{"candidates": [{"promptText": "A patient on a narrow-therapeutic-index drug is started on a strong CYP3A4 inhibitor. Using pharmacokinetic principles, explain why the dose of the first drug may need to be reduced and what adverse effects you would monitor for.", "promptType": "long_answer", "bloomsLevel": "analyze", "topicArea": "drug-drug interaction — CYP3A4 inhibition", "rationale": "Requires applying enzyme inhibition kinetics to a clinical consequence, connecting absorption/metabolism to toxicity risk without depending on any specific drug name."}]}`;
+    case 'short_answer':
+    default:
+      return `Short answer example:
+{"candidates": [{"promptText": "Explain why a non-selective beta-blocker is contraindicated in a patient with asthma.", "promptType": "short_answer", "bloomsLevel": "understand", "topicArea": "beta-blocker contraindications", "rationale": "Tests understanding of receptor selectivity and its clinical consequences rather than pure recall."}]}`;
+  }
+}
+
+/** Maps difficulty preference to Bloom's taxonomy language with example question starters. */
+function buildDifficultyBlock(difficulty?: string): string {
+  switch (difficulty) {
+    case 'basic':
+      return 'Target the "remember" and "understand" levels of Bloom\'s taxonomy. Questions should test definitions, core mechanisms, and recall. Example starters: "What is...", "Name the...", "Define...", "Which receptor...".';
+    case 'advanced':
+      return 'Target the "analyze", "evaluate", and "create" levels of Bloom\'s taxonomy. Questions should require comparing drug classes, justifying clinical choices, reasoning through trade-offs, or predicting outcomes from mechanistic first principles. Example starters: "Evaluate which...", "Analyze the consequences...", "Compare and justify...", "Given these two mechanisms...".';
+    default:
+      return 'Target the "apply" and "analyze" levels of Bloom\'s taxonomy. Questions should connect mechanism to effect, interpret clinical scenarios, or work through moderate-complexity drug interactions. Example starters: "Explain why...", "How would...", "Given this mechanism...", "What would you expect if...".';
+  }
+}
+
+/**
+ * Maps style preference to question framing guidance.
+ * When style=factual and difficulty=advanced, the factual block explicitly notes that
+ * multi-step reasoning is required — resolving the contradiction between "direct recall"
+ * and "evaluate/create" without leaving it ambiguous.
+ */
+function buildStyleBlock(style?: string, difficulty?: string): string {
+  switch (style) {
+    case 'factual':
+      if (difficulty === 'advanced') {
+        return 'Focus on direct recall and foundational facts — questions must have a clearly correct answer grounded in the lecture content. At advanced difficulty, the question should require multi-step reasoning or comparison to arrive at that answer, not single-fact retrieval.';
+      }
+      return 'Focus on direct recall and foundational facts. Questions should have clearly correct answers grounded in the lecture content.';
+    case 'clinical_scenario':
+      return 'Frame questions around clinical scenarios and patient cases. Embed the pharmacological concept inside a realistic patient presentation that students must interpret.';
+    default:
+      return 'Use a Socratic approach — encourage reasoning and questioning rather than pure recall. Frame questions to surface a tension or gap in understanding, then ask students to reason toward a resolution. Avoid questions with simple yes/no answers.';
+  }
+}
+
+/**
+ * Maps length preference and prompt type to word count guidance for the question itself.
+ * MC stems are shorter by nature (the options carry the cognitive load).
+ * long_answer questions benefit from more setup context at detailed length.
+ */
+function buildLengthBlock(length?: string, promptType?: PromptType): string {
+  if (promptType === 'multiple_choice') {
+    switch (length) {
+      case 'brief':   return '15–20 words for the stem';
+      case 'detailed': return '35–55 words for the stem, including a brief clinical or mechanistic setup';
+      default:        return '20–35 words for the stem';
+    }
+  }
+  if (promptType === 'long_answer') {
+    switch (length) {
+      case 'brief':   return '30–50 words';
+      case 'detailed': return '80–120 words, including substantial setup context and a multi-part ask';
+      default:        return '50–80 words';
+    }
+  }
+  // short_answer (and fallback)
+  switch (length) {
+    case 'brief':   return '20–30 words';
+    case 'detailed': return '60–90 words, including setup context';
+    default:        return '30–50 words';
+  }
 }
 
 /**
@@ -73,8 +204,10 @@ export function buildUserPrompt(params: {
   const typeInstructions = getTypeInstructions(promptType, preferences);
 
   const focusAreasBlock = preferences?.focusAreas?.trim()
-    ? `\n<focus_areas>\nThe instructor specifically requested to focus on: ${preferences.focusAreas.trim()}\n</focus_areas>\n`
+    ? `\n<focus_areas>\nCraft at least 2 of the ${CANDIDATE_COUNT} questions to directly address these instructor-specified topics: ${preferences.focusAreas.trim()}\nThe remaining question(s) may draw from other relevant content in the lecture.\n</focus_areas>\n`
     : '';
+
+  const bloomsBlock = buildBloomsDistributionBlock(preferences?.difficulty, promptType);
 
   return `<instructions>
 Based on the provided <context> and <transcript> from the lecture, generate exactly ${CANDIDATE_COUNT} discussion questions.${focusAreasBlock}
@@ -83,20 +216,24 @@ Based on the provided <context> and <transcript> from the lecture, generate exac
 ${typeInstructions}
 </question_type_rules>
 
-<output_format>
-Respond with a JSON array containing exactly ${CANDIDATE_COUNT} objects.
-Each object must strictly align with this schema:
-- "promptText": string (the discussion question)
-- "promptType": "${promptType}" (literal string)
-${promptType === 'multiple_choice' ? `- "mcOptions": array of exactly 4 objects, each with:
-  - "label": "A", "B", "C", or "D"
-  - "text": string (the answer option text)
-  - "is_correct": boolean (exactly one option must be true)` : ''}
-</output_format>
+<diversity>
+Vary the topic, cognitive level (Bloom's), and question structure across the ${CANDIDATE_COUNT} candidates. Do not generate variations of the same question.
+</diversity>
 
-<example>
-${getExampleJson(promptType)}
-</example>
+${bloomsBlock}
+
+<grounding>
+Every question must be directly traceable to content in <context> or <transcript>. If a drug, mechanism, or clinical fact is not mentioned in the provided content, do not include it in any question.
+</grounding>
+
+<output_format>
+Respond with a JSON object: { "candidates": [ ... ] } containing exactly ${CANDIDATE_COUNT} objects.
+Each object must strictly follow the output_schema in the system prompt — include "bloomsLevel", "topicArea", and "rationale" on every candidate.
+${promptType === 'multiple_choice' ? `"mcOptions" must be an array of exactly 4 objects, each with:
+  - "label": "A", "B", "C", or "D"
+  - "text": string (the answer option)
+  - "is_correct": boolean (exactly one must be true)` : ''}
+</output_format>
 </instructions>
 
 <context>
@@ -106,6 +243,47 @@ ${contextBlock}
 <transcript>
 ${transcriptBlock}
 </transcript>`;
+}
+
+/**
+ * Builds a <bloom_distribution> block assigning a Bloom's level to each candidate slot.
+ * Two schedules: MC and free-response (short_answer + long_answer share slots).
+ * Slot order is shuffled on every call so the model doesn't generate the same sequence each time.
+ *
+ * MC schedule (no "create"; "remember" retained at intermediate):
+ *   basic:        remember×2, understand×2, apply×1
+ *   intermediate: remember×1, understand×1, apply×2, analyze×1
+ *   advanced:     apply×1, analyze×2, evaluate×2
+ *
+ * Free-response schedule (short_answer + long_answer):
+ *   basic:        remember×1, understand×2, apply×2
+ *   intermediate: understand×1, apply×1, analyze×2, evaluate×1
+ *   advanced:     analyze×2, evaluate×2, create×1
+ */
+function buildBloomsDistributionBlock(difficulty?: string, promptType?: PromptType): string {
+  let slots: string[];
+
+  if (promptType === 'multiple_choice') {
+    switch (difficulty) {
+      case 'basic':        slots = ['remember', 'remember', 'understand', 'understand', 'apply']; break;
+      case 'advanced':     slots = ['apply', 'analyze', 'analyze', 'evaluate', 'evaluate']; break;
+      default:             slots = ['remember', 'understand', 'apply', 'apply', 'analyze']; // intermediate
+    }
+  } else {
+    // free-response: short_answer and long_answer
+    switch (difficulty) {
+      case 'basic':        slots = ['remember', 'understand', 'understand', 'apply', 'apply']; break;
+      case 'advanced':     slots = ['analyze', 'analyze', 'evaluate', 'evaluate', 'create']; break;
+      default:             slots = ['understand', 'apply', 'analyze', 'analyze', 'evaluate']; // intermediate
+    }
+  }
+
+  const shuffled = [...slots].sort(() => Math.random() - 0.5);
+  const assignments = shuffled.map((level, i) => `  Candidate ${i + 1}: "${level}"`).join('\n');
+  return `<bloom_distribution>
+Assign "bloomsLevel" to each candidate exactly as listed. Do not reuse a level unless it appears twice in this list.
+${assignments}
+</bloom_distribution>`;
 }
 
 /** Returns per-type generation rules injected into the user prompt. */
@@ -118,18 +296,10 @@ function getTypeInstructions(promptType: PromptType, preferences?: AIPromptPrefe
 
   switch (promptType) {
     case 'multiple_choice':
-      return `Each question must have exactly 4 answer options (A, B, C, D) with exactly one correct answer.${lengthInstruction}`;
+      return `Each question must have exactly 4 answer options (A, B, C, D) with exactly one correct answer. Distractors must be plausible pharmacological misconceptions — not trivially wrong options. Phrase the stem as a direct question ending with '?'.${lengthInstruction}`;
     case 'short_answer':
-      return `Each question should be answerable in 1-2 sentences. Focus on key concepts, definitions, or brief explanations.${lengthInstruction}`;
+      return `Each question should be answerable in 1-2 sentences. Focus on key concepts, definitions, mechanisms, or brief explanations grounded in the lecture content. Prefer to phrase each candidate as a direct question ending with '?' where the content permits.${lengthInstruction}`;
     case 'long_answer':
-      return `Each question should invite a 2-5 sentence response. Focus on mechanisms, comparisons, reasoning, or analysis.${lengthInstruction}`;
+      return `Each question should invite a 2-5 sentence response. Focus on mechanisms, comparisons, drug interactions, or clinical reasoning that requires drawing on multiple concepts. Prefer to phrase each candidate as a direct question ending with '?' where the content permits.${lengthInstruction}`;
   }
-}
-
-/** Returns a compact JSON example for the given prompt type, included in the prompt for few-shot guidance. */
-function getExampleJson(promptType: PromptType): string {
-  if (promptType === 'multiple_choice') {
-    return `[{"promptText": "Which receptor does drug X primarily target?", "promptType": "multiple_choice", "mcOptions": [{"label": "A", "text": "Beta-1 adrenergic", "is_correct": false}, {"label": "B", "text": "Muscarinic M2", "is_correct": true}, {"label": "C", "text": "Alpha-1 adrenergic", "is_correct": false}, {"label": "D", "text": "Nicotinic", "is_correct": false}]}]`;
-  }
-  return `[{"promptText": "Explain the mechanism of action of...", "promptType": "${promptType}"}]`;
 }

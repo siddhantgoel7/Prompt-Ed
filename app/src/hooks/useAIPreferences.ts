@@ -7,6 +7,7 @@ export function useAIPreferences() {
         difficulty: 'intermediate',
         style: 'socratic',
         length: 'standard',
+        focusAreas: '',
     });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

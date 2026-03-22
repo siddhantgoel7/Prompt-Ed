@@ -13,7 +13,7 @@ global.ResizeObserver = class {
   disconnect() {}
 } as unknown as typeof ResizeObserver;
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '../utils/renderWithProviders';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 import { ActiveRightPanel } from '@/components/instructor/session/ActiveRightPanel';
