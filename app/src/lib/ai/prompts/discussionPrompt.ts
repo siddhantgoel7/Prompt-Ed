@@ -14,6 +14,18 @@ import type { AIPromptPreferences } from '@/types/ai';
 export const CANDIDATE_COUNT = 5;
 
 /**
+ * Per-type temperature for gpt-4o-mini.
+ * short_answer: lower temperature for precise, focused questions.
+ * multiple_choice: mid temperature — needs creativity for distractors but not too loose.
+ * long_answer: higher temperature to encourage exploratory, multi-angle questions.
+ */
+export const TEMPERATURE_BY_TYPE: Record<PromptType, number> = {
+  short_answer: 0.7,
+  multiple_choice: 0.7,
+  long_answer: 0.7,
+};
+
+/**
  * The AI's persona and instructions.
  * Maps difficulty to explicit Bloom's taxonomy levels with pharmacology-specific guidance.
  *
@@ -24,7 +36,7 @@ export const CANDIDATE_COUNT = 5;
 export function buildSystemPrompt(preferences?: AIPromptPreferences, promptType?: PromptType): string {
   const difficultyBlock = buildDifficultyBlock(preferences?.difficulty);
   const styleBlock = buildStyleBlock(preferences?.style, preferences?.difficulty);
-  const lengthBlock = buildLengthBlock(preferences?.length);
+  const lengthBlock = buildLengthBlock(preferences?.length, promptType);
   const fewShotExample = buildFewShotExample(promptType);
 
   return `You are an expert pharmacology teaching assistant helping a university instructor generate discussion questions for a live lecture.
@@ -117,15 +129,31 @@ function buildStyleBlock(style?: string, difficulty?: string): string {
   }
 }
 
-/** Maps length preference to approximate word count guidance for the question itself. */
-function buildLengthBlock(length?: string): string {
+/**
+ * Maps length preference and prompt type to word count guidance for the question itself.
+ * MC stems are shorter by nature (the options carry the cognitive load).
+ * long_answer questions benefit from more setup context at detailed length.
+ */
+function buildLengthBlock(length?: string, promptType?: PromptType): string {
+  if (promptType === 'multiple_choice') {
+    switch (length) {
+      case 'brief':   return '15–20 words for the stem';
+      case 'detailed': return '35–55 words for the stem, including a brief clinical or mechanistic setup';
+      default:        return '20–35 words for the stem';
+    }
+  }
+  if (promptType === 'long_answer') {
+    switch (length) {
+      case 'brief':   return '30–50 words';
+      case 'detailed': return '80–120 words, including substantial setup context and a multi-part ask';
+      default:        return '50–80 words';
+    }
+  }
+  // short_answer (and fallback)
   switch (length) {
-    case 'brief':
-      return '20–30 words';
-    case 'detailed':
-      return '60–90 words, including setup context';
-    default:
-      return '30–50 words';
+    case 'brief':   return '20–30 words';
+    case 'detailed': return '60–90 words, including setup context';
+    default:        return '30–50 words';
   }
 }
 

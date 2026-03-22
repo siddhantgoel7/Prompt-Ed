@@ -5,7 +5,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PromptType } from '@/types/discussion';
 import type { CandidateSet, GeneratedPrompt, MCOption, AIPromptPreferences } from '@/types/ai';
 import { retrieveChunksBySimilarity, retrieveRecentChunks, blendEmbeddings, normalizeEmbedding, type RetrievedChunk } from './retrieveChunks';
-import { buildSystemPrompt, buildUserPrompt, CANDIDATE_COUNT } from './prompts/discussionPrompt';
+import { buildSystemPrompt, buildUserPrompt, CANDIDATE_COUNT, TEMPERATURE_BY_TYPE } from './prompts/discussionPrompt';
 
 /**
  * Orchestrates the full RAG → generate pipeline.
@@ -70,7 +70,7 @@ export async function generatePrompts(
     const { content: rawContent, tokenUsage, model } = await aiProvider.generateChatCompletion([
       { role: 'system', content: buildSystemPrompt(preferences, promptType) },
       { role: 'user', content: userPrompt }
-    ], { jsonMode: true, temperature: 0.7 });
+    ], { jsonMode: true, temperature: TEMPERATURE_BY_TYPE[promptType] });
     // [END DEBUG]
 
     const parsed = parseAIResponse(rawContent, promptType);

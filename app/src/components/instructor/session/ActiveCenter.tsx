@@ -329,11 +329,20 @@ export function ActiveCenter(props: Partial<{
           for (const l of LENGTHS)
             combos.push({ promptType: pt, difficulty: d, style: s, length: l });
 
+    // Fire at most CONCURRENCY requests at a time to avoid OpenAI rate-limit queuing.
+    // JS is single-threaded so nextIdx++ is race-free — each worker grabs the next slot.
+    const CONCURRENCY = 9;
     let completedCount = 0;
+    let nextIdx = 0;
     setSweepProgress({ current: 0, total: combos.length, label: 'Starting…' });
 
-    const results = await Promise.all(
-      combos.map(async (combo) => {
+    const results: SweepResult[] = new Array(combos.length);
+
+    const runWorker = async () => {
+      while (true) {
+        const i = nextIdx++;
+        if (i >= combos.length) break;
+        const combo = combos[i];
         const startMs = Date.now();
         try {
           const data = await generateCandidatesApi(lessonId, combo.promptType, transcriptText, {
@@ -342,16 +351,16 @@ export function ActiveCenter(props: Partial<{
             length: combo.length,
             focusAreas: preferences.focusAreas,
           });
-          completedCount++;
-          setSweepProgress({ current: completedCount, total: combos.length, label: `${completedCount} of ${combos.length} completed` });
-          return { combo, timeMs: Date.now() - startMs, candidates: data.candidates, warning: data.warning, tokenUsage: data.tokenUsage, model: data.model } as SweepResult;
+          results[i] = { combo, timeMs: Date.now() - startMs, candidates: data.candidates, warning: data.warning, tokenUsage: data.tokenUsage, model: data.model };
         } catch (err) {
-          completedCount++;
-          setSweepProgress({ current: completedCount, total: combos.length, label: `${completedCount} of ${combos.length} completed` });
-          return { combo, timeMs: Date.now() - startMs, candidates: [], error: err instanceof Error ? err.message : 'Failed' } as SweepResult;
+          results[i] = { combo, timeMs: Date.now() - startMs, candidates: [], error: err instanceof Error ? err.message : 'Failed' };
         }
-      })
-    );
+        completedCount++;
+        setSweepProgress({ current: completedCount, total: combos.length, label: `${completedCount} of ${combos.length} completed` });
+      }
+    };
+
+    await Promise.all(Array.from({ length: CONCURRENCY }, runWorker));
 
     setSweepProgress(null);
 
