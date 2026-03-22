@@ -78,6 +78,7 @@ describe('useStudentSession', () => {
     } as any);
   });
 
+  // 52.1
   it('restores submitted view on boot when this discussion was already submitted in browser storage', async () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([activeDiscussion.id]));
 
@@ -88,6 +89,7 @@ describe('useStudentSession', () => {
     });
   });
 
+  // 52.2
   it('keeps active view when storage has a different discussion id', async () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(['different-discussion-id']));
 
@@ -98,6 +100,7 @@ describe('useStudentSession', () => {
     });
   });
 
+  // 52.3
   it('persists submission and stays submitted after remount (refresh simulation)', async () => {
     submitStudentResponseApiMock.mockResolvedValue({
       data: {

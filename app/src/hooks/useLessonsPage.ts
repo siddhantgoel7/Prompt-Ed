@@ -1,5 +1,7 @@
 'use client';
 
+// Hook that manages all state and actions for the instructor's lessons page,
+// including fetching course/lesson data, modal state, and create/delete operations.
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 

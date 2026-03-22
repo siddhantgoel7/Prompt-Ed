@@ -110,18 +110,21 @@ function makeVM(overrides: Partial<SessionVM> = {}): SessionVM {
 
 describe('[US 1.39] Ended view response list', () => {
 
+  // 54.1
   it('[AT1] success: discussion card is rendered for each discussion', () => {
     render(<SessionEndedView vm={makeVM()} />);
 
     expect(screen.getByText('What is a closure?')).toBeInTheDocument();
   });
 
+  // 54.2
   it('[AT2] success: "Show Responses" button is visible when responses exist', () => {
     render(<SessionEndedView vm={makeVM()} />);
 
     expect(screen.getByText(/Show Responses \(2\)/i)).toBeInTheDocument();
   });
 
+  // 54.3
   it('[AT3] success: clicking "Show Responses" reveals responses in sequential list', () => {
     render(<SessionEndedView vm={makeVM()} />);
 
@@ -131,6 +134,7 @@ describe('[US 1.39] Ended view response list', () => {
     expect(screen.getByText('Second response.')).toBeInTheDocument();
   });
 
+  // 54.4
   it('[AT4] success: clicking again hides responses', () => {
     render(<SessionEndedView vm={makeVM()} />);
 
@@ -141,6 +145,7 @@ describe('[US 1.39] Ended view response list', () => {
     expect(screen.queryByText('First response.')).not.toBeInTheDocument();
   });
 
+  // 54.5
   it('[AT5] success: each response shows a timestamp when expanded', () => {
     render(<SessionEndedView vm={makeVM()} />);
 
@@ -150,6 +155,7 @@ describe('[US 1.39] Ended view response list', () => {
     expect(timestamps.length).toBeGreaterThanOrEqual(2);
   });
 
+  // 54.6
   it('[AT6] failure: "Show Responses" button not shown when discussion has no responses', () => {
     const vm = makeVM({
       lessonDiscussions: [makeDiscussion({ responses: [] }) as any],
@@ -159,6 +165,7 @@ describe('[US 1.39] Ended view response list', () => {
     expect(screen.queryByText(/Show Responses/i)).not.toBeInTheDocument();
   });
 
+  // 54.7
   it('[AT7] success: summary bar shows total discussion count', () => {
     const vm = makeVM({
       lessonDiscussions: [makeDiscussion() as any, makeDiscussion({ id: 'disc-2', prompt_text: 'Second prompt' }) as any],
@@ -184,6 +191,7 @@ describe('[US 1.40] Ended view metrics', () => {
     ]);
   });
 
+  // 54.8
   it('[AT1] success: response rate shown on discussion card (responses / snapshot)', () => {
     // 2 responses / 4 students = 50%
     render(<SessionEndedView vm={makeVM()} />);
@@ -191,12 +199,14 @@ describe('[US 1.40] Ended view metrics', () => {
     expect(screen.getByText(/50%/)).toBeInTheDocument();
   });
 
+  // 54.9
   it('[AT2] success: student count shown on discussion card', () => {
     render(<SessionEndedView vm={makeVM()} />);
 
     expect(screen.getByText('4')).toBeInTheDocument(); // participant_snapshot
   });
 
+  // 54.10
   it('[AT3] failure: response rate not shown when participant_snapshot is null', () => {
     const vm = makeVM({
       lessonDiscussions: [makeDiscussion({ participant_snapshot: null }) as any],
@@ -206,12 +216,14 @@ describe('[US 1.40] Ended view metrics', () => {
     expect(screen.queryByText(/%\s*rate/i)).not.toBeInTheDocument();
   });
 
+  // 54.11
   it('[AT4] success: "View Analytics" button is present on each discussion card', () => {
     render(<SessionEndedView vm={makeVM()} />);
 
     expect(screen.getByRole('button', { name: /View Analytics/i })).toBeInTheDocument();
   });
 
+  // 54.12
   it('[AT5] success: clicking "View Analytics" opens the analytics modal', async () => {
     render(<SessionEndedView vm={makeVM()} />);
 
@@ -226,6 +238,7 @@ describe('[US 1.40] Ended view metrics', () => {
     });
   });
 
+  // 54.13
   it('[AT6] success: analytics modal shows participation rate from snapshot', async () => {
     render(<SessionEndedView vm={makeVM()} />);
 
@@ -237,6 +250,7 @@ describe('[US 1.40] Ended view metrics', () => {
     });
   });
 
+  // 54.14
   it('[AT7] success: summary bar shows correct total response count', () => {
     render(<SessionEndedView vm={makeVM()} />);
 
@@ -245,6 +259,7 @@ describe('[US 1.40] Ended view metrics', () => {
     expect(screen.getAllByText('2').length).toBeGreaterThanOrEqual(1);
   });
 
+  // 54.15
   it('[AT8] success: multiple discussion cards each show their own response count', () => {
     const vm = makeVM({
       lessonDiscussions: [

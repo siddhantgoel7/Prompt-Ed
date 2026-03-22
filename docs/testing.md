@@ -47,6 +47,7 @@ app/tests/
 │   ├── auth.acceptance.test.tsx
 │   ├── auto_save.acceptance.test.tsx
 │   ├── auto_save_interval_recovery.acceptance.test.tsx
+│   ├── discussion_timer.acceptance.test.tsx
 │   ├── instructor_dashboard.acceptance.test.tsx
 │   ├── instructor_reconnect.acceptance.test.tsx
 │   ├── instructor_session_active_view.test.tsx
@@ -56,42 +57,72 @@ app/tests/
 │   ├── mc_feedback.acceptance.test.tsx
 │   ├── multiple_discussions.acceptance.test.tsx
 │   ├── real_time_responses.acceptance.test.tsx
-│   └── student_session_page.test.tsx
+│   ├── student_session_page.test.tsx
+│   └── student_submitted_view.test.tsx
 ├── api/                     # Backend API tests
+│   ├── ai_preferences.test.ts
 │   ├── auth.test.ts
 │   ├── courses.test.ts
+│   ├── fetchFlaggedResponses.test.ts
+│   ├── flagResponse.test.ts
+│   ├── lesson_scoping.test.ts
 │   ├── mc_feedback.test.ts
-│   └── socket.test.ts
+│   ├── socket.test.ts
+│   └── unflagResponse.test.ts
 ├── components/              # Component integration tests
+│   ├── AIPreferencesDialog.test.tsx
+│   ├── ActiveRightPanel.highlight.test.tsx
+│   ├── ActiveRightPanel.test.tsx
 │   ├── connectionStatus.test.tsx
 │   ├── dashboard.test.tsx
+│   ├── DiscussionAnalyticsModal.test.tsx
+│   ├── DiscussionPage.highlight.test.tsx
+│   ├── DiscussionTimer.test.tsx
+│   ├── DiscussionTimerSection.test.tsx
 │   ├── lessons_page.test.tsx
+│   ├── ResponseCard.test.tsx
 │   ├── session.test.tsx
+│   ├── SessionDisplayView.test.tsx
+│   ├── SessionEndedView.test.tsx
+│   ├── SessionHeaderActive.test.tsx
+│   ├── SessionHeaderEnded.test.tsx
 │   ├── splitView.test.tsx
-│   └── student_prompt_card.test.tsx
+│   ├── StartDiscussionDialog.test.tsx
+│   ├── student_prompt_card.test.tsx
+│   ├── StudentSessionPage.ended.test.tsx
+│   ├── StudentSessionPage.rejoin.test.tsx
+│   └── StudentSessionShellLeave.test.tsx
 ├── fixtures/                # Test data fixtures
 │   └── discussions.ts
 ├── ui/                      # End-to-end Playwright tests
 │   ├── global-setup.ts
 │   ├── global-teardown.ts
 │   ├── instructor_ai_features.spec.ts
+│   ├── instructor_ai_preferences.spec.ts
 │   ├── instructor_dashboard.spec.ts
+│   ├── instructor_highlight_hide.spec.ts
 │   ├── instructor_login.spec.ts
 │   ├── instructor_past_lessons.spec.ts
 │   ├── instructor_reconnect_autosave.spec.ts
+│   ├── instructor_timer.spec.ts
 │   ├── student_anonymous_access.spec.ts
 │   ├── student_join.spec.ts
 │   ├── student_lesson_scoping.spec.ts
 │   ├── student_mc_feedback.spec.ts
+│   ├── student_multiple_responses.spec.ts
 │   ├── student_responsive.spec.ts
-│   └── student_submit_response.spec.ts
+│   ├── student_submit_response.spec.ts
+│   └── student_timer.spec.ts
 ├── unit/                    # Unit tests for utilities and hooks
 │   ├── ai/
 │   │   ├── parsers.test.ts
 │   │   └── providers.test.ts
 │   ├── authHelpers.test.ts
+│   ├── csv_utils.test.ts
 │   ├── mc_feedback_logic.test.ts
+│   ├── useAIPreferences.test.ts
 │   ├── useRealtime.test.ts
+│   ├── useStudentSession.test.ts
 │   └── validation.test.ts
 ├── jest.d.ts                # Jest TypeScript types
 └── smoke.test.ts            # CI smoke test
@@ -162,22 +193,52 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 
 ---
 
-### Cumulative Test Coverage Summary (Sprints 1–3)
+### Must Have Features (Sprint 4)
 
-- **Total User Stories Tested**: 37 (22 Sprint 2 + 15 Sprint 3)
-- **Acceptance Tests**: 15 files, 108 test cases
-- **Component Tests**: 6 files, 58 test cases
-- **UI Tests (Playwright)**: 12 spec files, 38 test cases
-- **API Tests**: 4 files, 14 test cases
-- **Unit Tests**: 5 files, 57 test cases
+| User Story | Description | Acceptance Tests | UI Tests (Playwright) | API/Unit Tests | Coverage |
+|------------|-------------|------------------|-----------------------|----------------|----------|
+| **US 1.22** | AI preferences / custom AI settings | — | `instructor_ai_preferences.spec.ts` (8 tests) | `api/ai_preferences.test.ts` (51.1–51.4)<br>`components/AIPreferencesDialog.test.tsx` (57.1–57.3)<br>`unit/useAIPreferences.test.ts` (53.1–53.4) | **Complete**: API CRUD, dialog UI, hook behavior |
+| **US 1.29** | Set a time limit for a response window | `discussion_timer.acceptance.test.tsx` (69.13, 69.14) | `instructor_timer.spec.ts` (18 tests) | `components/DiscussionTimerSection.test.tsx` (67.1–67.22)<br>`components/StartDiscussionDialog.test.tsx` (66.1–66.14) | **Complete**: Start dialog, timer section UI, countdown, extend/edit, acceptance flow |
+| **US 1.30** | Student can update/resubmit response | — | `student_multiple_responses.spec.ts` (4 tests) | — | **Partial**: UI-level resubmit flow covered; no unit tests |
+| **US 1.35** | Hide inappropriate responses | — | `instructor_highlight_hide.spec.ts` (14 tests) | `api/fetchFlaggedResponses.test.ts` (48.1–48.4)<br>`api/flagResponse.test.ts` (50.1–50.4)<br>`api/unflagResponse.test.ts` (49.1–49.4)<br>`components/ResponseCard.test.tsx` (62.3, 62.7–62.10)<br>`components/ActiveRightPanel.highlight.test.tsx` (58.1–58.16)<br>`components/DiscussionPage.highlight.test.tsx` (59.1–59.26) | **Complete**: Flag/unflag API, card red styling, Unflag button, panel hide/show logic |
+| **US 1.36** | Highlight a specific response | — | `instructor_highlight_hide.spec.ts` (14 tests) | `components/ResponseCard.test.tsx` (62.1, 62.2, 62.4–62.6)<br>`components/ActiveRightPanel.highlight.test.tsx` (58.1–58.16)<br>`components/DiscussionPage.highlight.test.tsx` (59.1–59.26) | **Complete**: Yellow emphasis, larger text, z-index elevation, toggle behavior |
+| **US 1.37** | View responses to a discussion in detail | — | — | `components/splitView.test.tsx` (64.9–64.12) | **Complete**: Response fetch, display, loading state, empty state in split-view panes |
+| **US 1.39** | Split view for comparing discussions | — | — | `components/splitView.test.tsx` (64.1–64.16)<br>`components/SessionEndedView.test.tsx` (54.1–54.15)<br>`components/ActiveRightPanel.test.tsx` (61.1–61.10)<br>`components/DiscussionAnalyticsModal.test.tsx` (60.1–60.15) | **Complete**: Dual-pane layout, independent selection, back navigation, live responses |
+| **US 1.40** | Discussion analytics | — | — | `components/ActiveRightPanel.test.tsx` (61.1–61.10)<br>`components/DiscussionAnalyticsModal.test.tsx` (60.1–60.15)<br>`components/SessionEndedView.test.tsx` (54.1–54.15) | **Complete**: Analytics modal, response counts, ended-view data display |
+| **US 1.41** | Export responses as a file | — | — | `unit/csv_utils.test.ts` (70.1–70.10) | **Complete**: CSV escaping and timestamp formatting utilities |
+| **US 1.42** | Export AI-generated prompts and responses | — | — | `unit/csv_utils.test.ts` (70.1–70.10) | **Complete**: Shared CSV utilities validated; full export handler covered via 1.41 shared logic |
+| **US 1.43** | Export appropriate lesson statistics | — | — | `unit/csv_utils.test.ts` (70.11–70.16) | **Complete**: Timestamp formatting for stat exports |
+| **US 2.11** | See how much time a prompt has left | `discussion_timer.acceptance.test.tsx` (69.1–69.12, 69.15–69.16) | `student_timer.spec.ts` (20 tests) | `components/DiscussionTimer.test.tsx` (68.1–68.10) | **Complete**: Circular countdown, MM:SS format, expiry state, aria labels, real-time updates |
+| **US 2.12** | Student sees session-ended state | — | — | `components/StudentSessionPage.ended.test.tsx` (6 tests) | **Complete**: Ended alert, custom/default message, badge rendering |
+| **US 2.13** | Student can leave session | — | — | `components/StudentSessionShellLeave.test.tsx` (4 tests) | **Complete**: Leave flow interaction tested |
+| **US 2.14** | Student can rejoin session | — | — | `components/StudentSessionPage.rejoin.test.tsx` (7 tests)<br>`unit/useStudentSession.test.ts` (52.1–52.3) | **Complete**: Session restoration from storage, remount persistence |
+
+---
+
+### Should Have / Could Have Features (Sprint 4)
+
+| User Story | Description | Acceptance Tests | UI Tests (Playwright) | API/Unit Tests | Coverage |
+|------------|-------------|------------------|-----------------------|----------------|----------|
+| **US 2.10** *(extended)* | MC feedback in submitted view | `acceptance/student_submitted_view.test.tsx` (65.1–65.24) | — | — | **Extended**: Post-submission feedback UI with timer-gate, timed/no-timer scenarios, short/long answer submitted state |
+
+---
+
+### Cumulative Test Coverage Summary (Sprints 1–4)
+
+- **Total User Stories Tested**: 52 (22 Sprint 2 + 15 Sprint 3 + 15 Sprint 4)
+- **Acceptance Tests**: 17 files, 148 test cases
+- **Component Tests**: 22 files, 193 test cases
+- **UI Tests (Playwright)**: 17 spec files, 104 test cases
+- **API Tests**: 9 files, 29 test cases
+- **Unit Tests**: 8 files, 92 test cases
 - **Smoke Tests**: 1 file, 1 test case
-- **Total Test Cases**: 276 (across 43 files)
+- **Total Test Cases**: 567 (across 74 files)
 
 ---
 
 ### Test Count by File
 
-#### Acceptance Tests (108 tests)
+#### Acceptance Tests (148 tests)
 
 | Test File | User Stories | Tests |
 |-----------|-------------|-------|
@@ -186,6 +247,7 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | `auth.acceptance.test.tsx` | US 1.01, 1.02 | 5 |
 | `auto_save.acceptance.test.tsx` | US 1.10 | 4 |
 | `auto_save_interval_recovery.acceptance.test.tsx` | US 1.13 | 2 |
+| `discussion_timer.acceptance.test.tsx` | US 1.29, 2.11 | 16 |
 | `instructor_dashboard.acceptance.test.tsx` | US 1.03, 1.04, 1.49, 1.50, 2.01 | 9 |
 | `instructor_reconnect.acceptance.test.tsx` | US 1.12 | 3 |
 | `instructor_session_active_view.test.tsx` | US 1.06, 1.09, 1.12, 1.28, 1.31 | 12 |
@@ -196,52 +258,82 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | `multiple_discussions.acceptance.test.tsx` | US 1.25 | 4 |
 | `real_time_responses.acceptance.test.tsx` | US 1.34 | 4 |
 | `student_session_page.test.tsx` | US 1.09, 2.03, 2.06, 2.07, 2.09, 2.10, 2.15 | 12 |
+| `student_submitted_view.test.tsx` | US 2.08, 2.10 | 24 |
 
-#### Component Tests (58 tests)
+#### Component Tests (193 tests)
 
 | Test File | User Stories | Tests |
 |-----------|-------------|-------|
+| `AIPreferencesDialog.test.tsx` | US 1.22 | 3 |
+| `ActiveRightPanel.highlight.test.tsx` | US 1.35, 1.36 | 16 |
+| `ActiveRightPanel.test.tsx` | US 1.39, 1.40 | 10 |
 | `connectionStatus.test.tsx` | US 1.12 | 7 |
 | `dashboard.test.tsx` | US 1.03, 1.49, 1.50 | 7 |
+| `DiscussionAnalyticsModal.test.tsx` | US 1.39, 1.40 | 15 |
+| `DiscussionPage.highlight.test.tsx` | US 1.35, 1.36 | 26 |
+| `DiscussionTimer.test.tsx` | US 2.11 | 10 |
+| `DiscussionTimerSection.test.tsx` | US 1.29 | 22 |
 | `lessons_page.test.tsx` | US 1.04, 1.05, 1.08 | 20 |
+| `ResponseCard.test.tsx` | US 1.35, 1.36 | 10 |
 | `session.test.tsx` | US 1.04, 1.06, 1.09, 1.14, 1.25, 1.34, 1.41 | 13 |
-| `splitView.test.tsx` | US 1.25, 1.34, 1.37, 1.39 | 18 |
+| `SessionDisplayView.test.tsx` | US 1.06, 1.31 | 1 |
+| `SessionEndedView.test.tsx` | US 1.39, 1.40 | 15 |
+| `SessionHeaderActive.test.tsx` | US 1.06, 1.31 | 1 |
+| `SessionHeaderEnded.test.tsx` | US 1.09, 1.14 | 2 |
+| `splitView.test.tsx` | US 1.25, 1.34, 1.37, 1.39 | 16 |
+| `StartDiscussionDialog.test.tsx` | US 1.29 | 14 |
 | `student_prompt_card.test.tsx` | US 2.08, 2.10 | 13 |
+| `StudentSessionPage.ended.test.tsx` | US 2.12 | 6 |
+| `StudentSessionPage.rejoin.test.tsx` | US 2.14 | 7 |
+| `StudentSessionShellLeave.test.tsx` | US 2.13 | 4 |
 
-#### UI Tests — Playwright (38 tests)
+#### UI Tests — Playwright (104 tests)
 
 | Test File | User Stories | Tests |
 |-----------|-------------|-------|
 | `instructor_ai_features.spec.ts` | US 1.16, 1.17, 1.18, 1.19, 1.23 | 3 |
+| `instructor_ai_preferences.spec.ts` | US 1.22 | 8 |
 | `instructor_dashboard.spec.ts` | US 1.03, 1.04, 1.05, 1.49 | 2 |
+| `instructor_highlight_hide.spec.ts` | US 1.35, 1.36 | 14 |
 | `instructor_login.spec.ts` | US 1.01, 1.02 | 9 |
 | `instructor_past_lessons.spec.ts` | US 1.04, 1.14 | 2 |
 | `instructor_reconnect_autosave.spec.ts` | US 1.12, 1.13 | 1 |
+| `instructor_timer.spec.ts` | US 1.29 | 18 |
 | `student_anonymous_access.spec.ts` | US 2.03 | 3 |
 | `student_join.spec.ts` | US 2.06 | 6 |
 | `student_lesson_scoping.spec.ts` | US 1.26, 2.04, 2.15 | 2 |
 | `student_mc_feedback.spec.ts` | US 2.08, 2.10 | 10 |
+| `student_multiple_responses.spec.ts` | US 1.30 | 4 |
 | `student_responsive.spec.ts` | US 2.01, 2.02 | 3 |
 | `student_submit_response.spec.ts` | US 2.07, 2.09 | 3 |
+| `student_timer.spec.ts` | US 2.11 | 20 |
 
-#### API Tests (14 tests)
+#### API Tests (29 tests)
 
 | Test File | User Stories | Tests |
 |-----------|-------------|-------|
+| `ai_preferences.test.ts` | US 1.22 | 4 |
 | `auth.test.ts` | US 1.01 | 3 |
 | `courses.test.ts` | US 1.49, 1.50 | 6 |
+| `fetchFlaggedResponses.test.ts` | US 1.35 | 4 |
+| `flagResponse.test.ts` | US 1.35 | 4 |
+| `lesson_scoping.test.ts` | US 1.26, 2.04 | 3 |
 | `mc_feedback.test.ts` | US 2.08, 2.10 | 11 |
 | `socket.test.ts` | Infrastructure | 1 |
+| `unflagResponse.test.ts` | US 1.35 | 4 |
 
-#### Unit Tests (57 tests)
+#### Unit Tests (92 tests)
 
 | Test File | User Stories | Tests |
 |-----------|-------------|-------|
 | `unit/ai/parsers.test.ts` | US 1.16 | 22 |
 | `unit/ai/providers.test.ts` | US 1.16, 1.23 | 20 |
 | `unit/authHelpers.test.ts` | US 1.01, 1.02, 1.03 | 5 |
+| `unit/csv_utils.test.ts` | US 1.41, 1.42, 1.43 | 16 |
 | `unit/mc_feedback_logic.test.ts` | US 2.10 | 20 |
+| `unit/useAIPreferences.test.ts` | US 1.22 | 4 |
 | `unit/useRealtime.test.ts` | US 1.12, 1.34, 2.06 | 8 |
+| `unit/useStudentSession.test.ts` | US 2.14 | 3 |
 | `unit/validation.test.ts` | US 1.01, 1.49 | 8 |
 
 ---
@@ -257,29 +349,37 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | Past Lesson View (US 1.14) | 2 | 0 | 2 |
 | AI Pipeline (US 1.16, 1.17, 1.18, 1.19, 1.23, 1.24) | 38 | 6 | 44 |
 | Discussions (US 1.25, 1.27, 1.28) | 6 | 1 | 7 |
-| Lesson Scoping (US 1.26, 2.04) | 2 | 0 | 2 |
+| Lesson Scoping (US 1.26, 2.04) | 5 | 1 | 6 |
+| AI Preferences (US 1.22) | 14 | 5 | 19 |
+| Timer / Time Limit (US 1.29, 2.11) | 74 | 8 | 82 |
+| Multiple Responses (US 1.30) | 4 | 0 | 4 |
 | PIN Display (US 1.31) | 5 | 0 | 5 |
 | Real-time (US 1.34) | 10 | 1 | 11 |
+| Highlight / Hide Responses (US 1.35, 1.36) | 52 | 14 | 66 |
+| Split View / Detail View (US 1.37, 1.39) | 28 | 3 | 31 |
+| Analytics (US 1.40) | 20 | 5 | 25 |
+| CSV Export (US 1.41, 1.42, 1.43) | 14 | 2 | 16 |
 | Courses (US 1.49, 1.50) | 11 | 5 | 16 |
 | Responsive Design (US 2.01, 2.02) | 5 | 0 | 5 |
 | Student Access (US 2.03, 2.06, 2.07, 2.09) | 18 | 5 | 23 |
 | MC Options (US 2.08) | 5 | 3 | 8 |
-| MC Feedback (US 2.10) | 28 | 19 | 47 |
+| MC Feedback (US 2.10) | 52 | 19 | 71 |
+| Student Session State (US 2.12, 2.13, 2.14) | 15 | 2 | 17 |
 | Status Indicators (US 2.15) | 6 | 0 | 6 |
-| **TOTALS** | **178** | **58** | **236** |
+| **TOTALS** | **426** | **98** | **524** |
 
 ---
 
 ### Coverage Depth by User Story (Cumulative)
 
 **Well-Covered (8+ tests):**
-US 1.01 (12), US 1.04 (7), US 1.05 (9), US 1.12 (13), US 1.16 (39), US 1.34 (11), US 1.49 (10), US 2.03 (7), US 2.06 (10), US 2.08 (19), US 2.10 (47)
+US 1.01 (12), US 1.04 (7), US 1.05 (9), US 1.12 (13), US 1.16 (39), US 1.22 (19), US 1.29 (54), US 1.34 (11), US 1.35 (66), US 1.36 (52), US 1.39 (31), US 1.40 (25), US 1.41 (16), US 1.49 (10), US 2.03 (7), US 2.06 (10), US 2.08 (19), US 2.10 (71), US 2.11 (46)
 
 **Adequately Covered (4–7 tests):**
-US 1.02 (5), US 1.03 (4), US 1.08 (6), US 1.09 (4), US 1.10 (4), US 1.13 (4), US 1.14 (4), US 1.18 (5), US 1.25 (5), US 1.31 (5), US 1.50 (6), US 2.07 (4), US 2.15 (6)
+US 1.02 (5), US 1.03 (4), US 1.08 (6), US 1.09 (4), US 1.10 (4), US 1.13 (4), US 1.14 (6), US 1.18 (5), US 1.25 (5), US 1.30 (4), US 1.31 (6), US 1.37 (4), US 1.50 (6), US 2.07 (4), US 2.12 (6), US 2.14 (10), US 2.15 (6)
 
 **Minimally Covered (1–3 tests):**
-US 1.06 (3), US 1.17 (3), US 1.19 (3), US 1.23 (4), US 1.24 (2), US 1.26 (2), US 1.27 (1), US 1.28 (2), US 2.01 (3), US 2.02 (2), US 2.04 (2), US 2.09 (2)
+US 1.06 (3), US 1.17 (3), US 1.19 (3), US 1.23 (4), US 1.24 (2), US 1.26 (6), US 1.27 (1), US 1.28 (2), US 1.42 (2), US 1.43 (6), US 2.01 (3), US 2.02 (2), US 2.04 (5), US 2.09 (2), US 2.13 (4)
 
 Even minimally covered stories have tests across multiple test types (acceptance + UI or unit), providing confidence through diverse validation rather than test count alone.
 
@@ -355,9 +455,9 @@ it('[US 2.03][AT1] success: student joins without providing name, email, or ID',
 ```
 
 **Coverage**:
-- 15 acceptance test files
-- 108 individual test cases
-- All Sprint 2 and Sprint 3 user stories covered
+- 17 acceptance test files
+- 148 individual test cases
+- All Sprint 2, Sprint 3, and Sprint 4 user stories covered
 
 ---
 
@@ -447,6 +547,13 @@ it('should display courses when loaded', async () => {
 - Connection status (connected/disconnected/reconnecting states)
 - Split view (dual-pane discussion comparison, real-time updates)
 - Student prompt card (MC option rendering, selection, security)
+- Response card (highlight/flag styling, emphasis states)
+- Discussion timer (circular countdown, MM:SS, expiry state)
+- Timer section (edit/extend controls, no-time-limit mode)
+- Start discussion dialog (timer configuration, confirm/cancel)
+- Analytics modal and ended view (response counts, export)
+- AI preferences dialog (settings UI)
+- Student session states (ended view, leave, rejoin)
 
 ---
 
@@ -491,7 +598,7 @@ export default async function globalTeardown() {
 ```
 
 **Coverage**:
-- **11 spec files** (plus global setup/teardown) with **38 test cases**
+- **16 spec files** (plus global setup/teardown) with **104 test cases**
 - **All critical user flows** automated end-to-end
 - **Cross-browser testing** on Chromium, Firefox, WebKit
 - **Responsive design** validated on desktop and mobile viewports
@@ -528,7 +635,7 @@ export default async function globalTeardown() {
 6. **`unit/ai/providers.test.ts`** - AI provider wrappers (GPT-4o vision, chat, embeddings)
 
 **Coverage**:
-- **6 unit test files** with **57 test cases**
+- **9 unit test files** with **92 test cases**
 - Auth helpers, real-time hook, validation, MC feedback logic, AI parsers, AI providers
 
 ---

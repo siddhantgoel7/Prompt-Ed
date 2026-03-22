@@ -18,6 +18,7 @@ describe('SessionHeaderActive', () => {
     jest.clearAllMocks();
   });
 
+  // 55.1
   it('encodes a direct student lesson URL in QR code (not homepage root)', async () => {
     render(
       <SessionHeaderActive

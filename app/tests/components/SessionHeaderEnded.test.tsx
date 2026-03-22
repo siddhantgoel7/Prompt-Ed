@@ -20,6 +20,7 @@ describe('SessionHeaderEnded', () => {
     jest.clearAllMocks();
   });
 
+  // 56.1
   it('routes back to lessons page when Back to Lessons is clicked', () => {
     render(
       <SessionHeaderEnded
@@ -39,6 +40,7 @@ describe('SessionHeaderEnded', () => {
     expect(mockPush).toHaveBeenCalledWith('/lessons_page/course-123');
   });
 
+  // 56.2
   it('uses onBackToLessons override when provided', () => {
     const onBackToLessons = jest.fn();
 

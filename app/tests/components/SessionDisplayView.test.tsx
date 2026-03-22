@@ -14,6 +14,7 @@ describe('SessionDisplayView', () => {
     jest.clearAllMocks();
   });
 
+  // 63.1
   it('renders lesson title, pin, and QR for direct student join URL', async () => {
     render(
       <SessionDisplayView
