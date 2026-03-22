@@ -14,6 +14,7 @@ import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { CandidateCard } from './CandidateCard';
 import { MultipleChoiceEditor } from './MultipleChoiceEditor';
 import { AIPreferencesDialog } from './AIPreferencesDialog';
+import { AITipsButton } from './AITipsButton';
 import { transcribeAudioApi } from '@/lib/api/aiApi';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
 
@@ -329,6 +330,8 @@ export function ActiveCenter(props: Partial<{
 
             {/* Prompt type + generate */}
             <div className="flex items-center gap-2">
+              {/* (i) best-practices button — leftmost, highlighted once per browser session */}
+              <AITipsButton lessonId={lessonId} />
               <select
                 value={promptType}
                 onChange={(e) => setPromptType(e.target.value as PromptType)}
