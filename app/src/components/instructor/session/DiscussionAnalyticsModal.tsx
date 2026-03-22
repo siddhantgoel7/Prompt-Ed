@@ -56,10 +56,12 @@ export function DiscussionAnalyticsContent({
         dist[r.selected_option]++;
       }
     });
+    const totalVotes = Object.values(dist).reduce((sum, count) => sum + count, 0);
     return discussion.mc_options.map((opt) => ({
       label: opt.label,
       text: opt.text,
       count: dist[opt.label] ?? 0,
+      percentage: totalVotes > 0 ? Math.round(((dist[opt.label] ?? 0) / totalVotes) * 100) : 0,
       isCorrect: discussion.correct_option === opt.label,
     }));
   })();
@@ -111,9 +113,9 @@ export function DiscussionAnalyticsContent({
                   cx="50%"
                   cy="50%"
                   outerRadius={75}
-                  label={({ name, percent }) =>
-                    `${name} (${Math.round((percent ?? 0) * 100)}%)`
-                  }
+                  minAngle={2}
+                  paddingAngle={1}
+                  label={false}
                   labelLine={false}
                 >
                   {mcChartData.map((entry, i) => (
@@ -144,7 +146,7 @@ export function DiscussionAnalyticsContent({
                     className="mt-0.5 h-2.5 w-2.5 rounded-full shrink-0"
                     style={{ background: entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length] }}
                   />
-                  <span style={{ color: entry.isCorrect ? 'var(--color-primary-500)' : 'var(--text-secondary)' }}>
+                  <span className="w-full" style={{ color: entry.isCorrect ? 'var(--color-primary-500)' : 'var(--text-secondary)' }}>
                     <span className={entry.isCorrect ? 'font-semibold' : ''}>
                       {entry.label}. {entry.text}
                     </span>
@@ -156,6 +158,9 @@ export function DiscussionAnalyticsContent({
                         Correct
                       </span>
                     )}
+                    <span className="ml-1.5 font-semibold text-content-primary">
+                      {entry.count} ({entry.percentage}%)
+                    </span>
                   </span>
                 </div>
               ))}

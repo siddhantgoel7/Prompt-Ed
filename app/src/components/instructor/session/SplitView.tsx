@@ -1,25 +1,24 @@
 'use client';
 
 // Full-screen split view overlay that renders two independent discussion-browsing panes
-// side by side, each with its own realtime response subscription.
+// side by side.
 //
 // Logical sections (in order):
 //   Types          — SplitViewProps, PaneState
 //   DiscussionList — tab UI listing active/closed discussions; clicking one selects it
 //   DiscussionDetail — prompt text, status badge, and scrollable response list
-//   Pane           — one half of the split; owns selection state + realtime subscription
+//   Pane           — one half of the split; owns selection state + response loading
 //   SplitView      — full-screen layout: header + two Panes
 
 import * as React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppLogo } from '@/components/ui/AppLogo';
-
-import { useRealtime } from '@/lib/realtime/useRealtime';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
 import { truncateText } from '@/lib/utils';
 import { fetchResponsesApi } from '@/lib/api/discussionsApi';
+import { ResponseCard } from '@/components/instructor/ResponseCard';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -29,6 +28,8 @@ interface SplitViewProps {
   discussions: DiscussionWithResponseCount[];
   lessonId: string;
   onBack: () => void;
+  liveActiveDiscussionId?: string | null;
+  liveActiveResponses?: Response[];
 }
 
 interface PaneState {
@@ -149,6 +150,17 @@ function DiscussionDetail({
   loading: boolean;
   onBack: () => void;
 }) {
+  const isMC = discussion.prompt_type === 'multiple_choice' && !!discussion.mc_options;
+  const distribution: Record<string, number> = {};
+  if (isMC && discussion.mc_options) {
+    discussion.mc_options.forEach((opt) => { distribution[opt.label] = 0; });
+    responses.forEach((r) => {
+      if (r.selected_option && distribution[r.selected_option] !== undefined) {
+        distribution[r.selected_option]++;
+      }
+    });
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Detail header */}
@@ -191,6 +203,26 @@ function DiscussionDetail({
         )}
       </div>
 
+      {isMC && discussion.mc_options && (
+        <div className="px-4 py-3 border-b border-line-subtle">
+          <div className="text-xs font-semibold mb-2 text-content-secondary">Options</div>
+          <div className="space-y-1.5">
+            {discussion.mc_options.map((opt) => (
+              <div key={opt.label} className="flex justify-between items-start gap-2 text-xs">
+                <span
+                  className={discussion.correct_option === opt.label ? 'font-semibold text-brand-600' : 'text-content-secondary'}
+                >
+                  {opt.label}. {opt.text}
+                </span>
+                <span className="font-semibold text-content-primary">
+                  {distribution[opt.label] ?? 0}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Responses */}
       <ScrollArea className="flex-1 px-4 py-3">
         {loading ? (
@@ -205,17 +237,15 @@ function DiscussionDetail({
         ) : (
           <div className="space-y-2">
             {responses.map((r) => (
-              <div
+              <ResponseCard
                 key={r.id}
-                className="rounded-xl p-3 bg-surface-raised border border-line-subtle"
-              >
-                <p className="text-sm text-content-primary">
-                  {r.response_text}
-                </p>
-                <p className="text-xs mt-1 text-content-muted">
-                  {new Date(r.created_at).toLocaleTimeString()}
-                </p>
-              </div>
+                variant="full"
+                responseText={r.response_text}
+                createdAt={r.created_at}
+                isSelected={false}
+                isBeingFlagged={false}
+                onToggle={() => {}}
+              />
             ))}
           </div>
         )}
@@ -228,15 +258,17 @@ function DiscussionDetail({
 // Pane
 // ---------------------------------------------------------------------------
 
-/** One half of the split view — manages its own selected discussion and realtime responses. */
+/** One half of the split view — manages its own selected discussion and loaded responses. */
 function Pane({
   label,
   discussions,
-  lessonId,
+  liveActiveDiscussionId,
+  liveActiveResponses,
 }: {
   label: string;
   discussions: DiscussionWithResponseCount[];
-  lessonId: string;
+  liveActiveDiscussionId?: string | null;
+  liveActiveResponses?: Response[];
 }) {
   const [state, setState] = React.useState<PaneState>({
     selectedDiscussionId: null,
@@ -244,13 +276,12 @@ function Pane({
     loading: false,
   });
 
-  const { channel, isConnected } = useRealtime(lessonId, 'instructor');
-
   // Fetch responses whenever the selected discussion changes.
   // `cancelled` is a closure flag that prevents stale async results from a previous
   // selection from overwriting the new selection's state after the effect cleans up.
   React.useEffect(() => {
     if (!state.selectedDiscussionId) return;
+    if (state.selectedDiscussionId === liveActiveDiscussionId) return;
 
     let cancelled = false;
     setState((prev) => ({ ...prev, loading: true }));
@@ -266,35 +297,17 @@ function Pane({
       });
 
     return () => { cancelled = true; };
-  }, [state.selectedDiscussionId]);
-
-  // `selectedIdRef` mirrors state.selectedDiscussionId so that the realtime broadcast
-  // handler below can read the current selected ID without being recreated every time
-  // the selection changes (the handler is registered once, on mount).
-  const selectedIdRef = React.useRef(state.selectedDiscussionId);
-  React.useEffect(() => {
-    selectedIdRef.current = state.selectedDiscussionId;
-  }, [state.selectedDiscussionId]);
-
-  // Subscribe to realtime response broadcasts for this pane.
-  // The listener is intentionally NOT returned with an unsubscribe — Supabase channel
-  // cleanup is handled at the hook level in useRealtime when the component unmounts.
-  React.useEffect(() => {
-    if (!channel || !isConnected) return;
-
-    channel.on('broadcast', { event: 'response:new' }, (payload: { payload?: { response?: Response } }) => {
-      const newResponse = payload.payload?.response;
-      if (newResponse && newResponse.discussion_id === selectedIdRef.current) {
-        setState((prev) => {
-          // Deduplicate just in case — Supabase Realtime can replay broadcast events on reconnect.
-          if (prev.responses.some((r) => r.id === newResponse.id)) return prev;
-          return { ...prev, responses: [...prev.responses, newResponse] };
-        });
-      }
-    });
-  }, [channel, isConnected]);
+  }, [state.selectedDiscussionId, liveActiveDiscussionId]);
 
   const selectedDiscussion = discussions.find((d) => d.id === state.selectedDiscussionId) ?? null;
+  const selectedResponses =
+    selectedDiscussion?.id && selectedDiscussion.id === liveActiveDiscussionId
+      ? (liveActiveResponses ?? [])
+      : state.responses;
+  const selectedLoading =
+    selectedDiscussion?.id && selectedDiscussion.id === liveActiveDiscussionId
+      ? false
+      : state.loading;
 
   return (
     <div
@@ -314,8 +327,8 @@ function Pane({
       {selectedDiscussion ? (
         <DiscussionDetail
           discussion={selectedDiscussion}
-          responses={state.responses}
-          loading={state.loading}
+          responses={selectedResponses}
+          loading={selectedLoading}
           onBack={() => setState({ selectedDiscussionId: null, responses: [], loading: false })}
         />
       ) : (
@@ -335,7 +348,12 @@ function Pane({
 // ---------------------------------------------------------------------------
 
 /** Full-screen overlay rendering two Panes side by side for simultaneous discussion monitoring. */
-export function SplitView({ discussions, lessonId, onBack }: SplitViewProps) {
+export function SplitView({
+  discussions,
+  onBack,
+  liveActiveDiscussionId,
+  liveActiveResponses = [],
+}: SplitViewProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col bg-surface-base"
@@ -377,8 +395,18 @@ export function SplitView({ discussions, lessonId, onBack }: SplitViewProps) {
 
       {/* Two panes */}
       <div className="flex-1 flex min-h-0">
-        <Pane label="Left Pane" discussions={discussions} lessonId={lessonId} />
-        <Pane label="Right Pane" discussions={discussions} lessonId={lessonId} />
+        <Pane
+          label="Left Pane"
+          discussions={discussions}
+          liveActiveDiscussionId={liveActiveDiscussionId}
+          liveActiveResponses={liveActiveResponses}
+        />
+        <Pane
+          label="Right Pane"
+          discussions={discussions}
+          liveActiveDiscussionId={liveActiveDiscussionId}
+          liveActiveResponses={liveActiveResponses}
+        />
       </div>
     </div>
   );

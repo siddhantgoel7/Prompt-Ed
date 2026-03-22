@@ -26,6 +26,8 @@ export function SessionActiveView(props: { vm?: SessionVM }) {
         discussions={vm.discussions}
         lessonId={lesson.id}
         onBack={() => setSplitView(false)}
+        liveActiveDiscussionId={vm.activeDiscussion?.id ?? null}
+        liveActiveResponses={vm.responses}
       />
     );
     return context ? splitContent : <SessionProvider vm={vm}>{splitContent}</SessionProvider>;

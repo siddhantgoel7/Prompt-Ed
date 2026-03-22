@@ -211,5 +211,8 @@ describe('[US 1.40] Response metrics', () => {
     // A: 1 vote (33%), B: 2 votes (67%), C: 0 votes (0%)
     expect(screen.getByText(/Stores program state/i)).toBeInTheDocument();
     expect(screen.getByText(/Pairs a lambda/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 \(33%\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/2 \(67%\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/0 \(0%\)/i)).toBeInTheDocument();
   });
 });

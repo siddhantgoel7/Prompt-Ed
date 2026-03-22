@@ -159,6 +159,8 @@ test.describe('Instructor Past Lessons', () => {
         const filesLoaded = page.waitForResponse(
             r => r.url().includes('/api/lessons/') && r.url().includes('/files'), { timeout: 20000 });
 
+        // Suppress the one-time AI tips spotlight so it doesn't block clicks in tests.
+        await page.addInitScript(() => sessionStorage.setItem('ai-tips-seen-past-lesson-xyz', 'true'));
         // 1. Navigate
         await page.goto('/session/past-lesson-xyz');
 

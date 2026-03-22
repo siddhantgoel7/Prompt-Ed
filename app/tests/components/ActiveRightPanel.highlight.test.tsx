@@ -49,6 +49,17 @@ const DISCUSSION: Discussion = {
   ai_generated_correct_option: null,
 };
 
+const MC_DISCUSSION: Discussion = {
+  ...DISCUSSION,
+  id: 'disc-mc-1',
+  prompt_type: 'multiple_choice',
+  mc_options: [
+    { label: 'A', text: 'Correct option' },
+    { label: 'B', text: 'Incorrect option' },
+  ],
+  correct_option: 'A',
+};
+
 function makeResponse(id: string, text: string): Response {
   return {
     id,
@@ -208,6 +219,23 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     });
   });
 
+  it('does not render "Flag as Inappropriate" for multiple-choice responses', async () => {
+    const user = userEvent.setup();
+    renderWithContext({
+      activeDiscussion: MC_DISCUSSION,
+      responses: [
+        {
+          ...makeResponse('mc-r1', 'Option A: Correct option'),
+          discussion_id: MC_DISCUSSION.id,
+          selected_option: 'A',
+        },
+      ],
+    });
+
+    await user.click(screen.getByText(/Option A: Correct option/i));
+    expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
+  });
+
   it('[US 1.36][AC2-AT2] multiple responses can be highlighted at the same time', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -357,4 +385,3 @@ describe('ActiveRightPanel — highlight visual emphasis', () => {
     });
   });
 });
-

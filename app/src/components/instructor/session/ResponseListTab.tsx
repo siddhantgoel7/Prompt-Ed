@@ -191,7 +191,7 @@ export function ResponseListTab({
               isSelected={selectedIds.includes(r.id)}
               isBeingFlagged={flaggingId === r.id}
               onToggle={() => toggleSelected(r.id)}
-              onFlag={() => void handleFlagInappropriate(r.id)}
+              onFlag={isMC ? undefined : () => void handleFlagInappropriate(r.id)}
             />
           ))}
           {showFlagged && flaggedResponses.map((r) => (
