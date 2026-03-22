@@ -33,6 +33,7 @@ function renderCard(overrides: Partial<React.ComponentProps<typeof ResponseCard>
 // ---------------------------------------------------------------------------
 
 describe('ResponseCard — visual emphasis (full variant)', () => {
+  // 62.1
   it('[US 1.36][AC1-AT1] renders in collapsed state with base styling when not selected', () => {
     renderCard({ isSelected: false });
 
@@ -42,6 +43,7 @@ describe('ResponseCard — visual emphasis (full variant)', () => {
     expect(text.className).not.toMatch(/text-3xl/);
   });
 
+  // 62.2
   it('[US 1.36][AC1-AT2] renders with prominent styling when selected (larger text, elevated z-index)', () => {
     const { container } = renderCard({ isSelected: true });
 
@@ -56,6 +58,7 @@ describe('ResponseCard — visual emphasis (full variant)', () => {
     expect(text.className).toMatch(/font-semibold/);
   });
 
+  // 62.3
   it('[US 1.35][AC1-AT1] shows the Flag action button only when selected', () => {
     const { rerender } = render(
       <ResponseCard
@@ -88,6 +91,7 @@ describe('ResponseCard — visual emphasis (full variant)', () => {
     expect(screen.getByRole('button', { name: /Flag as Inappropriate/i })).toBeInTheDocument();
   });
 
+  // 62.4
   it('[US 1.36][AC1-AT3] clicking the card calls onToggle to toggle highlight', async () => {
     const user = userEvent.setup();
     const onToggle = jest.fn();
@@ -103,6 +107,7 @@ describe('ResponseCard — visual emphasis (full variant)', () => {
 // ---------------------------------------------------------------------------
 
 describe('ResponseCard — visual emphasis (compact variant)', () => {
+  // 62.5
   it('[US 1.36][AC1-AT1] renders with base styling when not selected', () => {
     renderCard({ variant: 'compact', isSelected: false });
 
@@ -110,6 +115,7 @@ describe('ResponseCard — visual emphasis (compact variant)', () => {
     expect(text.className).toMatch(/text-sm/);
   });
 
+  // 62.6
   it('[US 1.36][AC1-AT2] renders prominently when selected (larger text, elevated z-index)', () => {
     const { container } = renderCard({ variant: 'compact', isSelected: true });
 
@@ -127,6 +133,7 @@ describe('ResponseCard — visual emphasis (compact variant)', () => {
 // ---------------------------------------------------------------------------
 
 describe('ResponseCard — flagged mode visual styling', () => {
+  // 62.7
   it('[US 1.35][AC1-AT1] uses red styling when in flagged mode and selected', () => {
     const { container } = renderCard({ mode: 'flagged', isSelected: true });
 
@@ -137,6 +144,7 @@ describe('ResponseCard — flagged mode visual styling', () => {
     expect(card.className).toMatch(/z-10/);
   });
 
+  // 62.8
   it('[US 1.35][AC1-AT2] shows Unflag button instead of Flag when in flagged mode and selected', () => {
     renderCard({ mode: 'flagged', isSelected: true });
 
@@ -144,12 +152,14 @@ describe('ResponseCard — flagged mode visual styling', () => {
     expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
   });
 
+  // 62.9
   it('[US 1.35][AC1-AT3] shows Restoring... text when isBeingFlagged in flagged mode', () => {
     renderCard({ mode: 'flagged', isSelected: true, isBeingFlagged: true });
 
     expect(screen.getByRole('button', { name: /Restoring/i })).toBeInTheDocument();
   });
 
+  // 62.10
   it('[US 1.35][AC1-AT4] shows Removing... text when isBeingFlagged in normal mode', () => {
     renderCard({ mode: 'normal', isSelected: true, isBeingFlagged: true });
 

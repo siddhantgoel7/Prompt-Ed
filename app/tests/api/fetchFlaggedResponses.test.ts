@@ -28,11 +28,13 @@ describe('fetchFlaggedResponsesApi', () => {
     jest.clearAllMocks();
   });
 
+  // 48.1
   it('should return empty array when discussionId is null', async () => {
     const result = await fetchFlaggedResponsesApi(null);
     expect(result).toEqual([]);
   });
 
+  // 48.2
   it('should call supabase with .not("flagged_at", "is", null) filter', async () => {
     const mockData = [
       {
@@ -58,6 +60,7 @@ describe('fetchFlaggedResponsesApi', () => {
     expect(result).toEqual(mockData);
   });
 
+  // 48.3
   it('should return empty array on error', async () => {
     mockOrder.mockResolvedValue({ data: null, error: { message: 'Something went wrong' } });
 
@@ -65,6 +68,7 @@ describe('fetchFlaggedResponsesApi', () => {
     expect(result).toEqual([]);
   });
 
+  // 48.4
   it('should return empty array when data is null', async () => {
     mockOrder.mockResolvedValue({ data: null, error: null });
 

@@ -32,6 +32,7 @@ describe('AIPreferencesDialog Component [US 1.22]', () => {
         jest.clearAllMocks();
     });
 
+    // 57.1
     it('[US 1.22][COMP1] success: renders button and opens dialog with populated settings', async () => {
         render(<AIPreferencesDialog />);
 
@@ -51,6 +52,7 @@ describe('AIPreferencesDialog Component [US 1.22]', () => {
         expect(focusAreaTextarea.value).toBe('mocked focus area');
     });
 
+    // 57.2
     it('[US 1.22][COMP2] success: modifies settings and calls save gracefully', async () => {
         render(<AIPreferencesDialog />);
         fireEvent.click(screen.getByRole('button', { name: /Settings/i }));
@@ -79,6 +81,7 @@ describe('AIPreferencesDialog Component [US 1.22]', () => {
         });
     });
 
+    // 57.3
     it('[US 1.22][COMP3] success: shows loading state when preferences are loading', async () => {
         (useAIPreferences as jest.Mock).mockReturnValue({
             preferences: {},

@@ -86,6 +86,7 @@ function renderPanel({
 
 describe('[US 1.39] List and Metrics tabs', () => {
 
+  // 61.1
   it('[AT1] success: "Responses" and "Metrics" tabs shown when discussion is active', () => {
     renderPanel({ activeDiscussion: FREE_TEXT_DISCUSSION });
 
@@ -93,6 +94,7 @@ describe('[US 1.39] List and Metrics tabs', () => {
     expect(screen.getByRole('tab', { name: /Metrics/i })).toBeInTheDocument();
   });
 
+  // 61.2
   it('[AT2] failure: no active discussion shows empty state in responses tab', () => {
     renderPanel({ activeDiscussion: null });
 
@@ -110,18 +112,21 @@ describe('[US 1.39] List and Metrics tabs', () => {
 
 describe('[US 1.40] Student count header', () => {
 
+  // 61.3
   it('[AT1] success: shows peak student count in header when > 0', () => {
     renderPanel({ activeDiscussion: FREE_TEXT_DISCUSSION, studentCount: 5 });
 
     expect(screen.getByText(/\/\s*5/)).toBeInTheDocument();
   });
 
+  // 61.4
   it('[AT2] failure: student count not shown when studentCount is 0', () => {
     renderPanel({ activeDiscussion: FREE_TEXT_DISCUSSION, studentCount: 0 });
 
     expect(screen.queryByText(/\/\s*\d/)).not.toBeInTheDocument();
   });
 
+  // 61.5
   it('[AT3] success: response count shown in header', () => {
     const responses = [makeResponse('r1'), makeResponse('r2'), makeResponse('r3')];
     renderPanel({ activeDiscussion: FREE_TEXT_DISCUSSION, responses, studentCount: 5 });
@@ -136,6 +141,7 @@ describe('[US 1.40] Student count header', () => {
 
 describe('[US 1.40] MC response distribution counts', () => {
 
+  // 61.6
   it('[AT1] success: per-option response counts shown for MC discussion', () => {
     const responses = [
       makeResponse('r1', 'A'),
@@ -152,6 +158,7 @@ describe('[US 1.40] MC response distribution counts', () => {
     expect(rows).toHaveLength(3);
   });
 
+  // 61.7
   it('[AT2] success: correct option counts are reflected per label', () => {
     const responses = [
       makeResponse('r1', 'A'),
@@ -166,6 +173,7 @@ describe('[US 1.40] MC response distribution counts', () => {
     expect(counts.length).toBeGreaterThanOrEqual(3);
   });
 
+  // 61.8
   it('[AT3] success: all options show 0 when no responses yet', () => {
     renderPanel({ activeDiscussion: MC_DISCUSSION, responses: [] });
 
@@ -173,6 +181,7 @@ describe('[US 1.40] MC response distribution counts', () => {
     expect(zeros.length).toBeGreaterThanOrEqual(3);
   });
 
+  // 61.9
   it('[AT4] failure: MC distribution not shown for free text discussion', () => {
     renderPanel({ activeDiscussion: FREE_TEXT_DISCUSSION });
 
@@ -180,6 +189,7 @@ describe('[US 1.40] MC response distribution counts', () => {
     expect(screen.queryByText(/Option A:/)).not.toBeInTheDocument();
   });
 
+  // 61.10
   it('[AT5] success: empty state shown when no responses and free text discussion', () => {
     renderPanel({ activeDiscussion: FREE_TEXT_DISCUSSION, responses: [] });
 

@@ -26,6 +26,7 @@ describe('flagResponseApi', () => {
     jest.clearAllMocks();
   });
 
+  // 50.1
   it('should call supabase update with flagged_at and the correct response ID', async () => {
     mockSelect.mockResolvedValue({ data: [{ id: 'response-123' }], error: null });
 
@@ -40,12 +41,14 @@ describe('flagResponseApi', () => {
     expect(mockSelect).toHaveBeenCalled();
   });
 
+  // 50.2
   it('should resolve successfully when update returns data', async () => {
     mockSelect.mockResolvedValue({ data: [{ id: 'response-456' }], error: null });
 
     await expect(flagResponseApi('response-456')).resolves.toBeUndefined();
   });
 
+  // 50.3
   it('should throw when supabase returns an error', async () => {
     const supaError = { message: 'Row not found', code: 'PGRST116' };
     mockSelect.mockResolvedValue({ data: null, error: supaError });
@@ -53,6 +56,7 @@ describe('flagResponseApi', () => {
     await expect(flagResponseApi('response-bad')).rejects.toEqual(supaError);
   });
 
+  // 50.4
   it('should throw when update affects 0 rows (RLS blocking)', async () => {
     mockSelect.mockResolvedValue({ data: [], error: null });
 
