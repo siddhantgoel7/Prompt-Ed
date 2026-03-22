@@ -32,6 +32,8 @@ import type { AIPromptPreferences, GeneratedPrompt as GP, TokenUsage } from '@/t
  * Hosts AI prompt generation (with STT recording), candidate selection, and the
  * Start/Close Discussion toggle. Reads from SessionContext or explicit props.
  */
+const GENERATING_CHARS = 'Generating...'.split('');
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export function ActiveCenter(props: Partial<{
   lessonId: string;
@@ -630,20 +632,33 @@ export function ActiveCenter(props: Partial<{
               </select>
 
               <AIPreferencesDialog />
-              <div className="rotating-glow-wrap">
+              <div className={`rotating-glow-wrap${isGenerating ? ' generating' : ''}`}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       onClick={() => onGenerate()}
                       disabled={isGenerating || recorder.isRecording}
                       size="sm"
-                      className="px-4 py-1.5 rounded-full font-semibold disabled:opacity-50"
+                      className="px-4 py-1.5 rounded-full font-semibold"
                       style={{
                         background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
                         color: 'white',
+                        opacity: 1,
                       }}
                     >
-                      {isGenerating ? 'Generating…' : 'Generate Prompts'}
+                      {isGenerating ? (
+                        <span aria-label="Generating…" style={{ display: 'inline-flex' }}>
+                          {GENERATING_CHARS.map((ch, i) => (
+                            <span
+                              key={i}
+                              className={ch === '.' ? 'generating-char' : 'generating-shimmer'}
+                              style={{ animationDelay: `${i * 0.07}s` }}
+                            >
+                              {ch}
+                            </span>
+                          ))}
+                        </span>
+                      ) : 'Generate Prompts'}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Use AI to generate 5 discussion prompt candidates from your transcript and uploaded files. Takes 5 to 15 seconds.</TooltipContent>

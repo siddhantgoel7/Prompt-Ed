@@ -406,6 +406,7 @@
   border-radius: 999px;
   padding: 2px;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .rotating-glow-wrap::before {
@@ -432,9 +433,47 @@
   z-index: 1;
 }
 
-/* Pause rotation when button is disabled */
-.rotating-glow-wrap:has(button:disabled)::before,
-.rotating-glow-wrap:has([disabled])::before {
+/* Generating state — amber ring, faster spin */
+.rotating-glow-wrap.generating::before {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    #fde68a 30deg,
+    #f59e0b 60deg,
+    #fbbf24 90deg,
+    transparent 130deg
+  );
+  animation-duration: 1.2s;
+}
+
+/* Generating text — wave bounce + shimmer, one char at a time */
+@keyframes generating-char-shimmer {
+  0%, 40%, 100% { color: rgba(255, 255, 255, 0.55); }
+  20%            { color: rgba(255, 255, 255, 1);    }
+}
+
+@keyframes generating-char-wave {
+  0%, 40%, 100% { transform: translateY(0);    color: rgba(255, 255, 255, 0.55); }
+  20%            { transform: translateY(-2px); color: rgba(255, 255, 255, 1);    }
+}
+
+.generating-shimmer,
+.generating-char {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.generating-shimmer {
+  animation: generating-char-shimmer 1.4s ease-in-out infinite;
+}
+
+.generating-char {
+  animation: generating-char-wave 1.4s ease-in-out infinite;
+}
+
+/* Pause rotation when button is disabled — but not while generating */
+.rotating-glow-wrap:not(.generating):has(button:disabled)::before,
+.rotating-glow-wrap:not(.generating):has([disabled])::before {
   animation-play-state: paused;
   opacity: 0.4;
 }
