@@ -296,7 +296,7 @@ function getTypeInstructions(promptType: PromptType, preferences?: AIPromptPrefe
 
   switch (promptType) {
     case 'multiple_choice':
-      return `Each question must have exactly 4 answer options (A, B, C, D) with exactly one correct answer. Distractors must be plausible pharmacological misconceptions — not trivially wrong options.${lengthInstruction}`;
+      return `Each question must have exactly 4 answer options (A, B, C, D) with exactly one correct answer. Distractors must be plausible pharmacological misconceptions — not trivially wrong options. Phrase the stem as a direct question ending with '?'.${lengthInstruction}`;
     case 'short_answer':
       return `Each question should be answerable in 1-2 sentences. Focus on key concepts, definitions, mechanisms, or brief explanations grounded in the lecture content. Prefer to phrase each candidate as a direct question ending with '?' where the content permits.${lengthInstruction}`;
     case 'long_answer':
