@@ -11,8 +11,8 @@ import { buildSystemPrompt, buildUserPrompt, CANDIDATE_COUNT } from './prompts/d
  * Orchestrates the full RAG → generate pipeline.
  *
  * Flow:
- *   if transcriptText: embed it → blend with focusAreas (70/30) → retrieveChunksBySimilarity → filterExcludedChunks
- *   if no transcriptText but focusAreas: embed focusAreas → retrieveChunksBySimilarity → filterExcludedChunks
+ *   if transcriptText: embed it → blend with focusAreas (70/30) → retrieveChunksBySimilarity
+ *   if no transcriptText but focusAreas: embed focusAreas → retrieveChunksBySimilarity
  *   final fallback: retrieveRecentChunks + warning
  *   → buildUserPrompt → gpt-4o-mini → parse CANDIDATE_COUNT candidates
  *
@@ -99,10 +99,16 @@ function parseAIResponse(raw: string, promptType: PromptType): GeneratedPrompt[]
   if (Array.isArray(parsed)) {
     candidates = parsed;
   } else if (parsed && typeof parsed === 'object') {
-    // gpt-4o-mini with json_object sometimes wraps in an object
+    // gpt-4o-mini with json_object wraps candidates in an object.
+    // Prefer the "candidates" key (matches our output schema); fall back to scanning
+    // for any array key in case the model uses a different name.
     const obj = parsed as Record<string, unknown>;
-    const arrayKey = Object.keys(obj).find((k) => Array.isArray(obj[k]));
-    candidates = arrayKey ? (obj[arrayKey] as unknown[]) : [];
+    if (Array.isArray(obj.candidates)) {
+      candidates = obj.candidates as unknown[];
+    } else {
+      const arrayKey = Object.keys(obj).find((k) => Array.isArray(obj[k]));
+      candidates = arrayKey ? (obj[arrayKey] as unknown[]) : [];
+    }
   } else {
     return getFallbackCandidates(promptType);
   }
@@ -125,8 +131,13 @@ function parseAIResponse(raw: string, promptType: PromptType): GeneratedPrompt[]
       ...(candidate.rationale && { rationale: candidate.rationale }),
     };
 
-    if (promptType === 'multiple_choice' && Array.isArray(candidate.mcOptions)) {
-      result.mcOptions = candidate.mcOptions;
+    if (promptType === 'multiple_choice') {
+      if (Array.isArray(candidate.mcOptions) && candidate.mcOptions.length > 0) {
+        result.mcOptions = candidate.mcOptions;
+      } else {
+        result.promptText = 'Multiple choice options could not be generated for this question. Please regenerate.';
+        result.mcOptions = [];
+      }
     }
 
     return result;
