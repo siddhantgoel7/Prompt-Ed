@@ -68,6 +68,8 @@ test.describe('[US 1.22] Instructor AI Preferences', () => {
             }
         });
 
+        // Suppress the one-time AI tips spotlight so it doesn't block clicks in tests.
+        await page.addInitScript(() => sessionStorage.setItem('ai-tips-seen-ai-lesson-id', 'true'));
         await page.goto('/session/ai-lesson-id');
         await expect(page.getByText('AI Lesson Room')).toBeVisible({ timeout: 15000 });
     });

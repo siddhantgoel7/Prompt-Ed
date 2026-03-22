@@ -110,6 +110,8 @@ test.describe('Instructor Highlight & Hide Responses', () => {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) })
     );
 
+    // Suppress the one-time AI tips spotlight so it doesn't block clicks in tests.
+    await page.addInitScript(() => sessionStorage.setItem('ai-tips-seen-highlight-lesson', 'true'));
     // Navigate to the session page
     await page.goto(`/session/${LESSON_ID}`);
     await expect(page.getByText('Highlight Test Lesson')).toBeVisible({ timeout: 15000 });
