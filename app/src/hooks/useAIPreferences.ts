@@ -7,7 +7,6 @@ export function useAIPreferences() {
         style: 'socratic',
         length: 'standard',
         focusAreas: '',
-        excludeAreas: '',
     });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

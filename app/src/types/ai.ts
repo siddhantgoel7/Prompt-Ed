@@ -8,7 +8,6 @@ export interface AIPromptPreferences {
   style: 'socratic' | 'factual' | 'clinical_scenario';
   length: 'brief' | 'standard' | 'detailed';
   focusAreas?: string;
-  excludeAreas?: string; // comma-separated topics to exclude via post-fetch filter
 }
 
 // Upload pipeline state for a lesson file

@@ -26,7 +26,6 @@ export function AIPreferencesDialog() {
         style: 'socratic',
         length: 'standard',
         focusAreas: '',
-        excludeAreas: '',
     });
 
     const [isSaving, setIsSaving] = React.useState(false);
@@ -48,7 +47,6 @@ export function AIPreferencesDialog() {
     };
 
     const focusLen = (localPrefs.focusAreas ?? '').length;
-    const excludeLen = (localPrefs.excludeAreas ?? '').length;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -165,30 +163,6 @@ export function AIPreferencesDialog() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-4 items-start gap-4">
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <label htmlFor="excludeAreas" className="text-right text-sm font-medium pt-2 cursor-default">
-                                            Exclude Topics
-                                        </label>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        Topics to filter out from retrieved content. Comma-separated substring match.
-                                    </TooltipContent>
-                                </Tooltip>
-                                <div className="col-span-3 flex flex-col gap-1">
-                                    <textarea
-                                        id="excludeAreas"
-                                        value={localPrefs.excludeAreas ?? ''}
-                                        onChange={(e) => setLocalPrefs({ ...localPrefs, excludeAreas: e.target.value })}
-                                        placeholder="e.g., clinical trials, dosage calculations, drug history..."
-                                        className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring min-h-[80px] resize-y"
-                                    />
-                                    <p className={`text-xs text-right ${excludeLen > 400 ? 'text-amber-500' : 'text-gray-400'}`}>
-                                        {excludeLen}/500
-                                    </p>
-                                </div>
-                            </div>
                         </div>
                     </TooltipProvider>
                 )}

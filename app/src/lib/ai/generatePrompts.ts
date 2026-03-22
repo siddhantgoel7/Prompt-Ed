@@ -4,7 +4,7 @@ import type { AIProvider } from './providers';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PromptType } from '@/types/discussion';
 import type { CandidateSet, GeneratedPrompt, MCOption, AIPromptPreferences } from '@/types/ai';
-import { retrieveChunksBySimilarity, retrieveRecentChunks, blendEmbeddings, normalizeEmbedding, filterExcludedChunks, type RetrievedChunk } from './retrieveChunks';
+import { retrieveChunksBySimilarity, retrieveRecentChunks, blendEmbeddings, normalizeEmbedding, type RetrievedChunk } from './retrieveChunks';
 import { buildSystemPrompt, buildUserPrompt, CANDIDATE_COUNT } from './prompts/discussionPrompt';
 
 /**
@@ -44,12 +44,6 @@ export async function generatePrompts(
       }
 
       retrieved = await retrieveChunksBySimilarity(lessonId, queryEmbedding, supabase);
-
-      // Post-fetch exclusion: remove chunks matching instructor's exclude keywords.
-      // Substring-based because negation in embedding space is unreliable.
-      if (preferences?.excludeAreas) {
-        retrieved = filterExcludedChunks(retrieved, preferences.excludeAreas);
-      }
     }
 
     // Fallback to recent chunks if no transcript or retrieval returned nothing
@@ -59,9 +53,6 @@ export async function generatePrompts(
       if (preferences?.focusAreas?.trim()) {
         const focusResponse = await aiProvider.generateEmbedding(preferences.focusAreas.trim());
         retrieved = await retrieveChunksBySimilarity(lessonId, focusResponse[0], supabase);
-        if (preferences.excludeAreas) {
-          retrieved = filterExcludedChunks(retrieved, preferences.excludeAreas);
-        }
       }
       // Final fallback: no transcript and no focusAreas (or focusAreas retrieval also empty)
       if (retrieved.length === 0) {
