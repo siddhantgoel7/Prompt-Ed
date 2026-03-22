@@ -133,7 +133,7 @@ function parseAIResponse(raw: string, promptType: PromptType): GeneratedPrompt[]
 
     if (promptType === 'multiple_choice') {
       if (Array.isArray(candidate.mcOptions) && candidate.mcOptions.length > 0) {
-        result.mcOptions = candidate.mcOptions;
+        result.mcOptions = shuffleMCOptions(candidate.mcOptions);
       } else {
         result.promptText = 'Multiple choice options could not be generated for this question. Please regenerate.';
         result.mcOptions = [];
@@ -142,6 +142,17 @@ function parseAIResponse(raw: string, promptType: PromptType): GeneratedPrompt[]
 
     return result;
   });
+}
+
+/**
+ * Shuffles MC options and re-labels A–D so the correct answer lands at a random position.
+ * Prevents the LLM's positional bias (gpt-4o-mini tends to place the correct answer at B)
+ * from being visible to students.
+ */
+function shuffleMCOptions(options: MCOption[]): MCOption[] {
+  const labels: MCOption['label'][] = ['A', 'B', 'C', 'D'];
+  const shuffled = [...options].sort(() => Math.random() - 0.5);
+  return shuffled.map((opt, i) => ({ ...opt, label: labels[i] }));
 }
 
 /** Returns placeholder candidates when the AI response cannot be parsed. */
