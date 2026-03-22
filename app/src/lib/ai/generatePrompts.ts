@@ -115,7 +115,7 @@ function parseAIResponse(raw: string, promptType: PromptType): GeneratedPrompt[]
     return getFallbackCandidates(promptType);
   }
 
-  return candidates.slice(0, CANDIDATE_COUNT).map((c) => {
+  const mappedCandidates = candidates.slice(0, CANDIDATE_COUNT).map((c) => {
     const candidate = c as {
       promptText?: string;
       promptType?: string;
@@ -135,7 +135,7 @@ function parseAIResponse(raw: string, promptType: PromptType): GeneratedPrompt[]
 
     if (promptType === 'multiple_choice') {
       if (Array.isArray(candidate.mcOptions) && candidate.mcOptions.length > 0) {
-        result.mcOptions = shuffleMCOptions(candidate.mcOptions);
+        result.mcOptions = candidate.mcOptions; // position assignment handled in batch below
       } else {
         result.promptText = 'Multiple choice options could not be generated for this question. Please regenerate.';
         result.mcOptions = [];
@@ -144,17 +144,51 @@ function parseAIResponse(raw: string, promptType: PromptType): GeneratedPrompt[]
 
     return result;
   });
+
+  return promptType === 'multiple_choice' ? assignMCPositions(mappedCandidates) : mappedCandidates;
 }
 
 /**
- * Shuffles MC options and re-labels A–D so the correct answer lands at a random position.
- * Prevents the LLM's positional bias (gpt-4o-mini tends to place the correct answer at B)
- * from being visible to students.
+ * Assigns correct-answer positions across all MC candidates as a batch.
+ * Guarantees all four labels (A, B, C, D) appear at least once across 5 candidates;
+ * the 5th slot is a random repeat. Slot order is shuffled so the repeat isn't always
+ * at the same candidate index.
  */
-function shuffleMCOptions(options: MCOption[]): MCOption[] {
+function assignMCPositions(candidates: GeneratedPrompt[]): GeneratedPrompt[] {
   const labels: MCOption['label'][] = ['A', 'B', 'C', 'D'];
-  const shuffled = [...options].sort(() => Math.random() - 0.5);
-  return shuffled.map((opt, i) => ({ ...opt, label: labels[i] }));
+  const extra = labels[Math.floor(Math.random() * labels.length)];
+  const slots = ([...labels, extra] as MCOption['label'][]).sort(() => Math.random() - 0.5);
+
+  return candidates.map((candidate, i) => {
+    if (!candidate.mcOptions || candidate.mcOptions.length === 0) return candidate;
+    return { ...candidate, mcOptions: rotateMCToPosition(candidate.mcOptions, slots[i]) };
+  });
+}
+
+/**
+ * Places the correct option at targetLabel; fills remaining positions with
+ * incorrect options in randomised order. Re-labels all four options A–D.
+ */
+function rotateMCToPosition(options: MCOption[], targetLabel: MCOption['label']): MCOption[] {
+  const labels: MCOption['label'][] = ['A', 'B', 'C', 'D'];
+  const correctOpt = options.find(o => o.is_correct);
+  const incorrectOpts = options.filter(o => !o.is_correct).sort(() => Math.random() - 0.5);
+
+  if (!correctOpt) return options;
+
+  const targetIdx = labels.indexOf(targetLabel);
+  const result: MCOption[] = new Array(4);
+  result[targetIdx] = { ...correctOpt, label: labels[targetIdx] };
+
+  let incorrectIdx = 0;
+  for (let i = 0; i < 4; i++) {
+    if (!result[i]) {
+      result[i] = { ...incorrectOpts[incorrectIdx], label: labels[i] };
+      incorrectIdx++;
+    }
+  }
+
+  return result;
 }
 
 /** Returns placeholder candidates when the AI response cannot be parsed. */
