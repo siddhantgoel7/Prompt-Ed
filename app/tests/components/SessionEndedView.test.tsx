@@ -1,7 +1,7 @@
 // [US 1.39] ended view — show/hide responses toggle, sequential list
 // [US 1.40] ended view — response rate per card, "View Analytics" button present
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '../utils/renderWithProviders';
 import { SessionEndedView } from '@/components/instructor/session/SessionEndedView';
 import type { SessionVM } from '@/hooks/useSessionPage';
 import { fetchResponsesApi } from '@/lib/api/discussionsApi';

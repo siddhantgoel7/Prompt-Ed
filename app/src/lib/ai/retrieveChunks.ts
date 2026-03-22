@@ -1,5 +1,6 @@
 // Retrieval functions for the RAG pipeline — fetches relevant lesson content chunks
 // from the database, either by semantic similarity or by recency.
+// Also exports pure embedding-blend and exclusion-filter utilities (unit-testable, no DB).
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /** A chunk returned from the database with its content and stored metadata. */
@@ -88,4 +89,30 @@ export async function retrieveRecentChunks(
     console.error(`RETRIEVE_RECENT_ERR [${e.code ?? 'unknown'}]: ${e.message ?? String(err)}`);
     return [];
   }
+}
+
+// ─── Pure embedding-blend utilities (no DB, unit-testable) ───────────────────
+
+/**
+ * Blends two equal-length embedding vectors.
+ * alpha controls the weight of vector a (default 0.7).
+ * Returns an unnormalized blended vector — call normalizeEmbedding after.
+ * @throws if a.length !== b.length
+ */
+export function blendEmbeddings(a: number[], b: number[], alpha = 0.7): number[] {
+  if (a.length !== b.length) {
+    throw new Error(`blendEmbeddings: vector length mismatch (${a.length} vs ${b.length})`);
+  }
+  return a.map((v, i) => alpha * v + (1 - alpha) * b[i]);
+}
+
+/**
+ * L2-normalizes an embedding vector (returns a new array).
+ * Required after blending to keep the vector on the unit sphere for cosine similarity.
+ * Returns a zero vector unchanged (avoids divide-by-zero).
+ */
+export function normalizeEmbedding(v: number[]): number[] {
+  const norm = Math.sqrt(v.reduce((sum, x) => sum + x * x, 0));
+  if (norm === 0) return v.slice();
+  return v.map((x) => x / norm);
 }

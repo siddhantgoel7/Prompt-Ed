@@ -6,7 +6,7 @@
 // [US 1.35] Hide inappropriate responses
 //   AC1: Hidden from view but remains in data
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '../utils/renderWithProviders';
 import userEvent from '@testing-library/user-event';
 import { DiscussionPage } from '@/components/instructor/DiscussionPage';
 import type { Discussion } from '@/types/discussion';

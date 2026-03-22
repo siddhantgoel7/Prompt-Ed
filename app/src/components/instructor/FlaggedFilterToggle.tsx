@@ -1,7 +1,8 @@
 'use client';
 
-import { Flag } from 'lucide-react';
+import { Flag, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export type FlaggedFilterToggleVariant = 'compact' | 'full';
 
@@ -61,6 +62,12 @@ export function FlaggedFilterToggle({
           ? `Showing ${flaggedCount} flagged`
           : `Show flagged (${flaggedCount})`}
       </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About flagged filter" />
+        </TooltipTrigger>
+        <TooltipContent>Show only responses you have flagged as inappropriate.</TooltipContent>
+      </Tooltip>
       {showFlagged && (
         <button
           type="button"

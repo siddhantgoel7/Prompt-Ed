@@ -1,7 +1,8 @@
 'use client';
 
-import { Filter } from 'lucide-react';
+import { Filter, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export type FilterToggleVariant = 'compact' | 'full';
 
@@ -61,6 +62,12 @@ export function FilterToggle({
           ? `Showing ${selectedCount} highlighted`
           : `Show highlighted only (${selectedCount})`}
       </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About highlighted filter" />
+        </TooltipTrigger>
+        <TooltipContent>Show only responses you have highlighted by clicking on them.</TooltipContent>
+      </Tooltip>
       {showHighlightedOnly && (
         <button
           type="button"

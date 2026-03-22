@@ -1,7 +1,7 @@
 // Covers US 1.04, 1.06, 1.09, 1.14, 1.25, 1.34, 1.41
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import { render, waitFor, screen, fireEvent } from '../utils/renderWithProviders';
 import { SessionPage } from '@/components/instructor/SessionPage';
 import { createClient } from '@/lib/supabase/client';
 import { useRealtime } from '@/lib/realtime/useRealtime';

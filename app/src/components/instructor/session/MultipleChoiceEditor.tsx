@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export interface MCOptionData {
     label: string;
@@ -31,9 +33,17 @@ export function MultipleChoiceEditor({
                 border: '1px solid var(--border-default)',
             }}
         >
-            <h3 className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
-                Options &amp; Correct Answer
-            </h3>
+            <div className="flex items-center gap-1.5 mb-3">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-content-muted">
+                    Options &amp; Correct Answer
+                </h3>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About correct answer selection" />
+                    </TooltipTrigger>
+                    <TooltipContent>Select the radio button next to the correct answer. This is used to calculate response accuracy but is never shown to students.</TooltipContent>
+                </Tooltip>
+            </div>
 
             <div className="space-y-2">
                 {options.map((opt) => {
@@ -77,17 +87,25 @@ export function MultipleChoiceEditor({
             <div
                 className="mt-3 pt-3 border-t border-line-subtle"
             >
-                <label
-                    className="flex items-center gap-2 text-xs font-medium cursor-pointer text-content-secondary"
-                >
-                    <input
-                        type="checkbox"
-                        checked={feedbackEnabled}
-                        onChange={(e) => onFeedbackChange(e.target.checked)}
-                        className="accent-[var(--color-primary-500)]"
-                    />
-                    Show correctness feedback to students
-                </label>
+                <div className="flex items-center gap-1.5">
+                    <label
+                        className="flex items-center gap-2 text-xs font-medium cursor-pointer text-content-secondary"
+                    >
+                        <input
+                            type="checkbox"
+                            checked={feedbackEnabled}
+                            onChange={(e) => onFeedbackChange(e.target.checked)}
+                            className="accent-[var(--color-primary-500)]"
+                        />
+                        Show correctness feedback to students
+                    </label>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About correctness feedback" />
+                        </TooltipTrigger>
+                        <TooltipContent>When enabled, students see correct or incorrect feedback immediately after submitting.</TooltipContent>
+                    </Tooltip>
+                </div>
             </div>
         </div>
     );
