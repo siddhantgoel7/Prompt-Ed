@@ -278,6 +278,11 @@ export function ActiveCenter(props: Partial<{
 
     candidates.forEach((c, i) => {
       lines.push(`${i + 1}. ${c.promptText}`);
+      if (c.mcOptions && c.mcOptions.length > 0) {
+        c.mcOptions.forEach(opt => {
+          lines.push(`   ${opt.label}. ${opt.text}${opt.is_correct ? ' [CORRECT]' : ''}`);
+        });
+      }
       if (c.bloomsLevel) lines.push(`   Bloom's: ${c.bloomsLevel}`);
       if (c.topicArea)   lines.push(`   Topic: ${c.topicArea}`);
       if (c.rationale)   lines.push(`   Rationale: ${c.rationale}`);
@@ -346,6 +351,19 @@ export function ActiveCenter(props: Partial<{
 
     setSweepProgress(null);
 
+    // [DEBUG] helpers for batch metrics
+    const BLOOMS_ENCODE: Record<string, number> = {
+      remember: 1, understand: 2, apply: 3, analyze: 4, evaluate: 5, create: 6,
+    };
+    const stdDev = (vals: number[]): number => {
+      if (vals.length < 2) return 0;
+      const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+      return Math.sqrt(vals.map(v => (v - mean) ** 2).reduce((a, b) => a + b, 0) / vals.length);
+    };
+    const wordCount = (text: string) => text.split(/\s+/).filter(Boolean).length;
+    const TEMPERATURE = '0.7';
+    // [END DEBUG]
+
     // Build TXT
     const txtLines: string[] = [];
     results.forEach((r, i) => {
@@ -353,14 +371,35 @@ export function ActiveCenter(props: Partial<{
       const label = `${TYPE_LABEL[r.combo.promptType]} — ${cap(r.combo.difficulty)}, ${cap(r.combo.style)}, ${cap(r.combo.length)} — ${timeSec}s`;
       txtLines.push(`=== ${i + 1}. ${label} ===`);
       if (r.error) { txtLines.push(`ERROR: ${r.error}`, ''); return; }
-      if (r.warning) txtLines.push(`Warning: ${r.warning}`);
-      // [DEBUG] model and token usage in sweep TXT
-      if (r.model) txtLines.push(`Model: ${r.model}`);
-      if (r.tokenUsage) txtLines.push(`Tokens: ${r.tokenUsage.promptTokens} prompt + ${r.tokenUsage.completionTokens} completion = ${r.tokenUsage.totalTokens} total`);
+      if (r.model) txtLines.push(`Model: ${r.model} | Temperature: ${TEMPERATURE}`);
+      if (r.tokenUsage) {
+        // [DEBUG] cost in TXT
+        const costUsd = (r.tokenUsage.promptTokens * 0.15 / 1_000_000) + (r.tokenUsage.completionTokens * 0.60 / 1_000_000);
+        txtLines.push(`Tokens: ${r.tokenUsage.promptTokens} prompt + ${r.tokenUsage.completionTokens} completion = ${r.tokenUsage.totalTokens} total | Cost: $${costUsd.toFixed(6)}`);
+        // [END DEBUG]
+      }
+      if (r.warning) txtLines.push(`Warning: ${r.warning} | Fallback: true`);
+      // [DEBUG] batch metrics in TXT
+      const wcs = r.candidates.map(c => wordCount(c.promptText));
+      const meanWC = (wcs.reduce((a, b) => a + b, 0) / wcs.length).toFixed(1);
+      const uniqueTopics = new Set(r.candidates.map(c => c.topicArea).filter(Boolean)).size;
+      const bloomsVals = r.candidates.map(c => c.bloomsLevel ? (BLOOMS_ENCODE[c.bloomsLevel] ?? 0) : 0).filter(v => v > 0);
+      const bSpread = stdDev(bloomsVals).toFixed(2);
+      txtLines.push(`Topic diversity: ${uniqueTopics}/5 | Bloom's spread: ${bSpread} | Mean words: ${meanWC}`);
+      if (r.combo.promptType === 'multiple_choice') {
+        const bias: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
+        r.candidates.forEach(c => { const lbl = c.mcOptions?.find(o => o.is_correct)?.label; if (lbl) bias[lbl] = (bias[lbl] || 0) + 1; });
+        txtLines.push(`MC position bias: ${Object.entries(bias).map(([k, v]) => `${k}:${v}`).join(' ')}`);
+      }
       // [END DEBUG]
       txtLines.push('');
       r.candidates.forEach((c, ci) => {
         txtLines.push(`${ci + 1}. ${c.promptText}`);
+        if (c.mcOptions && c.mcOptions.length > 0) {
+          c.mcOptions.forEach(opt => {
+            txtLines.push(`   ${opt.label}. ${opt.text}${opt.is_correct ? ' [CORRECT]' : ''}`);
+          });
+        }
         if (c.bloomsLevel) txtLines.push(`   Bloom's: ${c.bloomsLevel}`);
         if (c.topicArea)   txtLines.push(`   Topic: ${c.topicArea}`);
         if (c.rationale)   txtLines.push(`   Rationale: ${c.rationale}`);
@@ -370,32 +409,85 @@ export function ActiveCenter(props: Partial<{
     });
 
     // Build CSV
-    // [DEBUG] added model and token columns to sweep CSV
+    // [DEBUG] full column set including quality and batch metrics
     const csvLines: string[] = [[
-      'combo_number', 'prompt_type', 'difficulty', 'style', 'length',
+      'combo_number', 'prompt_type', 'difficulty', 'style', 'length', 'temperature',
       'time_s', 'model', 'prompt_tokens', 'completion_tokens', 'total_tokens',
-      'warning', 'prompt_number', 'prompt_text', 'blooms_level', 'topic_area', 'rationale',
+      'fallback_used', 'warning', 'cost_usd', 'cost_per_higher_order_question',
+      'topic_diversity', 'blooms_spread', 'mean_word_count', 'length_variance', 'mc_position_bias',
+      'prompt_number', 'prompt_text', 'prompt_word_count', 'is_question', 'fields_missing',
+      'blooms_level', 'topic_area', 'rationale',
+      'mc_option_a', 'mc_option_b', 'mc_option_c', 'mc_option_d', 'correct_option',
+      'mc_option_a_length', 'mc_option_b_length', 'mc_option_c_length', 'mc_option_d_length',
     ].map(escapeCsv).join(',')];
     // [END DEBUG]
 
     results.forEach((r, i) => {
       const timeSec = Math.round(r.timeMs / 1000);
-      // [DEBUG] include model and token columns in each sweep CSV row
       const mdl = r.model ?? '';
-      const pt = r.tokenUsage?.promptTokens ?? '';
-      const ct = r.tokenUsage?.completionTokens ?? '';
-      const tt = r.tokenUsage?.totalTokens ?? '';
+      const ptok = r.tokenUsage?.promptTokens ?? '';
+      const ctok = r.tokenUsage?.completionTokens ?? '';
+      const ttok = r.tokenUsage?.totalTokens ?? '';
+      const fallbackUsed = r.warning ? 'true' : 'false';
+
+      // [DEBUG] batch-level computed metrics
+      const costUsd = r.tokenUsage
+        ? (r.tokenUsage.promptTokens * 0.15 / 1_000_000) + (r.tokenUsage.completionTokens * 0.60 / 1_000_000)
+        : 0;
+      const higherOrderCount = r.candidates.filter(c => (BLOOMS_ENCODE[c.bloomsLevel ?? ''] ?? 0) >= 4).length;
+      const costPerHOQ = higherOrderCount > 0 ? (costUsd / higherOrderCount).toFixed(6) : 'N/A';
+      const uniqueTopics = new Set(r.candidates.map(c => c.topicArea).filter(Boolean)).size;
+      const bloomsVals = r.candidates.map(c => BLOOMS_ENCODE[c.bloomsLevel ?? ''] ?? 0).filter(v => v > 0);
+      const bSpread = stdDev(bloomsVals).toFixed(2);
+      const wcs = r.candidates.map(c => wordCount(c.promptText));
+      const meanWC = wcs.length ? (wcs.reduce((a, b) => a + b, 0) / wcs.length).toFixed(1) : '';
+      const lenVar = stdDev(wcs).toFixed(2);
+      const mcBias = r.combo.promptType === 'multiple_choice'
+        ? (() => {
+            const bias: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
+            r.candidates.forEach(c => { const lbl = c.mcOptions?.find(o => o.is_correct)?.label; if (lbl) bias[lbl] = (bias[lbl] || 0) + 1; });
+            return Object.entries(bias).map(([k, v]) => `${k}:${v}`).join(' ');
+          })()
+        : '';
+      // [END DEBUG]
+
       if (r.error || r.candidates.length === 0) {
-        csvLines.push([i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, timeSec, mdl, pt, ct, tt, r.error ?? r.warning ?? '', '', '', '', '', ''].map(escapeCsv).join(','));
+        csvLines.push([
+          i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE,
+          timeSec, mdl, ptok, ctok, ttok,
+          fallbackUsed, r.error ?? r.warning ?? '', costUsd ? costUsd.toFixed(6) : '', '',
+          '', '', '', '', '',
+          '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+        ].map(escapeCsv).join(','));
         return;
       }
+
       r.candidates.forEach((c, ci) => {
+        // [DEBUG] per-prompt metrics
+        const pwc = wordCount(c.promptText);
+        const isQ = c.promptText.trim().endsWith('?') ? 'true' : 'false';
+        const missing = (['bloomsLevel', 'topicArea', 'rationale'] as const).filter(f => !c[f]).join(',') || 'none';
+        const mcA = c.mcOptions?.find(o => o.label === 'A')?.text ?? '';
+        const mcB = c.mcOptions?.find(o => o.label === 'B')?.text ?? '';
+        const mcC = c.mcOptions?.find(o => o.label === 'C')?.text ?? '';
+        const mcD = c.mcOptions?.find(o => o.label === 'D')?.text ?? '';
+        const correct = c.mcOptions?.find(o => o.is_correct)?.label ?? '';
+        const mcALen = mcA ? mcA.length : '';
+        const mcBLen = mcB ? mcB.length : '';
+        const mcCLen = mcC ? mcC.length : '';
+        const mcDLen = mcD ? mcD.length : '';
+        // [END DEBUG]
         csvLines.push([
-          i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length,
-          timeSec, mdl, pt, ct, tt, r.warning ?? '', ci + 1, c.promptText, c.bloomsLevel ?? '', c.topicArea ?? '', c.rationale ?? '',
+          i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE,
+          timeSec, mdl, ptok, ctok, ttok,
+          fallbackUsed, r.warning ?? '', costUsd.toFixed(6), costPerHOQ,
+          uniqueTopics, bSpread, meanWC, lenVar, mcBias,
+          ci + 1, c.promptText, pwc, isQ, missing,
+          c.bloomsLevel ?? '', c.topicArea ?? '', c.rationale ?? '',
+          mcA, mcB, mcC, mcD, correct,
+          mcALen, mcBLen, mcCLen, mcDLen,
         ].map(escapeCsv).join(','));
       });
-      // [END DEBUG]
     });
 
     const download = (content: string, filename: string, mime: string) => {
