@@ -16,7 +16,7 @@ export interface Discussion {
   published_at: string | null;
   closed_at: string | null;
   display_order: number;
-  source: 'manual' | 'ai_generated' | null;
+  source: 'manual' | 'ai_generated' | 'general' | null;
   mc_options: MCOptionSafe[] | null;
   correct_option: string | null;
   feedback_enabled: boolean;

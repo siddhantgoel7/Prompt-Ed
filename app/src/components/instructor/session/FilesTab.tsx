@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import type { LessonFile, UploadStatus } from '@/types/ai';
+import { SessionContext } from './SessionContext';
 
 /** Renders a file upload button, upload error display, and a list of uploaded files with status badges. */
 export function FilesTab({
@@ -18,8 +19,14 @@ export function FilesTab({
     onUploadFile: (file: File) => Promise<void>;
     onDeleteFile: (fileId: string) => Promise<void>;
 }) {
+    const context = React.useContext(SessionContext);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [uploadError, setUploadError] = React.useState<string | null>(null);
+
+    const hasReadyFiles = files.some(f => f.status === 'ready');
+    const generalQuestions = context?.generalQuestions ?? [];
+    const isGeneratingGeneral = context?.isGeneratingGeneral ?? false;
+    const generateGeneralQuestions = context?.generateGeneralQuestions;
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -101,6 +108,39 @@ export function FilesTab({
                             </button>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Generate General Questions CTA — shown when files are ready */}
+            {hasReadyFiles && generateGeneralQuestions && (
+                <div
+                    className="mt-3 p-3 rounded-xl"
+                    style={{
+                        background: 'rgba(45,158,45,0.04)',
+                        border: '1px solid rgba(45,158,45,0.15)',
+                    }}
+                >
+                    <p className="text-xs text-content-muted mb-2">
+                        {generalQuestions.length > 0
+                            ? `${generalQuestions.length} general questions ready. View them in the General tab.`
+                            : 'Generate a set of multiple-choice questions from your uploaded materials.'}
+                    </p>
+                    <button
+                        onClick={generateGeneralQuestions}
+                        disabled={isGeneratingGeneral}
+                        className="w-full px-3 py-1.5 text-xs font-semibold rounded-[8px] transition-all duration-150 disabled:opacity-50"
+                        style={{
+                            background: generalQuestions.length > 0 ? 'transparent' : 'rgba(45,158,45,0.10)',
+                            border: '1px solid rgba(45,158,45,0.30)',
+                            color: 'var(--color-primary-600)',
+                        }}
+                    >
+                        {isGeneratingGeneral
+                            ? 'Generating...'
+                            : generalQuestions.length > 0
+                                ? 'Regenerate General Questions'
+                                : 'Generate General Questions'}
+                    </button>
                 </div>
             )}
         </div>
