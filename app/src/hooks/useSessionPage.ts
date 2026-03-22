@@ -97,11 +97,9 @@ export type SessionVM = {
   candidates: GeneratedPrompt[];
   isGenerating: boolean;
   generationWarning: string | null;
-  // [DEBUG] wall-clock ms, token usage, and model for the last generate call
   generationTimeMs: number | null;
   lastTokenUsage: TokenUsage | null;
   lastModel: string | null;
-  // [END DEBUG]
   generateCandidates: (transcriptOverride?: string) => Promise<void>;
   selectCandidate: (p: GeneratedPrompt) => void;
   regenerateCandidates: () => Promise<void>;

@@ -5,8 +5,6 @@ import { createClient } from '@/lib/supabase/server';
 import { OpenAIProvider } from '@/lib/ai/providers';
 import type { PromptType } from '@/types/discussion';
 import type { CandidateSet, AIPromptPreferences } from '@/types/ai';
-// [DEBUG] sweep mode needs preferences override in body — no DB write required
-
 /**
  * POST /api/lessons/[lessonId]/generate
  * Generates AI discussion prompt candidates using RAG.
@@ -56,7 +54,6 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // [DEBUG] accept optional preferencesOverride for sweep mode
     const body = await req.json() as { promptType?: PromptType; transcriptText?: string; preferencesOverride?: AIPromptPreferences };
     const promptType = body.promptType ?? 'long_answer';
     const transcriptText = body.transcriptText ?? '';
@@ -84,7 +81,6 @@ export async function POST(
         };
       }
     }
-    // [END DEBUG]
 
     let result: CandidateSet;
 

@@ -66,12 +66,10 @@ export async function generatePrompts(
     // Build and call
     const chunks = retrieved.map((c) => c.content);
     const userPrompt = buildUserPrompt({ chunks, transcriptText, promptType, preferences });
-    // [DEBUG] destructure content + tokenUsage + model from new return shape
     const { content: rawContent, tokenUsage, model } = await aiProvider.generateChatCompletion([
       { role: 'system', content: buildSystemPrompt(preferences, promptType) },
       { role: 'user', content: userPrompt }
     ], { jsonMode: true, temperature: TEMPERATURE_BY_TYPE[promptType] });
-    // [END DEBUG]
 
     const parsed = parseAIResponse(rawContent, promptType);
 

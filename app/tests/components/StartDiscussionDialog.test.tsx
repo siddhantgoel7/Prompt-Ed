@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '../utils/renderWithProviders';
 import { StartDiscussionDialog } from '@/components/instructor/session/StartDiscussionDialog';
 
 function renderDialog(onConfirm = jest.fn(), onCancel = jest.fn()) {

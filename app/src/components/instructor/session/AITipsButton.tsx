@@ -184,7 +184,7 @@ function TipsModal({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl p-6 enter"
+        className="relative w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl p-6 enter"
         style={{
           background: 'var(--surface-raised)',
           border: '1px solid var(--border-default)',
@@ -220,36 +220,31 @@ function TipsModal({ onClose }: { onClose: () => void }) {
         {/* Tips list */}
         <div className="space-y-5 text-sm text-content-secondary">
           <Tip index={1} title="Upload Specific Lesson Files First">
-            The <strong className="text-content-primary">Files tab</strong> in every session lets you upload material for the AI to draw from. Upload lecture slides, handouts, or case studies for that specific class — not the entire course. The narrower the source, the more precise the questions.
+            The <strong className="text-content-primary">Files tab</strong> in every session lets you upload material for the AI to draw from. Upload lecture slides, handouts, or case studies for that specific class, not the entire course. The narrower the source, the more precise the questions.
           </Tip>
 
           <Tip index={2} title="Match Question Type to Your Goal">
             <ul className="space-y-1.5 mt-1">
               <TipBullet label="Multiple choice">Factual recall, classification, spotting misconceptions. Students see instant correctness feedback and you get option-by-option analytics.</TipBullet>
-              <TipBullet label="Short answer">Quick reasoning, one-line justifications. Fast to write in a live session.</TipBullet>
-              <TipBullet label="Long answer">Multi-step reasoning or synthesis. Best saved for the end of a session block.</TipBullet>
+              <TipBullet label="Short answer">Quick reasoning, one-line justifications. Best for mid-lecture check-ins.</TipBullet>
+              <TipBullet label="Long answer">Multi-step reasoning or synthesis. Best saved for the end of a lesson.</TipBullet>
             </ul>
-            <p className="mt-2 text-xs text-content-muted italic">Suggested flow: MC → Short Answer → Long Answer</p>
           </Tip>
 
-          <Tip index={3} title="Set Preferences Before Students Join">
-            Open <strong className="text-content-primary">Settings</strong> and configure difficulty level and topic focus before the session starts. Tuning these in front of students wastes time and skews the first batch of questions.
+          <Tip index={3} title="Do a Test Run Beforehand">
+            Generate 2–3 questions in a test lesson first. Check that MC distractors are plausible and that the language matches your course level. Prior sessions persist, so they serve as a calibration reference.
           </Tip>
 
-          <Tip index={4} title="Do a Test Run Beforehand">
-            Generate 2–3 questions in a test lesson first. Check that distractors on MC questions are plausible and that the language matches your course level. Discussion history persists, so prior sessions serve as a calibration reference.
+          <Tip index={4} title="Review and Edit Before Publishing">
+            The AI gives you three candidate questions — pick one, edit it, or write your own via the <strong className="text-content-primary">Manual entry</strong> field. Always read the question before publishing: reject anything too vague, too long, or already covered.
           </Tip>
 
-          <Tip index={5} title="Keep Questions Short and Focused">
-            The app is designed for real-time polling. Questions answerable in 30–90 seconds generate more responses. If a generated question is too complex, split it into two sequential discussions.
+          <Tip index={5} title="Use Analytics to Guide the Next Question">
+            After closing a discussion, the analytics panel shows response distribution. MC option clusters reveal shared misconceptions, make those your next prompt. Open-answer responses show you the language students are actually using.
           </Tip>
 
-          <Tip index={6} title="Use Analytics to Guide the Next Question">
-            After closing a discussion, the analytics modal shows response distribution. MC option clusters reveal shared misconceptions — make those your next prompt. Short and long answer responses show you the language students are actually using.
-          </Tip>
-
-          <Tip index={7} title="One Active Discussion at a Time">
-            The split-view is for <em>monitoring</em> two discussions side by side, not for running them simultaneously on the same group. Close one before activating the next.
+          <Tip index={6} title="One Active Discussion at a Time">
+            The split-view is for <em>monitoring</em> two discussions side by side, not for running them simultaneously. Close one before activating the next.
           </Tip>
         </div>
       </div>
