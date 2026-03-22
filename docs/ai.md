@@ -15,6 +15,7 @@
 11. Configuration Reference
 12. Design Decisions & Rationale
 13. Decisions Reversed
+14. Implemented Optimizations & Improvements
 
 ---
 
@@ -862,6 +863,251 @@ Early versions of the system prompt framed the AI as a "pharmacology teaching as
 ### 13.5 pdf-parse npm Package
 
 `pdf-parse` was the first PDF parsing library attempted. Its `require('pdf-parse')` call returns `pdfjs-dist` internals due to a broken package install interaction. Replaced with `pdfjs-serverless` which is purpose-built for serverless/edge environments.
+
+---
+
+## 14. Implemented Optimizations & Improvements
+
+This section documents every optimization, quality improvement, and stabilization change that has been shipped. It is a record of what is live in the codebase, not a proposal.
+
+---
+
+### 14.1 Embedding batch size: 100 → 500
+
+**File**: `src/lib/ai/embedChunks.ts`
+
+Increased the embedding batch size from 100 to 500. OpenAI's `text-embedding-3-small` allows up to 2048 inputs per API call. For a 500-chunk lesson this reduces OpenAI round trips from 5 down to 1.
+
+---
+
+### 14.2 Parallel DB writes with `Promise.all`
+
+**File**: `src/lib/ai/embedChunks.ts`
+
+Previously, after receiving embeddings from OpenAI, each chunk's embedding was written back to Supabase in a sequential loop — one UPDATE per chunk, each waiting for the previous to finish. Changed to fire all updates concurrently with `Promise.all`, so the total wait time is the slowest single write rather than the sum of all writes.
+
+**Before**: Write chunk 1, wait → write chunk 2, wait → ... → write chunk N (total = sum of all round trips)
+**After**: Fire all N writes simultaneously, wait for the slowest one (total = max of all round trips)
+
+---
+
+### 14.3 Bulk upsert attempted and reverted
+
+**File**: `src/lib/ai/embedChunks.ts`
+
+An intermediate version switched from N parallel UPDATEs to a single bulk upsert (all rows in one PostgREST call), which reduced N round trips to 1 per batch. Reverted because Supabase's PostgREST upsert requires INSERT permission on the table even when all rows already exist, conflicting with the existing RLS policies. The final implementation uses `Promise.all` over individual UPDATEs, which gives the parallelism benefit without the RLS side-effect.
+
+**Train analogy (original → upsert → final):**
+- Original: Put 1 person on the train, deliver, wait for it to return, repeat
+- Upsert: Put all 500 people on 1 train, deliver in a single trip
+- Final (`Promise.all` UPDATE): Put 500 people on 500 trains simultaneously, all depart at once
+
+---
+
+### 14.4 Replaced `RecursiveCharacterTextSplitter` with sentence-aware splitter
+
+**File**: `src/app/api/lessons/[lessonId]/upload/route.ts`
+
+Replaced the LangChain `RecursiveCharacterTextSplitter` with a custom `splitBySentences` function that splits on sentence boundaries (`/(?<=[.!?])\s+|\n+/`) and carries forward 1 sentence of overlap into the next chunk. This prevents pharmacology mechanism descriptions from being cut mid-sentence, improving embedding quality and retrieval precision.
+
+---
+
+### 14.5 Per-content-type chunk sizes
+
+**File**: `src/app/api/lessons/[lessonId]/upload/route.ts`
+
+Replaced the single uniform chunk size (500 chars / 200 overlap) with sizes tuned per content origin. See §2.6 for the full table.
+
+---
+
+### 14.6 Per-section chunking — no cross-boundary chunks
+
+**File**: `src/app/api/lessons/[lessonId]/upload/route.ts`
+
+Each `ParsedSection` (page, slide body, slide notes, visual description) is chunked independently. Chunk boundaries never cross section lines, so page/slide/content-type provenance is always preserved in the chunk metadata.
+
+---
+
+### 14.7 Minimum content filter
+
+Chunks shorter than 50 characters after trimming are discarded. This removes heading-only fragments (slide titles, section labels) that add noise to the embedding space without contributing retrieval value.
+
+---
+
+### 14.8 Jaccard deduplication before DB insert
+
+**File**: `src/app/api/lessons/[lessonId]/upload/route.ts`
+
+After chunking but before inserting into `lesson_chunks`, chunks are deduplicated using Jaccard word-set similarity. Any chunk with ≥70% similarity to an earlier chunk in the same file is dropped. This handles multi-column PDF layouts where the same paragraph is extracted twice and repeated slide content where title slides duplicate body text. See §2.6.
+
+---
+
+### 14.9 Chunk metadata enrichment
+
+**File**: `src/app/api/lessons/[lessonId]/upload/route.ts`, `src/types/ai.ts`
+
+Each chunk's `metadata` JSONB column now stores structured provenance: `contentOrigin`, `chunkType`, `fileName`, `pageNumber` (PDF), `slideNumber` (PPTX), `chunkIndex`, and `recordedAt` (transcript). New TypeScript types added: `ContentOrigin`, `ChunkType`, `ParsedSection`, `RetrievedChunk`.
+
+---
+
+### 14.10 Parallel PDF text extraction
+
+**File**: `src/lib/ai/parsers/pdfParser.ts`
+
+PDF text extraction previously used a sequential loop over pages. Changed to `Promise.all` over all `page.getTextContent()` calls, reducing text extraction time proportionally to page count.
+
+---
+
+### 14.11 Switched PDF vision from GPT-4o to Gemini 2.5 Flash
+
+**File**: `src/lib/ai/parsers/pdfParser.ts`, `src/lib/ai/providers.ts`
+
+When `GOOGLE_AI_API_KEY` is set, PDF vision uses `GeminiProvider` with `gemini-2.5-flash` instead of `gpt-4o`. Gemini accepts PDF buffers natively as inline data without requiring page rendering, resulting in approximately 50–65% faster PDF vision processing and approximately 90% lower cost per PDF compared to GPT-4o vision. Falls back to the provided `aiProvider` (GPT-4o) if the key is unavailable.
+
+---
+
+### 14.12 Parallel PPTX slide processing
+
+**File**: `src/lib/ai/parsers/pptxParser.ts`
+
+PPTX slides were previously processed in a sequential loop. Changed to `Promise.all` over all slides, so text extraction, notes resolution, and vision calls for all slides are in flight simultaneously. Estimated speedup: ~2x for text-only, up to 4–8x for vision-heavy decks.
+
+---
+
+### 14.13 One vision call per PPTX slide (not per image)
+
+**File**: `src/lib/ai/parsers/pptxParser.ts`
+
+All images from a given slide are bundled into a single vision call alongside body text and speaker notes, rather than one call per image. The model sees the full slide context and can cross-reference diagram labels with text. Reduces API calls from `(images × slides)` to `(slides with images)`. See §2.4.
+
+---
+
+### 14.14 Label soup detection and `page_text` suppression
+
+**File**: `src/app/api/lessons/[lessonId]/upload/route.ts`
+
+`isLabelSoup(text)` classifies text as label soup when the average words-per-segment is below 4 — indicating isolated labels, chemical abbreviations, or axis tick marks rather than prose. When a page has a visual description and its `page_text` is classified as label soup, the `page_text` chunk is suppressed to prevent low-quality fragments from polluting the embedding space. See §2.6.
+
+---
+
+### 14.15 Per-diagram-type vision extraction rules
+
+**File**: `src/lib/ai/providers.ts`
+
+All vision prompts now include explicit per-diagram-type extraction rules. Flowcharts: express each directional relationship as a natural-language sentence and inject the arrow legend if present. Tables: one sentence per cell covering every row and column. The relationship-only rule for flowcharts instructs the model not to describe box shapes or visual layout — only the relationships between them. See §2.5.
+
+---
+
+### 14.16 Image format filtering for PPTX vision
+
+**File**: `src/lib/ai/parsers/pptxParser.ts`
+
+PPTX files commonly embed EMF, WMF, and SVG vector graphics that vision models cannot process. Added an explicit allow-list: only `png`, `jpg`/`jpeg`, and `webp` are passed to the vision model. Unsupported formats are silently skipped to prevent API errors.
+
+---
+
+### 14.17 Embedding blending for focusAreas (70/30 weighted)
+
+**File**: `src/lib/ai/generatePrompts.ts`, `src/lib/ai/retrieveChunks.ts`
+
+When `preferences.focusAreas` is set, the RAG query vector blends the transcript embedding (70%) with the focusAreas embedding (30%), then L2-normalizes the result. Steers retrieval toward chunks relevant to both what was just said and what the instructor wants to focus on. Utilities added: `blendEmbeddings(a, b, alpha)` and `normalizeEmbedding(v)`. See §12.6.
+
+---
+
+### 14.18 Fallback retrieval chain
+
+**File**: `src/lib/ai/generatePrompts.ts`
+
+Added a multi-stage fallback when semantic retrieval returns no results:
+
+1. Primary: `retrieveChunksBySimilarity` → top 8 by cosine similarity
+2. Fallback A (if empty and focusAreas set): retry with focusAreas embedding alone
+3. Fallback B (final): `retrieveRecentChunks` → 8 most recent chunks by `created_at DESC`
+
+A user-visible `warning` string is set whenever fallback B is used.
+
+---
+
+### 14.19 Bloom's taxonomy distribution (shuffled per call)
+
+**File**: `src/lib/ai/prompts/discussionPrompt.ts`
+
+Candidates are assigned explicit Bloom's taxonomy levels in the user prompt, with the level sequence shuffled on every call to prevent the model from repeatedly producing the same level order. Separate schedules for MC (stops at "evaluate") and free-response (includes "create" at advanced). See §12.7.
+
+---
+
+### 14.20 MC distractor strategy rules
+
+**File**: `src/lib/ai/prompts/discussionPrompt.ts`
+
+Added 4 named distractor strategies that the model must distribute across the 3 incorrect options of each MC question, with no strategy repeating within a single question: mechanism confusion, location confusion, dose confusion, and partial truth. See §6.3.
+
+---
+
+### 14.21 Few-shot MC examples covering all answer positions
+
+**File**: `src/lib/ai/prompts/discussionPrompt.ts`
+
+Added 5 annotated MC examples to the system prompt with correct answers at positions A, B, C, D, and D. D appears twice because early sweep testing showed D was consistently underrepresented in model output. See §12.8.
+
+---
+
+### 14.22 Interrogative framing nudge for MC stems
+
+**File**: `src/lib/ai/prompts/discussionPrompt.ts`
+
+Added an explicit rule requiring MC stems at all difficulty levels to end with `?` and be phrased as a direct question rather than an incomplete statement. Added after the debug sweep identified that approximately 40% of advanced-difficulty MC stems were generated as declarative sentences.
+
+---
+
+### 14.23 Explicit 13-rule system prompt structure
+
+**File**: `src/lib/ai/prompts/discussionPrompt.ts`
+
+The system prompt now contains 13 numbered critical rules: grounding, accuracy, cognitive level enforcement, style adherence, audience specification, format/length, diversity across candidates, question type lock, MC distractor quality, MC answer position distribution, no meta-lecture questions, STT noise skip, and JSON-only output.
+
+---
+
+### 14.24 Candidate count: 3 → 5
+
+**File**: `src/lib/ai/prompts/discussionPrompt.ts`
+
+`CANDIDATE_COUNT` increased from 3 to 5. Instructors receive 5 options per generation, improving the likelihood that at least one aligns with the current lecture moment without requiring a regeneration.
+
+---
+
+### 14.25 Guaranteed MC label distribution across candidates
+
+**File**: `src/lib/ai/generatePrompts.ts`
+
+`assignMCPositions()` post-processes all 5 MC candidates after generation to guarantee every label (A, B, C, D) appears as the correct answer at least once across the set. Builds a slot array `[A, B, C, D, random_repeat]`, shuffles it, and rotates each candidate's correct option to the assigned slot. Prevents the model from placing the correct answer at A or B for every candidate.
+
+---
+
+### 14.26 GeminiProvider implementation
+
+**File**: `src/lib/ai/providers.ts`
+
+`GeminiProvider` implements the full `AIProvider` interface: chat via `gemini-2.5-flash`, embeddings via `text-embedding-004` (1536 dimensions), PDF vision via native inline PDF data, and PPTX per-slide vision. JSON mode uses `responseMimeType: 'application/json'`. Thinking budget disabled (`thinkingBudget: 0`) — no accuracy gain for factual extraction tasks. Currently used automatically for PDF vision when `GOOGLE_AI_API_KEY` is set. See §9.
+
+---
+
+### 14.27 Debug sweep — 81-combination exhaustive test
+
+**File**: `src/hooks/useDebugSweep.ts`
+
+A developer-only sweep tool that exhaustively tests all `3 × 3 × 3 × 3 = 81` preference combinations (prompt types × difficulties × styles × lengths) in a single run. Concurrency limit of 9 simultaneous requests. Per-combination metrics include time (ms), topic diversity, Bloom's spread (std dev of level encodings), mean word count, and MC position bias. Outputs a TXT report and a CSV for spreadsheet analysis. A single-request clipboard export is also available for sharing individual generation results.
+
+**Findings from sweep runs:**
+
+- **Interrogative framing failure**: approximately 40% of `advanced` difficulty MC stems were generated as incomplete declarative sentences rather than direct questions. Led to fix 14.22.
+- **MC position bias**: before `assignMCPositions()` was introduced, correct answers clustered at positions A and B across all combinations. Position D appeared as correct in fewer than 10% of candidates. Led to fix 14.25.
+- **Bloom's level non-adherence at `basic` difficulty**: the model frequently generated `apply`-level questions even when the assigned level was `remember`, particularly for `socratic` style. Led to tighter level-enforcement wording in the 13-rule system prompt.
+- **Topic clustering**: with short transcripts and no focusAreas, all 5 candidates in a generation often shared the same `topicArea`. Led to the diversity rule and shuffled Bloom's distribution.
+- **Word count drift at `detailed` length**: actual word counts for MC stems at `detailed` length averaged 20–25 words rather than the 35–55 word target. Led to explicit minimum/maximum bounds in the length block rather than a single target.
+- **Style non-adherence for `clinical_scenario` at `basic` difficulty**: the model defaulted to recall questions and ignored the clinical framing instruction. Led to an explicit style-takes-precedence reminder in the system prompt.
+- **Generation time variance**: `multiple_choice` with `advanced` difficulty and `detailed` length was consistently the slowest combination (5–8s); `short_answer` at `basic` was fastest (2–3s). Informed concurrency limit tuning.
+- **`long_answer` and `short_answer` producing near-identical output at `basic` difficulty**: the two types were structurally indistinguishable. Led to separate type-specific instructions emphasizing the 1–2 sentence vs. 2–5 sentence reasoning distinction.
 
 ---
 
