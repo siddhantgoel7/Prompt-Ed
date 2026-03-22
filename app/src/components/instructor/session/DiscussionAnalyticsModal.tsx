@@ -270,7 +270,7 @@ export function StatCard({ label, value, sub, infoText }: { label: string; value
         {infoText && (
           <UITooltip>
             <UITooltipTrigger asChild>
-              <Info className="w-3.5 h-3.5 text-muted-foreground inline-block" aria-hidden="true" />
+              <Info className="w-3.5 h-3.5 text-muted-foreground inline-block" aria-label="What is response rate?" tabIndex={0} />
             </UITooltipTrigger>
             <UITooltipContent>{infoText}</UITooltipContent>
           </UITooltip>

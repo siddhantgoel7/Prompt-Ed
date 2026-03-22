@@ -3,6 +3,7 @@
 
 import * as React from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 import type { GeneratedPrompt } from '@/types/ai';
 
 /** Renders a clickable card for an AI-generated prompt candidate, showing the question and MC options. */
@@ -39,16 +40,17 @@ export function CandidateCard({
         >
             <div className="flex items-start justify-between mb-1.5">
                 <div className="flex items-center gap-2">
+                    <span
+                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize text-brand-600"
+                        style={{ background: 'var(--color-primary-alpha-12)' }}
+                    >
+                        {candidate.promptType.replace('_', ' ')}
+                    </span>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <span
-                                className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize text-brand-600 cursor-default"
-                                style={{ background: 'var(--color-primary-alpha-12)' }}
-                            >
-                                {candidate.promptType.replace('_', ' ')}
-                            </span>
+                            <Info className="w-3 h-3 text-muted-foreground shrink-0" aria-label="About this question type" />
                         </TooltipTrigger>
-                        <TooltipContent>
+                        <TooltipContent align="start">
                             {candidate.bloomsLevel && <p><span className="font-semibold">Bloom&apos;s:</span> {candidate.bloomsLevel}</p>}
                             {candidate.topicArea && <p><span className="font-semibold">Topic:</span> {candidate.topicArea}</p>}
                             {candidate.rationale && <p><span className="font-semibold">Rationale:</span> {candidate.rationale}</p>}

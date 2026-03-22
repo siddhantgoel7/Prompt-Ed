@@ -344,9 +344,9 @@ export function ActiveCenter(props: Partial<{
               </select>
 
               <AIPreferencesDialog />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="rotating-glow-wrap">
+              <div className="rotating-glow-wrap">
+                <Tooltip>
+                  <TooltipTrigger asChild>
                     <Button
                       onClick={() => onGenerate()}
                       disabled={isGenerating || recorder.isRecording}
@@ -359,10 +359,10 @@ export function ActiveCenter(props: Partial<{
                     >
                       {isGenerating ? 'Generating…' : 'Generate Prompts'}
                     </Button>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>Use AI to generate 5 discussion prompt candidates from your transcript and uploaded files. Takes 5 to 15 seconds.</TooltipContent>
-              </Tooltip>
+                  </TooltipTrigger>
+                  <TooltipContent>Use AI to generate 5 discussion prompt candidates from your transcript and uploaded files. Takes 5 to 15 seconds.</TooltipContent>
+                </Tooltip>
+              </div>
             </div>
 
             {generationWarning && (

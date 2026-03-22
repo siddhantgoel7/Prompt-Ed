@@ -1,6 +1,6 @@
 'use client';
 
-import { Flag } from 'lucide-react';
+import { Flag, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -40,30 +40,31 @@ export function FlaggedFilterToggle({
 
   return (
     <div className={cn('flex items-center', s.wrapper)}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className={cn(
+          'inline-flex items-center font-semibold rounded-full border transition-colors',
+          s.button,
+        )}
+        style={showFlagged ? {
+          background: 'var(--color-error-alpha-10)',
+          color: 'var(--recording-text, #dc2626)',
+          borderColor: 'rgba(239,68,68,0.30)',
+        } : {
+          background: 'var(--surface-raised)',
+          color: 'var(--text-secondary)',
+          borderColor: 'var(--border-default)',
+        }}
+      >
+        <Flag className={s.icon} />
+        {showFlagged
+          ? `Showing ${flaggedCount} flagged`
+          : `Show flagged (${flaggedCount})`}
+      </button>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
-            type="button"
-            onClick={onToggle}
-            className={cn(
-              'inline-flex items-center font-semibold rounded-full border transition-colors',
-              s.button,
-            )}
-            style={showFlagged ? {
-              background: 'var(--color-error-alpha-10)',
-              color: 'var(--recording-text, #dc2626)',
-              borderColor: 'rgba(239,68,68,0.30)',
-            } : {
-              background: 'var(--surface-raised)',
-              color: 'var(--text-secondary)',
-              borderColor: 'var(--border-default)',
-            }}
-          >
-            <Flag className={s.icon} />
-            {showFlagged
-              ? `Showing ${flaggedCount} flagged`
-              : `Show flagged (${flaggedCount})`}
-          </button>
+          <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About flagged filter" />
         </TooltipTrigger>
         <TooltipContent>Show only responses you have flagged as inappropriate.</TooltipContent>
       </Tooltip>

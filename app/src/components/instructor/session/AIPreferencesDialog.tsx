@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Settings2 } from 'lucide-react';
+import { Settings2, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -83,16 +83,19 @@ export function AIPreferencesDialog() {
                 ) : (
                     <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <label htmlFor="difficulty" className="text-right text-sm font-medium cursor-default">
-                                            Difficulty
-                                        </label>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        Basic tests recall and definitions. Intermediate applies concepts to scenarios. Advanced requires analysis and critical comparison.
-                                    </TooltipContent>
-                                </Tooltip>
+                                <div className="flex items-center justify-end gap-1">
+                                    <label htmlFor="difficulty" className="text-sm font-medium">
+                                        Difficulty
+                                    </label>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About difficulty levels" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            Basic tests recall and definitions. Intermediate applies concepts to scenarios. Advanced requires analysis and critical comparison.
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
                                 <select
                                     id="difficulty"
                                     value={localPrefs.difficulty}
@@ -106,16 +109,19 @@ export function AIPreferencesDialog() {
                             </div>
 
                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <label htmlFor="style" className="text-right text-sm font-medium cursor-default">
-                                            Style
-                                        </label>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        Socratic encourages open reasoning. Factual tests direct recall. Clinical frames questions as patient scenarios.
-                                    </TooltipContent>
-                                </Tooltip>
+                                <div className="flex items-center justify-end gap-1">
+                                    <label htmlFor="style" className="text-sm font-medium">
+                                        Style
+                                    </label>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About question styles" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            Socratic encourages open reasoning. Factual tests direct recall. Clinical frames questions as patient scenarios.
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
                                 <select
                                     id="style"
                                     value={localPrefs.style}
@@ -129,16 +135,19 @@ export function AIPreferencesDialog() {
                             </div>
 
                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <label htmlFor="length" className="text-right text-sm font-medium cursor-default">
-                                            Length
-                                        </label>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        Controls how much context and setup the question includes — not the expected answer length.
-                                    </TooltipContent>
-                                </Tooltip>
+                                <div className="flex items-center justify-end gap-1">
+                                    <label htmlFor="length" className="text-sm font-medium">
+                                        Length
+                                    </label>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About question length" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            Controls how much context and setup the question includes — not the expected answer length.
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
                                 <select
                                     id="length"
                                     value={localPrefs.length}
@@ -152,16 +161,19 @@ export function AIPreferencesDialog() {
                             </div>
 
                             <div className="grid grid-cols-4 items-start gap-4">
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <label htmlFor="focusAreas" className="text-right text-sm font-medium pt-2 cursor-default">
-                                            Focus Areas
-                                        </label>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        Topics the AI will prioritize when selecting content and generating questions. Comma-separated.
-                                    </TooltipContent>
-                                </Tooltip>
+                                <div className="flex items-start justify-end gap-1 pt-2">
+                                    <label htmlFor="focusAreas" className="text-sm font-medium text-right">
+                                        Focus Areas
+                                    </label>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About focus areas" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            Topics the AI will prioritize when selecting content and generating questions. Comma-separated.
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
                                 <div className="col-span-3 flex flex-col gap-1">
                                     <textarea
                                         id="focusAreas"

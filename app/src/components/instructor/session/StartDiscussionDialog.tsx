@@ -12,6 +12,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 
 interface StartDiscussionDialogProps {
   open: boolean;
@@ -55,9 +56,7 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
 
         <div className="space-y-5 py-2">
           {/* No Time Limit toggle */}
-          <Tooltip>
-          <TooltipTrigger asChild>
-          <label className="flex items-center gap-3 cursor-pointer select-none w-fit">
+          <label className="flex items-center gap-3 cursor-pointer select-none">
             <div
               role="checkbox"
               aria-checked={noLimit}
@@ -77,12 +76,13 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
               )}
             </div>
             <span className="text-sm font-medium">No Time Limit</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About no time limit" />
+              </TooltipTrigger>
+              <TooltipContent>Students can keep responding until you manually close the discussion.</TooltipContent>
+            </Tooltip>
           </label>
-          </TooltipTrigger>
-          <TooltipContent>
-            Students can keep responding until you manually close the discussion.
-          </TooltipContent>
-          </Tooltip>
 
           {/* Timer inputs */}
           <div className={`space-y-3 transition-opacity ${noLimit ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
