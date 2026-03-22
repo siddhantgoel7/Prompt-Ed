@@ -16,11 +16,12 @@ import { FilterToggle } from '@/components/instructor/FilterToggle';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
 
 /** Isolated response list — owns its own selection state so clicks don't re-render the whole page. */
-function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse }: {
+function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag }: {
   responses: Response[];
   flaggedResponses: Response[];
   onRemoveResponse: (id: string) => void;
   onRestoreResponse: (id: string) => Promise<void>;
+  canFlag: boolean;
 }) {
   const {
     selectedIds, flaggingId, showHighlightedOnly,
@@ -98,7 +99,7 @@ function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestore
           isSelected={selectedIds.includes(resp.id)}
           isBeingFlagged={flaggingId === resp.id}
           onToggle={() => toggleSelected(resp.id)}
-          onFlag={() => void handleFlagInappropriate(resp.id)}
+          onFlag={canFlag ? () => void handleFlagInappropriate(resp.id) : undefined}
         />
       ))}
 
@@ -423,6 +424,7 @@ export function DiscussionPage({
                   flaggedResponses={flaggedResponses}
                   onRemoveResponse={handleRemoveResponse}
                   onRestoreResponse={handleRestoreResponse}
+                  canFlag={!isMC}
                 />
               )}
             </div>

@@ -4,7 +4,7 @@ import '@testing-library/jest-dom'
 jest.mock('canvas-confetti', () => ({
   __esModule: true,
   default: jest.fn(),
-}))
+}), { virtual: true })
 
 // Mock environment variables
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
