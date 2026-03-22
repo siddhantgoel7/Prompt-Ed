@@ -3,6 +3,9 @@
 // (PDF vision — faster and cheaper for multi-page documents).
 import OpenAI from 'openai';
 import { GoogleGenerativeAI, type Part, type Content } from '@google/generative-ai';
+// [DEBUG] token usage type for generateChatCompletion return
+import type { TokenUsage } from '@/types/ai';
+// [END DEBUG]
 
 /** Represents a single message in the chat history passed to the LLM. */
 export type AIMessage = { role: 'system' | 'user' | 'assistant'; content: string };
@@ -63,11 +66,21 @@ const buildPdfVisionUserPrompt = (numPages: number): string =>
     '{ "pages": [ { "page": 1, "description": "..." }, ... ] }\n\n' +
     `Use "NO_VISUAL_CONTENT" for text-only pages. Include all ${numPages} pages.`;
 
+// [DEBUG] structured return type for generateChatCompletion including token usage and model
+export interface ChatCompletionResult {
+    content: string;
+    tokenUsage?: TokenUsage;
+    model?: string;
+}
+// [END DEBUG]
+
 export interface AIProvider {
+    // [DEBUG] returns content + token usage instead of plain string
     generateChatCompletion(
         messages: AIMessage[],
         options?: { temperature?: number; jsonMode?: boolean }
-    ): Promise<string>;
+    ): Promise<ChatCompletionResult>;
+    // [END DEBUG]
 
     generateEmbedding(text: string | string[]): Promise<number[][]>;
 
@@ -123,18 +136,27 @@ export class OpenAIProvider implements AIProvider {
         this.openai = new OpenAI({ apiKey: apiKey || process.env.OPENAI_API_KEY });
     }
 
-    /** Calls gpt-4o-mini with the given messages and returns the response text. */
+    /** Calls gpt-4o-mini with the given messages and returns the response text and token usage. */
     async generateChatCompletion(
         messages: AIMessage[],
         options?: { temperature?: number; jsonMode?: boolean }
-    ): Promise<string> {
+    ): Promise<ChatCompletionResult> {
         const response = await this.openai.chat.completions.create({
             model: 'gpt-4o-mini',
             messages,
             temperature: options?.temperature ?? 0.7,
             response_format: options?.jsonMode ? { type: 'json_object' } : undefined,
         });
-        return response.choices[0]?.message?.content ?? '';
+        const content = response.choices[0]?.message?.content ?? '';
+        // [DEBUG] capture token usage and model from OpenAI response
+        const usage = response.usage;
+        const tokenUsage: TokenUsage | undefined = usage ? {
+            promptTokens: usage.prompt_tokens,
+            completionTokens: usage.completion_tokens,
+            totalTokens: usage.total_tokens,
+        } : undefined;
+        return { content, tokenUsage, model: response.model };
+        // [END DEBUG]
     }
 
     /** Generates embeddings for one or more text strings using text-embedding-3-small. */
@@ -297,11 +319,11 @@ export class GeminiProvider implements AIProvider {
         this.genAI = new GoogleGenerativeAI(apiKey || process.env.GOOGLE_AI_API_KEY || '');
     }
 
-    /** Calls gemini-1.5-pro with the given messages and returns the response text. */
+    /** Calls gemini-1.5-pro with the given messages and returns the response text and token usage. */
     async generateChatCompletion(
         messages: AIMessage[],
         options?: { temperature?: number; jsonMode?: boolean }
-    ): Promise<string> {
+    ): Promise<ChatCompletionResult> {
         const systemMessage = messages.find(m => m.role === 'system');
         const chatMessages = messages.filter(m => m.role !== 'system');
 
@@ -319,7 +341,16 @@ export class GeminiProvider implements AIProvider {
             parts: [{ text: m.content }],
         }));
         const result = await geminiModel.generateContent({ contents });
-        return result.response.text();
+        const content = result.response.text();
+        // [DEBUG] capture token usage and model from Gemini response
+        const meta = result.response.usageMetadata;
+        const tokenUsage: TokenUsage | undefined = meta ? {
+            promptTokens: meta.promptTokenCount ?? 0,
+            completionTokens: meta.candidatesTokenCount ?? 0,
+            totalTokens: meta.totalTokenCount ?? 0,
+        } : undefined;
+        return { content, tokenUsage, model: this.model };
+        // [END DEBUG]
     }
 
     /** Generates embeddings using text-embedding-004. */

@@ -17,6 +17,12 @@ import { MultipleChoiceEditor } from './MultipleChoiceEditor';
 import { AIPreferencesDialog } from './AIPreferencesDialog';
 import { transcribeAudioApi } from '@/lib/api/aiApi';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
+// [DEBUG] imports for copy report and sweep mode
+import { useAIPreferences } from '@/hooks/useAIPreferences';
+import { generateCandidatesApi } from '@/lib/api/aiApi';
+import { escapeCsv } from '@/lib/utils/csv';
+import type { AIPromptPreferences, GeneratedPrompt as GP, TokenUsage } from '@/types/ai';
+// [END DEBUG]
 
 
 
@@ -41,6 +47,11 @@ export function ActiveCenter(props: Partial<{
   candidates: GeneratedPrompt[];
   isGenerating: boolean;
   generationWarning: string | null;
+  // [DEBUG] wall-clock ms, token usage, and model for copy report
+  generationTimeMs: number | null;
+  lastTokenUsage: TokenUsage | null;
+  lastModel: string | null;
+  // [END DEBUG]
   onGenerate: (transcriptOverride?: string) => void | Promise<void>;
   onSelectCandidate: (p: GeneratedPrompt) => void;
   onRegenerate: () => void;
@@ -58,6 +69,11 @@ export function ActiveCenter(props: Partial<{
   const candidates = context ? context.candidates : props.candidates!;
   const isGenerating = context ? context.isGenerating : props.isGenerating!;
   const generationWarning = context ? context.generationWarning : props.generationWarning!;
+  // [DEBUG] read timing, token usage, and model from context for copy report
+  const generationTimeMs = context ? context.generationTimeMs : props.generationTimeMs ?? null;
+  const lastTokenUsage = context ? context.lastTokenUsage : props.lastTokenUsage ?? null;
+  const lastModel = context ? context.lastModel : props.lastModel ?? null;
+  // [END DEBUG]
   const onGenerate = context ? context.generateCandidates : props.onGenerate!;
   const onSelectCandidate = context ? context.selectCandidate : props.onSelectCandidate!;
   const onRegenerate = context ? context.regenerateCandidates : props.onRegenerate!;
@@ -76,6 +92,11 @@ export function ActiveCenter(props: Partial<{
   });
   const [creationMode, setCreationMode] = React.useState<'ai' | 'manual'>('ai');
   const [showTimerDialog, setShowTimerDialog] = React.useState(false);
+  // [DEBUG] copy report and sweep state
+  const [copiedReport, setCopiedReport] = React.useState(false);
+  const { preferences } = useAIPreferences();
+  const [sweepProgress, setSweepProgress] = React.useState<{ current: number; total: number; label: string } | null>(null);
+  // [END DEBUG]
   const [pendingCandidate, setPendingCandidate] = React.useState<GeneratedPrompt | null>(null);
   const [publishError, setPublishError] = React.useState<string | null>(null);
 
@@ -230,6 +251,167 @@ export function ActiveCenter(props: Partial<{
     onPublish(timerSeconds);
   };
 
+  // [DEBUG] build plain-text report for clipboard copy
+  const handleCopyReport = React.useCallback(async () => {
+    const typeLabel: Record<string, string> = {
+      long_answer: 'Long Answer',
+      short_answer: 'Short Answer',
+      multiple_choice: 'Multiple Choice',
+    };
+    const timeSec = generationTimeMs != null ? `${Math.round(generationTimeMs / 1000)}s` : '—';
+    const contextLabel = (() => {
+      if (generationWarning) return 'No context (fallback)';
+      return 'Files + Transcript';
+    })();
+
+    const lines: string[] = [
+      `${typeLabel[promptType] ?? promptType} — ${preferences.difficulty.charAt(0).toUpperCase() + preferences.difficulty.slice(1)}, ${preferences.style.charAt(0).toUpperCase() + preferences.style.slice(1).replace('_', ' ')}, ${preferences.length.charAt(0).toUpperCase() + preferences.length.slice(1)} — ${timeSec}`,
+      `Context: ${contextLabel}`,
+    ];
+    if (generationWarning) lines.push(`Warning: ${generationWarning}`);
+    if (preferences.focusAreas?.trim()) lines.push(`Focus Areas: ${preferences.focusAreas.trim()}`);
+    // [DEBUG] model and token usage in copy report
+    if (lastModel) lines.push(`Model: ${lastModel}`);
+    if (lastTokenUsage) lines.push(`Tokens: ${lastTokenUsage.promptTokens} prompt + ${lastTokenUsage.completionTokens} completion = ${lastTokenUsage.totalTokens} total`);
+    // [END DEBUG]
+    lines.push('');
+
+    candidates.forEach((c, i) => {
+      lines.push(`${i + 1}. ${c.promptText}`);
+      if (c.bloomsLevel) lines.push(`   Bloom's: ${c.bloomsLevel}`);
+      if (c.topicArea)   lines.push(`   Topic: ${c.topicArea}`);
+      if (c.rationale)   lines.push(`   Rationale: ${c.rationale}`);
+      if (i < candidates.length - 1) lines.push('');
+    });
+
+    await navigator.clipboard.writeText(lines.join('\n'));
+    setCopiedReport(true);
+    setTimeout(() => setCopiedReport(false), 2000);
+  }, [candidates, generationTimeMs, generationWarning, lastModel, lastTokenUsage, preferences, promptType]);
+  // [END DEBUG]
+
+  // [DEBUG] sweep all 81 combinations and download TXT + CSV
+  const handleRunAllCombinations = React.useCallback(async () => {
+    const PROMPT_TYPES: PromptType[] = ['long_answer', 'short_answer', 'multiple_choice'];
+    const DIFFICULTIES: AIPromptPreferences['difficulty'][] = ['basic', 'intermediate', 'advanced'];
+    const STYLES: AIPromptPreferences['style'][] = ['socratic', 'factual', 'clinical_scenario'];
+    const LENGTHS: AIPromptPreferences['length'][] = ['brief', 'standard', 'detailed'];
+
+    const TYPE_LABEL: Record<string, string> = {
+      long_answer: 'Long Answer',
+      short_answer: 'Short Answer',
+      multiple_choice: 'Multiple Choice',
+    };
+    const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace('_', ' ');
+
+    type SweepResult = {
+      combo: { promptType: PromptType; difficulty: string; style: string; length: string };
+      timeMs: number;
+      candidates: GP[];
+      warning?: string;
+      error?: string;
+      // [DEBUG] token usage and model per combination
+      tokenUsage?: TokenUsage;
+      model?: string;
+      // [END DEBUG]
+    };
+
+    const combos: { promptType: PromptType; difficulty: AIPromptPreferences['difficulty']; style: AIPromptPreferences['style']; length: AIPromptPreferences['length'] }[] = [];
+    for (const pt of PROMPT_TYPES)
+      for (const d of DIFFICULTIES)
+        for (const s of STYLES)
+          for (const l of LENGTHS)
+            combos.push({ promptType: pt, difficulty: d, style: s, length: l });
+
+    const results: SweepResult[] = [];
+
+    for (let i = 0; i < combos.length; i++) {
+      const combo = combos[i];
+      const label = `${TYPE_LABEL[combo.promptType]} — ${cap(combo.difficulty)}, ${cap(combo.style)}, ${cap(combo.length)}`;
+      setSweepProgress({ current: i + 1, total: combos.length, label });
+
+      const startMs = Date.now();
+      try {
+        const data = await generateCandidatesApi(lessonId, combo.promptType, transcriptText, {
+          difficulty: combo.difficulty,
+          style: combo.style,
+          length: combo.length,
+          focusAreas: preferences.focusAreas,
+        });
+        results.push({ combo, timeMs: Date.now() - startMs, candidates: data.candidates, warning: data.warning, tokenUsage: data.tokenUsage, model: data.model });
+      } catch (err) {
+        results.push({ combo, timeMs: Date.now() - startMs, candidates: [], error: err instanceof Error ? err.message : 'Failed' });
+      }
+    }
+
+    setSweepProgress(null);
+
+    // Build TXT
+    const txtLines: string[] = [];
+    results.forEach((r, i) => {
+      const timeSec = Math.round(r.timeMs / 1000);
+      const label = `${TYPE_LABEL[r.combo.promptType]} — ${cap(r.combo.difficulty)}, ${cap(r.combo.style)}, ${cap(r.combo.length)} — ${timeSec}s`;
+      txtLines.push(`=== ${i + 1}. ${label} ===`);
+      if (r.error) { txtLines.push(`ERROR: ${r.error}`, ''); return; }
+      if (r.warning) txtLines.push(`Warning: ${r.warning}`);
+      // [DEBUG] model and token usage in sweep TXT
+      if (r.model) txtLines.push(`Model: ${r.model}`);
+      if (r.tokenUsage) txtLines.push(`Tokens: ${r.tokenUsage.promptTokens} prompt + ${r.tokenUsage.completionTokens} completion = ${r.tokenUsage.totalTokens} total`);
+      // [END DEBUG]
+      txtLines.push('');
+      r.candidates.forEach((c, ci) => {
+        txtLines.push(`${ci + 1}. ${c.promptText}`);
+        if (c.bloomsLevel) txtLines.push(`   Bloom's: ${c.bloomsLevel}`);
+        if (c.topicArea)   txtLines.push(`   Topic: ${c.topicArea}`);
+        if (c.rationale)   txtLines.push(`   Rationale: ${c.rationale}`);
+        if (ci < r.candidates.length - 1) txtLines.push('');
+      });
+      txtLines.push('');
+    });
+
+    // Build CSV
+    // [DEBUG] added model and token columns to sweep CSV
+    const csvLines: string[] = [[
+      'combo_number', 'prompt_type', 'difficulty', 'style', 'length',
+      'time_s', 'model', 'prompt_tokens', 'completion_tokens', 'total_tokens',
+      'warning', 'prompt_number', 'prompt_text', 'blooms_level', 'topic_area', 'rationale',
+    ].map(escapeCsv).join(',')];
+    // [END DEBUG]
+
+    results.forEach((r, i) => {
+      const timeSec = Math.round(r.timeMs / 1000);
+      // [DEBUG] include model and token columns in each sweep CSV row
+      const mdl = r.model ?? '';
+      const pt = r.tokenUsage?.promptTokens ?? '';
+      const ct = r.tokenUsage?.completionTokens ?? '';
+      const tt = r.tokenUsage?.totalTokens ?? '';
+      if (r.error || r.candidates.length === 0) {
+        csvLines.push([i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, timeSec, mdl, pt, ct, tt, r.error ?? r.warning ?? '', '', '', '', '', ''].map(escapeCsv).join(','));
+        return;
+      }
+      r.candidates.forEach((c, ci) => {
+        csvLines.push([
+          i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length,
+          timeSec, mdl, pt, ct, tt, r.warning ?? '', ci + 1, c.promptText, c.bloomsLevel ?? '', c.topicArea ?? '', c.rationale ?? '',
+        ].map(escapeCsv).join(','));
+      });
+      // [END DEBUG]
+    });
+
+    const download = (content: string, filename: string, mime: string) => {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    };
+
+    download(txtLines.join('\n'), 'sweep_report.txt', 'text/plain;charset=utf-8');
+    download(csvLines.join('\n'), 'sweep_report.csv', 'text/csv;charset=utf-8');
+  }, [lessonId, transcriptText, preferences]);
+  // [END DEBUG]
+
   return (
     <div className="flex-1 p-4 md:p-6 space-y-4">
 
@@ -363,6 +545,23 @@ export function ActiveCenter(props: Partial<{
                   <TooltipContent>Use AI to generate 5 discussion prompt candidates from your transcript and uploaded files. Takes 5 to 15 seconds.</TooltipContent>
                 </Tooltip>
               </div>
+              {/* [DEBUG] run all combinations button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={handleRunAllCombinations}
+                    disabled={isGenerating || !!sweepProgress || recorder.isRecording}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs font-semibold"
+                    style={{ borderColor: 'rgba(239,68,68,0.4)', color: 'oklch(0.55 0.22 27)' }}
+                  >
+                    {sweepProgress ? `${sweepProgress.current}/${sweepProgress.total}…` : 'Run All Combinations'}&nbsp;<span className="opacity-60">[DEBUG ONLY]</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Generate all 81 type/difficulty/style/length combinations sequentially. Downloads sweep_report.txt and sweep_report.csv when done. ~15–20 min.</TooltipContent>
+              </Tooltip>
+              {/* [END DEBUG] */}
             </div>
 
             {generationWarning && (
@@ -377,6 +576,15 @@ export function ActiveCenter(props: Partial<{
                 {generationWarning}
               </p>
             )}
+
+            {/* [DEBUG] sweep progress indicator */}
+            {sweepProgress && (
+              <p className="text-xs rounded-lg px-3 py-2 animate-pulse"
+                style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', color: '#6366f1' }}>
+                Generating {sweepProgress.current} / {sweepProgress.total} — {sweepProgress.label}
+              </p>
+            )}
+            {/* [END DEBUG] */}
 
             {/* Candidate cards */}
             {candidates.length > 0 && (
@@ -468,6 +676,22 @@ export function ActiveCenter(props: Partial<{
                     </TooltipTrigger>
                     <TooltipContent>Run AI generation again without changing the transcript or files. Use this if the previous candidates were not satisfactory.</TooltipContent>
                   </Tooltip>
+                  {/* [DEBUG] copy report button */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={handleCopyReport}
+                        disabled={isGenerating || candidates.length === 0}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                      >
+                        {copiedReport ? 'Copied!' : 'Copy Report'}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Copy generation details and all candidates to clipboard.</TooltipContent>
+                  </Tooltip>
+                  {/* [END DEBUG] */}
                 </div>
               </div>
             )}

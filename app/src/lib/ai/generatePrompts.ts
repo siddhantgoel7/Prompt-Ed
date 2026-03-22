@@ -66,14 +66,16 @@ export async function generatePrompts(
     // Build and call
     const chunks = retrieved.map((c) => c.content);
     const userPrompt = buildUserPrompt({ chunks, transcriptText, promptType, preferences });
-    const rawContent = await aiProvider.generateChatCompletion([
+    // [DEBUG] destructure content + tokenUsage + model from new return shape
+    const { content: rawContent, tokenUsage, model } = await aiProvider.generateChatCompletion([
       { role: 'system', content: buildSystemPrompt(preferences, promptType) },
       { role: 'user', content: userPrompt }
     ], { jsonMode: true, temperature: 0.7 });
+    // [END DEBUG]
 
     const parsed = parseAIResponse(rawContent, promptType);
 
-    return { candidates: parsed, warning };
+    return { candidates: parsed, warning, tokenUsage, model };
   } catch (err) {
     const e = err as { code?: string; message?: string };
     console.error(`GENERATE_ERR [${e.code ?? 'unknown'}]: ${e.message ?? String(err)}`);

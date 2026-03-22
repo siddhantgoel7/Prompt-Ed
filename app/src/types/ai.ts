@@ -34,11 +34,23 @@ export interface GeneratedPrompt {
   rationale?: string;   // why this question is pedagogically valuable
 }
 
+// [DEBUG] token usage from the LLM call
+export interface TokenUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+}
+// [END DEBUG]
+
 // Result of a generate call
 export interface CandidateSet {
   candidates: GeneratedPrompt[];
   // Present when AI had degraded context (e.g. no files, no transcriptText)
   warning?: string;
+  // [DEBUG] token usage and model from the LLM chat completion call
+  tokenUsage?: TokenUsage;
+  model?: string;
+  // [END DEBUG]
 }
 
 // Metadata stored with each lesson file

@@ -6,7 +6,7 @@ import { useRealtime } from '@/lib/realtime/useRealtime';
 import type { Lesson } from '@/types/lesson';
 import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
-import type { LessonFile, GeneratedPrompt } from '@/types/ai';
+import type { LessonFile, GeneratedPrompt, TokenUsage } from '@/types/ai';
 import type { PromptType } from '@/types/discussion';
 
 import { useLessonAI } from './useSessionPage/useLessonAI';
@@ -97,6 +97,11 @@ export type SessionVM = {
   candidates: GeneratedPrompt[];
   isGenerating: boolean;
   generationWarning: string | null;
+  // [DEBUG] wall-clock ms, token usage, and model for the last generate call
+  generationTimeMs: number | null;
+  lastTokenUsage: TokenUsage | null;
+  lastModel: string | null;
+  // [END DEBUG]
   generateCandidates: (transcriptOverride?: string) => Promise<void>;
   selectCandidate: (p: GeneratedPrompt) => void;
   regenerateCandidates: () => Promise<void>;
@@ -132,6 +137,9 @@ export function useSessionPage(lessonId: string): SessionVM {
     candidates,
     isGenerating,
     generationWarning,
+    generationTimeMs,
+    lastTokenUsage,
+    lastModel,
     generateCandidates,
     selectCandidate,
     regenerateCandidates,
@@ -660,7 +668,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     exportingData, activatingLesson, handleExportOverviewTxt, handleExportDiscussionsCsv, handleExportStatistics, handleActivate,
     files, isUploading, uploadFile, deleteFile, openFile,
     transcriptText, setTranscriptText, promptType, setPromptType,
-    candidates, isGenerating, generationWarning,
+    candidates, isGenerating, generationWarning, generationTimeMs, lastTokenUsage, lastModel,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
     discussionTimerEndTime, discussionTimerSeconds,
@@ -679,7 +687,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     exportingData, activatingLesson, handleExportOverviewTxt, handleExportDiscussionsCsv, handleExportStatistics, handleActivate,
     files, isUploading, uploadFile, deleteFile, openFile,
     transcriptText, setTranscriptText, promptType, setPromptType,
-    candidates, isGenerating, generationWarning,
+    candidates, isGenerating, generationWarning, generationTimeMs, lastTokenUsage, lastModel,
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
     discussionTimerEndTime, discussionTimerSeconds,

@@ -1,12 +1,14 @@
-import type { CandidateSet } from '@/types/ai';
+import type { CandidateSet, AIPromptPreferences } from '@/types/ai';
 import type { PromptType } from '@/types/discussion';
 
-export async function generateCandidatesApi(lessonId: string, promptType: PromptType, transcriptText: string): Promise<CandidateSet> {
+// [DEBUG] added optional preferencesOverride for sweep mode
+export async function generateCandidatesApi(lessonId: string, promptType: PromptType, transcriptText: string, preferencesOverride?: AIPromptPreferences): Promise<CandidateSet> {
     const res = await fetch(`/api/lessons/${lessonId}/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ promptType, transcriptText }),
+        body: JSON.stringify({ promptType, transcriptText, preferencesOverride }),
     });
+    // [END DEBUG]
     if (!res.ok) {
         const err = await res.json() as { error?: string };
         throw new Error(err.error ?? 'Generation failed');
