@@ -277,6 +277,10 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 | Export lesson statistics                | 1.43             | Shahbaz/ Sid | Mar 10       |
 | Leave/rejoin/ended-session stability    | 2.12, 2.13, 2.14 | Mo & Nikita (Already impllemented) | Mar 18       |
 | End-to-end testing for export/metrics   | All              | Shabaz/ Sid  | Mar 20       |
+| CI/CD Improvements & Testing            | Enhancement      | Sid          | Mar 15       |
+| Deployment                              | Task             | Sid          | Mar 22       |
+| Documentation & Feedback                | Task             | Nik/Sid/Kris/Aldo | Mar 22  |
+| Info button & UI enhancement            |Task              | Muaadh       | Mar 19       |
 
 ---
 
