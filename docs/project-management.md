@@ -233,7 +233,7 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 
 | **User Story** | **Description**            | **Story Points** |
 | -------------- | -------------------------- | ---------------- |
-| 1.11           | Resume unfinished lesson   | 3                | (Already Implemented)
+| 1.11           | Resume unfinished lesson (Already Implemented)   | 3                | 
 | 1.20           | Edit AI prompts            | 3                |
 | 1.22           | AI generation preferences  | 5                |
 | 1.29           | Time limits for responses  | 3                |
@@ -248,8 +248,8 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 | 2.05           | Scan QR code               | 3                |
 | 2.11           | Timer for prompts          | 1                |
 | 2.12           | Lesson ended notification  | 1                |
-| 2.13           | Leave lesson               | 3                | (Already Implemented)
-| 2.14           | Rejoin lesson              | 3                | (Already Implemented)
+| 2.13           | Leave lesson (Already Implemented)               | 3                | 
+| 2.14           | Rejoin lesson (Already Implemented)             | 3                | 
 | 2.17           | Confirmation message       | 1                |
 
 **Estimated Sprint Velocity:** ~45 points completed
@@ -266,7 +266,7 @@ Sprint 4 delivers **data export, session history, and engagement metrics** with 
 | QR display and scan flow improvements   | 1.32, 2.05       | Tommy        | Mar 11       |
 | Response highlight interactions         | 1.36             | Aldo         | Mar 14       |
 | Hide Inappropriate Responses            | 1.35             | Aldo         | Mar 14       |
-| List-view response panel                | 1.39             | Nikita/ Sid  | Mar 13       |
+| List-view response panel                | 1.39             | Nikita       | Mar 13       |
 | Engagement metrics calculations         | 1.40             | Nikita/ Sid  | Mar 11       |
 | Export responses (CSV/PDF/JSON)         | 1.41             | Shahbaz/ Sid | Mar 12       |
 | Export prompts + responses              | 1.42             | Shahbaz/ Sid | Mar 11       |
