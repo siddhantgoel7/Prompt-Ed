@@ -229,7 +229,8 @@ describe('LessonsPage', () => {
       mockSupabase.auth.getUser.mockImplementation(() => new Promise(() => {}));
 
       render(<LessonsPage courseId={courseId} />);
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      // Use data-testid="loading-screen" (set on LoadingScreen component) rather than logo alt text
+      expect(screen.getByTestId('loading-screen')).toBeInTheDocument();
     });
 
     // 16.6
@@ -256,7 +257,7 @@ describe('LessonsPage', () => {
       render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
-        expect(screen.getByText('Start a New Lesson')).toBeInTheDocument();
+        expect(screen.getByText('New Lesson')).toBeInTheDocument();
       });
     });
 
@@ -359,7 +360,7 @@ describe('LessonsPage', () => {
       render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
-        fireEvent.click(screen.getByText('Start a New Lesson'));
+        fireEvent.click(screen.getByText('New Lesson'));
       });
 
       await waitFor(() => {
@@ -372,7 +373,7 @@ describe('LessonsPage', () => {
       render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
-        fireEvent.click(screen.getByText('Start a New Lesson'));
+        fireEvent.click(screen.getByText('New Lesson'));
       });
 
       await waitFor(() => {
@@ -389,7 +390,7 @@ describe('LessonsPage', () => {
       render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
-        fireEvent.click(screen.getByText('Start a New Lesson'));
+        fireEvent.click(screen.getByText('New Lesson'));
       });
 
       await waitFor(() => {
@@ -409,7 +410,7 @@ describe('LessonsPage', () => {
       render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
-        fireEvent.click(screen.getByText('Start a New Lesson'));
+        fireEvent.click(screen.getByText('New Lesson'));
       });
 
       await waitFor(() => {
@@ -473,7 +474,7 @@ describe('LessonsPage', () => {
       render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
-        fireEvent.click(screen.getByText('Start a New Lesson'));
+        fireEvent.click(screen.getByText('New Lesson'));
       });
 
       await waitFor(() => {

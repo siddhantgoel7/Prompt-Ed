@@ -65,7 +65,21 @@ export function AIPreferencesDialog() {
                 </DialogHeader>
 
                 {isLoading ? (
-                    <div className="py-6 text-center text-sm text-gray-500">Loading preferences...</div>
+                    <div className="py-6 flex justify-center">
+                      {/* data-testid="loading-dots" is the test anchor — avoids .rounded-full class selector */}
+                      <div data-testid="loading-dots" className="flex items-center gap-1.5">
+                        {[0, 1, 2].map((i) => (
+                          <span
+                            key={i}
+                            className="block w-1.5 h-1.5 rounded-full"
+                            style={{
+                              background: 'var(--color-primary-400)',
+                              animation: `dotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
                 ) : (
                     <TooltipProvider> {/* DEBUG */}
                         <div className="grid gap-4 py-4">

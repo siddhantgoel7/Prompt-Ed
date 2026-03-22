@@ -80,12 +80,15 @@ test.describe('Instructor Reconnect & Autosave Resilience', () => {
         await page.goto('/lessons_page/c1');
 
         await expect(page.getByText('Resilient Lesson')).toBeVisible({ timeout: 15000 });
+        // Note: 'Active' text is rendered as a status badge on the lesson card.
+        // If this label ever changes (e.g. to 'Live' or 'In Progress'), update this locator.
         await expect(page.locator('span', { hasText: 'Active' })).toBeVisible();
 
         await page.getByText('Resilient Lesson').click();
 
         await expect(page.getByText('I survived a refresh!')).toBeVisible();
-        await expect(page.locator('span.bg-green-100', { hasText: 'Active' })).toBeVisible();
+        // Note: 'Active' status badge on the session header — update if this label ever changes.
+        await expect(page.locator('span', { hasText: 'Active' }).first()).toBeVisible();
     });
 
 });

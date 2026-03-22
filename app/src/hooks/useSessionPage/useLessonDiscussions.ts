@@ -103,9 +103,7 @@ export function useLessonDiscussions(
     }, [activeDiscussion]);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchResponses();
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchFlaggedResponses();
     }, [activeDiscussion?.id, fetchResponses, fetchFlaggedResponses]);
 

@@ -67,10 +67,10 @@ describe('DiscussionTimer Component [US 2.11]', () => {
     });
 
     // 7
-    it('[US 2.11][UNIT7] success: timer label shows "left" when not expired', () => {
+    it('[US 2.11][UNIT7] success: timer label shows "remaining" when not expired', () => {
         const endTime = Date.now() + 30_000;
         render(<DiscussionTimer timerEndTime={endTime} timerTotalSeconds={30} />);
-        expect(screen.getByTestId('student-timer').textContent).toMatch(/left/);
+        expect(screen.getByTestId('student-timer').textContent).toMatch(/remaining/);
     });
 
     // 8

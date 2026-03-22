@@ -127,7 +127,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
     describe('Selected option styling', () => {
 
         // 30.9
-        it('[US 2.10][CT9] success: selected option button has dark background class', () => {
+        it('[US 2.10][CT9] success: selected option button has distinct styling', () => {
             render(
                 <StudentPromptCard
                     discussion={mcDiscussion}
@@ -135,16 +135,17 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
                     onSelectOption={jest.fn()}
                 />
             );
-            // The selected button should contain 'bg-black' class
             const optionButtons = screen.getAllByRole('button');
             const selectedBtn = optionButtons.find(btn =>
                 btn.textContent?.includes('A.')
             );
-            expect(selectedBtn?.className).toMatch(/bg-black/);
+            expect(selectedBtn).toBeInTheDocument();
+            // Selected option has a distinct background — check semantic state attribute, not color values
+            expect(screen.getByTestId('mc-option-A')).toHaveAttribute('data-state', 'selected');
         });
 
         // 30.10
-        it('[US 2.10][CT10] success: non-selected options do NOT have dark background class', () => {
+        it('[US 2.10][CT10] success: non-selected options do NOT have selected styling', () => {
             render(
                 <StudentPromptCard
                     discussion={mcDiscussion}
@@ -154,11 +155,12 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
             );
             const optionButtons = screen.getAllByRole('button');
             const unselectedBtn = optionButtons.find(btn => btn.textContent?.includes('B.'));
-            expect(unselectedBtn?.className).not.toMatch(/bg-black/);
+            // Non-selected button should not have the dark green selection background
+            expect(unselectedBtn?.getAttribute('style')).not.toMatch(/0\.18/); // 0.18 is the opacity of the selected style
         });
 
         // 30.11
-        it('[US 2.10][CT11] success: no option has highlight when selectedOption is null', () => {
+        it('[US 2.10][CT11] success: no option has strong highlight when selectedOption is null', () => {
             render(
                 <StudentPromptCard
                     discussion={mcDiscussion}
@@ -168,7 +170,8 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
             );
             const optionButtons = screen.getAllByRole('button');
             optionButtons.forEach(btn => {
-                expect(btn.className).not.toMatch(/bg-black/);
+                // No option should have selected styling (0.18 opacity is only for selected)
+                expect(btn.getAttribute('style')).not.toMatch(/0\.18/);
             });
         });
     });
@@ -191,11 +194,14 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
             const { container } = render(
                 <StudentPromptCard discussion={mcDiscussion} />
             );
-            // All option buttons should have the same base className structure
+            // All option buttons should have the same base className structure (no is_correct in HTML)
+            expect(container.innerHTML).not.toMatch(/is_correct/i);
+            expect(container.innerHTML).not.toMatch(/Correct Option/i);
+            // All buttons should have identical class names (no class-based answer hint)
             const buttons = container.querySelectorAll('button');
             const classNames = Array.from(buttons).map(b => b.className);
-            // All start non-selected, so all should share the same base style
-            classNames.forEach(cls => expect(cls).toMatch(/border-gray-200/));
+            const uniqueClasses = new Set(classNames);
+            expect(uniqueClasses.size).toBe(1); // All options have identical class names
         });
     });
 });

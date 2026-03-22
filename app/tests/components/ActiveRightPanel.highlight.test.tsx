@@ -309,8 +309,8 @@ describe('ActiveRightPanel — highlight visual emphasis', () => {
     expect(responseText.className).toMatch(/text-2xl/);
     expect(responseText.className).toMatch(/font-semibold/);
 
-    // The card wrapper should have emphasised styling
-    const card = responseText.closest('[class*="bg-yellow-50"]');
+    // The card wrapper should have elevated z-index (selected state)
+    const card = responseText.closest('[class*="z-10"]');
     expect(card).not.toBeNull();
   });
 

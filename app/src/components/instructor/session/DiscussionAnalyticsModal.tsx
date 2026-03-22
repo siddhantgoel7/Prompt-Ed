@@ -3,7 +3,6 @@
 // Reusable analytics content and modal for a single discussion.
 // Used by ActiveRightPanel (live view inline) and SessionEndedView (modal).
 
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -94,7 +93,9 @@ export function DiscussionAnalyticsContent({
       {/* ── MC pie chart ── */}
       {isMC && mcChartData.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
+          <p
+            className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted"
+          >
             Answer Distribution
           </p>
           <div className="flex flex-col sm:flex-row gap-4 items-center">
@@ -121,6 +122,13 @@ export function DiscussionAnalyticsContent({
                 </Pie>
                 <Tooltip
                   formatter={(value, name) => [`${value} votes`, `Option ${name}`]}
+                  contentStyle={{
+                    background: 'var(--surface-overlay)',
+                    border: '1px solid var(--border-default)',
+                    borderRadius: '8px',
+                    color: 'var(--text-primary)',
+                    fontSize: '12px',
+                  }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -133,10 +141,17 @@ export function DiscussionAnalyticsContent({
                     className="mt-0.5 h-2.5 w-2.5 rounded-full shrink-0"
                     style={{ background: entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length] }}
                   />
-                  <span className={entry.isCorrect ? 'font-semibold text-green-700' : 'text-gray-700'}>
-                    {entry.label}. {entry.text}
+                  <span style={{ color: entry.isCorrect ? 'var(--color-primary-500)' : 'var(--text-secondary)' }}>
+                    <span className={entry.isCorrect ? 'font-semibold' : ''}>
+                      {entry.label}. {entry.text}
+                    </span>
                     {entry.isCorrect && (
-                      <span className="ml-1 text-[10px] bg-green-100 text-green-800 px-1 py-0.5 rounded">Correct</span>
+                      <span
+                        className="ml-1 text-[10px] px-1 py-0.5 rounded font-medium"
+                        style={{ background: 'rgba(45,158,45,0.15)', color: 'var(--color-primary-500)' }}
+                      >
+                        Correct
+                      </span>
                     )}
                   </span>
                 </div>
@@ -149,19 +164,27 @@ export function DiscussionAnalyticsContent({
       {/* ── Response timeline bar chart ── */}
       {timelineData.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
+          <p
+            className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted"
+          >
             Response Timeline (per minute)
           </p>
           <ResponsiveContainer width="100%" height={160}>
             <BarChart data={timelineData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ fontSize: 12 }}
+                contentStyle={{
+                  background: 'var(--surface-overlay)',
+                  border: '1px solid var(--border-default)',
+                  borderRadius: '8px',
+                  color: 'var(--text-primary)',
+                  fontSize: '12px',
+                }}
                 formatter={(v) => [`${v} responses`, 'Count']}
               />
-              <Bar dataKey="Responses" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="Responses" fill="var(--color-primary-500)" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -169,22 +192,27 @@ export function DiscussionAnalyticsContent({
 
       {/* ── All responses ── */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+        <p
+          className="text-xs font-semibold uppercase tracking-wider mb-2 text-content-muted"
+        >
           All Responses ({total})
         </p>
         {total === 0 ? (
-          <p className="text-sm text-muted-foreground">No responses yet.</p>
+          <p className="text-sm text-content-muted">No responses yet.</p>
         ) : (
           <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
             {responses.map((r) => (
-              <Card key={r.id} className="border-gray-100">
-                <CardContent className="p-3">
-                  <p className="text-sm whitespace-pre-wrap break-words">{r.response_text}</p>
-                  <p className="text-xs text-muted-foreground mt-1" suppressHydrationWarning>
-                    {new Date(r.created_at).toLocaleTimeString()}
-                  </p>
-                </CardContent>
-              </Card>
+              <div
+                key={r.id}
+                className="rounded-xl p-3 bg-surface-raised border border-line-subtle"
+              >
+                <p className="text-sm whitespace-pre-wrap break-words text-content-primary">
+                  {r.response_text}
+                </p>
+                <p className="text-xs mt-1 text-content-muted" suppressHydrationWarning>
+                  {new Date(r.created_at).toLocaleTimeString()}
+                </p>
+              </div>
             ))}
           </div>
         )}
@@ -218,10 +246,10 @@ export function DiscussionAnalyticsModal({
           </DialogTitle>
         </DialogHeader>
 
-        <DiscussionAnalyticsContent 
-          discussion={discussion} 
-          responses={responses} 
-          studentCount={studentCount} 
+        <DiscussionAnalyticsContent
+          discussion={discussion}
+          responses={responses}
+          studentCount={studentCount}
         />
       </DialogContent>
     </Dialog>
@@ -231,10 +259,12 @@ export function DiscussionAnalyticsModal({
 /** Small stat display card used inside the analytics modal. */
 export function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
-      <p className="text-xl font-bold text-gray-900">{value}</p>
-      {sub && <p className="text-[10px] text-gray-400 mt-0.5">{sub}</p>}
+    <div
+      className="rounded-xl p-3 bg-surface-raised border border-line-subtle"
+    >
+      <p className="text-xs mb-1 text-content-muted">{label}</p>
+      <p className="text-xl font-bold text-content-primary">{value}</p>
+      {sub && <p className="text-[10px] mt-0.5 text-content-muted">{sub}</p>}
     </div>
   );
 }

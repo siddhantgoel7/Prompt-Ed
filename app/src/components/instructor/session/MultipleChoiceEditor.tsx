@@ -25,40 +25,66 @@ export function MultipleChoiceEditor({
     nameGroup,
 }: MultipleChoiceEditorProps) {
     return (
-        <div className="mt-2 p-4 border rounded-lg bg-white border-gray-200">
-            <h3 className="text-sm font-semibold mb-3">Options & Correct Answer</h3>
+        <div
+            className="mt-2 p-4 rounded-xl bg-surface-raised"
+            style={{
+                border: '1px solid var(--border-default)',
+            }}
+        >
+            <h3 className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
+                Options &amp; Correct Answer
+            </h3>
+
             <div className="space-y-2">
-                {options.map((opt) => (
-                    <div key={opt.label} className="flex items-center gap-2 text-xs">
-                        <input
-                            type="radio"
-                            name={nameGroup}
-                            value={opt.label}
-                            checked={correctOption === opt.label}
-                            onChange={() => onCorrectOptionChange(opt.label)}
-                            className="cursor-pointer"
-                        />
-                        <span className="font-semibold text-gray-700 w-4">{opt.label}.</span>
-                        <input
-                            type="text"
-                            value={opt.text}
-                            onChange={(e) => onOptionTextChange(opt.label, e.target.value)}
-                            className={`flex-1 px-2 py-1.5 border rounded focus:outline-none focus:border-black ${correctOption === opt.label
-                                    ? 'border-black font-medium bg-gray-50'
-                                    : 'border-gray-300'
-                                }`}
-                            placeholder={`Option ${opt.label}`}
-                        />
-                    </div>
-                ))}
+                {options.map((opt) => {
+                    const isCorrect = correctOption === opt.label;
+                    return (
+                        <div key={opt.label} className="flex items-center gap-2 text-xs">
+                            <input
+                                type="radio"
+                                name={nameGroup}
+                                value={opt.label}
+                                checked={isCorrect}
+                                onChange={() => onCorrectOptionChange(opt.label)}
+                                className="cursor-pointer accent-[var(--color-primary-500)]"
+                            />
+                            <span
+                                className="font-bold w-4 flex-shrink-0"
+                                style={{ color: isCorrect ? 'var(--color-primary-600)' : 'var(--text-secondary)' }}
+                            >
+                                {opt.label}.
+                            </span>
+                            <input
+                                type="text"
+                                value={opt.text}
+                                onChange={(e) => onOptionTextChange(opt.label, e.target.value)}
+                                className="flex-1 px-2.5 py-1.5 rounded-[8px] text-xs transition-all duration-150"
+                                style={{
+                                    background: isCorrect ? 'var(--color-primary-alpha-06)' : 'var(--surface-base)',
+                                    border: isCorrect
+                                        ? '1.5px solid var(--color-primary-400)'
+                                        : '1px solid var(--border-default)',
+                                    color: 'var(--text-primary)',
+                                    fontWeight: isCorrect ? 500 : 400,
+                                }}
+                                placeholder={`Option ${opt.label}`}
+                            />
+                        </div>
+                    );
+                })}
             </div>
 
-            <div className="mt-3 pt-3 border-t border-gray-100">
-                <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+            <div
+                className="mt-3 pt-3 border-t border-line-subtle"
+            >
+                <label
+                    className="flex items-center gap-2 text-xs font-medium cursor-pointer text-content-secondary"
+                >
                     <input
                         type="checkbox"
                         checked={feedbackEnabled}
                         onChange={(e) => onFeedbackChange(e.target.checked)}
+                        className="accent-[var(--color-primary-500)]"
                     />
                     Show correctness feedback to students
                 </label>

@@ -1,4 +1,13 @@
-// Full-page instructor display view for projecting join information (PIN + QR code).
+// Full-page view for projecting session join information onto a classroom screen.
+// Opened when the instructor clicks "Display QR/Code" in the session header menu.
+// Renders in a new tab/window so the instructor's session view stays untouched.
+//
+// Layout: two glassmorphism cards side by side on large screens, stacked on mobile.
+//   Left  — large PIN number in primary green (easy to read from the back of a room)
+//   Right — QR code that students can scan to join directly without typing the PIN
+//
+// Dark/light mode: all colours use CSS variables (var(--surface-*), var(--text-*)) so
+// the page respects the instructor's theme preference — no hardcoded bg-white/text-black.
 'use client';
 
 import { useStudentJoinQR } from '@/hooks/useStudentJoinQR';
@@ -12,36 +21,54 @@ export function SessionDisplayView(props: {
   const { joinUrl, qrDataUrl } = useStudentJoinQR(lessonId, 520);
 
   return (
-    <main className="min-h-screen bg-white text-black px-8 py-10 md:px-12 md:py-12">
+    <main
+      className="min-h-screen px-8 py-10 md:px-12 md:py-12 bg-surface-base text-content-primary"
+    >
       <header className="mb-10 text-center">
-        <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Live Session</p>
-        <h1 className="mt-2 text-3xl md:text-5xl font-semibold">{title}</h1>
+        <p className="text-xs uppercase tracking-[0.2em] text-content-muted">Live Session</p>
+        <h1 className="mt-2 text-3xl md:text-5xl font-semibold text-content-primary">{title}</h1>
       </header>
 
       <section className="mx-auto max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-        <div className="rounded-2xl border border-gray-200 bg-gray-50 p-8 md:p-12 text-center">
-          <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Join PIN</p>
-          <p className="mt-4 text-6xl md:text-8xl font-bold tracking-[0.12em]">
+        {/* PIN card */}
+        <div className="glass rounded-2xl p-8 md:p-12 text-center shadow-[0_4px_24px_rgba(0,0,0,0.12)]">
+          <p className="text-sm uppercase tracking-[0.2em] text-content-muted">
+            Join PIN
+          </p>
+          <p className="mt-4 text-6xl md:text-8xl font-bold tracking-[0.12em] text-brand-500">
             {pinCode ?? '------'}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 md:p-12 text-center">
-          <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Scan To Join</p>
+        {/* QR card */}
+        <div className="glass rounded-2xl p-8 md:p-12 text-center shadow-[0_4px_24px_rgba(0,0,0,0.12)]">
+          <p className="text-sm uppercase tracking-[0.2em] text-content-muted">
+            Scan To Join
+          </p>
           <div className="mt-4 flex items-center justify-center">
             {qrDataUrl ? (
+              // QR code is a dynamically-generated base64 data URL — next/image cannot
+              // optimize data: URLs, so a plain <img> is appropriate here.
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={qrDataUrl}
                 alt="Join lesson QR code"
-                className="w-64 h-64 md:w-80 md:h-80"
+                className="w-64 h-64 md:w-80 md:h-80 rounded-xl"
               />
             ) : (
-              <div className="w-64 h-64 md:w-80 md:h-80 border border-dashed border-gray-300 flex items-center justify-center text-sm text-gray-500">
+              <div
+                className="w-64 h-64 md:w-80 md:h-80 flex items-center justify-center text-sm rounded-xl text-content-muted"
+                style={{ border: '1px dashed var(--border-default)' }}
+              >
                 Generating QR...
               </div>
             )}
           </div>
-          {joinUrl ? <p className="mt-4 text-sm text-gray-600 break-all">{joinUrl}</p> : null}
+          {joinUrl ? (
+            <p className="mt-4 text-sm break-all text-content-secondary">
+              {joinUrl}
+            </p>
+          ) : null}
         </div>
       </section>
     </main>

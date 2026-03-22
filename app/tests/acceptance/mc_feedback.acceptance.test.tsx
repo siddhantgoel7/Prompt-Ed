@@ -127,9 +127,9 @@ describe('[US 2.10] MC Feedback — Correct Answer (Acceptance)', () => {
     beforeEach(() => jest.clearAllMocks());
 
     // 29.1
-    it('[US 2.10][AC1-AT1] success: submitting correct option shows Good Job! headline', () => {
+    it('[US 2.10][AC1-AT1] success: submitting correct option shows Great job! headline', () => {
         renderAndSubmit('A'); // A is the correct_option in fixture
-        expect(screen.getByText(/Good Job/i)).toBeInTheDocument();
+        expect(screen.getByText(/Great job/i)).toBeInTheDocument();
     });
 
     // 29.2
@@ -140,22 +140,24 @@ describe('[US 2.10] MC Feedback — Correct Answer (Acceptance)', () => {
     });
 
     // 29.3
-    it('[US 2.10][AC1-AT3] success: correct feedback banner has green styling class', () => {
+    it('[US 2.10][AC1-AT3] success: correct feedback banner has green styling', () => {
         renderAndSubmit('A');
         const banner = screen.getByTestId('mc-feedback-banner');
-        expect(banner?.className).toMatch(/green/);
+        expect(banner).toBeInTheDocument();
+        // Check semantic state attribute rather than color values
+        expect(banner).toHaveAttribute('data-variant', 'correct');
     });
 
     // 29.4
-    it('[US 2.10][AC1-AT4] success: Good Job! banner is shown after correct submission', () => {
+    it('[US 2.10][AC1-AT4] success: Great job! banner is shown after correct submission', () => {
         renderAndSubmit('A');
-        expect(screen.getByText(/Good Job/i)).toBeInTheDocument();
+        expect(screen.getByText(/Great job/i)).toBeInTheDocument();
     });
 
     // 29.5
-    it('[US 2.10][AC1-AT5] success: correct answer feedback does NOT show Oops! banner', () => {
+    it('[US 2.10][AC1-AT5] success: correct answer feedback does NOT show Not quite! banner', () => {
         renderAndSubmit('A');
-        expect(screen.queryByText(/Oops/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Not quite/i)).not.toBeInTheDocument();
     });
 
     // 29.6
@@ -172,9 +174,9 @@ describe('[US 2.10] MC Feedback — Incorrect Answer (Acceptance)', () => {
     beforeEach(() => jest.clearAllMocks());
 
     // 29.7
-    it('[US 2.10][AC2-AT1] failure: submitting wrong option shows Oops! headline', () => {
+    it('[US 2.10][AC2-AT1] failure: submitting wrong option shows Not quite! headline', () => {
         renderAndSubmit('B'); // correct is A
-        expect(screen.getByText(/Oops/i)).toBeInTheDocument();
+        expect(screen.getByText(/Not quite/i)).toBeInTheDocument();
     });
 
     // 29.8
@@ -184,16 +186,18 @@ describe('[US 2.10] MC Feedback — Incorrect Answer (Acceptance)', () => {
     });
 
     // 29.9
-    it('[US 2.10][AC2-AT3] failure: incorrect feedback banner has red styling class', () => {
+    it('[US 2.10][AC2-AT3] failure: incorrect feedback banner has red styling', () => {
         renderAndSubmit('C'); // correct is A
         const banner = screen.getByTestId('mc-feedback-banner');
-        expect(banner?.className).toMatch(/red/);
+        expect(banner).toBeInTheDocument();
+        // Check semantic state attribute rather than color values
+        expect(banner).toHaveAttribute('data-variant', 'incorrect');
     });
 
     // 29.10
-    it('[US 2.10][AC2-AT4] failure: wrong answer does NOT show Good Job! banner', () => {
+    it('[US 2.10][AC2-AT4] failure: wrong answer does NOT show Great job! banner', () => {
         renderAndSubmit('D'); // correct is A
-        expect(screen.queryByText(/Good Job/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Great job/i)).not.toBeInTheDocument();
     });
 
     // 29.11
@@ -204,9 +208,9 @@ describe('[US 2.10] MC Feedback — Incorrect Answer (Acceptance)', () => {
     });
 
     // 29.12
-    it('[US 2.10][AC2-AT6] failure: Oops! banner is shown after incorrect submission', () => {
+    it('[US 2.10][AC2-AT6] failure: Not quite! banner is shown after incorrect submission', () => {
         renderAndSubmit('B');
-        expect(screen.getByText(/Oops/i)).toBeInTheDocument();
+        expect(screen.getByText(/Not quite/i)).toBeInTheDocument();
     });
 });
 
@@ -218,15 +222,15 @@ describe('[US 2.10] MC Feedback — Feedback Disabled (Acceptance)', () => {
     // 29.13
     it('[US 2.10][AC3-AT1] success: no feedback banner when feedback_enabled=false and answer is correct', () => {
         renderAndSubmit('A', MC_DISCUSSION_FEEDBACK_OFF);
-        expect(screen.queryByText(/Good Job/i)).not.toBeInTheDocument();
-        expect(screen.queryByText(/Oops/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Great job/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Not quite/i)).not.toBeInTheDocument();
     });
 
     // 29.14
     it('[US 2.10][AC3-AT2] success: no feedback banner when feedback_enabled=false and answer is incorrect', () => {
         renderAndSubmit('B', MC_DISCUSSION_FEEDBACK_OFF);
-        expect(screen.queryByText(/Good Job/i)).not.toBeInTheDocument();
-        expect(screen.queryByText(/Oops/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Great job/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Not quite/i)).not.toBeInTheDocument();
     });
 
     // 29.15
@@ -236,12 +240,14 @@ describe('[US 2.10] MC Feedback — Feedback Disabled (Acceptance)', () => {
     });
 
     // 29.16
-    it('[US 2.10][AC3-AT4] success: selected option is highlighted in gray when feedback is disabled', () => {
+    it('[US 2.10][AC3-AT4] success: selected option is highlighted when feedback is disabled', () => {
         renderAndSubmit('B', MC_DISCUSSION_FEEDBACK_OFF);
-        // The selected option button should have gray styling
+        // The selected option button should have distinct styling (no correctness revealed)
         const optionButtons = screen.getAllByRole('button');
         const selectedBtn = optionButtons.find(btn => btn.textContent?.includes('B.'));
-        expect(selectedBtn?.className).toMatch(/bg-gray-200/);
+        expect(selectedBtn).toBeInTheDocument();
+        // Selected option has a distinct background (green tint without correctness indicator)
+        expect(selectedBtn?.getAttribute('style')).toMatch(/45.*158.*45|primary/);
     });
 });
 

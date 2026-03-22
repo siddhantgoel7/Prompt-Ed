@@ -96,7 +96,7 @@ describe('LessonsPage (Acceptance)', () => {
     useLessonsPageMock.mockReturnValue(makeLessonsVM());
     render(<LessonsPage courseId="c1" />);
 
-    expect(screen.getByText(/PMCOL Teaching Tool/i)).toBeInTheDocument();
+    expect(screen.getByText(/PromptED/i)).toBeInTheDocument();
     expect(screen.getByText(/Course Title/i)).toBeInTheDocument();
   });
 
@@ -183,7 +183,7 @@ describe('LessonsPage (Acceptance)', () => {
 
     render(<LessonsPage courseId="c1" />);
     expect(
-      screen.getByText(/No lessons yet\. Click "Start a New Lesson" to create your first lesson!/i)
+      screen.getByText(/No lessons yet/i)
     ).toBeInTheDocument();
   });
 

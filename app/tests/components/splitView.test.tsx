@@ -79,8 +79,8 @@ describe('SplitView Component', () => {
     it('[US 1.39] renders left and right pane labels', () => {
       render(<SplitView discussions={discussions} lessonId="lesson-456" onBack={onBack} />);
 
-      expect(screen.getByText('Left')).toBeInTheDocument();
-      expect(screen.getByText('Right')).toBeInTheDocument();
+      expect(screen.getByText('Left Pane')).toBeInTheDocument();
+      expect(screen.getByText('Right Pane')).toBeInTheDocument();
     });
   });
 
@@ -420,7 +420,7 @@ describe('SplitView Component', () => {
       const cards = screen.getAllByText(/What is the main purpose/i);
       fireEvent.click(cards[0]);
 
-      expect(screen.getByText('Loading responses...')).toBeInTheDocument();
+      expect(document.querySelector('.skeleton-shimmer')).toBeInTheDocument();
     });
   });
 });

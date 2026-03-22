@@ -89,7 +89,11 @@ describe('AIPreferencesDialog Component [US 1.22]', () => {
         render(<AIPreferencesDialog />);
         fireEvent.click(screen.getByRole('button', { name: /Settings/i }));
 
-        const loadingText = await screen.findByText('Loading preferences...');
-        expect(loadingText).toBeInTheDocument();
+        // Loading state shows dot bounce animation instead of text
+        const dialog = await screen.findByRole('dialog');
+        expect(dialog).toBeInTheDocument();
+        // data-testid="loading-dots" is the semantic anchor — avoids counting .rounded-full elements
+        // (which would break if any other rounded element is added to the dialog)
+        expect(screen.getByTestId('loading-dots')).toBeInTheDocument();
     });
 });

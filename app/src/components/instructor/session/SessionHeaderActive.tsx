@@ -1,13 +1,30 @@
-// Header bar for an active lesson session with the lesson title, join code, and control buttons.
+// Sticky header for an active lesson session.
+// Contains three zones:
+//   Left   — PromptED logo + lesson title (truncated on small screens)
+//   Center — Live join PIN + mini QR thumbnail (links to the join URL in a new tab)
+//   Right  — ThemeToggle + HamburgerMenu (Display QR/Code, Split View, Settings, End Session)
+//
+// The HamburgerMenu lives in HamburgerMenu.tsx — extracted because it has its own
+// state, refs, effects, and is self-contained and potentially reusable.
+//
+// ThemeToggle remains outside the menu because theme switching is a persistent
+// preference, not a one-off session action.
+//
+// Data sourcing (dual-mode for testability):
+//   In production the component reads everything from SessionContext.
+//   In Jest tests SessionContext is not available, so explicit props are used as fallback.
+//   This avoids the need to wrap every test in a context provider.
 'use client';
 
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
+import { AppLogo } from '@/components/ui/AppLogo';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useStudentJoinQR } from '@/hooks/useStudentJoinQR';
 import { SessionContext } from './SessionContext';
+import { HamburgerMenu } from './HamburgerMenu';
 
 /**
- * Active-session header with lesson title, join PIN code, Display/End/Split View/Settings buttons.
+ * Active-session header with logo, lesson title, join PIN code, Display/End/Split View/Settings buttons.
  * Reads values from SessionContext when available, falling back to explicit props for testing.
  */
 export function SessionHeaderActive(props: {
@@ -30,47 +47,59 @@ export function SessionHeaderActive(props: {
   const { joinUrl, qrDataUrl } = useStudentJoinQR(lessonId, 96);
 
   return (
-    <header className="border-b border-gray-300 px-4 md:px-6 py-3 md:py-4 flex flex-wrap items-center justify-between gap-2">
-      <h1 className="text-lg md:text-xl font-semibold truncate">{title}</h1>
+    <header
+      className="sticky top-0 z-50 bg-surface-glass backdrop-blur-md border-b border-line-default"
+    >
+      <div className="px-4 md:px-5 py-2.5 flex items-center justify-between gap-3">
+        {/* Left: Logo + title */}
+        <div className="flex items-center gap-3 min-w-0">
+          <AppLogo size="sm" className="flex-shrink-0 hidden sm:block" />
+          <div className="hidden sm:block w-px h-5 flex-shrink-0 bg-line-default" />
+          <h1 className="text-sm md:text-base font-semibold truncate text-content-primary">
+            {title}
+          </h1>
+        </div>
 
-      <div className="flex flex-wrap items-center gap-2 md:gap-4">
-        <div className="flex items-center gap-2">
+        {/* Center: join code + QR */}
+        <div
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full flex-shrink-0"
+          style={{
+            background: 'rgba(45,158,45,0.10)',
+            border: '1px solid rgba(45,158,45,0.25)',
+          }}
+        >
           {joinUrl ? (
             <a
               href={joinUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Open student lesson link"
-              className="w-8 h-8 md:w-10 md:h-10 bg-gray-200 border border-gray-300 flex items-center justify-center text-[10px] overflow-hidden"
+              className="w-7 h-7 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center bg-surface-raised border border-line-default"
             >
               {qrDataUrl ? (
-                <img
-                  src={qrDataUrl}
-                  alt="Join lesson QR code"
-                  className="w-full h-full object-cover"
-                />
+                // QR is a base64 data URL — cannot be optimised by next/image.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={qrDataUrl} alt="Join QR" className="w-full h-full object-cover" />
               ) : (
-                'QR'
+                <span className="text-[8px] font-mono text-content-muted">QR</span>
               )}
             </a>
-          ) : (
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-200 border border-gray-300 flex items-center justify-center text-xs">
-              QR
-            </div>
-          )}
-          <span className="font-semibold text-sm md:text-base">Join Code: {pinCode ?? '------'}</span>
+          ) : null}
+          <span className="text-xs font-semibold text-brand-600">
+            PIN: <span className="font-mono tracking-widest">{pinCode ?? '------'}</span>
+          </span>
         </div>
 
-        <Button size="sm" onClick={onDisplay}>Display</Button>
-
-        {/* Keep label "End" for tests */}
-        <Button size="sm" onClick={onEnd} disabled={endingLesson} variant="destructive">
-          {endingLesson ? 'Ending...' : 'End'}
-        </Button>
-
-        <Button size="sm" variant="outline" onClick={onSplitView}>Split View</Button>
-
-        <Button size="sm" variant="secondary">Settings</Button>
+        {/* Right: theme toggle + hamburger menu */}
+        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+          <ThemeToggle />
+          <HamburgerMenu
+            onDisplay={onDisplay}
+            onSplitView={onSplitView}
+            onEnd={onEnd}
+            endingLesson={endingLesson}
+          />
+        </div>
       </div>
     </header>
   );
