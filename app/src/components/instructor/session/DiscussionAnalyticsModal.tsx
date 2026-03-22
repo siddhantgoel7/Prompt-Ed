@@ -9,6 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Tooltip as UITooltip, TooltipContent as UITooltipContent, TooltipTrigger as UITooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 import {
   PieChart,
   Pie,
@@ -87,6 +89,7 @@ export function DiscussionAnalyticsContent({
           label="Response Rate"
           value={responseRate !== null ? `${responseRate}%` : '—'}
           sub={snapshot > 0 ? `${total} / ${snapshot} students` : undefined}
+          infoText="Responses received divided by the number of students who joined during this discussion."
         />
       </div>
 
@@ -257,12 +260,22 @@ export function DiscussionAnalyticsModal({
 }
 
 /** Small stat display card used inside the analytics modal. */
-export function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+export function StatCard({ label, value, sub, infoText }: { label: string; value: string; sub?: string; infoText?: string }) {
   return (
     <div
       className="rounded-xl p-3 bg-surface-raised border border-line-subtle"
     >
-      <p className="text-xs mb-1 text-content-muted">{label}</p>
+      <p className="text-xs mb-1 text-content-muted flex items-center gap-1">
+        {label}
+        {infoText && (
+          <UITooltip>
+            <UITooltipTrigger asChild>
+              <Info className="w-3.5 h-3.5 text-muted-foreground inline-block" aria-hidden="true" />
+            </UITooltipTrigger>
+            <UITooltipContent>{infoText}</UITooltipContent>
+          </UITooltip>
+        )}
+      </p>
       <p className="text-xl font-bold text-content-primary">{value}</p>
       {sub && <p className="text-[10px] mt-0.5 text-content-muted">{sub}</p>}
     </div>

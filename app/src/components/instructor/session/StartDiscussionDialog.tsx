@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface StartDiscussionDialogProps {
   open: boolean;
@@ -54,7 +55,9 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
 
         <div className="space-y-5 py-2">
           {/* No Time Limit toggle */}
-          <label className="flex items-center gap-3 cursor-pointer select-none">
+          <Tooltip>
+          <TooltipTrigger asChild>
+          <label className="flex items-center gap-3 cursor-pointer select-none w-fit">
             <div
               role="checkbox"
               aria-checked={noLimit}
@@ -75,6 +78,11 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
             </div>
             <span className="text-sm font-medium">No Time Limit</span>
           </label>
+          </TooltipTrigger>
+          <TooltipContent>
+            Students can keep responding until you manually close the discussion.
+          </TooltipContent>
+          </Tooltip>
 
           {/* Timer inputs */}
           <div className={`space-y-3 transition-opacity ${noLimit ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>

@@ -101,6 +101,9 @@ export function FilesTab({
                             </button>
                         </div>
                     ))}
+                    <p className="text-xs text-muted-foreground mt-2">
+                        Ready: available for AI generation. Processing: being indexed. Failed: delete and re-upload.
+                    </p>
                 </div>
             )}
         </div>

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export interface MCOptionData {
     label: string;
@@ -31,9 +32,16 @@ export function MultipleChoiceEditor({
                 border: '1px solid var(--border-default)',
             }}
         >
-            <h3 className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
-                Options &amp; Correct Answer
-            </h3>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted cursor-default">
+                        Options &amp; Correct Answer
+                    </h3>
+                </TooltipTrigger>
+                <TooltipContent>
+                    Select the radio button next to the correct answer. This is used to calculate response accuracy but is never shown to students.
+                </TooltipContent>
+            </Tooltip>
 
             <div className="space-y-2">
                 {options.map((opt) => {
@@ -77,17 +85,24 @@ export function MultipleChoiceEditor({
             <div
                 className="mt-3 pt-3 border-t border-line-subtle"
             >
-                <label
-                    className="flex items-center gap-2 text-xs font-medium cursor-pointer text-content-secondary"
-                >
-                    <input
-                        type="checkbox"
-                        checked={feedbackEnabled}
-                        onChange={(e) => onFeedbackChange(e.target.checked)}
-                        className="accent-[var(--color-primary-500)]"
-                    />
-                    Show correctness feedback to students
-                </label>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <label
+                            className="flex items-center gap-2 text-xs font-medium cursor-pointer text-content-secondary"
+                        >
+                            <input
+                                type="checkbox"
+                                checked={feedbackEnabled}
+                                onChange={(e) => onFeedbackChange(e.target.checked)}
+                                className="accent-[var(--color-primary-500)]"
+                            />
+                            Show correctness feedback to students
+                        </label>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        When enabled, students see correct or incorrect feedback immediately after submitting.
+                    </TooltipContent>
+                </Tooltip>
             </div>
         </div>
     );

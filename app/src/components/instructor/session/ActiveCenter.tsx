@@ -4,6 +4,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 import * as React from 'react';
@@ -343,20 +344,25 @@ export function ActiveCenter(props: Partial<{
               </select>
 
               <AIPreferencesDialog />
-              <div className="rotating-glow-wrap">
-                <Button
-                  onClick={() => onGenerate()}
-                  disabled={isGenerating || recorder.isRecording}
-                  size="sm"
-                  className="px-4 py-1.5 rounded-full font-semibold disabled:opacity-50"
-                  style={{
-                    background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-                    color: 'white',
-                  }}
-                >
-                  {isGenerating ? 'Generating…' : 'Generate Prompts'}
-                </Button>
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="rotating-glow-wrap">
+                    <Button
+                      onClick={() => onGenerate()}
+                      disabled={isGenerating || recorder.isRecording}
+                      size="sm"
+                      className="px-4 py-1.5 rounded-full font-semibold disabled:opacity-50"
+                      style={{
+                        background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+                        color: 'white',
+                      }}
+                    >
+                      {isGenerating ? 'Generating…' : 'Generate Prompts'}
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>Use AI to generate 5 discussion prompt candidates from your transcript and uploaded files. Takes 5 to 15 seconds.</TooltipContent>
+              </Tooltip>
             </div>
 
             {generationWarning && (
@@ -448,15 +454,20 @@ export function ActiveCenter(props: Partial<{
                 ))}
 
                 <div className="flex gap-2 pt-1">
-                  <Button
-                    onClick={onRegenerate}
-                    disabled={isGenerating}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs"
-                  >
-                    {isGenerating ? 'Regenerating…' : 'Regenerate'}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={onRegenerate}
+                        disabled={isGenerating}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                      >
+                        {isGenerating ? 'Regenerating…' : 'Regenerate'}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Run AI generation again without changing the transcript or files. Use this if the previous candidates were not satisfactory.</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             )}

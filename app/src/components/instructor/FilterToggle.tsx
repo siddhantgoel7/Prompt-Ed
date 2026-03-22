@@ -2,6 +2,7 @@
 
 import { Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export type FilterToggleVariant = 'compact' | 'full';
 
@@ -39,28 +40,33 @@ export function FilterToggle({
 
   return (
     <div className={cn('flex items-center', s.wrapper)}>
-      <button
-        type="button"
-        onClick={onToggle}
-        className={cn(
-          'inline-flex items-center font-semibold rounded-full border transition-colors',
-          s.button,
-        )}
-        style={showHighlightedOnly ? {
-          background: 'rgba(250,204,21,0.15)',
-          color: 'oklch(0.55 0.15 85)',
-          borderColor: 'rgba(250,204,21,0.45)',
-        } : {
-          background: 'var(--surface-raised)',
-          color: 'var(--text-secondary)',
-          borderColor: 'var(--border-default)',
-        }}
-      >
-        <Filter className={s.icon} />
-        {showHighlightedOnly
-          ? `Showing ${selectedCount} highlighted`
-          : `Show highlighted only (${selectedCount})`}
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            onClick={onToggle}
+            className={cn(
+              'inline-flex items-center font-semibold rounded-full border transition-colors',
+              s.button,
+            )}
+            style={showHighlightedOnly ? {
+              background: 'rgba(250,204,21,0.15)',
+              color: 'oklch(0.55 0.15 85)',
+              borderColor: 'rgba(250,204,21,0.45)',
+            } : {
+              background: 'var(--surface-raised)',
+              color: 'var(--text-secondary)',
+              borderColor: 'var(--border-default)',
+            }}
+          >
+            <Filter className={s.icon} />
+            {showHighlightedOnly
+              ? `Showing ${selectedCount} highlighted`
+              : `Show highlighted only (${selectedCount})`}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>Show only responses you have highlighted by clicking on them.</TooltipContent>
+      </Tooltip>
       {showHighlightedOnly && (
         <button
           type="button"

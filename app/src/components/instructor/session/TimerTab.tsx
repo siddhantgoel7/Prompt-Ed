@@ -14,6 +14,7 @@
 import * as React from 'react';
 import { CircularTimer } from '@/components/ui/CircularTimer';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export function TimerTab({
   activeDiscussionId,
@@ -81,26 +82,36 @@ export function TimerTab({
         {/* Timer controls: Edit + +10s (only shown when a timer is active) */}
         {hasTimer && (
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowEditDialog(true)}
-              data-testid="edit-timer-button"
-              className="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150"
-              style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'var(--color-primary-alpha-06)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-14)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-06)'; }}
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => onExtendTimer?.(10)}
-              data-testid="extend-timer-button"
-              className="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150"
-              style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'var(--color-primary-alpha-06)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-14)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-06)'; }}
-            >
-              +10s
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setShowEditDialog(true)}
+                  data-testid="edit-timer-button"
+                  className="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150"
+                  style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'var(--color-primary-alpha-06)' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-14)'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-06)'; }}
+                >
+                  Edit
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Replace the current timer with a new duration.</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onExtendTimer?.(10)}
+                  data-testid="extend-timer-button"
+                  className="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150"
+                  style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'var(--color-primary-alpha-06)' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-14)'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-06)'; }}
+                >
+                  +10s
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Add 10 seconds to the running countdown immediately.</TooltipContent>
+            </Tooltip>
           </div>
         )}
 
