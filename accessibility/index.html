@@ -724,6 +724,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="1. Color &amp; Contrast (Mandatory)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#color-contrast-checker-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Color Contrast Checker Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -810,6 +827,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="1. Color &amp; Contrast (Mandatory)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#color-contrast-checker-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Color Contrast Checker Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -868,26 +902,50 @@
 <p>We cannot rely on color alone to convey meaning (e.g., a red background for an error must also have an error icon or clear text message).</p>
 <ul>
 <li><strong>The Contrast Rule:</strong> All text and critical UI elements MUST pass a WCAG AA contrast ratio (at least 4.5:1 for normal text, and 3:1 for large text).</li>
-<li><strong>The Tool:</strong> Before adding any new color combination to the UI, you must verify it passes using this <a href="https://accessibilityaid.com/free-tools/colour-contrast-checker">Colour Contrast Checker</a>.</li>
+<li><strong>The Tool:</strong> Before adding any new color csombination to the UI, you must verify it passes using this <a href="https://accessibilityaid.com/free-tools/colour-contrast-checker">Colour Contrast Checker</a>.</li>
 </ul>
+<h3 id="color-contrast-checker-results">Color Contrast Checker Results</h3>
+<!-- SCREENSHOT: Run the Colour Contrast Checker (https://accessibilityaid.com/free-tools/colour-contrast-checker)
+     with foreground=#ffffff (button text) and background=#237a23 (--color-primary-600).
+     Save screenshot to: docs/images/accessibility/contrast-primary-button.png -->
+<p><img alt="Primary button contrast check" src="../images/accessibility/contrast-primary-button.png" /></p>
+<!-- SCREENSHOT: Run the Colour Contrast Checker with foreground=#1a2e1a (--text-primary)
+     and background=#ffffff (page background).
+     Save screenshot to: docs/images/accessibility/contrast-body-text.png -->
+<p><img alt="Body text contrast check" src="../images/accessibility/contrast-body-text.png" /></p>
+<hr />
 <h2 id="2-typography-scale">2. Typography &amp; Scale</h2>
 <p>Because we are designing for two drastic extremes (a massive projector screen vs. a 6-inch phone), text scaling is critical.</p>
 <ul>
 <li><strong>Instructor View (Projector/Desktop):</strong> Text must be large enough to be read from 30 feet away. Use heavy, high-contrast headings for the AI-generated prompts. Avoid ultra-thin font weights entirely.</li>
 <li><strong>Student View (Mobile):</strong> Base body text must be at least <code>16px</code>.</li>
 </ul>
+<!-- SCREENSHOT: Capture the student mobile view (browser dev tools, ~375px width) showing
+     the prompt card and response input at readable text size.
+     Save screenshot to: docs/images/accessibility/typography-student-mobile.png -->
+<p><img alt="Student mobile text scale" src="../images/accessibility/typography-student-mobile.png" /></p>
+<hr />
 <h2 id="3-touch-targets-interactivity">3. Touch Targets &amp; Interactivity</h2>
-<p>Students are often interacting with the app quickly, sometimes with one hand while taking notes. </p>
+<p>Students are often interacting with the app quickly, sometimes with one hand while taking notes.</p>
 <ul>
 <li><strong>Minimum Touch Area:</strong> Any clickable element (buttons, links, form inputs) must have a minimum touch target area of <code>45x45 pixels</code>.</li>
 <li><strong>Safe Spacing:</strong> Provide ample padding between clickable elements to prevent "fat-finger" errors (e.g., accidentally hitting "Submit" instead of "Cancel").</li>
 </ul>
+<!-- SCREENSHOT: Capture the student MC option buttons on mobile view. Use dev tools to
+     show element dimensions meet the 45x45px minimum.
+     Save screenshot to: docs/images/accessibility/touch-targets-mc-options.png -->
+<p><img alt="MC option touch targets" src="../images/accessibility/touch-targets-mc-options.png" /></p>
+<hr />
 <h2 id="4-visual-hierarchy-focus-states">4. Visual Hierarchy &amp; Focus States</h2>
 <p>Instructors managing a live lecture might use keyboard navigation to quickly jump through the dashboard.</p>
 <ul>
-<li><strong>Focus Indicators:</strong> Never remove the default browser focus outline (<code>outline: none;</code>) for keyboard users unless you are replacing it with a custom, highly visible focus ring. </li>
+<li><strong>Focus Indicators:</strong> Never remove the default browser focus outline (<code>outline: none;</code>) for keyboard users unless you are replacing it with a custom, highly visible focus ring.</li>
 <li><strong>Action Colors:</strong> Reserve your primary, most vibrant color <em>only</em> for primary actions (like "Generate Prompt" or "Submit Answer"). Do not use the action color for static text or decorative backgrounds, as it confuses users about what is clickable.</li>
 </ul>
+<!-- SCREENSHOT: Capture the instructor center panel showing the primary green used only
+     on action buttons (Generate Prompts, Start Discussion) while static text uses neutral colors.
+     Save screenshot to: docs/images/accessibility/action-color-hierarchy.png -->
+<p><img alt="Primary action color reserved for buttons" src="../images/accessibility/action-color-hierarchy.png" /></p>
 
 
 

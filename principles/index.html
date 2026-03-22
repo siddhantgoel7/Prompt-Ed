@@ -865,7 +865,7 @@
 
 
 <h1 id="ux-principles">UX Principles</h1>
-<p>Our interface is built on four core usability heuristics (adapted from Nielsen’s 10 Heuristics). Every screen, button, and user flow must adhere to these rules to ensure the tool remains frictionless for students and stress-free for instructors.</p>
+<p>Our interface is built on four core usability heuristics (adapted from Nielsen's 10 Heuristics). Every screen, button, and user flow must adhere to these rules to ensure the tool remains frictionless for students and stress-free for instructors.</p>
 <h3 id="1-prevent-errors-before-they-happen">1. Prevent Errors Before They Happen</h3>
 <p><em>(Nielsen #5: Error Prevention)</em></p>
 <p>Instructors are operating in a high-stress live environment, and AI can sometimes hallucinate. The UI must protect the instructor from accidentally broadcasting incorrect information.</p>
@@ -873,6 +873,11 @@
 <li><strong>DO:</strong> Require explicit confirmation (a two-step action or clear review screen) before an AI-generated prompt is sent to the students.</li>
 <li><strong>DON'T:</strong> Make destructive actions (like permanently deleting a lesson or ending a live session) a single click. Always use a safety net.</li>
 </ul>
+<!-- SCREENSHOT: Capture the timer/confirmation dialog that appears after clicking publish.
+     Shows the two-step confirmation before broadcasting a question.
+     Save screenshot to: docs/images/ux-principles/error-prevention-publish-confirm.png -->
+<p><img alt="Two-step publish confirmation dialog" src="../images/ux-principles/error-prevention-publish-confirm.png" /></p>
+<hr />
 <h3 id="2-keep-the-user-informed">2. Keep the User Informed</h3>
 <p><em>(Nielsen #1: Visibility of System Status)</em></p>
 <p>Instructors need quick confirmation the application is in the intended state. Both instructors and students need immediate feedback regarding their actions.</p>
@@ -881,21 +886,36 @@
 <li><strong>DO:</strong> Show instant, visual success states the moment a student submits an answer so they don't submit twice.</li>
 <li><strong>DON'T:</strong> Leave users guessing if the AI is "thinking." Always show a clear loading state when analyzing lecture audio or generating prompts.</li>
 </ul>
+<!-- SCREENSHOT: Capture the Files tab showing status badges (Processing/Ready) and/or
+     the AI generation panel showing the "Generating..." loading state.
+     Save screenshot to: docs/images/ux-principles/system-status-feedback.png -->
+<p><img alt="System status feedback generating" src="../images/ux-principles/system-status-feedback-generating.png" />
+<img alt="System status feedback processing" src="../images/ux-principles/system-status-feedback-processing.png" /></p>
+<hr />
 <h3 id="3-minimalism">3. Minimalism</h3>
 <p><em>(Nielsen #8: Aesthetic and Minimalist Design)</em></p>
 <p>A student's primary focus should be the lecture, not our app. Every extra button competes for their attention.</p>
 <ul>
-<li><strong>DO:</strong> Keep the student login flow to a single action: scanning a QR code or entering a PIN. </li>
+<li><strong>DO:</strong> Keep the student login flow to a single action: scanning a QR code or entering a PIN.</li>
 <li><strong>DO:</strong> Hide secondary instructor settings (like exporting analytics) behind menus during a live session, keeping the main dashboard focused purely on the active discussion.</li>
 <li><strong>DON'T:</strong> Clutter the mobile view with navigation menus. Show them only the current question and the input field.</li>
 </ul>
+<!-- SCREENSHOT: Capture the student mobile view (~375px) showing only the active prompt
+     and response input — no nav menus, no clutter.
+     Save screenshot to: docs/images/ux-principles/minimalism-student-mobile.png -->
+<p><img alt="Minimal student view" src="../images/ux-principles/minimalism-student.png" /></p>
+<hr />
 <h3 id="4-provide-emergency-exits">4. Provide Emergency Exits</h3>
 <p><em>(Nielsen #3: User Control and Freedom)</em></p>
-<p>Lectures are dynamic. An instructor might ask the AI for a prompt, but then the class discussion naturally pivots. </p>
+<p>Lectures are dynamic. An instructor might ask the AI for a prompt, but then the class discussion naturally pivots.</p>
 <ul>
 <li><strong>DO:</strong> Allow instructors to instantly cancel, edit, or regenerate an AI prompt at any point in the workflow.</li>
 <li><strong>DON'T:</strong> Lock the instructor into a rigid, linear step-by-step process. They need the freedom to skip questions or jump back to previous ones seamlessly.</li>
 </ul>
+<!-- SCREENSHOT: Capture the AI generation panel showing a selected candidate being edited
+     in the textarea, with the Regenerate button visible below.
+     Save screenshot to: docs/images/ux-principles/emergency-exit-edit-regenerate.png -->
+<p><img alt="Edit prompt and regenerate options" src="../images/ux-principles/emergency-exit-edit-regenerate.png" /></p>
 
 
 
