@@ -12,6 +12,7 @@ import type { PromptType } from '@/types/discussion';
 import { useLessonAI } from './useSessionPage/useLessonAI';
 import { useLessonDiscussions } from './useSessionPage/useLessonDiscussions';
 import { useLessonFiles } from './useSessionPage/useLessonFiles';
+import { generateSecurePin } from '@/lib/utils/random';
 import {
   fetchLessonWithInstructorIdApi,
   activateDraftLessonApi,
@@ -191,7 +192,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [lessonDiscussions, setLessonDiscussions] = useState<DiscussionWithResponses[]>([]);
 
-  const generatePinCode = (): string => Math.floor(100000 + Math.random() * 900000).toString();
+  const generatePinCode = (): string => generateSecurePin();
 
   const fetchTranscripts = useCallback(async () => {
     setTranscriptsLoading(true);

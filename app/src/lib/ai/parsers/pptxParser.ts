@@ -1,6 +1,7 @@
 // Parses PPTX files into structured sections by extracting slide body, speaker notes,
 // and optionally describing embedded images via a vision model (one call per slide).
 import JSZip from 'jszip';
+import { XMLParser } from 'fast-xml-parser';
 import type { AIProvider } from '@/lib/ai/providers';
 import type { ParsedSection } from '@/types/ai';
 
@@ -41,6 +42,14 @@ const VISION_MIME_MAP: Record<string, 'image/png' | 'image/jpeg' | 'image/webp'>
  */
 export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promise<ParsedSection[]> {
   const zip = await JSZip.loadAsync(buffer);
+
+  // Security: Check total uncompressed size to prevent Zip Bomb (S5042)
+  const MAX_TOTAL_SIZE = 150 * 1024 * 1024; // 150MB limit
+  let totalSize = 0;
+  Object.values(zip.files).forEach(file => { totalSize += (file as any).uncompressedSize ?? 0; });
+  if (totalSize > MAX_TOTAL_SIZE) {
+    throw new Error(`PPTX extraction aborted: Total size (${Math.round(totalSize/1024/1024)}MB) exceeds safety limit.`);
+  }
 
   const slideFiles = Object.keys(zip.files)
     .filter((name) => /^ppt\/slides\/slide\d+\.xml$/.test(name))
@@ -162,39 +171,89 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
 
 // ── XML helpers ────────────────────────────────────────────────────────────────
 
-/** Extracts all text node values from PPTX/OOXML and joins them with spaces. */
+/** 
+ * Extracts all text node values from PPTX/OOXML and joins them with spaces.
+ * Uses fast-xml-parser to avoid ReDoS (S5852) from backtracking regex.
+ */
 function extractTextNodes(xml: string): string {
-  const matches = xml.match(/<a:t[^>]*>([^<]*)<\/a:t>/g) ?? [];
-  return matches
-    .map((m) => m.replace(/<[^>]+>/g, ''))
+  if (!xml) return '';
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    parseAttributeValue: false,
+    processEntities: true,
+  });
+  
+  const jsonObj = parser.parse(xml);
+  const texts: string[] = [];
+
+  // pptx structure for text nodes is deeply nested: 
+  // <a:p> -> <a:r> -> <a:t> OR <a:p> -> <a:fld> -> <a:t>
+  const findText = (obj: any) => {
+    if (!obj || typeof obj !== 'object') return;
+    
+    // a:t is the actual text node
+    if (obj['a:t']) {
+      const val = obj['a:t'];
+      if (typeof val === 'string') texts.push(val);
+      else if (val?.['#text']) texts.push(val['#text']);
+    }
+
+    // Recursively scan all keys
+    for (const key in obj) {
+      if (key !== 'a:t') {
+        const val = obj[key];
+        if (Array.isArray(val)) val.forEach(findText);
+        else findText(val);
+      }
+    }
+  };
+
+  findText(jsonObj);
+  
+  return texts
     .join(' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-/** Finds the notes slide path from a slide's .rels file, with fallback to the default naming convention. */
+/** Finds the notes slide path from a slide's .rels file using XML parsing. */
 function findNotesSlideTarget(relsXml: string, slideNumber: number): string | null {
-  const pattern = /Type="[^"]*notesSlide"[^>]*Target="([^"]+)"/g;
-  let match;
-  while ((match = pattern.exec(relsXml)) !== null) {
-    const target = match[1];
+  if (!relsXml) return `ppt/notesSlides/notesSlide${slideNumber}.xml`;
+  
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const rels = parser.parse(relsXml);
+  const relationships = rels?.Relationships?.Relationship;
+  
+  if (!relationships) return `ppt/notesSlides/notesSlide${slideNumber}.xml`;
+  
+  const list = Array.isArray(relationships) ? relationships : [relationships];
+  const notesRel = list.find((r: any) => r['@_Type']?.endsWith('notesSlide'));
+  const target = notesRel?.['@_Target'];
+
+  if (target) {
     if (target.startsWith('../')) return `ppt/${target.slice(3)}`;
     if (!target.startsWith('ppt/')) return `ppt/slides/${target}`;
     return target;
   }
+  
   return `ppt/notesSlides/notesSlide${slideNumber}.xml`;
 }
 
-/** Extracts all image relationship targets from a slide's .rels file. */
+/** Extracts all image relationship targets from a slide's .rels file using XML parsing. */
 function findImageTargets(relsXml: string): string[] {
   if (!relsXml) return [];
-  const pattern = /Type="[^"]*\/image"[^>]*Target="([^"]+)"/g;
-  const targets: string[] = [];
-  let match;
-  while ((match = pattern.exec(relsXml)) !== null) {
-    targets.push(match[1]);
-  }
-  return targets;
+  
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const rels = parser.parse(relsXml);
+  const relationships = rels?.Relationships?.Relationship;
+  
+  if (!relationships) return [];
+  
+  const list = Array.isArray(relationships) ? relationships : [relationships];
+  return list
+    .filter((r: any) => r['@_Type']?.endsWith('/image'))
+    .map((r: any) => r['@_Target'])
+    .filter(Boolean);
 }
 
 /** Resolves a relative image target from a slide .rels entry to its absolute zip path. */

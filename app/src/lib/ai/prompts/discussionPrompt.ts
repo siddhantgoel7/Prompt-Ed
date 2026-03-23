@@ -2,6 +2,7 @@
 // Edit CANDIDATE_COUNT and the prompt text here to tune AI behavior without touching pipeline code.
 import type { PromptType } from '@/types/discussion';
 import type { AIPromptPreferences } from '@/types/ai';
+import { secureShuffle } from '../../utils/random';
 
 /**
  * ============================================================
@@ -278,7 +279,7 @@ function buildBloomsDistributionBlock(difficulty?: string, promptType?: PromptTy
     }
   }
 
-  const shuffled = [...slots].sort(() => Math.random() - 0.5);
+  const shuffled = secureShuffle([...slots]);
   const assignments = shuffled.map((level, i) => `  Candidate ${i + 1}: "${level}"`).join('\n');
   return `<bloom_distribution>
 Assign "bloomsLevel" to each candidate exactly as listed. Do not reuse a level unless it appears twice in this list.
