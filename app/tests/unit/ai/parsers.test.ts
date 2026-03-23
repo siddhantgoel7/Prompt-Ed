@@ -378,6 +378,76 @@ describe('[US 1.16] parsePptx', () => {
       expect(result.find(s => s.contentOrigin === 'visual_description')).toBeUndefined();
     });
   });
+
+  describe('security & robustness', () => {
+    // [Manual Test] Covers Zip Bomb prevention (S5042)
+    it('failure: throws error when PPTX exceeds MAX_TOTAL_SIZE (Zip Bomb prevention)', async () => {
+      const zip = new JSZip();
+      // Add a large file (151MB > 150MB limit)
+      // Note: We use a small compressed buffer but large uncompressedSize
+      zip.file('large.txt', Buffer.alloc(151 * 1024 * 1024)); 
+      const buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+      await expect(parsePptx(buf)).rejects.toThrow(/exceeds safety limit/);
+    });
+
+    // [Manual Test] Covers ReDoS prevention logic (S5852)
+    it('success: extractTextNodes handles deeply nested <a:t> nodes using XMLParser', async () => {
+      const zip = new JSZip();
+      zip.folder('ppt')?.folder('slides')?.file('slide1.xml', `
+        <p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+          <p:cSld><p:spTree><p:sp><p:txBody><a:p>
+            <a:r><a:t>Level 1</a:t></a:r>
+            <a:fld><a:t>Level 2 (Field)</a:t></a:fld>
+          </a:p></p:txBody></p:sp></p:spTree></p:cSld>
+        </p:sld>
+      `);
+      const buf = await zip.generateAsync({ type: 'nodebuffer' });
+      const result = await parsePptx(buf);
+      expect(result[0].content).toBe('Level 1 Level 2 (Field)');
+    });
+
+    it('success: handles missing .rels files gracefully with fallback target', async () => {
+      const zip = new JSZip();
+      // Slide XML but NO .rels folder
+      zip.folder('ppt')?.folder('slides')?.file('slide1.xml', '<a:t>Content</a:t>');
+      const buf = await zip.generateAsync({ type: 'nodebuffer' });
+      
+      const result = await parsePptx(buf);
+      // Should not crash, just returns content
+      expect(result[0].content).toBe('Content');
+    });
+
+    it('success: findImageTargets handles multiple image relationships correctly', async () => {
+      const zip = new JSZip();
+      zip.folder('ppt')?.folder('slides')?.file('slide1.xml', '<a:t>Slide with images</a:t>');
+      zip.folder('ppt')?.folder('slides')?.folder('_rels')?.file('slide1.xml.rels', `
+        <?xml version="1.0" encoding="UTF-8"?>
+        <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+          <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image1.png"/>
+          <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image2.jpg"/>
+          <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide" Target="../notesSlides/notesSlide1.xml"/>
+        </Relationships>
+      `);
+      
+      const provider = makeMockProvider({
+        generatePptxSlideVisualDescription: jest.fn().mockResolvedValue('Description'),
+      });
+      // Mock images exist in zip
+      zip.folder('ppt')?.folder('media')?.file('image1.png', FAKE_PNG);
+      zip.folder('ppt')?.folder('media')?.file('image2.jpg', FAKE_JPEG);
+
+      const buf = await zip.generateAsync({ type: 'nodebuffer' });
+      await parsePptx(buf, provider);
+
+      expect(provider.generatePptxSlideVisualDescription).toHaveBeenCalledWith(
+        1, 'Slide with images', '',
+        expect.arrayContaining([
+          expect.objectContaining({ mimeType: 'image/png' }),
+          expect.objectContaining({ mimeType: 'image/jpeg' }),
+        ])
+      );
+    });
+  });
 });
 
 // parseFile dispatcher

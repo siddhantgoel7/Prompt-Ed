@@ -46,7 +46,11 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
   // Security: Check total uncompressed size to prevent Zip Bomb (S5042)
   const MAX_TOTAL_SIZE = 150 * 1024 * 1024; // 150MB limit
   let totalSize = 0;
-  Object.values(zip.files).forEach(file => { totalSize += (file as any).uncompressedSize ?? 0; });
+  Object.values(zip.files).forEach(file => { 
+    // JSZip 3 internally stores uncompressed size in _data.uncompressedSize
+    const size = (file as any).uncompressedSize ?? (file as any)._data?.uncompressedSize ?? 0;
+    totalSize += size; 
+  });
   if (totalSize > MAX_TOTAL_SIZE) {
     throw new Error(`PPTX extraction aborted: Total size (${Math.round(totalSize/1024/1024)}MB) exceeds safety limit.`);
   }

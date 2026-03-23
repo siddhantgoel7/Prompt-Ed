@@ -1,76 +1,59 @@
 /**
  * Returns a cryptographically secure random number between 0 and 1.
- * Works in both browser (window.crypto) and Node.js environments.
+ * Uses globalThis.crypto for cross-platform compatibility (Modern Browser & Node.js 19+).
  */
 export function secureRandom(): number {
-  if (typeof window !== 'undefined' && window.crypto) {
-    const array = new Uint32Array(1);
-    window.crypto.getRandomValues(array);
-    return array[0] / (0xffffffff + 1);
+  const crypto = globalThis.crypto;
+  if (!crypto) {
+    throw new Error('Cryptographically secure random number generator is not available.');
   }
-  
-  // Node.js environment fallback
-  try {
-    const crypto = require('crypto');
-    return crypto.randomBytes(4).readUInt32BE(0) / (0xffffffff + 1);
-  } catch (e) {
-    // If all else fails, fallback to Math.random (should ideally never happen in modern environments)
-    return Math.random();
-  }
+
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  // Divide by 2^32 to get a value between 0 and 1
+  return array[0] / (0xffffffff + 1);
 }
 
 /**
  * Generates a secure random 6-digit numeric PIN.
  */
 export function generateSecurePin(): string {
-  if (typeof window !== 'undefined' && window.crypto) {
-    const array = new Uint32Array(1);
-    window.crypto.getRandomValues(array);
-    // Ensure 6 digits: 100000 to 999999
-    return (100000 + (array[0] % 900000)).toString();
+  const crypto = globalThis.crypto;
+  if (!crypto) {
+    throw new Error('Cryptographically secure random number generator is not available.');
   }
 
-  try {
-    const crypto = require('crypto');
-    // randomInt is the cleanest way in Node
-    return crypto.randomInt(100000, 1000000).toString();
-  } catch (e) {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  }
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  
+  // Ensure we stay in the 100,000 - 999,999 range for a 6-digit pin
+  const pin = 100000 + (array[0] % 900000);
+  return pin.toString();
 }
 
 /**
  * Generates a secure random alphanumeric string of a given length.
  */
 export function generateSecureAlphanumeric(length: number): string {
+  const crypto = globalThis.crypto;
+  if (!crypto) {
+    throw new Error('Cryptographically secure random number generator is not available.');
+  }
+
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
   
-  if (typeof window !== 'undefined' && window.crypto) {
-    const array = new Uint8Array(length);
-    window.crypto.getRandomValues(array);
-    for (let i = 0; i < length; i++) {
-      result += charset[array[i] % charset.length];
-    }
-  } else {
-    try {
-      const crypto = require('crypto');
-      const bytes = crypto.randomBytes(length);
-      for (let i = 0; i < length; i++) {
-        result += charset[bytes[i] % charset.length];
-      }
-    } catch (e) {
-      // Fallback
-      for (let i = 0; i < length; i++) {
-        result += charset.charAt(Math.floor(Math.random() * charset.length));
-      }
-    }
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  for (let i = 0; i < length; i++) {
+    result += charset[array[i] % charset.length];
   }
+  
   return result;
 }
 
 /**
- * Fisher-Yates shuffle using secure random source.
+ * Fisher-Yates (Durstenfeld) shuffle using secure random source.
  * Prevents SonarQube S2245 (Weak PRNG) and S2245 (Non-uniform shuffle).
  */
 export function secureShuffle<T>(array: T[]): T[] {
