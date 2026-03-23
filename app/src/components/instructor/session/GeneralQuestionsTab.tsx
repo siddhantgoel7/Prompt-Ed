@@ -10,6 +10,9 @@ import { StartDiscussionDialog } from './StartDiscussionDialog';
 /** Renders the list of pre-generated general questions with publish buttons. */
 export function GeneralQuestionsTab() {
     const context = React.useContext(SessionContext);
+    const [showTimerDialog, setShowTimerDialog] = React.useState(false);
+    const [pendingQuestion, setPendingQuestion] = React.useState<GeneralQuestion | null>(null);
+
     if (!context) return null;
 
     const {
@@ -21,9 +24,6 @@ export function GeneralQuestionsTab() {
         isConnected,
         files,
     } = context;
-
-    const [showTimerDialog, setShowTimerDialog] = React.useState(false);
-    const [pendingQuestion, setPendingQuestion] = React.useState<GeneralQuestion | null>(null);
 
     const hasReadyFiles = files.some(f => f.status === 'ready');
 

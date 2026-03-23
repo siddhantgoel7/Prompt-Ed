@@ -104,9 +104,9 @@ describe('API — General Questions Data Layer [US 1.51]', () => {
 
             expect(error).toBeNull();
             expect(data).toHaveLength(2);
-            expect(data[0].prompt_text).toContain('receptor');
-            expect(data[1].prompt_text).toContain('therapeutic index');
-            expect(data[0].display_order).toBeLessThan(data[1].display_order);
+            expect(data?.[0].prompt_text).toContain('receptor');
+            expect(data?.[1].prompt_text).toContain('therapeutic index');
+            expect(data?.[0].display_order).toBeLessThan(data?.[1].display_order ?? Infinity);
         });
 
         // 48.2
@@ -189,9 +189,9 @@ describe('API — General Questions Data Layer [US 1.51]', () => {
 
             expect(error).toBeNull();
             expect(data).toHaveLength(2);
-            expect(data[0].id).toBe('gq-1');
-            expect(data[0].mc_options).toHaveLength(4);
-            expect(data[0].correct_option).toBe('B');
+            expect(data?.[0].id).toBe('gq-1');
+            expect(data?.[0].mc_options).toHaveLength(4);
+            expect(data?.[0].correct_option).toBe('B');
         });
 
         // 48.5
@@ -298,7 +298,7 @@ describe('API — General Questions Data Layer [US 1.51]', () => {
                 .order('display_order', { ascending: true });
 
             expect(result1.data).toHaveLength(1);
-            expect(result1.data[0].lesson_id).toBe('lesson-A');
+            expect(result1.data?.[0].lesson_id).toBe('lesson-A');
 
             // Second call: lesson-B
             mockSupabase.from.mockReturnValueOnce({
@@ -316,7 +316,7 @@ describe('API — General Questions Data Layer [US 1.51]', () => {
                 .order('display_order', { ascending: true });
 
             expect(result2.data).toHaveLength(1);
-            expect(result2.data[0].lesson_id).toBe('lesson-B');
+            expect(result2.data?.[0].lesson_id).toBe('lesson-B');
         });
     });
 });

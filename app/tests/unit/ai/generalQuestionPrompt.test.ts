@@ -31,33 +31,34 @@ describe('General Question Prompt — buildGeneralSystemPrompt [US 1.51]', () =>
   });
 
   // 47.2
-  it('[US 1.51][AC1-AT2] success: applies basic difficulty when preference is set', () => {
+  it('[US 1.51][AC1-AT2] success: applies basic difficulty with Bloom\'s taxonomy language', () => {
     const prefs: AIPromptPreferences = {
       difficulty: 'basic',
       style: 'factual',
       length: 'standard',
     };
     const prompt = buildGeneralSystemPrompt(prefs);
-    expect(prompt).toContain('simple');
-    expect(prompt).toContain('core concepts');
+    expect(prompt).toContain('remember');
+    expect(prompt).toContain('understand');
   });
 
   // 47.3
-  it('[US 1.51][AC1-AT3] success: applies advanced difficulty when preference is set', () => {
+  it('[US 1.51][AC1-AT3] success: applies advanced difficulty with Bloom\'s taxonomy language', () => {
     const prefs: AIPromptPreferences = {
       difficulty: 'advanced',
       style: 'factual',
       length: 'standard',
     };
     const prompt = buildGeneralSystemPrompt(prefs);
-    expect(prompt).toContain('challenging');
-    expect(prompt).toContain('critical analysis');
+    expect(prompt).toContain('analyze');
+    expect(prompt).toContain('evaluate');
   });
 
   // 47.4
-  it('[US 1.51][AC1-AT4] success: defaults to intermediate difficulty when no preference is set', () => {
+  it('[US 1.51][AC1-AT4] success: defaults to apply/analyze difficulty when no preference is set', () => {
     const prompt = buildGeneralSystemPrompt();
-    expect(prompt).toContain('intermediate');
+    expect(prompt).toContain('apply');
+    expect(prompt).toContain('analyze');
   });
 });
 
@@ -86,11 +87,11 @@ describe('General Question Prompt — buildGeneralUserPrompt [US 1.51]', () => {
   });
 
   // 47.7
-  it('[US 1.51][AC1-AT7] success: specifies multiple_choice prompt type in the output format', () => {
+  it('[US 1.51][AC1-AT7] success: specifies candidates wrapper and MC schema in the output format', () => {
     const prompt = buildGeneralUserPrompt({ chunks: SAMPLE_CHUNKS });
-    expect(prompt).toContain('"promptType": "multiple_choice"');
+    expect(prompt).toContain('"candidates"');
+    expect(prompt).toContain('"promptType"');
     expect(prompt).toContain('"mcOptions"');
-    expect(prompt).toContain('"is_correct"');
   });
 
   // 47.8
@@ -135,7 +136,7 @@ describe('General Question Prompt — buildGeneralUserPrompt [US 1.51]', () => {
   // 47.12
   it('[US 1.51][AC1-AT12] success: includes diversity instruction to avoid topic clustering', () => {
     const prompt = buildGeneralUserPrompt({ chunks: SAMPLE_CHUNKS });
-    expect(prompt).toContain('diverse');
+    expect(prompt).toContain('Vary the topic');
     expect(prompt).toContain('different topics');
   });
 });

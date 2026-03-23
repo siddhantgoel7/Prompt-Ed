@@ -100,7 +100,7 @@ export async function POST(
     } else {
       const aiProvider = new OpenAIProvider();
       const userPrompt = buildGeneralUserPrompt({ chunks, preferences });
-      const rawContent = await aiProvider.generateChatCompletion([
+      const { content: rawContent } = await aiProvider.generateChatCompletion([
         { role: 'system', content: buildGeneralSystemPrompt(preferences) },
         { role: 'user', content: userPrompt }
       ], { jsonMode: true, temperature: 0.7 });
@@ -144,7 +144,9 @@ export async function POST(
   }
 }
 
-/** Parses the raw JSON from the LLM into general question candidates. */
+/** Parses the raw JSON from the LLM into general question candidates.
+ *  Mirrors the updated discussion parser: prefers the "candidates" key,
+ *  falls back to scanning for any array key, and rotates MC answer positions. */
 function parseGeneralResponse(raw: string): { promptText: string; mcOptions: MCOption[] }[] {
   let parsed: unknown;
   try {
@@ -158,13 +160,17 @@ function parseGeneralResponse(raw: string): { promptText: string; mcOptions: MCO
     candidates = parsed;
   } else if (parsed && typeof parsed === 'object') {
     const obj = parsed as Record<string, unknown>;
-    const arrayKey = Object.keys(obj).find((k) => Array.isArray(obj[k]));
-    candidates = arrayKey ? (obj[arrayKey] as unknown[]) : [];
+    if (Array.isArray(obj.candidates)) {
+      candidates = obj.candidates as unknown[];
+    } else {
+      const arrayKey = Object.keys(obj).find((k) => Array.isArray(obj[k]));
+      candidates = arrayKey ? (obj[arrayKey] as unknown[]) : [];
+    }
   } else {
     return getFallbackQuestions();
   }
 
-  return candidates.slice(0, GENERAL_QUESTION_COUNT).map((c) => {
+  const mapped = candidates.slice(0, GENERAL_QUESTION_COUNT).map((c) => {
     const candidate = c as {
       promptText?: string;
       mcOptions?: MCOption[];
@@ -172,13 +178,53 @@ function parseGeneralResponse(raw: string): { promptText: string; mcOptions: MCO
 
     return {
       promptText: candidate.promptText ?? 'General question — AI response could not be parsed.',
-      mcOptions: Array.isArray(candidate.mcOptions) ? candidate.mcOptions : [
-        { label: 'A' as const, text: 'Option A', is_correct: true },
-        { label: 'B' as const, text: 'Option B', is_correct: false },
-        { label: 'C' as const, text: 'Option C', is_correct: false },
-        { label: 'D' as const, text: 'Option D', is_correct: false },
-      ],
+      mcOptions: Array.isArray(candidate.mcOptions) && candidate.mcOptions.length > 0
+        ? candidate.mcOptions
+        : [
+            { label: 'A' as const, text: 'Option A', is_correct: true },
+            { label: 'B' as const, text: 'Option B', is_correct: false },
+            { label: 'C' as const, text: 'Option C', is_correct: false },
+            { label: 'D' as const, text: 'Option D', is_correct: false },
+          ],
     };
+  });
+
+  return assignMCPositions(mapped);
+}
+
+/**
+ * Distributes correct-answer positions across all MC questions.
+ * Mirrors the logic in generatePrompts.ts to avoid position bias.
+ */
+function assignMCPositions(questions: { promptText: string; mcOptions: MCOption[] }[]): { promptText: string; mcOptions: MCOption[] }[] {
+  const labels: MCOption['label'][] = ['A', 'B', 'C', 'D'];
+  // Build a shuffled list of target positions, cycling through A-D
+  const slots: MCOption['label'][] = [];
+  for (let i = 0; i < questions.length; i++) {
+    slots.push(labels[i % 4]);
+  }
+  slots.sort(() => Math.random() - 0.5);
+
+  return questions.map((q, i) => {
+    if (!q.mcOptions || q.mcOptions.length === 0) return q;
+
+    const correctOpt = q.mcOptions.find(o => o.is_correct);
+    const incorrectOpts = q.mcOptions.filter(o => !o.is_correct).sort(() => Math.random() - 0.5);
+    if (!correctOpt) return q;
+
+    const targetIdx = labels.indexOf(slots[i]);
+    const result: MCOption[] = new Array(4);
+    result[targetIdx] = { ...correctOpt, label: labels[targetIdx] };
+
+    let incorrectIdx = 0;
+    for (let j = 0; j < 4; j++) {
+      if (!result[j]) {
+        result[j] = { ...incorrectOpts[incorrectIdx], label: labels[j] };
+        incorrectIdx++;
+      }
+    }
+
+    return { ...q, mcOptions: result };
   });
 }
 
