@@ -13,7 +13,7 @@
 // consistent with LoginForm without duplicating style objects.
 'use client';
 
-import { useState, type FormEvent as ReactFormEvent } from 'react';
+import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { signUpWithEmail, signInWithGoogle } from '@/lib/supabase/auth';
 
@@ -33,16 +33,16 @@ type SignUpFormData = {
 export function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [formData, setFormData] = useState<SignUpFormData>({
+  const [formData, setFormData] = React.useState<SignUpFormData>({
     fullName: '',
     email: '',
     password: '',
     agreeToTerms: false,
   });
 
-  const [error, setError] = useState<string | null>(searchParams.get('error'));
-  const [loading, setLoading] = useState(false);
-  const [confirmedEmail, setConfirmedEmail] = useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(searchParams.get('error'));
+  const [loading, setLoading] = React.useState(false);
+  const [confirmedEmail, setConfirmedEmail] = React.useState<string | null>(null);
 
   const setField = <K extends keyof SignUpFormData>(
     key: K,
@@ -51,7 +51,7 @@ export function SignUpForm() {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = async (e: ReactFormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);

@@ -3,7 +3,6 @@
 'use client';
 
 import * as React from 'react';
-import { type FormEvent as ReactFormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { signOut } from '@/lib/supabase/auth';
@@ -138,7 +137,7 @@ export function useInstructorDashboard() {
 
   /** Validates and submits the add-course form, then prepends the new course to state. */
   const submitAdd = React.useCallback(
-    async (e: ReactFormEvent<HTMLFormElement>) => {
+    async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setError(null);
 
@@ -168,7 +167,7 @@ export function useInstructorDashboard() {
 
   /** Validates and submits the edit-course form, then updates the course in local state. */
   const submitEdit = React.useCallback(
-    async (e: ReactFormEvent<HTMLFormElement>) => {
+    async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (modal.type !== 'edit') return;
 

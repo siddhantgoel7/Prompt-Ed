@@ -11,18 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tooltip as UITooltip, TooltipContent as UITooltipContent, TooltipTrigger as UITooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
-import {
-  PieChart,
-  Pie,
-  Cell as RechartsCell,
-  Tooltip,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-} from 'recharts';
+import * as Recharts from 'recharts';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 
@@ -104,9 +93,9 @@ export function DiscussionAnalyticsContent({
             Answer Distribution
           </p>
           <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
+            <Recharts.ResponsiveContainer width="100%" height={200}>
+              <Recharts.PieChart>
+                <Recharts.Pie
                   data={mcChartData}
                   dataKey="count"
                   nameKey="label"
@@ -119,13 +108,13 @@ export function DiscussionAnalyticsContent({
                   labelLine={false}
                 >
                   {mcChartData.map((entry, i) => (
-                    <RechartsCell
+                    <Recharts.Cell
                       key={entry.label}
                       fill={entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]}
                     />
                   ))}
-                </Pie>
-                <Tooltip
+                </Recharts.Pie>
+                <Recharts.Tooltip
                   formatter={(value, name) => [`${value} votes`, `Option ${name}`]}
                   contentStyle={{
                     background: 'var(--surface-overlay)',
@@ -135,8 +124,8 @@ export function DiscussionAnalyticsContent({
                     fontSize: '12px',
                   }}
                 />
-              </PieChart>
-            </ResponsiveContainer>
+              </Recharts.PieChart>
+            </Recharts.ResponsiveContainer>
 
             {/* Legend table */}
             <div className="w-full sm:w-48 shrink-0 space-y-1.5">
@@ -177,12 +166,12 @@ export function DiscussionAnalyticsContent({
           >
             Response Timeline (per minute)
           </p>
-          <ResponsiveContainer width="100%" height={160}>
-            <BarChart data={timelineData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-              <Tooltip
+          <Recharts.ResponsiveContainer width="100%" height={160}>
+            <Recharts.BarChart data={timelineData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+              <Recharts.CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+              <Recharts.XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+              <Recharts.YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+              <Recharts.Tooltip
                 contentStyle={{
                   background: 'var(--surface-overlay)',
                   border: '1px solid var(--border-default)',
@@ -192,9 +181,9 @@ export function DiscussionAnalyticsContent({
                 }}
                 formatter={(v) => [`${v} responses`, 'Count']}
               />
-              <Bar dataKey="Responses" fill="var(--color-primary-500)" radius={[3, 3, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+              <Recharts.Bar dataKey="Responses" fill="var(--color-primary-500)" radius={[3, 3, 0, 0]} />
+            </Recharts.BarChart>
+          </Recharts.ResponsiveContainer>
         </div>
       )}
 

@@ -3,7 +3,7 @@
 // .btn-submit) to keep the JSX concise and stay in sync with SignUpForm.
 'use client';
 
-import { useState, type FormEvent as ReactFormEvent } from 'react';
+import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmail, signInWithGoogle } from '@/lib/supabase/auth';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -18,16 +18,16 @@ type LoginFormData = {
 export function LoginForm() {
   const router = useRouter();
 
-  const [formData, setFormData] = useState<LoginFormData>({ email: '', password: '' });
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = React.useState<LoginFormData>({ email: '', password: '' });
+  const [error, setError] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
 
   /** Generic field setter — avoids a separate onChange handler per field. */
   const setField = (name: keyof LoginFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSignIn = async (e: ReactFormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -58,7 +58,7 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSignIn} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Email field — HTML5 required + type="email" handles basic validation */}
       <div className="space-y-1.5">
         <label htmlFor="email" className="form-label">Email</label>

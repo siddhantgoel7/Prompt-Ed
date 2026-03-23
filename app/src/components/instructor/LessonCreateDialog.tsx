@@ -2,7 +2,6 @@
 'use client';
 
 import * as React from 'react';
-import { type FormEvent as ReactFormEvent } from 'react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +24,7 @@ export function LessonCreateDialog({
   title: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: ReactFormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   error: string | null;
   saving: boolean;
 }) {
