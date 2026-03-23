@@ -13,7 +13,7 @@
 // consistent with LoginForm without duplicating style objects.
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent as ReactFormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { signUpWithEmail, signInWithGoogle } from '@/lib/supabase/auth';
 
@@ -51,7 +51,7 @@ export function SignUpForm() {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: ReactFormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);

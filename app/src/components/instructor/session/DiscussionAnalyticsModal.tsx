@@ -14,7 +14,7 @@ import { Info } from 'lucide-react';
 import {
   PieChart,
   Pie,
-  Cell as ReCell,
+  Cell as RechartsCell,
   Tooltip,
   BarChart,
   Bar,
@@ -119,7 +119,7 @@ export function DiscussionAnalyticsContent({
                   labelLine={false}
                 >
                   {mcChartData.map((entry, i) => (
-                    <ReCell
+                    <RechartsCell
                       key={entry.label}
                       fill={entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]}
                     />
