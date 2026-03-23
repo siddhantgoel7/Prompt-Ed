@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     name: Build and analyze
-    runs-on: self-hosted
+    runs-on: sidcybera
     
     steps:
       - uses: actions/checkout@v4
