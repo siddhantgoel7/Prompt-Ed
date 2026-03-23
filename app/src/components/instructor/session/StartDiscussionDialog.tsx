@@ -96,7 +96,7 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
                   min={0}
                   max={59}
                   value={minutes}
-                  onChange={(e) => setMinutes(Math.max(0, Math.min(59, Number.parseInt(e.target.value) || 0)))}
+                  onChange={(e) => setMinutes(Math.max(0, Math.min(59, Number.parseInt(e.target.value, 10) || 0)))}
                   disabled={noLimit}
                   className="w-16 text-center rounded-lg border border-border bg-background text-foreground px-2 py-2 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-ring"
                   data-testid="timer-minutes"
@@ -111,7 +111,7 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
                   min={0}
                   max={59}
                   value={seconds}
-                  onChange={(e) => setSeconds(Math.max(0, Math.min(59, Number.parseInt(e.target.value) || 0)))}
+                  onChange={(e) => setSeconds(Math.max(0, Math.min(59, Number.parseInt(e.target.value, 10) || 0)))}
                   disabled={noLimit}
                   className="w-16 text-center rounded-lg border border-border bg-background text-foreground px-2 py-2 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-ring"
                   data-testid="timer-seconds"

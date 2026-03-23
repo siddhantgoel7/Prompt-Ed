@@ -44,7 +44,7 @@ export function CandidateCard({
                         className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize text-brand-600"
                         style={{ background: 'var(--color-primary-alpha-12)' }}
                     >
-                        {candidate.promptType.replace('_', ' ')}
+                        {candidate.promptType.replaceAll('_', ' ')}
                     </span>
                     <Tooltip>
                         <TooltipTrigger asChild>

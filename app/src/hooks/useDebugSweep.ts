@@ -48,7 +48,7 @@ export function useDebugSweep({
     const contextLabel = generationWarning ? 'No context (fallback)' : 'Files + Transcript';
 
     const lines: string[] = [
-      `${typeLabel[promptType] ?? promptType} — ${preferences.difficulty.charAt(0).toUpperCase() + preferences.difficulty.slice(1)}, ${preferences.style.charAt(0).toUpperCase() + preferences.style.slice(1).replace('_', ' ')}, ${preferences.length.charAt(0).toUpperCase() + preferences.length.slice(1)} — ${timeSec}`,
+      `${typeLabel[promptType] ?? promptType} — ${preferences.difficulty.charAt(0).toUpperCase() + preferences.difficulty.slice(1)}, ${preferences.style.charAt(0).toUpperCase() + preferences.style.slice(1).replaceAll('_', ' ')}, ${preferences.length.charAt(0).toUpperCase() + preferences.length.slice(1)} — ${timeSec}`,
       `Context: ${contextLabel}`,
     ];
     if (generationWarning) lines.push(`Warning: ${generationWarning}`);
@@ -86,7 +86,7 @@ export function useDebugSweep({
       short_answer: 'Short Answer',
       multiple_choice: 'Multiple Choice',
     };
-    const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace('_', ' ');
+    const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replaceAll('_', ' ');
 
     type SweepResult = {
       combo: { promptType: PromptType; difficulty: string; style: string; length: string };

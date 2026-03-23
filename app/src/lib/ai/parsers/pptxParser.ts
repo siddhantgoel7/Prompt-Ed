@@ -43,14 +43,31 @@ const VISION_MIME_MAP: Record<string, 'image/png' | 'image/jpeg' | 'image/webp'>
 export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promise<ParsedSection[]> {
   const zip = await JSZip.loadAsync(buffer);
 
-  // Security: Check total uncompressed size to prevent Zip Bomb (S5042)
-  const MAX_TOTAL_SIZE = 150 * 1024 * 1024; // 150MB limit
+  // Security: Prevent Zip Bomb (S5042)
+  const MAX_ENTRIES = 10000;         // Max number of files in the PPTX
+  const MAX_TOTAL_SIZE = 150 * 1024 * 1024; // 150MB total limit
+  const MAX_COMPRESSION_RATIO = 100; // Max 100x compression
+
+  const entries = Object.values(zip.files);
+  if (entries.length > MAX_ENTRIES) {
+    throw new Error(`PPTX extraction aborted: Too many entries (${entries.length})`);
+  }
+
   let totalSize = 0;
-  Object.values(zip.files).forEach(file => { 
+  for (const file of entries) {
     // JSZip 3 internally stores uncompressed size in _data.uncompressedSize
-    const size = (file as any).uncompressedSize ?? (file as any)._data?.uncompressedSize ?? 0;
-    totalSize += size; 
-  });
+    // We cast to any because these are internal properties.
+    const uncompressedSize = (file as any).uncompressedSize ?? (file as any)._data?.uncompressedSize ?? 0;
+    const compressedSize = (file as any)._data?.compressedSize ?? 0;
+
+    // Check individual compression ratio if possible (uncompressed vs compressed)
+    if (compressedSize > 0 && (uncompressedSize / compressedSize) > MAX_COMPRESSION_RATIO) {
+      throw new Error(`PPTX extraction aborted: High compression ratio detected in ${file.name}`);
+    }
+
+    totalSize += uncompressedSize;
+  }
+
   if (totalSize > MAX_TOTAL_SIZE) {
     throw new Error(`PPTX extraction aborted: Total size (${Math.round(totalSize/1024/1024)}MB) exceeds safety limit.`);
   }

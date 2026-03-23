@@ -451,7 +451,7 @@ export function ActiveCenter(props: Partial<{
                             className="text-xs font-medium px-2 py-0.5 rounded-full capitalize"
                             style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-600)' }}
                           >
-                            {c.promptType.replace('_', ' ')}
+                            {c.promptType.replaceAll('_', ' ')}
                           </span>
                           <span className="text-xs font-medium text-brand-500">
                             Selected (Editing)
