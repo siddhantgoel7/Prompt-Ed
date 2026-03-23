@@ -306,7 +306,7 @@ export function DiscussionPage({
                         className="w-2 h-2 rounded-full animate-pulse"
                         style={{ background: 'var(--color-primary-500)' }}
                       />
-                      Active
+                      {' '}Active
                     </>
                   ) : (
                     <>
@@ -314,7 +314,7 @@ export function DiscussionPage({
                         className="w-2 h-2 rounded-full"
                         style={{ background: 'var(--text-muted)' }}
                       />
-                      Closed
+                      {' '}Closed
                     </>
                   )}
                 </div>

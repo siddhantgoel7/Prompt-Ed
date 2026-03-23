@@ -13,7 +13,7 @@
  */
 export function escapeCsv(value: string | number | null | undefined): string {
   const stringValue = String(value ?? '');
-  return `"${stringValue.replace(/"/g, '""')}"`;
+  return `"${stringValue.replaceAll(/"/g, '""')}"`;
 }
 
 /**

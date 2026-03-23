@@ -170,14 +170,22 @@ export function ResponseCard({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       className={cn(
-        'rounded-xl cursor-pointer transition-all duration-300 ease-in-out',
+        'rounded-xl cursor-pointer transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         isSelected ? cn(s.selectedPadding, 'my-4 z-10 relative') : s.unselectedPadding,
       )}
       data-highlighted={isSelected ? 'true' : undefined}
       data-variant={isSelected ? (isFlagged ? 'flagged-selected' : 'highlighted-selected') : undefined}
       style={isSelected ? selectedStyle : unselectedStyle}
       onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
     >
       {content}
     </div>

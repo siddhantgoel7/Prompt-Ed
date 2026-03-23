@@ -380,7 +380,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   }, [lesson, channel, router, activeDiscussion, handleCloseDiscussion, loadEndedLessonHistory]);
 
   const getSafeLessonFileBase = useCallback(() => {
-    return lesson?.title.replace(/[^a-z0-9-_]/gi, '_').toLowerCase() || 'lesson';
+    return lesson?.title.replaceAll(/[^a-z0-9-_]/gi, '_').toLowerCase() || 'lesson';
   }, [lesson]);
 
   const downloadBlob = useCallback((blob: Blob, fileName: string) => {

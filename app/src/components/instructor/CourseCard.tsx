@@ -33,9 +33,18 @@ export function CourseCard({
 }) {
   return (
     <div
-      className="glass relative overflow-hidden rounded-2xl card-hover cursor-pointer group"
+      role="button"
+      tabIndex={0}
+      className="glass relative overflow-hidden rounded-2xl card-hover cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       style={{
         boxShadow: '0 2px 16px var(--color-primary-alpha-06), 0 1px 3px var(--color-black-alpha-06)',
+      }}
+      onClick={onAccess}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onAccess();
+        }
       }}
     >
       {/* Top action menu */}
@@ -92,7 +101,7 @@ export function CourseCard({
       </div>
 
       {/* Content */}
-      <div className="p-5" onClick={onAccess}>
+      <div className="p-5">
         <p className="text-xs mb-1.5 text-content-muted">
           Created {formatDate(course.date_created)}
         </p>

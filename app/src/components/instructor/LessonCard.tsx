@@ -73,8 +73,16 @@ export function LessonCard(
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={props.onAccess}
-      className="h-28 rounded-2xl relative p-4 flex flex-col justify-between cursor-pointer card-hover group"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          props.onAccess();
+        }
+      }}
+      className="h-28 rounded-2xl relative p-4 flex flex-col justify-between cursor-pointer card-hover group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       style={{
         background: 'var(--surface-glass)',
         backdropFilter: 'blur(10px)',

@@ -89,13 +89,14 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
             <p className="text-sm text-muted-foreground">Set timer duration:</p>
             <div className="flex items-center gap-3">
               <div className="flex flex-col items-center gap-1">
-                <label className="text-xs text-muted-foreground">Min</label>
+                <label className="text-xs text-muted-foreground" htmlFor="timer-min">Min</label>
                 <input
+                  id="timer-min"
                   type="number"
                   min={0}
                   max={59}
                   value={minutes}
-                  onChange={(e) => setMinutes(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                  onChange={(e) => setMinutes(Math.max(0, Math.min(59, Number.parseInt(e.target.value) || 0)))}
                   disabled={noLimit}
                   className="w-16 text-center rounded-lg border border-border bg-background text-foreground px-2 py-2 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-ring"
                   data-testid="timer-minutes"
@@ -103,13 +104,14 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
               </div>
               <span className="text-2xl font-bold text-muted-foreground mt-4">:</span>
               <div className="flex flex-col items-center gap-1">
-                <label className="text-xs text-muted-foreground">Sec</label>
+                <label className="text-xs text-muted-foreground" htmlFor="timer-sec">Sec</label>
                 <input
+                  id="timer-sec"
                   type="number"
                   min={0}
                   max={59}
                   value={seconds}
-                  onChange={(e) => setSeconds(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                  onChange={(e) => setSeconds(Math.max(0, Math.min(59, Number.parseInt(e.target.value) || 0)))}
                   disabled={noLimit}
                   className="w-16 text-center rounded-lg border border-border bg-background text-foreground px-2 py-2 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-ring"
                   data-testid="timer-seconds"

@@ -98,7 +98,7 @@ export function MultipleChoiceEditor({
                             onChange={(e) => onFeedbackChange(e.target.checked)}
                             className="accent-[var(--color-primary-500)]"
                         />
-                        Show correctness feedback to students
+                        {' '}Show correctness feedback to students
                     </label>
                     <Tooltip>
                         <TooltipTrigger asChild>

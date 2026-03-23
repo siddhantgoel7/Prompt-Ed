@@ -216,7 +216,7 @@ function extractTextNodes(xml: string): string {
   
   return texts
     .join(' ')
-    .replace(/\s+/g, ' ')
+    .replaceAll(/\s+/g, ' ')
     .trim();
 }
 
@@ -270,7 +270,7 @@ function resolveMediaPath(target: string): string | null {
 
 /** Removes control characters and Unicode bidi overrides that can corrupt chunk storage. */
 function stripControlChars(text: string): string {
-  return text.replace(/[\u0000-\u0008\u000B-\u001F\u202A-\u202E\u2066-\u2069]/g, '');
+  return text.replaceAll(/[\u0000-\u0008\u000B-\u001F\u202A-\u202E\u2066-\u2069]/g, '');
 }
 
 /** Extracts the numeric slide index from a ppt/slides/slideN.xml path. */

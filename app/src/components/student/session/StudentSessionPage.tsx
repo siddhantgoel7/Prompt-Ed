@@ -165,7 +165,7 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
               style={{ background: 'var(--color-primary-alpha-12)', color: 'var(--color-primary-600)' }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-              Active
+              {' '}Active
             </span>
           )}
         </div>

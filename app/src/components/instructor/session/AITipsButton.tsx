@@ -182,6 +182,10 @@ function TipsModal({ onClose }: { onClose: () => void }) {
       className="fixed inset-0 flex items-center justify-center p-4"
       style={{ zIndex: 110, background: 'var(--color-black-alpha-30)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
       onClick={onClose}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }}
+      role="button"
+      tabIndex={-1}
+      aria-label="Close modal backdrop"
     >
       <div
         className="relative w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl p-6 enter"
