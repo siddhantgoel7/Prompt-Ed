@@ -4,6 +4,7 @@
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { LessonFile, UploadStatus } from '@/types/ai';
 import { SessionContext } from './SessionContext';
 
@@ -46,16 +47,31 @@ export function FilesTab({
         return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     };
 
+    const statusTooltip: Record<UploadStatus, string> = {
+        ready: 'Available for AI prompt generation.',
+        processing: 'Being indexed — AI generation available shortly.',
+        uploading: 'Being uploaded and indexed.',
+        failed: 'Indexing failed. Delete and re-upload to try again.',
+    };
+
     const getStatusBadge = (status: UploadStatus) => {
-        switch (status) {
-            case 'ready':
-                return <Badge className="text-xs" style={{ background: 'var(--color-primary-alpha-15)', color: 'var(--color-primary-500)', border: 'none' }}>Ready</Badge>;
-            case 'processing':
-            case 'uploading':
-                return <Badge className="text-xs" style={{ background: 'var(--color-warning-alpha-15)', color: 'var(--color-warning-600)', border: 'none' }}>Processing</Badge>;
-            case 'failed':
-                return <Badge className="text-xs" style={{ background: 'var(--color-error-alpha-12)', color: 'var(--recording-text, #dc2626)', border: 'none' }}>Failed</Badge>;
-        }
+        const badge = (() => {
+            switch (status) {
+                case 'ready':
+                    return <Badge className="text-xs" style={{ background: 'var(--color-primary-alpha-15)', color: 'var(--color-primary-500)', border: 'none' }}>Ready</Badge>;
+                case 'processing':
+                case 'uploading':
+                    return <Badge className="text-xs" style={{ background: 'var(--color-warning-alpha-15)', color: 'var(--color-warning-600)', border: 'none' }}>Processing</Badge>;
+                case 'failed':
+                    return <Badge className="text-xs" style={{ background: 'var(--color-error-alpha-12)', color: 'var(--recording-text, #dc2626)', border: 'none' }}>Failed</Badge>;
+            }
+        })();
+        return (
+            <Tooltip>
+                <TooltipTrigger asChild>{badge}</TooltipTrigger>
+                <TooltipContent>{statusTooltip[status]}</TooltipContent>
+            </Tooltip>
+        );
     };
 
     return (

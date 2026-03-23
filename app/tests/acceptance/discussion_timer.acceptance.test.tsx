@@ -165,14 +165,14 @@ function makeSubmittedWithTimerHookValue(timerExpired = false) {
 describe('[US 2.11] Student Timer Display', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    // 1
+    // 69.1
     it('[US 2.11][AC1-AT1] success: circular timer is rendered when discussion has a time limit', () => {
         mockHook.mockReturnValue(makeTimerHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByTestId('student-timer')).toBeInTheDocument();
     });
 
-    // 2
+    // 69.2
     it('[US 2.11][AC1-AT2] success: timer shows MM:SS format', () => {
         mockHook.mockReturnValue(makeTimerHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -181,7 +181,7 @@ describe('[US 2.11] Student Timer Display', () => {
         expect(timer.textContent).toMatch(/\d{2}:\d{2}/);
     });
 
-    // 3
+    // 69.3
     it('[US 2.11][AC1-AT3] success: no timer shown when discussion has no time limit', () => {
         mockHook.mockReturnValue(makeNoTimerHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -194,35 +194,35 @@ describe('[US 2.11] Student Timer Display', () => {
 describe('[US 2.11] Timer Expired State', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    // 4
+    // 69.4
     it('[US 2.11][AC3-AT1] success: timer expired message shown when timer expires without submission', () => {
         mockHook.mockReturnValue(makeExpiredHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByTestId('timer-expired-message')).toBeInTheDocument();
     });
 
-    // 5
+    // 69.5
     it("[US 2.11][AC3-AT2] success: timer expired message contains Time's up text", () => {
         mockHook.mockReturnValue(makeExpiredHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByText(/Time's up/i)).toBeInTheDocument();
     });
 
-    // 6
+    // 69.6
     it('[US 2.11][AC3-AT3] success: "No answer was submitted" shown in timer expired message', () => {
         mockHook.mockReturnValue(makeExpiredHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByText(/No answer was submitted/i)).toBeInTheDocument();
     });
 
-    // 7
+    // 69.7
     it('[US 2.11][AC3-AT4] failure: submit form is not rendered after timer expires', () => {
         mockHook.mockReturnValue(makeExpiredHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.queryByRole('button', { name: /Submit/i })).not.toBeInTheDocument();
     });
 
-    // 8
+    // 69.8
     it('[US 2.11][AC3-AT5] success: MC with feedback_enabled shows correct answer in expired message', () => {
         mockHook.mockReturnValue(makeExpiredHookValue(MC_DISCUSSION_WITH_TIMER as unknown as typeof BASE_DISCUSSION));
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -231,7 +231,7 @@ describe('[US 2.11] Timer Expired State', () => {
         expect(expiredMsg.textContent).toContain('Correct Answer: A. Angiotensin Converting Enzyme');
     });
 
-    // 9
+    // 69.9
     it('[US 2.11][AC3-AT6] success: MC without feedback_enabled does NOT show correct answer in expired message', () => {
         const disc = { ...MC_DISCUSSION_WITH_TIMER, feedback_enabled: false };
         mockHook.mockReturnValue(makeExpiredHookValue(disc as unknown as typeof BASE_DISCUSSION));
@@ -245,7 +245,7 @@ describe('[US 2.11] Timer Expired State', () => {
 describe('[US 2.11] MC Feedback Timing with Timer', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    // 10
+    // 69.10
     it('[US 2.11][AC3-AT7] success: MC feedback is NOT shown in submitted view while timer is still running', () => {
         mockHook.mockReturnValue(makeSubmittedWithTimerHookValue(false));
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -253,14 +253,14 @@ describe('[US 2.11] MC Feedback Timing with Timer', () => {
         expect(screen.queryByText(/Not quite/i)).not.toBeInTheDocument();
     });
 
-    // 11
+    // 69.11
     it("[US 2.11][AC3-AT8] success: submitted state shows 'results will be shown when time's up' while timer running", () => {
         mockHook.mockReturnValue(makeSubmittedWithTimerHookValue(false));
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByText(/results will be shown when time/i)).toBeInTheDocument();
     });
 
-    // 12
+    // 69.12
     it('[US 2.11][AC3-AT9] success: MC feedback IS shown in submitted view after timer expires', () => {
         // Simulate correct submission
         const hookVal = makeSubmittedWithTimerHookValue(true);
@@ -288,14 +288,14 @@ describe('[US 2.11] MC Feedback Timing with Timer', () => {
 describe('[US 1.29] Instructor Timer — Discussion Data', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    // 13
+    // 69.13
     it('[US 1.29][AC3-AT1] success: timer is displayed to student when time_limit_seconds is set in discussion', () => {
         mockHook.mockReturnValue(makeTimerHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByTestId('student-timer')).toBeInTheDocument();
     });
 
-    // 14
+    // 69.14
     it('[US 1.29][AC3-AT2] success: no timer displayed when time_limit_seconds is null', () => {
         mockHook.mockReturnValue(makeNoTimerHookValue());
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -308,14 +308,14 @@ describe('[US 1.29] Instructor Timer — Discussion Data', () => {
 describe('[US 2.11] Timer shown in submitted view', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    // 15
+    // 69.15
     it('[US 2.11][AC2-AT1] success: timer is visible in submitted view while timer is still running', () => {
         mockHook.mockReturnValue(makeSubmittedWithTimerHookValue(false));
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByTestId('student-timer')).toBeInTheDocument();
     });
 
-    // 16
+    // 69.16
     it('[US 2.11][AC2-AT2] success: timer NOT shown in submitted view after timer expires', () => {
         mockHook.mockReturnValue(makeSubmittedWithTimerHookValue(true));
         render(<StudentSessionPage lessonId="lesson-1" />);

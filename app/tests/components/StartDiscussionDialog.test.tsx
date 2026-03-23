@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '../utils/renderWithProviders';
 import { StartDiscussionDialog } from '@/components/instructor/session/StartDiscussionDialog';
 
 function renderDialog(onConfirm = jest.fn(), onCancel = jest.fn()) {
@@ -17,13 +17,13 @@ function renderDialog(onConfirm = jest.fn(), onCancel = jest.fn()) {
 describe('StartDiscussionDialog [US 1.29]', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    // 1
+    // 66.1
     it('[US 1.29][UNIT1] success: dialog renders when open=true', () => {
         renderDialog();
         expect(screen.getByText('Set Time Limit')).toBeInTheDocument();
     });
 
-    // 2
+    // 66.2
     it('[US 1.29][UNIT2] success: default timer is 1 minute (minutes=1, seconds=0)', () => {
         renderDialog();
         const minInput = screen.getByTestId('timer-minutes') as HTMLInputElement;
@@ -32,14 +32,14 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         expect(secInput.value).toBe('0');
     });
 
-    // 3
+    // 66.3
     it('[US 1.29][UNIT3] success: "No Time Limit" checkbox is unchecked by default', () => {
         renderDialog();
         const checkbox = screen.getByRole('checkbox');
         expect(checkbox).toHaveAttribute('aria-checked', 'false');
     });
 
-    // 4
+    // 66.4
     it('[US 1.29][UNIT4] success: clicking No Time Limit toggles the checkbox on', () => {
         renderDialog();
         const checkbox = screen.getByRole('checkbox');
@@ -47,7 +47,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         expect(checkbox).toHaveAttribute('aria-checked', 'true');
     });
 
-    // 5
+    // 66.5
     it('[US 1.29][UNIT5] success: confirming with default (1 min) calls onConfirm(60)', () => {
         const onConfirm = jest.fn();
         renderDialog(onConfirm);
@@ -55,7 +55,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         expect(onConfirm).toHaveBeenCalledWith(60);
     });
 
-    // 6
+    // 66.6
     it('[US 1.29][UNIT6] success: confirming with No Time Limit calls onConfirm(null)', () => {
         const onConfirm = jest.fn();
         renderDialog(onConfirm);
@@ -64,7 +64,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         expect(onConfirm).toHaveBeenCalledWith(null);
     });
 
-    // 7
+    // 66.7
     it('[US 1.29][UNIT7] success: setting minutes=2, seconds=30 calls onConfirm(150)', () => {
         const onConfirm = jest.fn();
         renderDialog(onConfirm);
@@ -74,7 +74,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         expect(onConfirm).toHaveBeenCalledWith(150);
     });
 
-    // 8
+    // 66.8
     it('[US 1.29][UNIT8] success: Cancel button calls onCancel', () => {
         const onCancel = jest.fn();
         renderDialog(jest.fn(), onCancel);
@@ -82,7 +82,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         expect(onCancel).toHaveBeenCalled();
     });
 
-    // 9
+    // 66.9
     it('[US 1.29][UNIT9] failure: Start Discussion button disabled when minutes=0, seconds=0 and no limit unchecked', () => {
         renderDialog();
         fireEvent.change(screen.getByTestId('timer-minutes'), { target: { value: '0' } });
@@ -91,7 +91,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         expect(startBtn).toBeDisabled();
     });
 
-    // 10
+    // 66.10
     it('[US 1.29][UNIT10] success: Start Discussion button enabled when No Time Limit is checked even if inputs are zero', () => {
         renderDialog();
         fireEvent.change(screen.getByTestId('timer-minutes'), { target: { value: '0' } });
@@ -101,19 +101,19 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         expect(startBtn).not.toBeDisabled();
     });
 
-    // 11
+    // 66.11
     it('[US 1.29][UNIT11] success: dialog does not render when open=false', () => {
         render(<StartDiscussionDialog open={false} onConfirm={jest.fn()} onCancel={jest.fn()} />);
         expect(screen.queryByText('Set Time Limit')).not.toBeInTheDocument();
     });
 
-    // 12
+    // 66.12
     it('[US 1.29][UNIT12] success: default confirm button label is "Start Discussion"', () => {
         renderDialog();
         expect(screen.getByRole('button', { name: /Start Discussion/i })).toBeInTheDocument();
     });
 
-    // 13
+    // 66.13
     it('[US 1.29][UNIT13] success: custom confirmLabel overrides button text', () => {
         render(
             <StartDiscussionDialog
@@ -127,7 +127,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         expect(screen.queryByRole('button', { name: /Start Discussion/i })).not.toBeInTheDocument();
     });
 
-    // 14
+    // 66.14
     it('[US 1.29][UNIT14] success: custom confirmLabel button still calls onConfirm correctly', () => {
         const onConfirm = jest.fn();
         render(

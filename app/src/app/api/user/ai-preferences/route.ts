@@ -35,7 +35,7 @@ export async function GET() {
             difficulty: data.difficulty as AIPromptPreferences['difficulty'],
             style: data.style as AIPromptPreferences['style'],
             length: data.length as AIPromptPreferences['length'],
-            focusAreas: data.focus_areas || '',
+            focusAreas: data.focus_areas ?? '',
         };
 
         return NextResponse.json(prefs);
@@ -56,7 +56,7 @@ export async function PUT(req: NextRequest) {
 
         const body = await req.json() as AIPromptPreferences;
 
-        // Optional validation logic could go here
+        const focusAreas = (body.focusAreas ?? '').trim().slice(0, 500) || null;
 
         const { error } = await supabase
             .from('instructor_ai_preferences')
@@ -65,7 +65,7 @@ export async function PUT(req: NextRequest) {
                 difficulty: body.difficulty,
                 style: body.style,
                 length: body.length,
-                focus_areas: body.focusAreas || null,
+                focus_areas: focusAreas,
                 updated_at: new Date().toISOString(),
             });
 

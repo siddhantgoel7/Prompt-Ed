@@ -28,7 +28,7 @@ describe('Discussions API — Lesson Scoping [US 1.26] [US 2.04]', () => {
         jest.clearAllMocks();
     });
 
-    // 1.26 AC1 & 2.04 AC1, AC2: Only fetch discussions matching a specific lesson_id
+    // 47.1
     it('[US 1.26][AC1-AT1] [US 2.04][AC1-AT1] success: fetching active discussion is scoped to specific lesson_id', async () => {
         mockSupabase.single.mockResolvedValue({ data: { id: 'disc-target', lesson_id: 'lesson-target-123' }, error: null });
 
@@ -51,6 +51,7 @@ describe('Discussions API — Lesson Scoping [US 1.26] [US 2.04]', () => {
     });
 
     // Student not in the lesson tries to fetch it by guessing?
+    // 47.2
     it('[US 1.26][AC2-AT1] failure: fetching active discussion with wrong lesson_id yields null', async () => {
         // Returns null because there are no active discussions for the wrong lesson
         mockSupabase.single.mockResolvedValue({ data: null, error: { message: 'Row not found' } });
@@ -72,6 +73,7 @@ describe('Discussions API — Lesson Scoping [US 1.26] [US 2.04]', () => {
     });
 
     // 2.04 AC3: Rejoining the same lesson checks the same active prompt
+    // 47.3
     it('[US 2.04][AC3-AT1] success: rejoining same lesson fetches identical active lesson_id scope', async () => {
         mockSupabase.single.mockResolvedValue({ data: { id: 'disc-target', lesson_id: 'lesson-target-123' }, error: null });
 

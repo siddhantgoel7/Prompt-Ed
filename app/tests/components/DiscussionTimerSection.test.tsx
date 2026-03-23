@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '../utils/renderWithProviders';
 import { DiscussionTimerSection } from '@/components/instructor/session/DiscussionTimerSection';
 
 const DISCUSSION_ID = 'disc-abc';
@@ -29,7 +29,7 @@ function renderSection(overrides: Partial<React.ComponentProps<typeof Discussion
 describe('DiscussionTimerSection — Visibility [US 1.29]', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    // 1
+    // 67.1
     it('[US 1.29][TS-UNIT1] success: renders nothing when no active discussion', () => {
         const { container } = render(
             <DiscussionTimerSection
@@ -42,25 +42,25 @@ describe('DiscussionTimerSection — Visibility [US 1.29]', () => {
         expect(container.firstChild).toBeNull();
     });
 
-    // 2
+    // 67.2
     it('[US 1.29][TS-UNIT2] success: renders section when discussion is active', () => {
         renderSection();
         expect(screen.getByTestId('discussion-timer-section')).toBeInTheDocument();
     });
 
-    // 3
+    // 67.3
     it('[US 1.29][TS-UNIT3] success: circular timer shown when timer is set', () => {
         renderSection();
         expect(screen.getByTestId('instructor-timer')).toBeInTheDocument();
     });
 
-    // 4
+    // 67.4
     it('[US 1.29][TS-UNIT4] success: "No Time Limit" placeholder shown when no timer', () => {
         renderSection({ timerEndTime: null, timerTotalSeconds: null });
         expect(screen.getByTestId('no-time-limit-label')).toBeInTheDocument();
     });
 
-    // 5
+    // 67.5
     it('[US 1.29][TS-UNIT5] success: circular timer NOT shown when no timer is set', () => {
         renderSection({ timerEndTime: null, timerTotalSeconds: null });
         expect(screen.queryByTestId('instructor-timer')).not.toBeInTheDocument();
@@ -72,13 +72,13 @@ describe('DiscussionTimerSection — Visibility [US 1.29]', () => {
 describe('DiscussionTimerSection — Close Button [US 1.29]', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    // 6
+    // 67.6
     it('[US 1.29][TS-UNIT6] success: Close Discussion button is present', () => {
         renderSection();
         expect(screen.getByTestId('close-discussion-button')).toBeInTheDocument();
     });
 
-    // 7
+    // 67.7
     it('[US 1.29][TS-UNIT7] success: clicking Close Discussion calls onClose with discussion id', () => {
         const onClose = jest.fn();
         renderSection({ onClose });
@@ -92,26 +92,26 @@ describe('DiscussionTimerSection — Close Button [US 1.29]', () => {
 describe('DiscussionTimerSection — Edit Timer Button [US 1.29]', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    // 8
+    // 67.8
     it('[US 1.29][TS-UNIT8] success: Edit button is shown when timer is set', () => {
         renderSection();
         expect(screen.getByTestId('edit-timer-button')).toBeInTheDocument();
     });
 
-    // 9
+    // 67.9
     it('[US 1.29][TS-UNIT9] success: Edit button is NOT shown when no timer is set', () => {
         renderSection({ timerEndTime: null, timerTotalSeconds: null });
         expect(screen.queryByTestId('edit-timer-button')).not.toBeInTheDocument();
     });
 
-    // 10
+    // 67.10
     it('[US 1.29][TS-UNIT10] success: clicking Edit button opens the timer dialog', () => {
         renderSection();
         fireEvent.click(screen.getByTestId('edit-timer-button'));
         expect(screen.getByText('Set Time Limit')).toBeInTheDocument();
     });
 
-    // 11
+    // 67.11
     it('[US 1.29][TS-UNIT11] success: dialog confirm button reads "Update Timer" not "Start Discussion"', () => {
         renderSection();
         fireEvent.click(screen.getByTestId('edit-timer-button'));
@@ -119,7 +119,7 @@ describe('DiscussionTimerSection — Edit Timer Button [US 1.29]', () => {
         expect(screen.queryByRole('button', { name: /Start Discussion/i })).not.toBeInTheDocument();
     });
 
-    // 12
+    // 67.12
     it('[US 1.29][TS-UNIT12] success: confirming edit with a new value calls onEditTimer with seconds', () => {
         const onEditTimer = jest.fn().mockResolvedValue(undefined);
         renderSection({ onEditTimer });
@@ -131,7 +131,7 @@ describe('DiscussionTimerSection — Edit Timer Button [US 1.29]', () => {
         expect(onEditTimer).toHaveBeenCalledWith(120);
     });
 
-    // 13
+    // 67.13
     it('[US 1.29][TS-UNIT13] success: confirming edit with "No Time Limit" calls onEditTimer(null)', () => {
         const onEditTimer = jest.fn().mockResolvedValue(undefined);
         renderSection({ onEditTimer });
@@ -141,7 +141,7 @@ describe('DiscussionTimerSection — Edit Timer Button [US 1.29]', () => {
         expect(onEditTimer).toHaveBeenCalledWith(null);
     });
 
-    // 14
+    // 67.14
     it('[US 1.29][TS-UNIT14] success: cancelling the edit dialog closes it without calling onEditTimer', () => {
         const onEditTimer = jest.fn();
         renderSection({ onEditTimer });
@@ -152,7 +152,7 @@ describe('DiscussionTimerSection — Edit Timer Button [US 1.29]', () => {
         expect(onEditTimer).not.toHaveBeenCalled();
     });
 
-    // 15
+    // 67.15
     it('[US 1.29][TS-UNIT15] success: edit dialog closes automatically when timer expires while it is open', () => {
         jest.useFakeTimers();
         // Start with 2 seconds left
@@ -178,19 +178,19 @@ describe('DiscussionTimerSection — Edit Timer Button [US 1.29]', () => {
 describe('DiscussionTimerSection — Extend Timer Button [US 1.29]', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    // 16
+    // 67.16
     it('[US 1.29][TS-UNIT16] success: +10s button is shown when timer is set', () => {
         renderSection();
         expect(screen.getByTestId('extend-timer-button')).toBeInTheDocument();
     });
 
-    // 17
+    // 67.17
     it('[US 1.29][TS-UNIT17] success: +10s button is NOT shown when no timer is set', () => {
         renderSection({ timerEndTime: null, timerTotalSeconds: null });
         expect(screen.queryByTestId('extend-timer-button')).not.toBeInTheDocument();
     });
 
-    // 18
+    // 67.18
     it('[US 1.29][TS-UNIT18] success: clicking +10s button calls onExtendTimer with 10', () => {
         const onExtendTimer = jest.fn().mockResolvedValue(undefined);
         renderSection({ onExtendTimer });
@@ -198,7 +198,7 @@ describe('DiscussionTimerSection — Extend Timer Button [US 1.29]', () => {
         expect(onExtendTimer).toHaveBeenCalledWith(10);
     });
 
-    // 19
+    // 67.19
     it('[US 1.29][TS-UNIT19] success: +10s button does not open any dialog', () => {
         renderSection();
         fireEvent.click(screen.getByTestId('extend-timer-button'));
@@ -211,20 +211,20 @@ describe('DiscussionTimerSection — Extend Timer Button [US 1.29]', () => {
 describe('DiscussionTimerSection — Timer Display [US 1.29]', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    // 20
+    // 67.20
     it('[US 1.29][TS-UNIT20] success: timer displays MM:SS format', () => {
         renderSection();
         const timer = screen.getByTestId('instructor-timer');
         expect(timer.textContent).toMatch(/\d{2}:\d{2}/);
     });
 
-    // 21
+    // 67.21
     it('[US 1.29][TS-UNIT21] success: timer shows "remaining" label when time is left', () => {
         renderSection();
         expect(screen.getByText('remaining')).toBeInTheDocument();
     });
 
-    // 22
+    // 67.22
     it('[US 1.29][TS-UNIT22] success: timer shows "Time expired" when remaining is 0', () => {
         renderSection({ timerEndTime: Date.now() - 1000, timerTotalSeconds: 60 });
         expect(screen.getByText('Time expired')).toBeInTheDocument();

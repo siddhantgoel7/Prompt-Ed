@@ -1,3 +1,4 @@
+// Client-side Supabase helpers for lesson and course CRUD operations.
 import { createClient } from '@/lib/supabase/client';
 import type { CreateLessonInput } from '@/types/lesson';
 

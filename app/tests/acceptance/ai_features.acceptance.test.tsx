@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '../utils/renderWithProviders';
 import { ActiveCenter } from '@/components/instructor/session/ActiveCenter';
 import { ActiveSidebar } from '@/components/instructor/session/ActiveSidebar';
 import * as React from 'react';

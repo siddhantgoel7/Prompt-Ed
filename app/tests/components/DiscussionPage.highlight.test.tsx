@@ -6,7 +6,7 @@
 // [US 1.35] Hide inappropriate responses
 //   AC1: Hidden from view but remains in data
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '../utils/renderWithProviders';
 import userEvent from '@testing-library/user-event';
 import { DiscussionPage } from '@/components/instructor/DiscussionPage';
 import type { Discussion } from '@/types/discussion';
@@ -105,6 +105,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     jest.clearAllMocks();
   });
 
+  // 59.1
   it('[US 1.36][AC1-AT1] renders all responses in their default collapsed state', () => {
     renderPage();
 
@@ -115,6 +116,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
   });
 
+  // 59.2
   it('[US 1.36][AC1-AT2] clicking a response highlights it and shows the flag button', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -124,6 +126,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.getByRole('button', { name: /Flag as Inappropriate/i })).toBeInTheDocument();
   });
 
+  // 59.3
   it('[US 1.36][AC1-AT3] clicking a highlighted response collapses it', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -139,6 +142,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
   });
 
+  // 59.4
   it('[US 1.36][AC2-AT1] selecting a different response highlights both responses', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -151,6 +155,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(2);
   });
 
+  // 59.5
   it('[US 1.36][AC2-AT2] clicking a highlighted response deselects only that response', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -165,6 +170,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(1);
   });
 
+  // 59.6
   it('[US 1.36][AC2-AT3] all three responses can be highlighted simultaneously', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -175,6 +181,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(3);
   });
 
+  // 59.7
   it('[US 1.35][AC1-AT1] flagging a response calls flagResponseApi and removes it from the DOM', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -200,6 +207,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.getByText(/CYP450 enzymes/)).toBeInTheDocument();
   });
 
+  // 59.8
   it('[US 1.35][AC1-AT2] shows flagged toggle when all responses are flagged', async () => {
     const user = userEvent.setup();
     renderPage([RESPONSES[0]]);
@@ -214,17 +222,20 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     });
   });
 
+  // 59.9
   it('[US 1.35][AC1-AT3] flag button is not visible when no response is selected', () => {
     renderPage();
 
     expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
   });
 
+  // 59.10
   it('[US 1.36][AC1-AT4] filter toggle is hidden when no responses are highlighted', () => {
     renderPage();
     expect(screen.queryByRole('button', { name: /Show highlighted only/i })).not.toBeInTheDocument();
   });
 
+  // 59.11
   it('[US 1.36][AC1-AT5] filter toggle appears when responses are highlighted', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -233,6 +244,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.getByRole('button', { name: /Show highlighted only \(1\)/i })).toBeInTheDocument();
   });
 
+  // 59.12
   it('[US 1.36][AC1-AT6] filter toggle hides non-highlighted responses when active', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -249,6 +261,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.queryByText(/CYP450 enzymes/)).not.toBeInTheDocument();
   });
 
+  // 59.13
   it('[US 1.36][AC1-AT7] "Show all" button restores full response list', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -267,6 +280,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.getByText(/CYP450 enzymes/)).toBeInTheDocument();
   });
 
+  // 59.14
   it('[US 1.36][AC1-AT8] flagging all highlighted responses while filtered auto-switches back to full view', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -303,6 +317,7 @@ describe('DiscussionPage — highlight visual emphasis', () => {
     jest.clearAllMocks();
   });
 
+  // 59.15
   it('[US 1.36][AC1-AT1] highlighted response has prominent styling (colour, larger text, shadow)', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -323,6 +338,7 @@ describe('DiscussionPage — highlight visual emphasis', () => {
     expect(card).not.toBeNull();
   });
 
+  // 59.16
   it('[US 1.36][AC1-AT2] un-highlighted response returns to base styling', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -338,6 +354,7 @@ describe('DiscussionPage — highlight visual emphasis', () => {
     expect(responseText.className).not.toMatch(/text-3xl/);
   });
 
+  // 59.17
   it('[US 1.36][AC2-AT1] each of multiple highlighted responses has its own prominent styling', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -353,6 +370,7 @@ describe('DiscussionPage — highlight visual emphasis', () => {
     expect(screen.getByText(/The liver is the primary site/).className).toMatch(/text-base/);
   });
 
+  // 59.18
   it('[US 1.35][AC1-AT1] hidden (flagged) response is removed from the active list but preserved in data', async () => {
     const user = userEvent.setup();
     renderPage();
@@ -398,16 +416,19 @@ describe('DiscussionPage — flagged response restore feature', () => {
     jest.clearAllMocks();
   });
 
+  // 59.19
   it('[US 1.35][AC1-AT1] flagged toggle is hidden when no flagged responses exist', () => {
     renderPage(RESPONSES, []);
     expect(screen.queryByRole('button', { name: /Show flagged/i })).not.toBeInTheDocument();
   });
 
+  // 59.20
   it('[US 1.35][AC1-AT2] flagged toggle appears when flagged responses exist', () => {
     renderPage(RESPONSES, FLAGGED);
     expect(screen.getByRole('button', { name: /Show flagged \(1\)/i })).toBeInTheDocument();
   });
 
+  // 59.21
   it('[US 1.35][AC1-AT3] toggling shows only flagged responses and hides active responses', async () => {
     const user = userEvent.setup();
     renderPage(RESPONSES, FLAGGED);
@@ -427,6 +448,7 @@ describe('DiscussionPage — flagged response restore feature', () => {
     expect(screen.queryByText(/CYP450 enzymes/)).not.toBeInTheDocument();
   });
 
+  // 59.22
   it('[US 1.35][AC1-AT4] clicking a flagged response highlights it and shows the Unflag button', async () => {
     const user = userEvent.setup();
     renderPage(RESPONSES, FLAGGED);
@@ -441,6 +463,7 @@ describe('DiscussionPage — flagged response restore feature', () => {
     expect(screen.getByRole('button', { name: /Unflag/i })).toBeInTheDocument();
   });
 
+  // 59.23
   it('[US 1.35][AC1-AT5] clicking Unflag calls unflagResponseApi and moves response back', async () => {
     const user = userEvent.setup();
     renderPage(RESPONSES, FLAGGED);
@@ -459,6 +482,7 @@ describe('DiscussionPage — flagged response restore feature', () => {
     });
   });
 
+  // 59.24
   it('[US 1.35][AC1-AT6] Hide button switches back to showing active responses', async () => {
     const user = userEvent.setup();
     renderPage(RESPONSES, FLAGGED);
@@ -475,6 +499,7 @@ describe('DiscussionPage — flagged response restore feature', () => {
     expect(screen.getByText(/Phase I reactions/)).toBeInTheDocument();
   });
 
+  // 59.25
   it('[US 1.35][AC1-AT7] flagging a response moves it to the flagged view', async () => {
     const user = userEvent.setup();
     renderPage(RESPONSES, []);
@@ -502,6 +527,7 @@ describe('DiscussionPage — flagged response restore feature', () => {
     expect(screen.getByText(/The liver is the primary site/)).toBeInTheDocument();
   });
 
+  // 59.26
   it('[US 1.35][AC1-AT8] unflagging all responses auto-switches back to normal view', async () => {
     const user = userEvent.setup();
     renderPage(RESPONSES, FLAGGED);

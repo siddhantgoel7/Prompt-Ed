@@ -10,6 +10,7 @@ describe('useAIPreferences Hook [US 1.22]', () => {
         jest.clearAllMocks();
     });
 
+    // 53.1
     it('[US 1.22][UNIT1] success: loads preferences from API on mount', async () => {
         const mockPrefs = {
             difficulty: 'advanced',
@@ -38,6 +39,7 @@ describe('useAIPreferences Hook [US 1.22]', () => {
         expect(result.current.error).toBeNull();
     });
 
+    // 53.2
     it('[US 1.22][UNIT2] failure: handles fetch error gracefully', async () => {
         fetchMock.mockResolvedValueOnce({
             ok: false,
@@ -54,6 +56,7 @@ describe('useAIPreferences Hook [US 1.22]', () => {
         expect(result.current.preferences.difficulty).toBe('intermediate');
     });
 
+    // 53.3
     it('[US 1.22][UNIT3] success: saves new preferences via API', async () => {
         const initialPrefs = {
             difficulty: 'intermediate',
@@ -99,6 +102,7 @@ describe('useAIPreferences Hook [US 1.22]', () => {
         });
     });
 
+    // 53.4
     it('[US 1.22][UNIT4] failure: handles error when saving preferences fails', async () => {
         fetchMock.mockResolvedValueOnce({
             ok: true,

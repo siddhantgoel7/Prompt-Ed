@@ -50,6 +50,7 @@ describe('API — AI Preferences Data Layer [US 1.22]', () => {
     });
 
     describe('Fetch Preferences', () => {
+        // 51.1
         it('[US 1.22][API1] success: fetches existing preferences for a user', async () => {
             mockSupabase.from.mockReturnValue({
                 select: jest.fn().mockReturnValue({
@@ -76,6 +77,7 @@ describe('API — AI Preferences Data Layer [US 1.22]', () => {
             expect(data?.focus_areas).toBe('pharmacokinetics');
         });
 
+        // 51.2
         it('[US 1.22][API2] failure: handles PGRST116 (Not Found) gracefully', async () => {
             mockSupabase.from.mockReturnValue({
                 select: jest.fn().mockReturnValue({
@@ -101,6 +103,7 @@ describe('API — AI Preferences Data Layer [US 1.22]', () => {
     });
 
     describe('Upsert Preferences', () => {
+        // 51.3
         it('[US 1.22][API3] success: upserts new preferences for an instructor', async () => {
             mockSupabase.from.mockReturnValue({
                 upsert: jest.fn().mockResolvedValue({
@@ -127,6 +130,7 @@ describe('API — AI Preferences Data Layer [US 1.22]', () => {
             expect(mockSupabase.from().upsert).toHaveBeenCalledWith(payload);
         });
 
+        // 51.4
         it('[US 1.22][API4] failure: fails to save preferences with missing requirement', async () => {
             mockSupabase.from.mockReturnValue({
                 upsert: jest.fn().mockResolvedValue({

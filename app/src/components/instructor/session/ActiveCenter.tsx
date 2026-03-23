@@ -4,6 +4,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 import * as React from 'react';
@@ -17,6 +18,9 @@ import { AIPreferencesDialog } from './AIPreferencesDialog';
 import { AITipsButton } from './AITipsButton';
 import { transcribeAudioApi } from '@/lib/api/aiApi';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
+import type { TokenUsage } from '@/types/ai';
+import { DEBUG_TOOLS } from '@/lib/debug';
+import { useDebugSweep } from '@/hooks/useDebugSweep';
 
 
 
@@ -25,6 +29,8 @@ import { StartDiscussionDialog } from './StartDiscussionDialog';
  * Hosts AI prompt generation (with STT recording), candidate selection, and the
  * Start/Close Discussion toggle. Reads from SessionContext or explicit props.
  */
+const GENERATING_CHARS = 'Generating...'.split('');
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export function ActiveCenter(props: Partial<{
   lessonId: string;
@@ -41,6 +47,9 @@ export function ActiveCenter(props: Partial<{
   candidates: GeneratedPrompt[];
   isGenerating: boolean;
   generationWarning: string | null;
+  generationTimeMs: number | null;
+  lastTokenUsage: TokenUsage | null;
+  lastModel: string | null;
   onGenerate: (transcriptOverride?: string) => void | Promise<void>;
   onSelectCandidate: (p: GeneratedPrompt) => void;
   onRegenerate: () => void;
@@ -58,6 +67,9 @@ export function ActiveCenter(props: Partial<{
   const candidates = context ? context.candidates : props.candidates!;
   const isGenerating = context ? context.isGenerating : props.isGenerating!;
   const generationWarning = context ? context.generationWarning : props.generationWarning!;
+  const generationTimeMs = context ? context.generationTimeMs : props.generationTimeMs ?? null;
+  const lastTokenUsage = context ? context.lastTokenUsage : props.lastTokenUsage ?? null;
+  const lastModel = context ? context.lastModel : props.lastModel ?? null;
   const onGenerate = context ? context.generateCandidates : props.onGenerate!;
   const onSelectCandidate = context ? context.selectCandidate : props.onSelectCandidate!;
   const onRegenerate = context ? context.regenerateCandidates : props.onRegenerate!;
@@ -76,6 +88,10 @@ export function ActiveCenter(props: Partial<{
   });
   const [creationMode, setCreationMode] = React.useState<'ai' | 'manual'>('ai');
   const [showTimerDialog, setShowTimerDialog] = React.useState(false);
+  const { copiedReport, sweepProgress, handleCopyReport, handleRunAllCombinations } = useDebugSweep({
+    lessonId, transcriptText, candidates, isGenerating,
+    generationWarning, generationTimeMs, lastTokenUsage, lastModel, promptType,
+  });
   const [pendingCandidate, setPendingCandidate] = React.useState<GeneratedPrompt | null>(null);
   const [publishError, setPublishError] = React.useState<string | null>(null);
 
@@ -346,20 +362,55 @@ export function ActiveCenter(props: Partial<{
               </select>
 
               <AIPreferencesDialog />
-              <div className="rotating-glow-wrap">
-                <Button
-                  onClick={() => onGenerate()}
-                  disabled={isGenerating || recorder.isRecording}
-                  size="sm"
-                  className="px-4 py-1.5 rounded-full font-semibold disabled:opacity-50"
-                  style={{
-                    background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-                    color: 'white',
-                  }}
-                >
-                  {isGenerating ? 'Generating…' : 'Generate Prompts'}
-                </Button>
+              <div className={`rotating-glow-wrap${isGenerating ? ' generating' : ''}`}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={() => onGenerate()}
+                      disabled={isGenerating || recorder.isRecording}
+                      size="sm"
+                      className="px-4 py-1.5 rounded-full font-semibold"
+                      style={{
+                        background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+                        color: 'white',
+                        opacity: 1,
+                      }}
+                    >
+                      {isGenerating ? (
+                        <span aria-label="Generating…" style={{ display: 'inline-flex' }}>
+                          {GENERATING_CHARS.map((ch, i) => (
+                            <span
+                              key={i}
+                              className={ch === '.' ? 'generating-char' : 'generating-shimmer'}
+                              style={{ animationDelay: `${i * 0.07}s` }}
+                            >
+                              {ch}
+                            </span>
+                          ))}
+                        </span>
+                      ) : 'Generate Prompts'}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Use AI to generate 5 discussion prompt candidates from your transcript and uploaded files. Takes 5 to 15 seconds.</TooltipContent>
+                </Tooltip>
               </div>
+              {DEBUG_TOOLS && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={handleRunAllCombinations}
+                      disabled={isGenerating || !!sweepProgress || recorder.isRecording}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs font-semibold"
+                      style={{ borderColor: 'rgba(239,68,68,0.4)', color: 'oklch(0.55 0.22 27)' }}
+                    >
+                      {sweepProgress ? `${sweepProgress.current}/${sweepProgress.total}…` : 'Run All Combinations'}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Generate all 81 type/difficulty/style/length combinations sequentially. Downloads sweep_report.txt and sweep_report.csv when done. ~15–20 min.</TooltipContent>
+                </Tooltip>
+              )}
             </div>
 
             {generationWarning && (
@@ -372,6 +423,13 @@ export function ActiveCenter(props: Partial<{
                 }}
               >
                 {generationWarning}
+              </p>
+            )}
+
+            {DEBUG_TOOLS && sweepProgress && (
+              <p className="text-xs rounded-lg px-3 py-2 animate-pulse"
+                style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', color: '#6366f1' }}>
+                Generating {sweepProgress.current} / {sweepProgress.total} — {sweepProgress.label}
               </p>
             )}
 
@@ -451,15 +509,36 @@ export function ActiveCenter(props: Partial<{
                 ))}
 
                 <div className="flex gap-2 pt-1">
-                  <Button
-                    onClick={onRegenerate}
-                    disabled={isGenerating}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs"
-                  >
-                    {isGenerating ? 'Regenerating…' : 'Regenerate'}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={onRegenerate}
+                        disabled={isGenerating}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                      >
+                        {isGenerating ? 'Regenerating…' : 'Regenerate'}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Run AI generation again without changing the transcript or files. Use this if the previous candidates were not satisfactory.</TooltipContent>
+                  </Tooltip>
+                  {DEBUG_TOOLS && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={handleCopyReport}
+                          disabled={isGenerating || candidates.length === 0}
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                        >
+                          {copiedReport ? 'Copied!' : 'Copy Report'}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Copy generation details and all candidates to clipboard.</TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
               </div>
             )}

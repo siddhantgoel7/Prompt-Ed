@@ -13,7 +13,7 @@ global.ResizeObserver = class {
   disconnect() {}
 } as unknown as typeof ResizeObserver;
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '../utils/renderWithProviders';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 import { ActiveRightPanel } from '@/components/instructor/session/ActiveRightPanel';
@@ -152,6 +152,7 @@ function renderWithContext(vm?: Partial<SessionVM>) {
 
 describe('ActiveRightPanel — response highlight & flag feature', () => {
 
+  // 58.1
   it('[US 1.36][AC1-AT1] renders all response cards in collapsed state by default', () => {
     renderWithContext();
 
@@ -162,6 +163,7 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
   });
 
+  // 58.2
   it('[US 1.36][AC1-AT2] clicking a response highlights it and shows the flag button', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -173,6 +175,7 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     expect(screen.getByRole('button', { name: /Flag as Inappropriate/i })).toBeInTheDocument();
   });
 
+  // 58.3
   it('[US 1.36][AC1-AT3] clicking a highlighted response collapses it and hides the flag button', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -188,6 +191,7 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
   });
 
+  // 58.4
   it('[US 1.36][AC2-AT1] clicking a different response highlights both responses', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -203,6 +207,7 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     expect(flagButtons).toHaveLength(2);
   });
 
+  // 58.5
   it('[US 1.35][AC1-AT1] clicking "Flag as Inappropriate" calls removeResponse with the response ID', async () => {
     const user = userEvent.setup();
     const { contextValue } = renderWithContext();
@@ -219,6 +224,7 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     });
   });
 
+  // 58.6
   it('does not render "Flag as Inappropriate" for multiple-choice responses', async () => {
     const user = userEvent.setup();
     renderWithContext({
@@ -236,6 +242,7 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
   });
 
+  // 58.7
   it('[US 1.36][AC2-AT2] multiple responses can be highlighted at the same time', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -253,6 +260,7 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(3);
   });
 
+  // 58.8
   it('[US 1.36][AC2-AT3] clicking a highlighted response deselects only that response', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -268,11 +276,13 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(1);
   });
 
+  // 58.9
   it('[US 1.36][AC1-AT4] filter toggle is hidden when no responses are highlighted', () => {
     renderWithContext();
     expect(screen.queryByRole('button', { name: /Show highlighted only/i })).not.toBeInTheDocument();
   });
 
+  // 58.10
   it('[US 1.36][AC1-AT5] filter toggle appears when responses are highlighted', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -281,6 +291,7 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     expect(screen.getByRole('button', { name: /Show highlighted only \(1\)/i })).toBeInTheDocument();
   });
 
+  // 58.11
   it('[US 1.36][AC1-AT6] filter toggle shows only highlighted responses when active', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -297,6 +308,7 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     expect(screen.queryByText(/Third student response/)).not.toBeInTheDocument();
   });
 
+  // 58.12
   it('[US 1.36][AC1-AT7] "Show all" button restores full response list', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -322,6 +334,7 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
 
 describe('ActiveRightPanel — highlight visual emphasis', () => {
 
+  // 58.13
   it('[US 1.36][AC1-AT1] highlighted response has prominent styling (colour, larger text, shadow)', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -342,6 +355,7 @@ describe('ActiveRightPanel — highlight visual emphasis', () => {
     expect(card).not.toBeNull();
   });
 
+  // 58.14
   it('[US 1.36][AC1-AT2] un-highlighted response returns to base styling', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -357,6 +371,7 @@ describe('ActiveRightPanel — highlight visual emphasis', () => {
     expect(responseText.className).not.toMatch(/text-2xl/);
   });
 
+  // 58.15
   it('[US 1.36][AC2-AT1] each of multiple highlighted responses has its own prominent styling', async () => {
     const user = userEvent.setup();
     renderWithContext();
@@ -372,6 +387,7 @@ describe('ActiveRightPanel — highlight visual emphasis', () => {
     expect(screen.getByText(/Second student response/).className).toMatch(/text-sm/);
   });
 
+  // 58.16
   it('[US 1.35][AC1-AT1] hidden (flagged) response is removed from the visible list', async () => {
     const user = userEvent.setup();
     const { contextValue } = renderWithContext();

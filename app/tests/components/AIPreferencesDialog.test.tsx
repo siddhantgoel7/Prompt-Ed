@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '../utils/renderWithProviders';
 import '@testing-library/jest-dom';
 import { AIPreferencesDialog } from '@/components/instructor/session/AIPreferencesDialog';
 import { useAIPreferences } from '@/hooks/useAIPreferences';
@@ -32,6 +32,7 @@ describe('AIPreferencesDialog Component [US 1.22]', () => {
         jest.clearAllMocks();
     });
 
+    // 57.1
     it('[US 1.22][COMP1] success: renders button and opens dialog with populated settings', async () => {
         render(<AIPreferencesDialog />);
 
@@ -44,26 +45,28 @@ describe('AIPreferencesDialog Component [US 1.22]', () => {
         expect(dialogTitle).toBeInTheDocument();
 
         // Check defaults populated from mocked hook
-        const difficultySelect = screen.getByLabelText(/Difficulty/i) as HTMLSelectElement;
+        // Use getByRole to avoid ambiguity with tooltip text that also contains "Difficulty"
+        const difficultySelect = screen.getByRole('combobox', { name: /Difficulty/i }) as HTMLSelectElement;
         expect(difficultySelect.value).toBe('intermediate');
 
-        const focusAreaTextarea = screen.getByLabelText(/Focus Areas/i) as HTMLTextAreaElement;
+        const focusAreaTextarea = screen.getByRole('textbox', { name: /Focus Areas/i }) as HTMLTextAreaElement;
         expect(focusAreaTextarea.value).toBe('mocked focus area');
     });
 
+    // 57.2
     it('[US 1.22][COMP2] success: modifies settings and calls save gracefully', async () => {
         render(<AIPreferencesDialog />);
         fireEvent.click(screen.getByRole('button', { name: /Settings/i }));
 
         await screen.findByRole('heading', { name: 'AI Generation Preferences' });
 
-        const difficultySelect = screen.getByLabelText(/Difficulty/i);
+        const difficultySelect = screen.getByRole('combobox', { name: /Difficulty/i });
         fireEvent.change(difficultySelect, { target: { value: 'advanced' } });
 
-        const styleSelect = screen.getByLabelText(/Style/i);
+        const styleSelect = screen.getByRole('combobox', { name: /Style/i });
         fireEvent.change(styleSelect, { target: { value: 'factual' } });
 
-        const lengthSelect = screen.getByLabelText(/Length/i);
+        const lengthSelect = screen.getByRole('combobox', { name: /Length/i });
         fireEvent.change(lengthSelect, { target: { value: 'brief' } });
 
         const saveButton = screen.getByRole('button', { name: 'Save Settings' });
@@ -79,6 +82,7 @@ describe('AIPreferencesDialog Component [US 1.22]', () => {
         });
     });
 
+    // 57.3
     it('[US 1.22][COMP3] success: shows loading state when preferences are loading', async () => {
         (useAIPreferences as jest.Mock).mockReturnValue({
             preferences: {},

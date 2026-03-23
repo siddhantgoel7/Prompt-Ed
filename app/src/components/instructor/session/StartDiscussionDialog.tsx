@@ -11,6 +11,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 
 interface StartDiscussionDialogProps {
   open: boolean;
@@ -74,6 +76,12 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
               )}
             </div>
             <span className="text-sm font-medium">No Time Limit</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About no time limit" />
+              </TooltipTrigger>
+              <TooltipContent>Students can keep responding until you manually close the discussion.</TooltipContent>
+            </Tooltip>
           </label>
 
           {/* Timer inputs */}

@@ -52,6 +52,7 @@ describe('SplitView Component', () => {
   });
 
   describe('Layout and Navigation', () => {
+    // 64.1
     it('[US 1.39] renders full-screen overlay with back button and title', () => {
       render(<SplitView discussions={discussions} lessonId="lesson-456" onBack={onBack} />);
 
@@ -59,6 +60,7 @@ describe('SplitView Component', () => {
       expect(screen.getByRole('button', { name: /Back to Session/i })).toBeInTheDocument();
     });
 
+    // 64.2
     it('[US 1.39] calls onBack when "Back to Session" is clicked', () => {
       render(<SplitView discussions={discussions} lessonId="lesson-456" onBack={onBack} />);
 
@@ -66,6 +68,7 @@ describe('SplitView Component', () => {
       expect(onBack).toHaveBeenCalledTimes(1);
     });
 
+    // 64.3
     it('[US 1.39] renders left and right pane labels', () => {
       render(<SplitView discussions={discussions} lessonId="lesson-456" onBack={onBack} />);
 
@@ -75,6 +78,7 @@ describe('SplitView Component', () => {
   });
 
   describe('Discussion Selection', () => {
+    // 64.4
     it('[US 1.25][US 1.39] shows active and closed tabs in each pane', () => {
       render(<SplitView discussions={discussions} lessonId="lesson-456" onBack={onBack} />);
 
@@ -84,6 +88,7 @@ describe('SplitView Component', () => {
       expect(closedTabs).toHaveLength(2);
     });
 
+    // 64.5
     it('[US 1.25][US 1.39] displays active discussion cards with prompt text and response count', () => {
       render(<SplitView discussions={discussions} lessonId="lesson-456" onBack={onBack} />);
 
@@ -94,6 +99,7 @@ describe('SplitView Component', () => {
       expect(counts.length).toBeGreaterThanOrEqual(2);
     });
 
+    // 64.6
     it('[US 1.25][US 1.39] renders closed tab with correct count', () => {
       render(<SplitView discussions={discussions} lessonId="lesson-456" onBack={onBack} />);
 
@@ -101,6 +107,7 @@ describe('SplitView Component', () => {
       expect(closedTabs).toHaveLength(2);
     });
 
+    // 64.7
     it('[US 1.25][US 1.39] shows status badges on discussion cards', () => {
       render(<SplitView discussions={discussions} lessonId="lesson-456" onBack={onBack} />);
 
@@ -108,6 +115,7 @@ describe('SplitView Component', () => {
       expect(activeBadges.length).toBeGreaterThanOrEqual(2);
     });
 
+    // 64.8
     it('[US 1.25][US 1.39] handles empty discussion list gracefully', () => {
       render(<SplitView discussions={[]} lessonId="lesson-456" onBack={onBack} />);
 
@@ -117,6 +125,7 @@ describe('SplitView Component', () => {
   });
 
   describe('Discussion Detail View', () => {
+    // 64.9
     it('[US 1.37][US 1.39] shows discussion detail with prompt and back button after selecting a discussion', async () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
@@ -145,6 +154,7 @@ describe('SplitView Component', () => {
       expect(promptElements.length).toBeGreaterThanOrEqual(1);
     });
 
+    // 64.10
     it('[US 1.37][US 1.39] fetches responses from Supabase when discussion is selected', async () => {
       const responsesData = createMockResponses('discussion-123', 3);
 
@@ -177,6 +187,7 @@ describe('SplitView Component', () => {
       });
     });
 
+    // 64.11
     it('[US 1.37][US 1.39] returns to discussion list when pane back button is clicked', async () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
@@ -207,6 +218,7 @@ describe('SplitView Component', () => {
       });
     });
 
+    // 64.12
     it('[US 1.37][US 1.39] shows "No responses yet." when discussion has no responses', async () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
@@ -230,6 +242,7 @@ describe('SplitView Component', () => {
   });
 
   describe('Independent Pane Selection', () => {
+    // 64.13
     it('[US 1.25][US 1.39] allows selecting different discussions in left and right panes', async () => {
       const disc2: DiscussionWithResponseCount = {
         ...mockDiscussion,
@@ -264,6 +277,7 @@ describe('SplitView Component', () => {
       });
     });
 
+    // 64.14
     it('[US 1.25][US 1.39] allows selecting the same discussion in both panes', async () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({
@@ -294,6 +308,7 @@ describe('SplitView Component', () => {
   });
 
   describe('Live Active Discussion Responses', () => {
+    // 64.15
     it('[US 1.34] uses provided live responses for the active discussion', async () => {
       const { rerender } = render(
         <SplitView
@@ -336,6 +351,7 @@ describe('SplitView Component', () => {
   });
 
   describe('Loading State', () => {
+    // 64.16
     it('[US 1.37] shows loading text while fetching responses', async () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn().mockReturnValue({

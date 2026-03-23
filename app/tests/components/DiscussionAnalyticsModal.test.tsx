@@ -1,7 +1,7 @@
 // [US 1.39] list view of responses — sequential display with timestamps
 // [US 1.40] metrics view — participation rate, avg response length, timeline
 
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '../utils/renderWithProviders';
 import { DiscussionAnalyticsModal } from '@/components/instructor/session/DiscussionAnalyticsModal';
 import type { Discussion } from '@/types/discussion';
 import type { Response } from '@/types/response';
@@ -95,6 +95,7 @@ function renderModal(
 
 describe('[US 1.39] Response list view', () => {
 
+  // 60.1
   it('[AT1] success: all responses are displayed in a sequential list', () => {
     renderModal(BASE_DISCUSSION, RESPONSES);
 
@@ -103,6 +104,7 @@ describe('[US 1.39] Response list view', () => {
     expect(screen.getByText('Third response here.')).toBeInTheDocument();
   });
 
+  // 60.2
   it('[AT2] success: each response is displayed with a timestamp', () => {
     renderModal(BASE_DISCUSSION, RESPONSES);
 
@@ -112,18 +114,21 @@ describe('[US 1.39] Response list view', () => {
     expect(timestamps.length).toBeGreaterThanOrEqual(RESPONSES.length);
   });
 
+  // 60.3
   it('[AT3] success: response count heading shows correct total', () => {
     renderModal(BASE_DISCUSSION, RESPONSES);
 
     expect(screen.getByText(/All Responses \(3\)/i)).toBeInTheDocument();
   });
 
+  // 60.4
   it('[AT4] failure: empty state shown when no responses exist', () => {
     renderModal(BASE_DISCUSSION, []);
 
     expect(screen.getByText(/No responses yet/i)).toBeInTheDocument();
   });
 
+  // 60.5
   it('[AT5] success: modal title includes the prompt text', () => {
     renderModal(BASE_DISCUSSION, RESPONSES);
 
@@ -137,6 +142,7 @@ describe('[US 1.39] Response list view', () => {
 
 describe('[US 1.40] Response metrics', () => {
 
+  // 60.6
   it('[AT1] success: participation rate shown for closed discussion (responses / snapshot)', () => {
     // 3 responses / 4 students = 75%
     renderModal(BASE_DISCUSSION, RESPONSES, 4);
@@ -145,6 +151,7 @@ describe('[US 1.40] Response metrics', () => {
     expect(screen.getByText(/3 \/ 4 students/i)).toBeInTheDocument();
   });
 
+  // 60.7
   it('[AT2] success: participation rate uses studentCount when snapshot is null', () => {
     const noSnapshot: Discussion = { ...BASE_DISCUSSION, participant_snapshot: null };
     // 3 responses / 4 students = 75%
@@ -153,6 +160,7 @@ describe('[US 1.40] Response metrics', () => {
     expect(screen.getByText('75%')).toBeInTheDocument();
   });
 
+  // 60.8
   it('[AT3] success: participation rate is live for active discussion (uses higher of snapshot vs studentCount)', () => {
     // snapshot=3, studentCount=5 → should use 5 → 3/5 = 60%
     renderModal(ACTIVE_DISCUSSION, RESPONSES, 5);
@@ -161,6 +169,7 @@ describe('[US 1.40] Response metrics', () => {
     expect(screen.getByText(/3 \/ 5 students/i)).toBeInTheDocument();
   });
 
+  // 60.9
   it('[AT4] failure: participation rate shows — when no student count available', () => {
     const noSnapshot: Discussion = { ...BASE_DISCUSSION, participant_snapshot: null };
     renderModal(noSnapshot, RESPONSES, 0);
@@ -168,12 +177,14 @@ describe('[US 1.40] Response metrics', () => {
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
+  // 60.10
   it('[AT5] success: response timeline chart is rendered when responses exist', () => {
     renderModal(BASE_DISCUSSION, RESPONSES);
 
     expect(screen.getByText(/Response Timeline/i)).toBeInTheDocument();
   });
 
+  // 60.11
   it('[AT6] success: only Responses and Response Rate stat cards are shown (avg length and first response removed)', () => {
     renderModal(BASE_DISCUSSION, RESPONSES);
 
@@ -183,12 +194,14 @@ describe('[US 1.40] Response metrics', () => {
     expect(screen.queryByText(/after publish/i)).not.toBeInTheDocument();
   });
 
+  // 60.12
   it('[AT7] success: response timeline section is rendered', () => {
     renderModal(BASE_DISCUSSION, RESPONSES);
 
     expect(screen.getByText(/Response Timeline/i)).toBeInTheDocument();
   });
 
+  // 60.13
   it('[AT8] success: total response count stat card is shown', () => {
     renderModal(BASE_DISCUSSION, RESPONSES);
 
@@ -197,6 +210,7 @@ describe('[US 1.40] Response metrics', () => {
   });
 
   // MC-specific distribution
+  // 60.14
   it('[AT9] success: MC answer distribution shown with correct answer highlighted', () => {
     renderModal(MC_DISCUSSION, MC_RESPONSES, 3);
 
@@ -205,6 +219,7 @@ describe('[US 1.40] Response metrics', () => {
     expect(screen.getByText(/Correct/i)).toBeInTheDocument();
   });
 
+  // 60.15
   it('[AT10] success: MC distribution shows per-option counts', () => {
     renderModal(MC_DISCUSSION, MC_RESPONSES, 3);
 

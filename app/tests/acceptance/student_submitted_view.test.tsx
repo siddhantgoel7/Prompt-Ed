@@ -104,18 +104,21 @@ function makeSubmitted(discussion: any = MC_FEEDBACK_ON, timerOverrides: Record<
 describe('MC UI — No textarea for multiple choice', () => {
     beforeEach(() => jest.clearAllMocks());
 
+    // 65.1
     it('[SV-MC-1] success: no textarea is shown for MC questions in active state', () => {
         mockHook.mockReturnValue(makeActive());
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.queryByPlaceholderText('Type your response here…')).not.toBeInTheDocument();
     });
 
+    // 65.2
     it('[SV-MC-2] success: textarea IS shown for short-answer questions', () => {
         mockHook.mockReturnValue(makeActive(SHORT_ANSWER));
         render(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByPlaceholderText('Type your response here…')).toBeInTheDocument();
     });
 
+    // 65.3
     it('[SV-MC-3] success: textarea IS shown for long-answer questions', () => {
         mockHook.mockReturnValue(makeActive(LONG_ANSWER));
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -140,16 +143,19 @@ describe('MC Submitted View — Scenario 1: no timer + feedback enabled', () => 
         return { rerender };
     }
 
+    // 65.4
     it('[SV-MC1-1] success: correct answer shows Great job! banner', () => {
         submitAndRerender('A');
         expect(screen.getByText(/Great job/i)).toBeInTheDocument();
     });
 
+    // 65.5
     it('[SV-MC1-2] success: incorrect answer shows Not quite! banner', () => {
         submitAndRerender('B');
         expect(screen.getByText(/Not quite/i)).toBeInTheDocument();
     });
 
+    // 65.6
     it('[SV-MC1-3] success: correct answer banner has green styling', () => {
         submitAndRerender('A');
         const banner = screen.getByTestId('mc-feedback-banner');
@@ -158,6 +164,7 @@ describe('MC Submitted View — Scenario 1: no timer + feedback enabled', () => 
         expect(banner).toHaveAttribute('data-variant', 'correct');
     });
 
+    // 65.7
     it('[SV-MC1-4] success: incorrect answer banner has red styling', () => {
         submitAndRerender('B');
         const banner = screen.getByTestId('mc-feedback-banner');
@@ -166,11 +173,13 @@ describe('MC Submitted View — Scenario 1: no timer + feedback enabled', () => 
         expect(banner).toHaveAttribute('data-variant', 'incorrect');
     });
 
+    // 65.8
     it('[SV-MC1-5] success: full question is shown during feedback window', () => {
         submitAndRerender('A');
         expect(screen.getByText('What is the mechanism of aspirin?')).toBeInTheDocument();
     });
 
+    // 65.9
     it('[SV-MC1-6] success: correct option is highlighted distinctly when wrong answer submitted', () => {
         submitAndRerender('B');
         // data-testid avoids text-content matching; data-state="correct-highlight" is the semantic signal
@@ -179,6 +188,7 @@ describe('MC Submitted View — Scenario 1: no timer + feedback enabled', () => 
         expect(correctBtn).toHaveAttribute('data-state', 'correct-highlight');
     });
 
+    // 65.10
     it('[SV-MC1-7] success: submitted wrong option is highlighted red', () => {
         submitAndRerender('B');
         // data-state="wrong-submitted" is the semantic signal — avoids brittle color-code regex assertions
@@ -187,6 +197,7 @@ describe('MC Submitted View — Scenario 1: no timer + feedback enabled', () => 
         expect(wrongBtn).toHaveAttribute('data-state', 'wrong-submitted');
     });
 
+    // 65.11
     it('[SV-MC1-8] success: submitted correct option is highlighted green', () => {
         submitAndRerender('A');
         // data-state="correct-submitted" is the semantic signal — avoids brittle color-code regex assertions
@@ -204,6 +215,7 @@ describe('MC Submitted View — Scenario 2: timed + feedback enabled', () => {
     const timerRunning = { timerEndTime: Date.now() + 30_000, timerTotalSeconds: 30, timerExpired: false };
     const timerExpired = { timerEndTime: Date.now() - 1_000, timerTotalSeconds: 30, timerExpired: true };
 
+    // 65.12
     it('[SV-MC2-1] success: submitted option shown without correctness feedback while timer is running', () => {
         mockHook.mockReturnValue(makeActive(MC_FEEDBACK_ON, timerRunning));
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
@@ -221,6 +233,7 @@ describe('MC Submitted View — Scenario 2: timed + feedback enabled', () => {
         expect(submittedBtn).toBeInTheDocument();
     });
 
+    // 65.13
     it('[SV-MC2-2] success: "results will be shown when time\'s up" shown while timer running', () => {
         mockHook.mockReturnValue(makeActive(MC_FEEDBACK_ON, timerRunning));
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
@@ -232,6 +245,7 @@ describe('MC Submitted View — Scenario 2: timed + feedback enabled', () => {
         expect(screen.getByText(/results will be shown when time/i)).toBeInTheDocument();
     });
 
+    // 65.14
     it('[SV-MC2-3] success: Great job! shown after timer expires (correct answer)', () => {
         mockHook.mockReturnValue(makeActive(MC_FEEDBACK_ON, timerRunning));
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
@@ -245,6 +259,7 @@ describe('MC Submitted View — Scenario 2: timed + feedback enabled', () => {
         expect(screen.getByText(/Great job/i)).toBeInTheDocument();
     });
 
+    // 65.15
     it('[SV-MC2-4] success: Not quite! shown after timer expires (incorrect answer)', () => {
         mockHook.mockReturnValue(makeActive(MC_FEEDBACK_ON, timerRunning));
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
@@ -264,6 +279,7 @@ describe('MC Submitted View — Scenario 2: timed + feedback enabled', () => {
 describe('MC Submitted View — Scenario 3: no feedback', () => {
     beforeEach(() => jest.clearAllMocks());
 
+    // 65.16
     it('[SV-MC3-1] success: submitted option shown with highlight (no feedback, no timer)', () => {
         mockHook.mockReturnValue(makeActive(MC_FEEDBACK_OFF));
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
@@ -278,6 +294,7 @@ describe('MC Submitted View — Scenario 3: no feedback', () => {
         expect(submittedBtn).toHaveAttribute('data-state', 'submitted');
     });
 
+    // 65.17
     it('[SV-MC3-2] success: no feedback banner shown when feedback disabled', () => {
         mockHook.mockReturnValue(makeActive(MC_FEEDBACK_OFF));
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
@@ -291,6 +308,7 @@ describe('MC Submitted View — Scenario 3: no feedback', () => {
         expect(screen.queryByText(/Not quite/i)).not.toBeInTheDocument();
     });
 
+    // 65.18
     it('[SV-MC3-3] success: full question is shown after submission (no feedback)', () => {
         mockHook.mockReturnValue(makeActive(MC_FEEDBACK_OFF));
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
@@ -308,6 +326,7 @@ describe('MC Submitted View — Scenario 3: no feedback', () => {
 describe('Short/Long Answer Submitted View — Scenario 1: no timer', () => {
     beforeEach(() => jest.clearAllMocks());
 
+    // 65.19
     it('[SV-SA1-1] success: full question shown after short-answer submission (no timer)', () => {
         mockHook.mockReturnValue(makeActive(SHORT_ANSWER));
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
@@ -321,6 +340,7 @@ describe('Short/Long Answer Submitted View — Scenario 1: no timer', () => {
         expect(screen.getByText('Explain the pharmacokinetics of ibuprofen.')).toBeInTheDocument();
     });
 
+    // 65.20
     it('[SV-SA1-2] success: submitted answer text is displayed after short-answer submission', () => {
         mockHook.mockReturnValue({
             ...makeActive(SHORT_ANSWER),
@@ -335,6 +355,7 @@ describe('Short/Long Answer Submitted View — Scenario 1: no timer', () => {
         expect(screen.getByText('Aspirin inhibits COX enzymes.')).toBeInTheDocument();
     });
 
+    // 65.21
     it('[SV-SA1-3] success: full question shown after long-answer submission (no timer)', () => {
         mockHook.mockReturnValue(makeActive(LONG_ANSWER));
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
@@ -348,6 +369,7 @@ describe('Short/Long Answer Submitted View — Scenario 1: no timer', () => {
         expect(screen.getByText('Explain the pharmacokinetics of ibuprofen.')).toBeInTheDocument();
     });
 
+    // 65.22
     it('[SV-SA1-4] success: no MC feedback banner shown for short-answer questions', () => {
         mockHook.mockReturnValue(makeSubmitted(SHORT_ANSWER));
         render(<StudentSessionPage lessonId="lesson-1" />);
@@ -363,6 +385,7 @@ describe('Short/Long Answer Submitted View — Scenario 2: timed', () => {
     const timerRunning = { timerEndTime: Date.now() + 30_000, timerTotalSeconds: 30, timerExpired: false };
     const timerExpiredState = { timerEndTime: Date.now() - 1_000, timerTotalSeconds: 30, timerExpired: true };
 
+    // 65.23
     it('[SV-SA2-1] success: waiting message shown while timer still running (short answer)', () => {
         mockHook.mockReturnValue(makeActive(SHORT_ANSWER, timerRunning));
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
@@ -376,6 +399,7 @@ describe('Short/Long Answer Submitted View — Scenario 2: timed', () => {
         expect(screen.getByText(/results will be shown when time/i)).toBeInTheDocument();
     });
 
+    // 65.24
     it('[SV-SA2-2] success: full question + answer shown after timer expires (short answer)', () => {
         mockHook.mockReturnValue({
             ...makeActive(SHORT_ANSWER, timerRunning),
