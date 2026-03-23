@@ -387,7 +387,7 @@ describe('[US 1.16] parsePptx', () => {
       // Note: We use a small compressed buffer but large uncompressedSize
       zip.file('large.txt', Buffer.alloc(151 * 1024 * 1024)); 
       const buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
-      await expect(parsePptx(buf)).rejects.toThrow(/exceeds safety limit/);
+      await expect(parsePptx(buf)).rejects.toThrow(/exceeds safety limit|High compression ratio/);
     });
 
     // [Manual Test] Covers ReDoS prevention logic (S5852)
