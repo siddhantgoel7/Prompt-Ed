@@ -3,6 +3,7 @@
 // Hook that manages all state and actions for the instructor's lessons page,
 // including fetching course/lesson data, modal state, and create/delete operations.
 import * as React from 'react';
+import { type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { createClient } from '@/lib/supabase/client';
@@ -106,7 +107,7 @@ export function useLessonsPage(courseId: string) {
   );
 
   const submitCreate = React.useCallback(
-    async (e: React.FormEvent) => {
+    async (e: FormEvent) => {
       e.preventDefault();
       setError(null);
 

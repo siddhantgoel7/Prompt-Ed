@@ -2,6 +2,7 @@
 'use client';
 
 import * as React from 'react';
+import { type FormEvent } from 'react';
 import type { CreateCourseInput } from '@/types/course';
 
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,7 @@ export function CourseDialog({
   mode: 'add' | 'edit';
   value: CreateCourseInput;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: FormEvent) => void;
   error: string | null;
   saving: boolean;
 }) {

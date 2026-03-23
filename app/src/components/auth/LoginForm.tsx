@@ -3,7 +3,7 @@
 // .btn-submit) to keep the JSX concise and stay in sync with SignUpForm.
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmail, signInWithGoogle } from '@/lib/supabase/auth';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -27,7 +27,7 @@ export function LoginForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);

@@ -81,7 +81,6 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
 
     // 1
     test('[US 1.29][UI-AT1] success: timer dialog appears when instructor clicks Start Discussion', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Requires mocked session env');
         await setupInstructorSession(page);
 
         // Type a prompt
@@ -97,7 +96,6 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
 
     // 2
     test('[US 1.29][UI-AT2] success: timer dialog default is 1 minute', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Requires mocked session env');
         await setupInstructorSession(page);
 
         const promptArea = page.locator('textarea').first();
@@ -114,7 +112,6 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
 
     // 3
     test('[US 1.29][UI-AT3] success: "No Time Limit" checkbox is available in dialog', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Requires mocked session env');
         await setupInstructorSession(page);
 
         const promptArea = page.locator('textarea').first();
@@ -127,7 +124,6 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
 
     // 4
     test('[US 1.29][UI-AT4] success: Cancel button in dialog closes it without publishing', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Requires mocked session env');
         await setupInstructorSession(page);
 
         const promptArea = page.locator('textarea').first();
@@ -141,7 +137,6 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
 
     // 5
     test('[US 1.29][UI-AT5] success: Close Discussion button NOT in the center panel', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Requires mocked session env');
         await setupInstructorSession(page);
 
         // Before a discussion starts, center panel should not have Close Discussion
@@ -151,7 +146,6 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
 
     // 6
     test('[US 1.29][UI-AT6] success: timer section shows when a discussion with timer is active', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Requires mocked session env');
         await setupInstructorSession(page);
 
         // Mock discussion insert to return a timed discussion
@@ -199,7 +193,6 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
 
     // 7
     test('[US 1.29][UI-AT7] success: timer section shows "No Time Limit" label when no timer selected', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Requires mocked session env');
         await setupInstructorSession(page);
 
         await page.route('**/rest/v1/discussions*', async (route) => {
@@ -247,7 +240,6 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
 
     // 8
     test('[US 1.29][UI-AT8] success: Close Discussion button appears in timer section when discussion is active', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Requires mocked session env');
         await setupInstructorSession(page);
 
         await page.route('**/rest/v1/discussions*', async (route) => {
