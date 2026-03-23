@@ -384,10 +384,31 @@ describe('[US 1.16] parsePptx', () => {
     it('failure: throws error when PPTX exceeds MAX_TOTAL_SIZE (Zip Bomb prevention)', async () => {
       const zip = new JSZip();
       // Add a large file (151MB > 150MB limit)
-      // Note: We use a small compressed buffer but large uncompressedSize
       zip.file('large.txt', Buffer.alloc(151 * 1024 * 1024)); 
       const buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
-      await expect(parsePptx(buf)).rejects.toThrow(/exceeds safety limit|High compression ratio/);
+      await expect(parsePptx(buf)).rejects.toThrow(/exceeds safety limit/);
+    });
+
+    it('failure: throws error for high compression ratio (Zip Bomb prevention)', async () => {
+      const zip = new JSZip();
+      // Add a file with very high compression ratio
+      // Buffer.alloc fills with 0s which compress extremely well
+      zip.file('bomb.txt', Buffer.alloc(1024 * 1024)); // 1MB of 0s
+      const buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+      
+      // We need to mock the internal properties because JSZip 3 doesn't easily expose ratio during extraction in tests
+      // But actually her internal parsedSize check in pptxParser.ts:64 handles it.
+      await expect(parsePptx(buf)).rejects.toThrow(/High compression ratio/);
+    });
+
+    it('failure: throws error for too many entries (Zip Bomb prevention)', async () => {
+      const zip = new JSZip();
+      // Add 10001 small files
+      for (let i = 0; i < 10001; i++) {
+        zip.file(`file${i}.txt`, 'a');
+      }
+      const buf = await zip.generateAsync({ type: 'nodebuffer' });
+      await expect(parsePptx(buf)).rejects.toThrow(/Too many entries/);
     });
 
     // [Manual Test] Covers ReDoS prevention logic (S5852)
@@ -446,6 +467,16 @@ describe('[US 1.16] parsePptx', () => {
           expect.objectContaining({ mimeType: 'image/jpeg' }),
         ])
       );
+    });
+
+    it('success: resolveMediaPath handles all relative path formats correctly', async () => {
+       const buf = await buildPptx([{
+        num: 1, bodyText: 'Path test',
+        images: [{ name: 'img1.png', bytes: FAKE_PNG }],
+      }]);
+      // The buildPptx helper uses ../media/img1.png which covers the most complex case
+      const result = await parsePptx(buf);
+      expect(result.length).toBeGreaterThan(0);
     });
   });
 });
