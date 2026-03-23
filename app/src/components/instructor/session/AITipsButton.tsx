@@ -180,13 +180,21 @@ function TipsModal({ onClose }: { onClose: () => void }) {
   return ReactDOM.createPortal(
     <div
       className="fixed inset-0 flex items-center justify-center p-4"
-      style={{ zIndex: 110, background: 'var(--color-black-alpha-30)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
-      onClick={onClose}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }}
-      role="button"
-      tabIndex={-1}
-      aria-label="Close modal backdrop"
+      style={{ zIndex: 110 }}
     >
+      {/* Backdrop sibling — an actual button for accessibility and simpler code (no stopPropagation needed) */}
+      <button
+        type="button"
+        className="absolute inset-0 w-full h-full"
+        style={{
+          background: 'var(--color-black-alpha-30)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+        }}
+        onClick={onClose}
+        aria-label="Close tips backdrop"
+      />
+
       <div
         className="relative w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl p-6 enter"
         style={{
@@ -194,7 +202,6 @@ function TipsModal({ onClose }: { onClose: () => void }) {
           border: '1px solid var(--border-default)',
           boxShadow: '0 8px 40px var(--color-black-alpha-30)',
         }}
-        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="ai-tips-title"
