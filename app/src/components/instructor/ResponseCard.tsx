@@ -171,6 +171,7 @@ export function ResponseCard({
   return (
     <div
       role="button"
+      aria-label="Student response"
       tabIndex={0}
       className={cn(
         'rounded-xl cursor-pointer transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
