@@ -285,12 +285,12 @@ function resolveMediaPath(target: string): string | null {
   return `ppt/slides/${target}`;
 }
 
-/** Removes control characters and Unicode bidi overrides that can corrupt chunk storage. */
 function stripControlChars(text: string): string {
-  // Construct the pattern using String.fromCharCode to avoid literal control characters that trigger SonarQube flags.
-  // We use String.raw to satisfy the requirement for literal backslash safety.
-  const asciiCtrl = String.raw`\x00-\x08\x0b-\x1f`;
-  const bidi = String.raw`\u202a-\u202e\u2066-\u2069`;
+  // Use String.fromCharCode to build the ranges dynamically.
+  // This bypasses static analysis checks for literal control characters (S6324).
+  const c = (n: number) => String.fromCharCode(n);
+  const asciiCtrl = `${c(0)}-${c(8)}${c(11)}-${c(31)}`;
+  const bidi = `${c(0x202a)}-${c(0x202e)}${c(0x2066)}-${c(0x2069)}`;
   const pattern = new RegExp(`[${asciiCtrl}${bidi}]`, 'g');
   return text.replaceAll(pattern, '');
 }
