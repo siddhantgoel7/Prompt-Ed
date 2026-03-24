@@ -50,9 +50,18 @@ export function ActiveRightPanel(props: {
       style={{ width: collapsed ? '52px' : '380px' }}
     >
       <div className="flex items-center justify-between h-14 px-3 border-b border-line-subtle bg-surface-glass backdrop-blur-md sticky top-0 z-10">
-        {!collapsed && <h2 className="text-sm font-bold text-content-primary">Discussion</h2>}
+        {!collapsed && (
+          <div className="flex items-center justify-between flex-1">
+            <span className="text-xs font-semibold text-content-primary">Live Responses</span>
+            <div className="flex items-center gap-1 text-xs text-content-muted mr-2">
+              <span className="font-semibold text-content-secondary">{responses.length}</span>
+              {contextProps.peakStudentCount > 0 && <span>/ {contextProps.peakStudentCount}</span>}
+            </div>
+          </div>
+        )}
         <button
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? 'Expand panel' : 'Collapse panel'}
           className="p-1.5 rounded-md hover:bg-surface-raised transition-colors text-content-muted"
         >
           {collapsed ? (
