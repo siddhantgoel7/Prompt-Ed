@@ -240,11 +240,7 @@ function generateCsvReport(results: any[], BLOOMS_ENCODE: any, stdDev: any, word
     const wcs = r.candidates.map((c: any) => wordCount(c.promptText));
     const meanWC = wcs.length ? (wcs.reduce((a: number, b: number) => a + b, 0) / wcs.length).toFixed(1) : '';
     const lenVar = stdDev(wcs).toFixed(2);
-    const mcBias = r.combo.promptType === 'multiple_choice' ? (() => {
-      const bias: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
-      r.candidates.forEach((c: any) => { const lbl = c.mcOptions?.find((o: any) => o.is_correct)?.label; if (lbl) bias[lbl] = (bias[lbl] || 0) + 1; });
-      return Object.entries(bias).map(([k, v]) => `${k}:${v}`).join(' ');
-    })() : '';
+    const mcBias = r.combo.promptType === 'multiple_choice' ? calculateMcBias(r.candidates) : '';
 
     if (r.error || r.candidates.length === 0) {
       csvLines.push([i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE_BY_TYPE[r.combo.promptType as PromptType], timeSec, mdl, ptok, ctok, ttok, fallbackUsed, r.error ?? r.warning ?? '', costUsd ? costUsd.toFixed(6) : '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''].map(escapeCsv).join(','));
@@ -272,4 +268,13 @@ function downloadFile(content: string, filename: string, mime: string) {
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function calculateMcBias(candidates: any[]) {
+  const bias: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
+  candidates.forEach((c: any) => {
+    const lbl = c.mcOptions?.find((o: any) => o.is_correct)?.label;
+    if (lbl) bias[lbl] = (bias[lbl] || 0) + 1;
+  });
+  return Object.entries(bias).map(([k, v]) => `${k}:${v}`).join(' ');
 }

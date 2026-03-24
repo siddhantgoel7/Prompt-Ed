@@ -299,30 +299,14 @@ function SubmittedView(props: any) {
   );
 }
 
-function SubmittedMCView({
-  activeDiscussion, feedbackPeriodActive, isSubmitCorrect, selectedOption,
-  correctOptionLabel, hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds
-}: any) {
+function SubmittedMCView(props: any) {
+  const { activeDiscussion, feedbackPeriodActive, isSubmitCorrect, selectedOption, correctOptionLabel, hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds } = props;
+  
   if (activeDiscussion.feedback_enabled) {
     if (feedbackPeriodActive) {
       return (
         <>
-          <div
-            data-testid="mc-feedback-banner"
-            data-variant={isSubmitCorrect ? 'correct' : 'incorrect'}
-            className="text-center text-xl font-bold p-5 rounded-2xl enter"
-            style={isSubmitCorrect ? {
-              background: 'var(--color-primary-alpha-12)',
-              border: '1px solid var(--color-primary-alpha-25)',
-              color: 'var(--color-primary-700)',
-            } : {
-              background: 'var(--color-error-alpha-10)',
-              border: '1px solid var(--color-error-alpha-25)',
-              color: 'var(--color-error-600)',
-            }}
-          >
-            {isSubmitCorrect ? 'Great job!' : 'Not quite!'}
-          </div>
+          <FeedbackResultBanner isCorrect={isSubmitCorrect} />
           <StudentPromptCard discussion={activeDiscussion} submittedOption={selectedOption} showCorrectness correctOption={correctOptionLabel} disabled />
         </>
       );
@@ -330,28 +314,38 @@ function SubmittedMCView({
     if (hasTimer && !isTimerExpired) {
       return (
         <>
-          <div className="flex justify-center">
-            <DiscussionTimer timerEndTime={timerEndTime!} timerTotalSeconds={timerTotalSeconds!} />
-          </div>
+          <div className="flex justify-center"><DiscussionTimer timerEndTime={timerEndTime!} timerTotalSeconds={timerTotalSeconds!} /></div>
           <StudentStatusAlert title="Response submitted" description="You're all set. Results will be shown when time's up." />
           <StudentPromptCard discussion={activeDiscussion} submittedOption={selectedOption} showCorrectness={false} disabled />
         </>
       );
     }
-    return <StudentStatusAlert title="Response submitted" description="You're all set. Wait for the next prompt." />;
   }
 
-  // No feedback case
+  return <SubmittedDefaultView {...props} />;
+}
+
+function FeedbackResultBanner({ isCorrect }: { isCorrect: boolean }) {
+  const style = isCorrect ? {
+    background: 'var(--color-primary-alpha-12)', border: '1px solid var(--color-primary-alpha-25)', color: 'var(--color-primary-700)',
+  } : {
+    background: 'var(--color-error-alpha-10)', border: '1px solid var(--color-error-alpha-25)', color: 'var(--color-error-600)',
+  };
+  return (
+    <div data-testid="mc-feedback-banner" data-variant={isCorrect ? 'correct' : 'incorrect'} className="text-center text-xl font-bold p-5 rounded-2xl enter" style={style}>
+      {isCorrect ? 'Great job!' : 'Not quite!'}
+    </div>
+  );
+}
+
+function SubmittedDefaultView({ hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds, activeDiscussion, selectedOption }: any) {
+  const showTimer = hasTimer && !isTimerExpired;
   return (
     <>
-      {hasTimer && !isTimerExpired && (
-        <div className="flex justify-center">
-          <DiscussionTimer timerEndTime={timerEndTime!} timerTotalSeconds={timerTotalSeconds!} />
-        </div>
-      )}
+      {showTimer && <div className="flex justify-center"><DiscussionTimer timerEndTime={timerEndTime!} timerTotalSeconds={timerTotalSeconds!} /></div>}
       <StudentStatusAlert
         title="Response submitted"
-        description={hasTimer && !isTimerExpired ? "You're all set. Results will be shown when time's up." : "You're all set. Wait for the next prompt."}
+        description={showTimer ? "You're all set. Results will be shown when time's up." : "You're all set. Wait for the next prompt."}
       />
       <StudentPromptCard discussion={activeDiscussion} submittedOption={selectedOption} showCorrectness={false} disabled />
     </>

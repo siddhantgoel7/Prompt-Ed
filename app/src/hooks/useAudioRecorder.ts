@@ -36,13 +36,14 @@ export function useAudioRecorder() {
     }, []);
 
     /** Stops recording and resolves with the complete audio Blob. */
-    const stop = React.useCallback((): Promise<Blob> => {
+    const stop = React.useCallback(async (): Promise<Blob> => {
+        const recorder = mediaRecorderRef.current;
+        if (!recorder || recorder.state === 'inactive') return new Blob([]);
+        
         return new Promise((resolve) => {
-            const recorder = mediaRecorderRef.current;
-            if (!recorder) { resolve(new Blob([])); return; }
             recorder.onstop = () => {
                 const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
-                recorder.stream.getTracks().forEach((t) => t.stop());
+                recorder.stream.getTracks().forEach(t => t.stop());
                 resolve(blob);
             };
             recorder.stop();

@@ -119,10 +119,7 @@ export function useLessonDiscussions(
     if (!channel) return;
     const sub = (channel as RealtimeLikeChannel).on('broadcast', { event: 'response:new' }, (raw) => {
       const data = unwrapBroadcast<{ response: Response }>(raw);
-      if (data?.response) {
-        setResponses((prev) => prev.some((r) => r.id === data.response.id) ? prev : [data.response, ...prev]);
-        setDiscussions((prev) => prev.map((d) => d.id === data.response.discussion_id ? { ...d, response_count: (d.response_count ?? 0) + 1 } : d));
-      }
+      if (data?.response) handleNewResponse(data.response, setResponses, setDiscussions);
     });
     return () => sub.unsubscribe();
   }, [channel, setResponses]);
@@ -283,10 +280,11 @@ function useResponseManagementInternal(activeDiscussion: Discussion | null, setD
     await flagResponseApi(id);
     setResponses(prev => {
       const item = prev.find(r => r.id === id);
-      if (item) setFlaggedResponses(f => f.some(r => r.id === id) ? f : [{ ...item, flagged_at: new Date().toISOString() }, ...f]);
+      if (item) updateFlaggedResponses(item, setFlaggedResponses);
       return prev.filter(r => r.id !== id);
     });
-    setDiscussions((prev: any) => prev.map((d: any) => d.id === activeDiscussion?.id ? { ...d, response_count: Math.max((d.response_count ?? 1) - 1, 0) } : d));
+    const updateCount = (prev: any) => prev.map((d: any) => d.id === activeDiscussion?.id ? { ...d, response_count: Math.max((d.response_count ?? 1) - 1, 0) } : d);
+    setDiscussions(updateCount);
   }, [activeDiscussion, setDiscussions]);
 
   const restoreResponse = useCallback(async (id: string) => {
@@ -300,4 +298,15 @@ function useResponseManagementInternal(activeDiscussion: Discussion | null, setD
   }, [activeDiscussion, setDiscussions]);
 
   return { responses, setResponses, flaggedResponses, fetchResponses, removeResponse, restoreResponse };
+}
+
+// ─── Refactoring Helpers ──────────────────────────────────────────────────────
+
+function handleNewResponse(response: Response, setResponses: any, setDiscussions: any) {
+  setResponses((prev: Response[]) => prev.some((r) => r.id === response.id) ? prev : [response, ...prev]);
+  setDiscussions((prev: any[]) => prev.map((d) => d.id === response.discussion_id ? { ...d, response_count: (d.response_count ?? 0) + 1 } : d));
+}
+
+function updateFlaggedResponses(item: Response, setFlaggedResponses: any) {
+  setFlaggedResponses((f: Response[]) => f.some(r => r.id === item.id) ? f : [{ ...item, flagged_at: new Date().toISOString() }, ...f]);
 }

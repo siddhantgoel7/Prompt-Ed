@@ -147,38 +147,36 @@ function chunkSections(sections: any[], fileName: string, lessonId: string, file
 
   for (const section of sections) {
     if (chunkRows.length >= MAX_CHUNKS_PER_FILE) break;
-
-    // Suppress label soup if visual_description exists
-    if (section.contentOrigin === 'page_text' && section.pageNumber != null && pagesWithVision.has(section.pageNumber)) {
-      if (isLabelSoup(section.content)) continue;
-    }
-
-    const chunkSize = section.contentOrigin === 'slide_body' ? 512 : section.contentOrigin === 'slide_notes' ? 768 : 1024;
-    const subChunks = (
-      section.contentOrigin === 'visual_description'
-        ? [section.content]
-        : splitBySentences(section.content, chunkSize, 1)
-    ).filter(c => c.trim().length > 50);
-
-    for (const content of subChunks) {
-      if (chunkRows.length >= MAX_CHUNKS_PER_FILE) break;
-      chunkRows.push({
-        lesson_id: lessonId,
-        lesson_file_id: fileRecordId,
-        content_type: section.contentOrigin,
-        content,
-        metadata: {
-          contentOrigin: section.contentOrigin,
-          chunkType: 'text',
-          fileName,
-          pageNumber: section.pageNumber,
-          slideNumber: section.slideNumber,
-          chunkIndex: chunkIndex++,
-        } satisfies ChunkMetadata,
-      });
-    }
+    const sectionChunks = createChunksForSection(section, fileName, lessonId, fileRecordId, pagesWithVision, chunkIndex);
+    chunkIndex += sectionChunks.length;
+    chunkRows.push(...sectionChunks);
   }
-  return chunkRows;
+  return chunkRows.slice(0, MAX_CHUNKS_PER_FILE);
+}
+
+function createChunksForSection(section: any, fileName: string, lessonId: string, fileRecordId: string, pagesWithVision: Set<number>, startIndex: number) {
+  // Suppress label soup if visual_description exists
+  if (section.contentOrigin === 'page_text' && section.pageNumber != null && pagesWithVision.has(section.pageNumber)) {
+    if (isLabelSoup(section.content)) return [];
+  }
+
+  const chunkSize = section.contentOrigin === 'slide_body' ? 512 : section.contentOrigin === 'slide_notes' ? 768 : 1024;
+  const subChunks = (section.contentOrigin === 'visual_description' ? [section.content] : splitBySentences(section.content, chunkSize, 1)).filter(c => c.trim().length > 50);
+
+  return subChunks.map((content, i) => ({
+    lesson_id: lessonId,
+    lesson_file_id: fileRecordId,
+    content_type: section.contentOrigin,
+    content,
+    metadata: {
+      contentOrigin: section.contentOrigin,
+      chunkType: 'text',
+      fileName,
+      pageNumber: section.pageNumber,
+      slideNumber: section.slideNumber,
+      chunkIndex: startIndex + i,
+    } satisfies ChunkMetadata,
+  }));
 }
 
 async function runBackgroundProcessing(
@@ -189,20 +187,14 @@ async function runBackgroundProcessing(
   fileName: string,
   aiProvider: OpenAIProvider
 ) {
-  const supabase = await createClient(); // Use a dedicated client for async task
+  const supabase = await createClient();
   try {
     const sections = await parseFile(buffer, detectedType, aiProvider);
-    const pagesWithVision = new Set(
-      sections.filter(s => s.contentOrigin === 'visual_description' && s.pageNumber != null).map(s => s.pageNumber!)
-    );
+    const pagesWithVision = new Set(sections.filter(s => s.contentOrigin === 'visual_description' && s.pageNumber != null).map(s => s.pageNumber!));
 
     const chunkRows = chunkSections(sections, fileName, lessonId, fileRecord.id, pagesWithVision);
-
-    // Deduplicate near-identical chunks
     const finalRows = chunkRows.filter((row, i) => {
-      for (let j = 0; j < i; j++) {
-        if (jaccardSimilarity(row.content, chunkRows[j].content) > 0.70) return false;
-      }
+      for (let j = 0; j < i; j++) { if (jaccardSimilarity(row.content, chunkRows[j].content) > 0.70) return false; }
       return true;
     });
 
@@ -212,13 +204,9 @@ async function runBackgroundProcessing(
     }
 
     const { data: insertedChunks, error: chunksError } = await supabase.from('lesson_chunks').insert(finalRows).select('id');
-    if (chunksError || !insertedChunks) {
-      await supabase.from('lesson_files').update({ status: 'failed' }).eq('id', fileRecord.id);
-      return;
-    }
+    if (chunksError || !insertedChunks) throw new Error(chunksError?.message ?? 'Failed to insert chunks');
 
-    const chunksToEmbed = (insertedChunks as { id: string }[]).map((c, i) => ({ id: c.id, content: finalRows[i].content }));
-    await embedChunks(chunksToEmbed, supabase, aiProvider);
+    await embedChunks(insertedChunks.map((c, i) => ({ id: c.id, content: finalRows[i].content })), supabase, aiProvider);
     await supabase.from('lesson_files').update({ status: 'ready' }).eq('id', fileRecord.id);
 
   } catch (err) {
