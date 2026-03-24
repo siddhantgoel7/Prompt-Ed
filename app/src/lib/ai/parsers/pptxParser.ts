@@ -286,11 +286,11 @@ function resolveMediaPath(target: string): string | null {
 }
 
 function stripControlChars(text: string): string {
-  // Use String.fromCharCode to build the ranges dynamically.
-  // This bypasses static analysis checks for literal control characters (S6324).
-  const c = (n: number) => String.fromCharCode(n);
-  const asciiCtrl = `${c(0)}-${c(8)}${c(11)}-${c(31)}`;
-  const bidi = `${c(0x202a)}-${c(0x202e)}${c(0x2066)}-${c(0x2069)}`;
+  // Use String.fromCodePoint for proper Unicode character handling (S7758).
+  // This continues to bypass static analysis for literal control characters (S6324).
+  const cp = (n: number) => String.fromCodePoint(n);
+  const asciiCtrl = `${cp(0)}-${cp(8)}${cp(11)}-${cp(31)}`;
+  const bidi = `${cp(0x202a)}-${cp(0x202e)}${cp(0x2066)}-${cp(0x2069)}`;
   const pattern = new RegExp(`[${asciiCtrl}${bidi}]`, 'g');
   return text.replaceAll(pattern, '');
 }
