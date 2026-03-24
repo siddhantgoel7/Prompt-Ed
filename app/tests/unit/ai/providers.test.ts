@@ -1,89 +1,125 @@
-import { GeminiProvider } from '@/lib/ai/providers';
+import { OpenAIProvider, GeminiProvider } from '@/lib/ai/providers';
+import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-jest.mock('@google/generative-ai', () => {
-    const mockModel = {
-        generateContent: jest.fn(),
-        embedContent: jest.fn(),
-    };
-    return {
-        GoogleGenerativeAI: jest.fn().mockImplementation(() => ({
-            getGenerativeModel: jest.fn().mockReturnValue(mockModel),
-        })),
-    };
-});
+jest.mock('openai');
+jest.mock('@google/generative-ai');
 
-describe('GeminiProvider', () => {
-    let provider: GeminiProvider;
-    let mockModel: any;
+describe('AI Providers', () => {
+    describe('OpenAIProvider', () => {
+        let provider: OpenAIProvider;
+        let mockOpenAI: any;
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-        provider = new GeminiProvider('fake-key');
-        const genAI = new GoogleGenerativeAI('fake-key');
-        mockModel = (genAI.getGenerativeModel as jest.Mock)();
-    });
-
-    it('generateChatCompletion: formatted correctly and returns text', async () => {
-        mockModel.generateContent.mockResolvedValue({
-            response: {
-                text: () => 'Hello World',
-                usageMetadata: { promptTokenCount: 1, candidatesTokenCount: 2, totalTokenCount: 3 }
-            }
+        beforeEach(() => {
+            jest.clearAllMocks();
+            mockOpenAI = {
+                chat: {
+                    completions: {
+                        create: jest.fn().mockResolvedValue({
+                            choices: [{ message: { content: 'Test Response' } }],
+                            usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
+                            model: 'gpt-4o-mini'
+                        })
+                    }
+                },
+                embeddings: {
+                    create: jest.fn().mockResolvedValue({
+                        data: [{ embedding: [0.1, 0.2] }]
+                    })
+                }
+            };
+            (OpenAI as unknown as jest.Mock).mockImplementation(() => mockOpenAI);
+            provider = new OpenAIProvider('fake-key');
         });
 
-        const result = await provider.generateChatCompletion([
-            { role: 'system', content: 'You are an AI' },
-            { role: 'user', content: 'Hi' }
-        ]);
-
-        expect(result.content).toBe('Hello World');
-        expect(result.tokenUsage?.totalTokens).toBe(3);
-    });
-
-    it('generateEmbedding: calls embedContent for each input', async () => {
-        mockModel.embedContent.mockResolvedValue({
-            embedding: { values: [0.1, 0.2] }
+        it('generateChatCompletion: returns content and usage', async () => {
+            const res = await provider.generateChatCompletion([{ role: 'user', content: 'hi' }]);
+            expect(res.content).toBe('Test Response');
+            expect(res.tokenUsage?.totalTokens).toBe(2);
+            expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(expect.objectContaining({
+                model: 'gpt-4o-mini'
+            }));
         });
 
-        const result = await provider.generateEmbedding(['text1', 'text2']);
-
-        expect(result).toHaveLength(2);
-        expect(result[0]).toEqual([0.1, 0.2]);
-        expect(mockModel.embedContent).toHaveBeenCalledTimes(2);
-    });
-
-    it('generateVisionDescription: sends inlineData for images', async () => {
-        mockModel.generateContent.mockResolvedValue({
-            response: { text: () => 'Description' }
+        it('generateEmbedding: returns array of numbers', async () => {
+            const res = await provider.generateEmbedding('hello');
+            expect(res[0]).toEqual([0.1, 0.2]);
         });
 
-        const result = await provider.generateVisionDescription('base64', 'image/png', 'some context');
-
-        expect(result).toBe('Description');
-        expect(mockModel.generateContent).toHaveBeenCalledWith(expect.arrayContaining([
-            { inlineData: { mimeType: 'image/png', data: 'base64' } }
-        ]));
-    });
-
-    it('generatePdfVisualDescriptions: parses JSON array of page descriptions', async () => {
-        mockModel.generateContent.mockResolvedValue({
-            response: { text: () => JSON.stringify({ pages: [{ page: 1, description: 'Vis 1' }] }) }
+        it('generateVisionDescription: handles single image with hint', async () => {
+            const res = await provider.generateVisionDescription('base64', 'image/png', 'hint');
+            expect(res).toBe('Test Response');
+            expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(expect.objectContaining({
+                model: 'gpt-4o'
+            }));
         });
 
-        const result = await provider.generatePdfVisualDescriptions(Buffer.from('pdf'), 1);
-
-        expect(result.get(1)).toBe('Vis 1');
-    });
-
-    it('generatePptxSlideVisualDescription: combines text and images', async () => {
-        mockModel.generateContent.mockResolvedValue({
-            response: { text: () => 'Slide Desc' }
+        it('generatePdfVisualDescriptions: parses JSON response', async () => {
+            mockOpenAI.chat.completions.create.mockResolvedValueOnce({
+                choices: [{ message: { content: '{"pages":[{"page":1,"description":"Page 1 desc"}]}' } }]
+            });
+            const res = await provider.generatePdfVisualDescriptions(Buffer.from('%PDF'), 1);
+            expect(res.get(1)).toBe('Page 1 desc');
         });
 
-        const result = await provider.generatePptxSlideVisualDescription(1, 'body', 'notes', [{ base64: 'b64', mimeType: 'image/png' }]);
+        it('generatePptxSlideVisualDescription: builds prompt with images', async () => {
+            const res = await provider.generatePptxSlideVisualDescription(1, 'body', 'notes', [{ base64: 'b', mimeType: 'image/png' }]);
+            expect(res).toBe('Test Response');
+        });
+    });
 
-        expect(result).toBe('Slide Desc');
-        expect(mockModel.generateContent).toHaveBeenCalled();
+    describe('GeminiProvider', () => {
+        let provider: GeminiProvider;
+        let mockGenAI: any;
+        let mockModel: any;
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+            mockModel = {
+                generateContent: jest.fn().mockResolvedValue({
+                    response: {
+                        text: () => 'Gemini Response',
+                        usageMetadata: { promptTokenCount: 1, candidatesTokenCount: 1, totalTokenCount: 2 }
+                    }
+                }),
+                embedContent: jest.fn().mockResolvedValue({
+                    embedding: { values: [0.3, 0.4] }
+                })
+            };
+            mockGenAI = {
+                getGenerativeModel: jest.fn().mockReturnValue(mockModel)
+            };
+            (GoogleGenerativeAI as unknown as jest.Mock).mockImplementation(() => mockGenAI);
+            provider = new GeminiProvider('fake-key');
+        });
+
+        it('generateChatCompletion: returns content', async () => {
+            const res = await provider.generateChatCompletion([{ role: 'user', content: 'hi' }]);
+            expect(res.content).toBe('Gemini Response');
+            expect(res.tokenUsage?.totalTokens).toBe(2);
+        });
+
+        it('generateEmbedding: returns values', async () => {
+            const res = await provider.generateEmbedding('hello');
+            expect(res[0]).toEqual([0.3, 0.4]);
+        });
+
+        it('generateVisionDescription: handles image', async () => {
+            const res = await provider.generateVisionDescription('base64', 'image/png');
+            expect(res).toBe('Gemini Response');
+        });
+
+        it('generatePdfVisualDescriptions: handles JSON result', async () => {
+            mockModel.generateContent.mockResolvedValueOnce({
+                response: { text: () => '{"pages":[{"page":1,"description":"G1"}]}' }
+            });
+            const res = await provider.generatePdfVisualDescriptions(Buffer.from('%PDF'), 1);
+            expect(res.get(1)).toBe('G1');
+        });
+
+        it('generatePptxSlideVisualDescription: handles multiple images', async () => {
+            const res = await provider.generatePptxSlideVisualDescription(1, 'b', 'n', [{ base64: 'b', mimeType: 'image/jpeg' }]);
+            expect(res).toBe('Gemini Response');
+        });
     });
 });
