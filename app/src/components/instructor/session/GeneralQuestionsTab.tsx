@@ -18,10 +18,19 @@ export function GeneralQuestionsTab() {
     const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
     const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
 
+    const generalQuestions = context?.generalQuestions ?? [];
+
+    // Reset selection when questions are regenerated (must be before early return)
+    const prevLengthRef = React.useRef(generalQuestions.length);
+    if (generalQuestions.length !== prevLengthRef.current) {
+        prevLengthRef.current = generalQuestions.length;
+        setSelectedIndex(null);
+        setFeedbackEnabled(false);
+    }
+
     if (!context) return null;
 
     const {
-        generalQuestions,
         isGeneratingGeneral,
         generalWarning,
         generateGeneralQuestions,
@@ -31,14 +40,6 @@ export function GeneralQuestionsTab() {
     } = context;
 
     const hasReadyFiles = files.some(f => f.status === 'ready');
-
-    // Reset selection when questions change (e.g. regenerated)
-    const prevLengthRef = React.useRef(generalQuestions.length);
-    if (generalQuestions.length !== prevLengthRef.current) {
-        prevLengthRef.current = generalQuestions.length;
-        setSelectedIndex(null);
-        setFeedbackEnabled(false);
-    }
 
     const handleSelect = (index: number) => {
         if (selectedIndex === index) {
