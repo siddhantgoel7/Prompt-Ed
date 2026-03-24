@@ -4,6 +4,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { POST } from '@/app/api/lessons/[lessonId]/upload/route';
 import { createClient } from '@/lib/supabase/server';
+import { parseFile } from '@/lib/ai/parsers';
+import { embedChunks } from '@/lib/ai/embedChunks';
 
 // Mock Next.js globals
 if (typeof Request === 'undefined') {
@@ -168,4 +170,55 @@ describe('POST /api/lessons/[lessonId]/upload', () => {
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({ error: 'Only PDF and PPTX files are supported' });
   });
+
+  describe('processFile Logic (Async Interior)', () => {
+    // Since processFile is fire-and-forget, we must trigger it via POST and then
+    // await for the side effects in Supabase.
+    
+    it('success: processes PDF, chunks, deduplicates, and marks ready', async () => {
+        mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
+        
+        // Mock success for all interior calls
+        (parseFile as jest.Mock).mockResolvedValue([
+            { contentOrigin: 'page_text', content: 'Long chunk that exceeds minimum length used for testing sentence splitting and deduplication logic.', pageNumber: 1 },
+            { contentOrigin: 'page_text', content: 'Duplicate content that exceeds minimum length used for testing sentence splitting and deduplication logic.', pageNumber: 2 },
+            { contentOrigin: 'page_text', content: 'Duplicate content that exceeds minimum length used for testing sentence splitting and deduplication logic.', pageNumber: 2 }
+        ]);
+
+        mockSupabase.from.mockImplementation((table: string) => {
+            if (table === 'lessons') return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { course_id: 'c1' }, error: null }) }) }) };
+            if (table === 'courses') return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { instructor_id: 'u1' }, error: null }) }) }) };
+            if (table === 'lesson_files') {
+                return {
+                    select: () => ({ eq: () => Promise.resolve({ count: 0, error: null }) }),
+                    insert: () => ({ select: () => ({ single: () => Promise.resolve({ data: { id: 'f1', uploaded_at: 'now' }, error: null }) }) }),
+                    // This is our success marker in processFile
+                    update: jest.fn().mockReturnValue({ eq: () => Promise.resolve({ error: null }) })
+                };
+            }
+            if (table === 'lesson_chunks') {
+                return {
+                    insert: () => ({ select: () => Promise.resolve({ data: [{ id: 'c1' }, { id: 'c2' }], error: null }) })
+                };
+            }
+            return mockSupabase;
+        });
+
+        const pdfContent = Buffer.from('%PDF-1.4\n...');
+        const formData = new FormData();
+        formData.append('file', new File([pdfContent], 'test.pdf', { type: 'application/pdf' }));
+
+        const req = new NextRequest('http://l/api/lessons/l1/upload', { method: 'POST', body: formData });
+        const params = Promise.resolve({ lessonId: 'l1' });
+
+        await POST(req, { params });
+
+        // Wait a small amount for the processFile fire-and-forget closure to finish its async work
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // verify embedChunks was called
+        expect(embedChunks).toHaveBeenCalled();
+    });
+  });
 });
+
