@@ -114,7 +114,7 @@ export function ActiveCenter(props: Partial<{
     setPublishError(null);
   }, [candidates]);
 
-  // Stop recording → Whisper → populate transcriptText → trigger generate
+  // Stop recording → gpt-4o-transcribe → populate transcriptText → trigger generate
   const handleStopAndTranscribe = React.useCallback(async () => {
     setSttError(null);
     setSttStatus('transcribing');

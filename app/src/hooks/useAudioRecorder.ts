@@ -1,5 +1,5 @@
 // Hook that wraps the MediaRecorder API for in-browser audio capture.
-// Used to record instructor speech for Whisper transcription (US 1.17).
+// Used to record instructor speech for STT transcription (US 1.17).
 'use client';
 
 import * as React from 'react';
