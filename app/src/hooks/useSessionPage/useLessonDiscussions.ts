@@ -81,6 +81,21 @@ export function useLessonDiscussions(
         setDiscussions(data);
         const active = data.find((d) => d.status === 'active');
         setActiveDiscussion(active || null);
+
+        // Restore timer state from DB so the auto-close interval keeps working after
+        // a reconnect, a tab switch, or a page remount — cases where React state is
+        // lost but the discussion is still active in the DB.
+        if (active?.time_limit_seconds && active.published_at) {
+            const endTime = new Date(active.published_at).getTime() + active.time_limit_seconds * 1000;
+            activeDiscussionIdRef.current = active.id;
+            autoCloseCalledRef.current = false; // allow auto-close to re-evaluate
+            setDiscussionTimerEndTime(endTime);
+            setDiscussionTimerSeconds(active.time_limit_seconds);
+        } else if (!active) {
+            setDiscussionTimerEndTime(null);
+            setDiscussionTimerSeconds(null);
+            activeDiscussionIdRef.current = null;
+        }
         // Responses are fetched by the activeDiscussion?.id useEffect below
     }, [lessonId]);
 
