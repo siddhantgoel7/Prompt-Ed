@@ -291,7 +291,7 @@ function useResponseManagementInternal(activeDiscussion: Discussion | null, setD
     await unflagResponseApi(id);
     setFlaggedResponses(prev => {
       const item = prev.find(r => r.id === id);
-      if (item) setResponses(r => r.some(x => x.id === id) ? r : [{ ...item, flagged_at: null }, ...r]);
+      if (item) handleRestoredResponse(item, setResponses);
       return prev.filter(r => r.id !== id);
     });
     setDiscussions((prev: any) => prev.map((d: any) => d.id === activeDiscussion?.id ? { ...d, response_count: (d.response_count ?? 0) + 1 } : d));
@@ -309,4 +309,8 @@ function handleNewResponse(response: Response, setResponses: any, setDiscussions
 
 function updateFlaggedResponses(item: Response, setFlaggedResponses: any) {
   setFlaggedResponses((f: Response[]) => f.some(r => r.id === item.id) ? f : [{ ...item, flagged_at: new Date().toISOString() }, ...f]);
+}
+
+function handleRestoredResponse(item: Response, setResponses: any) {
+  setResponses((r: Response[]) => r.some(x => x.id === item.id) ? r : [{ ...item, flagged_at: null }, ...r]);
 }

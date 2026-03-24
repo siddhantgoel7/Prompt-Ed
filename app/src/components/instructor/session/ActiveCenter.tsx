@@ -180,29 +180,55 @@ export function ActiveCenter(props: Partial<ActiveCenterProps>) {
 function useActiveCenterStateMapping(props: Partial<ActiveCenterProps>) {
   const context = React.useContext(SessionContext);
   const recorder = useAudioRecorder();
-  const lessonId = context ? context.lesson.id : props.lessonId!;
+
+  if (!context) {
+    return {
+      lessonId: props.lessonId!,
+      recorder,
+      promptInput: props.promptInput!,
+      setPromptInput: props.setPromptInput!,
+      isConnected: props.isConnected!,
+      onPublish: (timerSeconds: number | null) => props.onPublish!(timerSeconds),
+      transcriptText: props.transcriptText!,
+      setTranscriptText: props.setTranscriptText!,
+      promptType: props.promptType!,
+      setPromptType: props.setPromptType!,
+      candidates: props.candidates!,
+      isGenerating: props.isGenerating!,
+      generationWarning: props.generationWarning!,
+      generationTimeMs: props.generationTimeMs ?? null,
+      lastTokenUsage: props.lastTokenUsage ?? null,
+      lastModel: props.lastModel ?? null,
+      onGenerate: props.onGenerate!,
+      onSelectCandidate: props.onSelectCandidate!,
+      onRegenerate: props.onRegenerate!,
+      onPublishAiCandidate: props.onPublishAiCandidate,
+      activeDiscussionId: props.activeDiscussionId!,
+    };
+  }
 
   return {
-    lessonId, recorder,
-    promptInput: context ? context.promptInput : props.promptInput!,
-    setPromptInput: context ? context.setPromptInput : props.setPromptInput!,
-    isConnected: context ? context.isConnected : props.isConnected!,
-    onPublish: context ? (timerSeconds: number | null) => context.handlePublishDiscussion(timerSeconds) : (timerSeconds: number | null) => props.onPublish!(timerSeconds),
-    transcriptText: context ? context.transcriptText : props.transcriptText!,
-    setTranscriptText: context ? context.setTranscriptText : props.setTranscriptText!,
-    promptType: context ? context.promptType : props.promptType!,
-    setPromptType: context ? context.setPromptType : props.setPromptType!,
-    candidates: context ? context.candidates : props.candidates!,
-    isGenerating: context ? context.isGenerating : props.isGenerating!,
-    generationWarning: context ? context.generationWarning : props.generationWarning!,
-    generationTimeMs: context ? context.generationTimeMs : props.generationTimeMs ?? null,
-    lastTokenUsage: context ? context.lastTokenUsage : props.lastTokenUsage ?? null,
-    lastModel: context ? context.lastModel : props.lastModel ?? null,
-    onGenerate: context ? context.generateCandidates : props.onGenerate!,
-    onSelectCandidate: context ? context.selectCandidate : props.onSelectCandidate!,
-    onRegenerate: context ? context.regenerateCandidates : props.onRegenerate!,
-    onPublishAiCandidate: context ? context.handlePublishAiCandidate : props.onPublishAiCandidate,
-    activeDiscussionId: context ? (context.activeDiscussion?.id ?? null) : props.activeDiscussionId!,
+    lessonId: context.lesson.id,
+    recorder,
+    promptInput: context.promptInput,
+    setPromptInput: context.setPromptInput,
+    isConnected: context.isConnected,
+    onPublish: (timerSeconds: number | null) => context.handlePublishDiscussion(timerSeconds),
+    transcriptText: context.transcriptText,
+    setTranscriptText: context.setTranscriptText,
+    promptType: context.promptType,
+    setPromptType: context.setPromptType,
+    candidates: context.candidates,
+    isGenerating: context.isGenerating,
+    generationWarning: context.generationWarning,
+    generationTimeMs: context.generationTimeMs,
+    lastTokenUsage: context.lastTokenUsage,
+    lastModel: context.lastModel,
+    onGenerate: context.generateCandidates,
+    onSelectCandidate: context.selectCandidate,
+    onRegenerate: context.regenerateCandidates,
+    onPublishAiCandidate: context.handlePublishAiCandidate,
+    activeDiscussionId: context.activeDiscussion?.id ?? null,
   };
 }
 

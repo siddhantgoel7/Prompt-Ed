@@ -40,15 +40,16 @@ export function useAudioRecorder() {
         const recorder = mediaRecorderRef.current;
         if (!recorder || recorder.state === 'inactive') return new Blob([]);
         
+        setIsRecording(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+
         return new Promise((resolve) => {
             recorder.onstop = () => {
                 const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
-                recorder.stream.getTracks().forEach(t => t.stop());
+                releaseTracks(recorder.stream);
                 resolve(blob);
             };
             recorder.stop();
-            setIsRecording(false);
-            if (timerRef.current) clearInterval(timerRef.current);
         });
     }, []);
 
@@ -57,4 +58,8 @@ export function useAudioRecorder() {
         `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
     return { isRecording, elapsed, fmt, start, stop };
+}
+
+function releaseTracks(stream: MediaStream) {
+  stream.getTracks().forEach(t => t.stop());
 }
