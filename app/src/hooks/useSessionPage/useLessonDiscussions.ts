@@ -230,21 +230,16 @@ export function useLessonDiscussions(
 
     const removeResponse = useCallback(async (responseId: string) => {
         await flagResponseApi(responseId);
-        // Capture the response via the functional updater (runs synchronously),
-        // then add to flagged at the top level — React 18+ batches both updates
-        // into a single render, preventing duplicate keys.
-        let flaggedItem: Response | undefined;
         setResponses((prev) => {
-            flaggedItem = prev.find((r) => r.id === responseId);
+            const item = prev.find((r) => r.id === responseId);
+            if (item) {
+                setFlaggedResponses((prevFlagged) => {
+                    if (prevFlagged.some((r) => r.id === responseId)) return prevFlagged;
+                    return [{ ...item, flagged_at: new Date().toISOString() }, ...prevFlagged];
+                });
+            }
             return prev.filter((r) => r.id !== responseId);
         });
-        if (flaggedItem) {
-            const item = flaggedItem;
-            setFlaggedResponses((prev) => {
-                if (prev.some((r) => r.id === responseId)) return prev;
-                return [{ ...item, flagged_at: new Date().toISOString() }, ...prev];
-            });
-        }
         setDiscussions((prev) =>
             prev.map((d) =>
                 d.id === activeDiscussion?.id
@@ -256,20 +251,16 @@ export function useLessonDiscussions(
 
     const restoreResponse = useCallback(async (responseId: string) => {
         await unflagResponseApi(responseId);
-        // Capture the response via the functional updater, then add to responses
-        // at the top level so React batches both updates into a single render.
-        let restoredItem: Response | undefined;
         setFlaggedResponses((prev) => {
-            restoredItem = prev.find((r) => r.id === responseId);
+            const item = prev.find((r) => r.id === responseId);
+            if (item) {
+                setResponses((prevResponses) => {
+                    if (prevResponses.some((r) => r.id === responseId)) return prevResponses;
+                    return [{ ...item, flagged_at: null }, ...prevResponses];
+                });
+            }
             return prev.filter((r) => r.id !== responseId);
         });
-        if (restoredItem) {
-            const item = restoredItem;
-            setResponses((prev) => {
-                if (prev.some((r) => r.id === responseId)) return prev;
-                return [{ ...item, flagged_at: null }, ...prev];
-            });
-        }
         setDiscussions((prev) =>
             prev.map((d) =>
                 d.id === activeDiscussion?.id
