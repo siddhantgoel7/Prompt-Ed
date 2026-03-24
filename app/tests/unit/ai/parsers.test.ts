@@ -385,7 +385,7 @@ describe('[US 1.16] parsePptx', () => {
       const zip = new JSZip();
       // Add a large file (151MB > 150MB limit)
       zip.file('large.txt', Buffer.alloc(151 * 1024 * 1024)); 
-      const buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+      const buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'STORE' });
       await expect(parsePptx(buf)).rejects.toThrow(/exceeds safety limit/);
     });
 
