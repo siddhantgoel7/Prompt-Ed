@@ -42,11 +42,12 @@ const VISION_MIME_MAP: Record<string, 'image/png' | 'image/jpeg' | 'image/webp'>
  */
 export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promise<ParsedSection[]> {
   const zip = await JSZip.loadAsync(buffer);
+  validateZipIntegrity(zip);
 
-  // Security: Prevent Zip Bomb (S5042)
-  const MAX_ENTRIES = 10000;         // Max number of files in the PPTX
-  const MAX_TOTAL_SIZE = 150 * 1024 * 1024; // 150MB total limit
-  const MAX_COMPRESSION_RATIO = 100; // Max 100x compression
+function validateZipIntegrity(zip: JSZip) {
+  const MAX_ENTRIES = 10000;
+  const MAX_TOTAL_SIZE = 150 * 1024 * 1024;
+  const MAX_COMPRESSION_RATIO = 100;
 
   const entries = Object.values(zip.files);
   if (entries.length > MAX_ENTRIES) {
@@ -55,22 +56,18 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
 
   let totalSize = 0;
   for (const file of entries) {
-    // JSZip 3 internally stores uncompressed size in _data.uncompressedSize
-    // We cast to any because these are internal properties.
     const uncompressedSize = (file as any).uncompressedSize ?? (file as any)._data?.uncompressedSize ?? 0;
     const compressedSize = (file as any)._data?.compressedSize ?? 0;
-
-    // Check individual compression ratio if possible (uncompressed vs compressed)
     if (compressedSize > 0 && (uncompressedSize / compressedSize) > MAX_COMPRESSION_RATIO) {
       throw new Error(`PPTX extraction aborted: High compression ratio detected in ${file.name}`);
     }
-
     totalSize += uncompressedSize;
   }
 
   if (totalSize > MAX_TOTAL_SIZE) {
     throw new Error(`PPTX extraction aborted: Total size (${Math.round(totalSize/1024/1024)}MB) exceeds safety limit.`);
   }
+}
 
   const slideFiles = Object.keys(zip.files)
     .filter((name) => /^ppt\/slides\/slide\d+\.xml$/.test(name))
@@ -87,107 +84,74 @@ export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promis
 
     dlog(`[pptxParser] ── slide ${n} ──────────────────────`);
 
-    // ── 1) Body text ──────────────────────────────────────────────────────────
+    // ── 1) Body text
     const slideXml = await zip.files[slideFile].async('text');
     const bodyText = extractTextNodes(slideXml);
     if (bodyText) {
       sections.push({ content: stripControlChars(bodyText), contentOrigin: 'slide_body', slideNumber: n });
-      dlog(`[pptxParser] slide=${n} bodyText len=${bodyText.length}: "${bodyText.slice(0, 80)}..."`);
-    } else {
-      dlog(`[pptxParser] slide=${n} bodyText: (empty)`);
     }
 
-    // ── 2) Speaker notes ──────────────────────────────────────────────────────
-    const relsFile = `ppt/slides/_rels/slide${n}.xml.rels`;
-    let relsXml = '';
-    if (zip.files[relsFile]) {
-      relsXml = await zip.files[relsFile].async('text');
-    }
-
-    let notesText = '';
-    if (relsXml) {
-      const notesPath = findNotesSlideTarget(relsXml, n);
-      if (notesPath && zip.files[notesPath]) {
-        const notesXml = await zip.files[notesPath].async('text');
-        notesText = extractTextNodes(notesXml);
-      }
-    }
-
+    // ── 2) Speaker notes
+    const notesText = await extractSpeakerNotes(zip, n);
     if (notesText) {
       sections.push({ content: stripControlChars(notesText), contentOrigin: 'slide_notes', slideNumber: n });
-      dlog(`[pptxParser] slide=${n} notes len=${notesText.length}: "${notesText.slice(0, 80)}..."`);
-    } else {
-      dlog(`[pptxParser] slide=${n} notes: (empty)`);
     }
 
-    // ── 3) Vision pass — one call per slide with ALL images ───────────────────
-    if (!aiProvider) {
-      dlog(`[pptxParser] slide=${n} vision: SKIPPED (no aiProvider)`);
-    } else {
-      // Collect all supported images for this slide
-      const imageTargets = findImageTargets(relsXml);
-      dlog(`[pptxParser] slide=${n} imageRefs found=${imageTargets.length}: ${imageTargets.join(', ')}`);
-
-      const images: Array<{ base64: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp'; zipPath: string }> = [];
-
-      for (const relTarget of imageTargets) {
-        const zipPath = resolveMediaPath(relTarget);
-        if (!zipPath || !zip.files[zipPath]) {
-          dlog(`[pptxParser] slide=${n} imageRef="${relTarget}" → zipPath="${zipPath}" NOT FOUND in zip`);
-          continue;
-        }
-
-        const ext = zipPath.split('.').pop()?.toLowerCase() ?? '';
-        const mimeType = VISION_MIME_MAP[ext];
-
-        if (!mimeType) {
-          dlog(`[pptxParser] slide=${n} zipPath="${zipPath}" ext="${ext}" → SKIPPED (unsupported format)`);
-          continue;
-        }
-
-        const imageBuffer = await zip.files[zipPath].async('nodebuffer');
-        const base64 = imageBuffer.toString('base64');
-        images.push({ base64, mimeType, zipPath });
-        dlog(`[pptxParser] slide=${n} image loaded: zipPath="${zipPath}" mime=${mimeType} b64Chars=${base64.length}`);
-      }
-
-      dlog(`[pptxParser] slide=${n} vision-eligible images=${images.length}`);
-
-      if (images.length === 0) {
-        dlog(`[pptxParser] slide=${n} vision: SKIPPED (no supported images)`);
-      } else {
-        // One vision model call: body text + notes + all images together
-        dlog(`[pptxParser] slide=${n} calling generatePptxSlideVisualDescription with ${images.length} image(s)`);
-        try {
-          const description = await aiProvider.generatePptxSlideVisualDescription(
-            n,
-            bodyText,
-            notesText,
-            images.map(({ base64, mimeType }) => ({ base64, mimeType }))
-          );
-
-          const isNoVisual = !description || description === NO_VISUAL_CONTENT;
-          dlog(
-            `[pptxParser] slide=${n} vision result: isNoVisual=${isNoVisual} ` +
-            `len=${description?.length ?? 0} preview="${(description ?? '').slice(0, 120)}"`
-          );
-
-          if (!isNoVisual) {
-            sections.push({ content: stripControlChars(description), contentOrigin: 'visual_description', slideNumber: n });
-          }
-        } catch (err) {
-          console.warn(`[pptxParser] slide=${n} vision call failed, skipping:`, err);
-        }
+    // ── 3) Vision pass
+    if (aiProvider) {
+      const description = await processSlideVision(zip, aiProvider, n, bodyText, notesText);
+      if (description) {
+        sections.push({ content: stripControlChars(description), contentOrigin: 'visual_description', slideNumber: n });
       }
     }
 
-    dlog(`[pptxParser] slide=${n} done — sections emitted: ${sections.length}`);
     return sections;
   }));
 
   const allSections = slidesSections.flat();
   dlog(`[pptxParser] COMPLETE — total sections=${allSections.length}`);
   return allSections;
+}
+
+async function extractSpeakerNotes(zip: JSZip, n: number): Promise<string> {
+  const relsFile = `ppt/slides/_rels/slide${n}.xml.rels`;
+  if (!zip.files[relsFile]) return '';
+  const relsXml = await zip.files[relsFile].async('text');
+  const notesPath = findNotesSlideTarget(relsXml, n);
+  if (notesPath && zip.files[notesPath]) {
+    const notesXml = await zip.files[notesPath].async('text');
+    return extractTextNodes(notesXml);
+  }
+  return '';
+}
+
+async function processSlideVision(zip: JSZip, aiProvider: AIProvider, n: number, bodyText: string, notesText: string): Promise<string | null> {
+  const relsFile = `ppt/slides/_rels/slide${n}.xml.rels`;
+  if (!zip.files[relsFile]) return null;
+  const relsXml = await zip.files[relsFile].async('text');
+  const imageTargets = findImageTargets(relsXml);
+  const images: Array<{ base64: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp' }> = [];
+
+  for (const relTarget of imageTargets) {
+    const zipPath = resolveMediaPath(relTarget);
+    if (!zipPath || !zip.files[zipPath]) continue;
+    const ext = zipPath.split('.').pop()?.toLowerCase() ?? '';
+    const mimeType = VISION_MIME_MAP[ext];
+    if (mimeType) {
+      const imageBuffer = await zip.files[zipPath].async('nodebuffer');
+      images.push({ base64: imageBuffer.toString('base64'), mimeType });
+    }
+  }
+
+  if (images.length === 0) return null;
+
+  try {
+    const description = await aiProvider.generatePptxSlideVisualDescription(n, bodyText, notesText, images);
+    return description === NO_VISUAL_CONTENT ? null : description;
+  } catch (err) {
+    console.warn(`[pptxParser] slide=${n} vision failed:`, err);
+    return null;
+  }
 }
 
 // ── XML helpers ────────────────────────────────────────────────────────────────

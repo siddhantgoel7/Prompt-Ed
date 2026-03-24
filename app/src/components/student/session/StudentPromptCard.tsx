@@ -43,115 +43,8 @@ export function StudentPromptCard({
 }) {
   const isMC =
     discussion.prompt_type === 'multiple_choice' &&
-    discussion.mc_options &&
+    !!discussion.mc_options &&
     discussion.mc_options.length > 0;
-
-  function getOptionStyle(label: string): React.CSSProperties {
-    const base: React.CSSProperties = {
-      width: '100%',
-      textAlign: 'left',
-      padding: '12px 16px',
-      borderRadius: '30px',
-      fontSize: '0.875rem',
-      transition: 'all 0.15s ease',
-      cursor: 'default',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-    };
-
-    if (submittedOption) {
-      const isThis = label === submittedOption;
-      const isCorrectOpt = label === correctOption;
-
-      if (showCorrectness) {
-        if (isThis && isCorrectOpt)
-          return { ...base, background: 'var(--color-primary-alpha-18)', border: '2px solid var(--color-primary-500)', color: 'var(--color-primary-700)' };
-        if (isThis && !isCorrectOpt)
-          return { ...base, background: 'var(--color-error-alpha-12)', border: '2px solid var(--color-error-500)', color: 'var(--color-error-600)' };
-        if (isCorrectOpt)
-          return { ...base, background: 'var(--color-primary-alpha-10)', border: '2px solid var(--color-primary-400)', color: 'var(--color-primary-600)' };
-        return { ...base, background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-muted)', opacity: 0.6 };
-      }
-
-      if (isThis)
-        return { ...base, background: 'var(--color-primary-alpha-10)', border: '2px solid var(--color-primary-300)', color: 'var(--text-secondary)' };
-      return { ...base, background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-muted)', opacity: 0.5 };
-    }
-
-    if (disabled)
-      return { ...base, background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-secondary)' };
-
-    if (selectedOption === label)
-      return { ...base, background: 'var(--color-primary-alpha-18)', border: '2px solid var(--color-primary-500)', color: 'var(--text-primary)', cursor: 'pointer' };
-
-    return {
-      ...base,
-      background: 'var(--color-primary-alpha-05)',
-      border: '1.5px solid var(--border-default)',
-      color: 'var(--text-secondary)',
-      cursor: 'pointer',
-    };
-  }
-
-  /** Returns a semantic state string for the option button — used as data-state for tests. */
-  function getOptionState(label: string): string {
-    if (submittedOption) {
-      const isThis = label === submittedOption;
-      const isCorrectOpt = label === correctOption;
-      if (showCorrectness) {
-        if (isThis && isCorrectOpt) return 'correct-submitted';
-        if (isThis && !isCorrectOpt) return 'wrong-submitted';
-        if (isCorrectOpt) return 'correct-highlight';
-        return 'other';
-      }
-      return isThis ? 'submitted' : 'other';
-    }
-    if (selectedOption === label) return 'selected';
-    if (disabled) return 'disabled';
-    return 'unselected';
-  }
-
-  function getRadioStyle(label: string): React.CSSProperties {
-    const isSelected = selectedOption === label || submittedOption === label;
-    const isCorrectOpt = label === correctOption;
-    const isThisSubmitted = submittedOption === label;
-
-    let bg = 'transparent';
-    let border = '2px solid var(--border-default)';
-
-    if (isSelected && !submittedOption) {
-      bg = 'var(--color-primary-500)';
-      border = '2px solid var(--color-primary-500)';
-    } else if (submittedOption) {
-      if (isThisSubmitted && showCorrectness && isCorrectOpt) {
-        bg = 'var(--color-primary-500)';
-        border = '2px solid var(--color-primary-500)';
-      } else if (isThisSubmitted && showCorrectness && !isCorrectOpt) {
-        bg = 'var(--color-error-500)';
-        border = '2px solid var(--color-error-500)';
-      } else if (isThisSubmitted) {
-        bg = 'var(--color-primary-300)';
-        border = '2px solid var(--color-primary-300)';
-      } else if (isCorrectOpt && showCorrectness) {
-        bg = 'var(--color-primary-400)';
-        border = '2px solid var(--color-primary-400)';
-      }
-    }
-
-    return {
-      width: '18px',
-      height: '18px',
-      borderRadius: '50%',
-      border,
-      background: bg,
-      flexShrink: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'all 0.15s ease',
-    };
-  }
 
   return (
     <div
@@ -189,33 +82,101 @@ export function StudentPromptCard({
       {isMC && discussion.mc_options ? (
         <div className="p-4 space-y-2.5">
           {discussion.mc_options.map((opt: MCOptionSafe) => (
-            <button
+            <MCOptionButton
               key={opt.label}
-              data-testid={`mc-option-${opt.label}`}
-              data-state={getOptionState(opt.label)}
-              onClick={() => {
-                if (!submittedOption && !disabled) {
-                  onSelectOption?.(opt.label);
-                }
-              }}
-              style={getOptionStyle(opt.label)}
-            >
-              {/* Radio indicator */}
-              <div style={getRadioStyle(opt.label)}>
-                {(selectedOption === opt.label && !submittedOption) && (
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white' }} />
-                )}
-              </div>
-              <span>
-                <span className="font-semibold mr-1.5" style={{ color: 'inherit' }}>
-                  {opt.label}.
-                </span>
-                {opt.text}
-              </span>
-            </button>
+              opt={opt}
+              selectedOption={selectedOption}
+              submittedOption={submittedOption}
+              showCorrectness={showCorrectness}
+              correctOption={correctOption}
+              disabled={disabled}
+              onSelect={onSelectOption}
+            />
           ))}
         </div>
       ) : null}
     </div>
+  );
+}
+
+// ─── Sub-components and Helpers ───────────────────────────────────────────────
+
+function MCOptionButton({
+  opt, selectedOption, submittedOption, showCorrectness, correctOption, disabled, onSelect
+}: any) {
+  const label = opt.label;
+  const isThis = label === submittedOption;
+  const isCorrectOpt = label === correctOption;
+  const isSelected = selectedOption === label || isThis;
+
+  const getStyle = (): React.CSSProperties => {
+    const base: React.CSSProperties = {
+      width: '100%', textAlign: 'left', padding: '12px 16px', borderRadius: '30px',
+      fontSize: '0.875rem', transition: 'all 0.15s ease', cursor: 'default',
+      display: 'flex', alignItems: 'center', gap: '10px',
+    };
+
+    if (submittedOption) {
+      if (showCorrectness) {
+        if (isThis && isCorrectOpt) return { ...base, background: 'var(--color-primary-alpha-18)', border: '2px solid var(--color-primary-500)', color: 'var(--color-primary-700)' };
+        if (isThis && !isCorrectOpt) return { ...base, background: 'var(--color-error-alpha-12)', border: '2px solid var(--color-error-500)', color: 'var(--color-error-600)' };
+        if (isCorrectOpt) return { ...base, background: 'var(--color-primary-alpha-10)', border: '2px solid var(--color-primary-400)', color: 'var(--color-primary-600)' };
+        return { ...base, background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-muted)', opacity: 0.6 };
+      }
+      if (isThis) return { ...base, background: 'var(--color-primary-alpha-10)', border: '2px solid var(--color-primary-300)', color: 'var(--text-secondary)' };
+      return { ...base, background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-muted)', opacity: 0.5 };
+    }
+    if (disabled) return { ...base, background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-secondary)' };
+    if (selectedOption === label) return { ...base, background: 'var(--color-primary-alpha-18)', border: '2px solid var(--color-primary-500)', color: 'var(--text-primary)', cursor: 'pointer' };
+    return { ...base, background: 'var(--color-primary-alpha-05)', border: '1.5px solid var(--border-default)', color: 'var(--text-secondary)', cursor: 'pointer' };
+  };
+
+  const getRadioStyle = (): React.CSSProperties => {
+    let bg = 'transparent';
+    let border = '2px solid var(--border-default)';
+
+    if (isSelected && !submittedOption) {
+      bg = 'var(--color-primary-500)'; border = '2px solid var(--color-primary-500)';
+    } else if (submittedOption) {
+      if (isThis && showCorrectness && isCorrectOpt) { bg = 'var(--color-primary-500)'; border = '2px solid var(--color-primary-500)'; }
+      else if (isThis && showCorrectness && !isCorrectOpt) { bg = 'var(--color-error-500)'; border = '2px solid var(--color-error-500)'; }
+      else if (isThis) { bg = 'var(--color-primary-300)'; border = '2px solid var(--color-primary-300)'; }
+      else if (isCorrectOpt && showCorrectness) { bg = 'var(--color-primary-400)'; border = '2px solid var(--color-primary-400)'; }
+    }
+    return { width: '18px', height: '18px', borderRadius: '50%', border, background: bg, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s ease' };
+  };
+
+  const getState = (): string => {
+    if (submittedOption) {
+      if (showCorrectness) {
+        if (isThis && isCorrectOpt) return 'correct-submitted';
+        if (isThis && !isCorrectOpt) return 'wrong-submitted';
+        if (isCorrectOpt) return 'correct-highlight';
+        return 'other';
+      }
+      return isThis ? 'submitted' : 'other';
+    }
+    if (selectedOption === label) return 'selected';
+    if (disabled) return 'disabled';
+    return 'unselected';
+  };
+
+  return (
+    <button
+      data-testid={`mc-option-${label}`}
+      data-state={getState()}
+      onClick={() => { if (!submittedOption && !disabled) onSelect?.(label); }}
+      style={getStyle()}
+    >
+      <div style={getRadioStyle()}>
+        {(selectedOption === label && !submittedOption) && (
+          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white' }} />
+        )}
+      </div>
+      <span>
+        <span className="font-semibold mr-1.5" style={{ color: 'inherit' }}>{label}.</span>
+        {opt.text}
+      </span>
+    </button>
   );
 }

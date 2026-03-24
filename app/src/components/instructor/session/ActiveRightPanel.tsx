@@ -144,132 +144,158 @@ export function ActiveRightPanel(props: {
 
       {/* ── Collapsed: icon strip with tab shortcuts ── */}
       {collapsed ? (
-        <div className="flex flex-col items-center gap-3 pt-4">
-          {/* Responses icon */}
-          <button
-            title={`${responses.length} responses`}
-            onClick={() => openTab('list')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 relative"
-            style={{ color: activeTab === 'list' ? 'var(--color-primary-500)' : 'var(--text-muted)', background: activeTab === 'list' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.10)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = activeTab === 'list' ? 'rgba(45,158,45,0.10)' : 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = activeTab === 'list' ? 'var(--color-primary-500)' : 'var(--text-muted)'; }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            {responses.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold rounded-full flex items-center justify-center text-white bg-brand-500">
-                {responses.length > 9 ? '9+' : responses.length}
-              </span>
-            )}
-          </button>
-
-          {/* Metrics icon */}
-          <button
-            title="Metrics"
-            onClick={() => openTab('analytics')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150"
-            style={{ color: activeTab === 'analytics' ? 'var(--color-primary-500)' : 'var(--text-muted)', background: activeTab === 'analytics' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.10)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = activeTab === 'analytics' ? 'rgba(45,158,45,0.10)' : 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = activeTab === 'analytics' ? 'var(--color-primary-500)' : 'var(--text-muted)'; }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10"/>
-              <line x1="12" y1="20" x2="12" y2="4"/>
-              <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
-          </button>
-
-          {/* Timer icon — highlighted when a discussion is running */}
-          <button
-            title={hasActiveDiscussion ? (hasTimer ? 'Timer running' : 'No time limit') : 'Timer'}
-            onClick={() => openTab('timer')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 relative"
-            style={{ color: activeTab === 'timer' ? 'var(--color-primary-500)' : (hasActiveDiscussion ? 'var(--color-primary-500)' : 'var(--text-muted)'), background: activeTab === 'timer' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.10)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = activeTab === 'timer' ? 'rgba(45,158,45,0.10)' : 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = (activeTab === 'timer' || hasActiveDiscussion) ? 'var(--color-primary-500)' : 'var(--text-muted)'; }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-            {hasActiveDiscussion && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-brand-500" />
-            )}
-          </button>
-        </div>
+        <CollapsedSidebarIcons
+          responses={responses}
+          activeTab={activeTab}
+          openTab={openTab}
+          hasActiveDiscussion={hasActiveDiscussion}
+          hasTimer={hasTimer}
+        />
       ) : (
-        /* ── Expanded: full tabbed content ── */
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden">
-          <div className="px-3 pt-2">
-            <TabsList className="w-full grid grid-cols-3">
-              <TabsTrigger value="list" className="text-xs">Responses</TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs">Metrics</TabsTrigger>
-              <TabsTrigger value="timer" className="text-xs">
-                Timer
-                {hasActiveDiscussion && (
-                  <span className="ml-1.5 w-1.5 h-1.5 rounded-full inline-block bg-brand-500" />
-                )}
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <ScrollArea className="flex-1 mt-3">
-            <div className="px-3 pb-4">
-
-              {/* ── Responses tab ── */}
-              <TabsContent value="list" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-                <ResponseListTab
-                  activeDiscussion={activeDiscussion}
-                  responses={responses}
-                  flaggedResponses={flaggedResponses}
-                  isMC={isMC}
-                  distribution={distribution}
-                  restoreResponse={restoreResponse}
-                  selectedIds={selectedIds}
-                  showHighlightedOnly={showHighlightedOnly}
-                  flaggingId={flaggingId}
-                  toggleSelected={toggleSelected}
-                  handleFlagInappropriate={handleFlagInappropriate}
-                  setShowHighlightedOnly={setShowHighlightedOnly}
-                  filterResponses={filterResponses}
-                />
-              </TabsContent>
-
-              {/* ── Metrics tab ── */}
-              <TabsContent value="analytics" className="mt-0 pt-2 focus-visible:outline-none focus-visible:ring-0">
-                {activeDiscussion ? (
-                  <DiscussionAnalyticsContent
-                    discussion={activeDiscussion}
-                    responses={responses}
-                    studentCount={peakStudentCount}
-                  />
-                ) : (
-                  <p className="text-sm py-8 text-center text-content-muted">
-                    No active discussion
-                  </p>
-                )}
-              </TabsContent>
-
-              {/* ── Timer tab ── */}
-              <TabsContent value="timer" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-                <TimerTab
-                  activeDiscussionId={activeDiscussionId}
-                  timerEndTime={timerEndTime}
-                  timerTotalSeconds={timerTotalSeconds}
-                  onClose={handleCloseDiscussion}
-                  onExtendTimer={handleExtendTimer}
-                  onEditTimer={handleEditTimer}
-                />
-              </TabsContent>
-
-            </div>
-          </ScrollArea>
-        </Tabs>
+        <ExpandedSidebarContent
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          activeDiscussion={activeDiscussion}
+          responses={responses}
+          flaggedResponses={flaggedResponses}
+          isMC={isMC}
+          distribution={distribution}
+          restoreResponse={restoreResponse}
+          selectedIds={selectedIds}
+          showHighlightedOnly={showHighlightedOnly}
+          flaggingId={flaggingId}
+          toggleSelected={toggleSelected}
+          handleFlagInappropriate={handleFlagInappropriate}
+          setShowHighlightedOnly={setShowHighlightedOnly}
+          filterResponses={filterResponses}
+          peakStudentCount={peakStudentCount}
+          activeDiscussionId={activeDiscussionId}
+          timerEndTime={timerEndTime}
+          timerTotalSeconds={timerTotalSeconds}
+          handleCloseDiscussion={handleCloseDiscussion}
+          handleExtendTimer={handleExtendTimer}
+          handleEditTimer={handleEditTimer}
+        />
       )}
     </aside>
+  );
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function CollapsedSidebarIcons({
+  responses, activeTab, openTab, hasActiveDiscussion, hasTimer
+}: any) {
+  return (
+    <div className="flex flex-col items-center gap-3 pt-4">
+      <button
+        title={`${responses.length} responses`}
+        onClick={() => openTab('list')}
+        className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 relative"
+        style={{ color: activeTab === 'list' ? 'var(--color-primary-500)' : 'var(--text-muted)', background: activeTab === 'list' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        {responses.length > 0 && (
+          <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold rounded-full flex items-center justify-center text-white bg-brand-500">
+            {responses.length > 9 ? '9+' : responses.length}
+          </span>
+        )}
+      </button>
+
+      <button
+        title="Metrics"
+        onClick={() => openTab('analytics')}
+        className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150"
+        style={{ color: activeTab === 'analytics' ? 'var(--color-primary-500)' : 'var(--text-muted)', background: activeTab === 'analytics' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+      </button>
+
+      <button
+        title={hasActiveDiscussion ? (hasTimer ? 'Timer running' : 'No time limit') : 'Timer'}
+        onClick={() => openTab('timer')}
+        className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 relative"
+        style={{ color: activeTab === 'timer' ? 'var(--color-primary-500)' : (hasActiveDiscussion ? 'var(--color-primary-500)' : 'var(--text-muted)'), background: activeTab === 'timer' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+        {hasActiveDiscussion && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-brand-500" />}
+      </button>
+    </div>
+  );
+}
+
+function ExpandedSidebarContent({
+  activeTab, setActiveTab, activeDiscussion, responses, flaggedResponses, isMC, distribution,
+  restoreResponse, selectedIds, showHighlightedOnly, flaggingId, toggleSelected,
+  handleFlagInappropriate, setShowHighlightedOnly, filterResponses, peakStudentCount,
+  activeDiscussionId, timerEndTime, timerTotalSeconds, handleCloseDiscussion,
+  handleExtendTimer, handleEditTimer
+}: any) {
+  return (
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden">
+      <div className="px-3 pt-2">
+        <TabsList className="w-full grid grid-cols-3">
+          <TabsTrigger value="list" className="text-xs">Responses</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs">Metrics</TabsTrigger>
+          <TabsTrigger value="timer" className="text-xs">
+            Timer
+            {activeDiscussionId && <span className="ml-1.5 w-1.5 h-1.5 rounded-full inline-block bg-brand-500" />}
+          </TabsTrigger>
+        </TabsList>
+      </div>
+
+      <ScrollArea className="flex-1 mt-3">
+        <div className="px-3 pb-4">
+          <TabsContent value="list" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <ResponseListTab
+              activeDiscussion={activeDiscussion}
+              responses={responses}
+              flaggedResponses={flaggedResponses}
+              isMC={isMC}
+              distribution={distribution}
+              restoreResponse={restoreResponse}
+              selectedIds={selectedIds}
+              showHighlightedOnly={showHighlightedOnly}
+              flaggingId={flaggingId}
+              toggleSelected={toggleSelected}
+              handleFlagInappropriate={handleFlagInappropriate}
+              setShowHighlightedOnly={setShowHighlightedOnly}
+              filterResponses={filterResponses}
+            />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-0 pt-2 focus-visible:outline-none focus-visible:ring-0">
+            {activeDiscussion ? (
+              <DiscussionAnalyticsContent discussion={activeDiscussion} responses={responses} studentCount={peakStudentCount} />
+            ) : (
+              <p className="text-sm py-8 text-center text-content-muted">No active discussion</p>
+            )}
+          </TabsContent>
+
+          <TabsContent value="timer" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <TimerTab
+              activeDiscussionId={activeDiscussionId}
+              timerEndTime={timerEndTime}
+              timerTotalSeconds={timerTotalSeconds}
+              onClose={handleCloseDiscussion}
+              onExtendTimer={handleExtendTimer}
+              onEditTimer={handleEditTimer}
+            />
+          </TabsContent>
+        </div>
+      </ScrollArea>
+    </Tabs>
   );
 }

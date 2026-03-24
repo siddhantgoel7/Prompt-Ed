@@ -248,7 +248,6 @@ export function ActiveCenter(props: Partial<{
 
   return (
     <div className="flex-1 p-4 md:p-6 space-y-4">
-
       <div
         className="space-y-3 rounded-2xl p-4"
         style={{
@@ -265,330 +264,55 @@ export function ActiveCenter(props: Partial<{
           </TabsList>
 
           <TabsContent value="ai" className="space-y-3 mt-0">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-content-primary">
-                Generate with AI
-              </span>
-
-              {/* STT recording button */}
-              <div className="flex items-center gap-2">
-                {recorder.isRecording && (
-                  <span
-                    className="flex items-center gap-1 text-xs font-medium"
-                    style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}
-                  >
-                    <span
-                      className="w-2 h-2 rounded-full animate-pulse inline-block"
-                      style={{ background: 'currentColor' }}
-                    />
-                    {recorder.fmt(recorder.elapsed)}
-                  </span>
-                )}
-                {!recorder.isRecording ? (
-                  <button
-                    onClick={recorder.start}
-                    disabled={isGenerating || sttStatus === 'transcribing'}
-                    className="text-xs h-7 px-3 rounded-[8px] font-medium transition-all duration-150 disabled:opacity-50 flex items-center gap-1.5"
-                    style={{
-                      background: 'rgba(239,68,68,0.10)',
-                      border: '1px solid rgba(239,68,68,0.30)',
-                      color: 'var(--recording-text, oklch(0.55 0.22 27))',
-                    }}
-                  >
-                    {/* Mic icon */}
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3Z" />
-                      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                      <line x1="12" x2="12" y1="19" y2="22" />
-                    </svg>
-                    Record
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleStopAndTranscribe}
-                    className="text-xs h-7 px-3 rounded-[8px] font-medium text-white transition-all duration-150 flex items-center gap-1.5"
-                    style={{ background: 'var(--color-primary-600)' }}
-                  >
-                    {/* Stop icon */}
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                    </svg>
-                    Stop &amp; Transcribe
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {sttStatus === 'transcribing' && (
-              <p className="text-xs animate-pulse text-content-muted">
-                Transcribing audio…
-              </p>
-            )}
-            {sttStatus === 'error' && sttError && (
-              <p className="text-xs" style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}>{sttError}</p>
-            )}
-
-            {/* Prompt / context input */}
-            <textarea
-              ref={transcriptRef}
-              value={promptInput}
-              onChange={(e) => {
-                setPromptInput(e.target.value);
-                setTranscriptText(e.target.value); // Keep in sync for STT context
-              }}
-              placeholder="Spoken content will appear here after recording, or type a topic manually"
-              className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[50px] transition-all duration-150 bg-surface-raised text-content-primary"
-              style={{
-                border: '1px solid var(--border-default)',
-              }}
-              rows={2}
+            <AIGenerationPanel
+              lessonId={lessonId}
+              recorder={recorder}
+              isGenerating={isGenerating}
+              sttStatus={sttStatus}
+              sttError={sttError}
+              handleStopAndTranscribe={handleStopAndTranscribe}
+              promptInput={promptInput}
+              setPromptInput={setPromptInput}
+              setTranscriptText={setTranscriptText}
+              transcriptRef={transcriptRef}
+              promptType={promptType}
+              setPromptType={setPromptType}
+              onGenerate={onGenerate}
+              handleRunAllCombinations={handleRunAllCombinations}
+              sweepProgress={sweepProgress}
+              generationWarning={generationWarning}
+              candidates={candidates}
+              selectedIndex={selectedIndex}
+              handleSelectCandidate={handleSelectCandidate}
+              editingOptions={editingOptions}
+              setEditingOptions={setEditingOptions}
+              overrideCorrectOption={overrideCorrectOption}
+              setOverrideCorrectOption={setOverrideCorrectOption}
+              feedbackEnabled={feedbackEnabled}
+              setFeedbackEnabled={setFeedbackEnabled}
+              setPendingCandidate={setPendingCandidate}
+              setShowTimerDialog={setShowTimerDialog}
+              isConnected={isConnected}
+              onRegenerate={onRegenerate}
+              handleCopyReport={handleCopyReport}
+              copiedReport={copiedReport}
             />
-
-            {/* Prompt type + generate */}
-            <div className="flex items-center gap-2">
-              {/* (i) best-practices button — leftmost, highlighted once per browser session */}
-              <AITipsButton lessonId={lessonId} />
-              <select
-                value={promptType}
-                onChange={(e) => setPromptType(e.target.value as PromptType)}
-                className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary"
-                style={{
-                  border: '1px solid var(--border-default)',
-                }}
-              >
-                <option value="long_answer">Long Answer</option>
-                <option value="short_answer">Short Answer</option>
-                <option value="multiple_choice">Multiple Choice</option>
-              </select>
-
-              <AIPreferencesDialog />
-              <div className={`rotating-glow-wrap${isGenerating ? ' generating' : ''}`}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={() => onGenerate()}
-                      disabled={isGenerating || recorder.isRecording}
-                      size="sm"
-                      className="px-4 py-1.5 rounded-full font-semibold"
-                      style={{
-                        background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-                        color: 'white',
-                        opacity: 1,
-                      }}
-                    >
-                      {isGenerating ? (
-                        <span aria-label="Generating…" style={{ display: 'inline-flex' }}>
-                          {GENERATING_CHARS.map((ch, i) => (
-                            <span
-                              key={i}
-                              className={ch === '.' ? 'generating-char' : 'generating-shimmer'}
-                              style={{ animationDelay: `${i * 0.07}s` }}
-                            >
-                              {ch}
-                            </span>
-                          ))}
-                        </span>
-                      ) : 'Generate Prompts'}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Use AI to generate 5 discussion prompt candidates from your transcript and uploaded files. Takes 5 to 15 seconds.</TooltipContent>
-                </Tooltip>
-              </div>
-              {DEBUG_TOOLS && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={handleRunAllCombinations}
-                      disabled={isGenerating || !!sweepProgress || recorder.isRecording}
-                      variant="outline"
-                      size="sm"
-                      className="text-xs font-semibold"
-                      style={{ borderColor: 'rgba(239,68,68,0.4)', color: 'oklch(0.55 0.22 27)' }}
-                    >
-                      {sweepProgress ? `${sweepProgress.current}/${sweepProgress.total}…` : 'Run All Combinations'}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Generate all 81 type/difficulty/style/length combinations sequentially. Downloads sweep_report.txt and sweep_report.csv when done. ~15–20 min.</TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-
-            {generationWarning && (
-              <p
-                className="text-xs rounded-lg px-3 py-2"
-                style={{
-                  background: 'rgba(245,158,11,0.10)',
-                  border: '1px solid rgba(245,158,11,0.25)',
-                  color: '#b45309',
-                }}
-              >
-                {generationWarning}
-              </p>
-            )}
-
-            {DEBUG_TOOLS && sweepProgress && (
-              <p className="text-xs rounded-lg px-3 py-2 animate-pulse"
-                style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', color: '#6366f1' }}>
-                Generating {sweepProgress.current} / {sweepProgress.total} — {sweepProgress.label}
-              </p>
-            )}
-
-            {/* Candidate cards */}
-            {candidates.length > 0 && (
-              <div className="space-y-2">
-                {candidates.map((c: GeneratedPrompt, i: number) => (
-                  <div key={i}>
-                    {selectedIndex === i ? (
-                      <div
-                        className="p-3 rounded-xl text-sm"
-                        style={{
-                          background: 'rgba(45,158,45,0.06)',
-                          border: '2px solid var(--color-primary-400)',
-                        }}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <span
-                            className="text-xs font-medium px-2 py-0.5 rounded-full capitalize"
-                            style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-600)' }}
-                          >
-                            {c.promptType.replaceAll('_', ' ')}
-                          </span>
-                          <span className="text-xs font-medium text-brand-500">
-                            Selected (Editing)
-                          </span>
-                        </div>
-                        <textarea
-                          value={promptInput}
-                          onChange={(e) => {
-                            setPromptInput(e.target.value);
-                            setTranscriptText(e.target.value);
-                          }}
-                          className="w-full px-3 py-2.5 text-sm rounded-[10px] min-h-[80px] resize-y leading-snug transition-all duration-150 bg-surface-raised text-content-primary"
-                          style={{
-                            border: '1px solid var(--border-default)',
-                          }}
-                          placeholder="Edit this prompt..."
-                        />
-                      </div>
-                    ) : (
-                      <CandidateCard
-                        candidate={c}
-                        isSelected={false}
-                        onSelect={() => handleSelectCandidate(c, i)}
-                      />
-                    )}
-
-                    {selectedIndex === i && c.promptType === 'multiple_choice' && (
-                      <MultipleChoiceEditor
-                        nameGroup={`correct-option-${i}`}
-                        options={c.mcOptions?.map((opt: { label: string; text: string; is_correct?: boolean }) => ({
-                          label: opt.label,
-                          text: editingOptions[opt.label] ?? opt.text
-                        })) || []}
-                        correctOption={overrideCorrectOption}
-                        onCorrectOptionChange={setOverrideCorrectOption}
-                        onOptionTextChange={(label, text) => setEditingOptions({ ...editingOptions, [label]: text })}
-                        feedbackEnabled={feedbackEnabled}
-                        onFeedbackChange={setFeedbackEnabled}
-                      />
-                    )}
-
-                    {selectedIndex === i && (
-                      <button
-                        onClick={() => { setPendingCandidate(c); setShowTimerDialog(true); }}
-                        disabled={!promptInput.trim() || !isConnected}
-                        className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
-                        style={{
-                          background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-                        }}
-                      >
-                        Publish This Question →
-                      </button>
-                    )}
-                  </div>
-                ))}
-
-                <div className="flex gap-2 pt-1">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        onClick={onRegenerate}
-                        disabled={isGenerating}
-                        variant="outline"
-                        size="sm"
-                        className="text-xs"
-                      >
-                        {isGenerating ? 'Regenerating…' : 'Regenerate'}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Run AI generation again without changing the transcript or files. Use this if the previous candidates were not satisfactory.</TooltipContent>
-                  </Tooltip>
-                  {DEBUG_TOOLS && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          onClick={handleCopyReport}
-                          disabled={isGenerating || candidates.length === 0}
-                          variant="outline"
-                          size="sm"
-                          className="text-xs"
-                        >
-                          {copiedReport ? 'Copied!' : 'Copy Report'}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Copy generation details and all candidates to clipboard.</TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-              </div>
-            )}
-
           </TabsContent>
 
           <TabsContent value="manual" className="space-y-3 mt-0">
-            <div className="flex items-center gap-2 mb-2">
-              <select
-                value={promptType}
-                onChange={(e) => setPromptType(e.target.value as PromptType)}
-                className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary"
-                style={{
-                  border: '1px solid var(--border-default)',
-                }}
-              >
-                <option value="long_answer">Long Answer</option>
-                <option value="short_answer">Short Answer</option>
-                <option value="multiple_choice">Multiple Choice</option>
-              </select>
-            </div>
-
-            <textarea
-              value={promptInput}
-              onChange={(e) => {
-                setPromptInput(e.target.value);
-                setTranscriptText(e.target.value);
-              }}
-              placeholder="Type your question here manually..."
-              className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[80px] transition-all duration-150 bg-surface-raised text-content-primary"
-              style={{
-                border: '1px solid var(--border-default)',
-              }}
-              rows={3}
+            <ManualCreationPanel
+              promptType={promptType}
+              setPromptType={setPromptType}
+              promptInput={promptInput}
+              setPromptInput={setPromptInput}
+              setTranscriptText={setTranscriptText}
+              manualOptions={manualOptions}
+              setManualOptions={setManualOptions}
+              overrideCorrectOption={overrideCorrectOption}
+              setOverrideCorrectOption={setOverrideCorrectOption}
+              feedbackEnabled={feedbackEnabled}
+              setFeedbackEnabled={setFeedbackEnabled}
             />
-
-            {promptType === 'multiple_choice' && (
-              <MultipleChoiceEditor
-                nameGroup="manual-correct-option"
-                options={['A', 'B', 'C', 'D'].map((label) => ({
-                  label,
-                  text: manualOptions[label] || ''
-                }))}
-                correctOption={overrideCorrectOption}
-                onCorrectOptionChange={setOverrideCorrectOption}
-                onOptionTextChange={(label, text) => setManualOptions({ ...manualOptions, [label]: text })}
-                feedbackEnabled={feedbackEnabled}
-                onFeedbackChange={setFeedbackEnabled}
-              />
-            )}
           </TabsContent>
         </Tabs>
 
@@ -605,7 +329,6 @@ export function ActiveCenter(props: Partial<{
           </p>
         )}
 
-        {/* Start Discussion button */}
         {!activeDiscussionId && (
           <div className="pt-3 flex justify-end border-t border-line-subtle">
             <button
@@ -629,5 +352,280 @@ export function ActiveCenter(props: Partial<{
         />
       </div>
     </div>
+  );
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function AIGenerationPanel({
+  lessonId, recorder, isGenerating, sttStatus, sttError, handleStopAndTranscribe,
+  promptInput, setPromptInput, setTranscriptText, transcriptRef,
+  promptType, setPromptType, onGenerate, handleRunAllCombinations, sweepProgress,
+  generationWarning, candidates, selectedIndex, handleSelectCandidate,
+  editingOptions, setEditingOptions, overrideCorrectOption, setOverrideCorrectOption,
+  feedbackEnabled, setFeedbackEnabled, setPendingCandidate, setShowTimerDialog,
+  isConnected, onRegenerate, handleCopyReport, copiedReport
+}: any) {
+  return (
+    <>
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold text-content-primary">Generate with AI</span>
+        <div className="flex items-center gap-2">
+          {recorder.isRecording && (
+            <span
+              className="flex items-center gap-1 text-xs font-medium"
+              style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}
+            >
+              <span className="w-2 h-2 rounded-full animate-pulse inline-block" style={{ background: 'currentColor' }} />
+              {recorder.fmt(recorder.elapsed)}
+            </span>
+          )}
+          {!recorder.isRecording ? (
+            <button
+              onClick={recorder.start}
+              disabled={isGenerating || sttStatus === 'transcribing'}
+              className="text-xs h-7 px-3 rounded-[8px] font-medium transition-all duration-150 disabled:opacity-50 flex items-center gap-1.5"
+              style={{
+                background: 'rgba(239,68,68,0.10)',
+                border: '1px solid rgba(239,68,68,0.30)',
+                color: 'var(--recording-text, oklch(0.55 0.22 27))',
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3Z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" x2="12" y1="19" y2="22" />
+              </svg>
+              Record
+            </button>
+          ) : (
+            <button
+              onClick={handleStopAndTranscribe}
+              className="text-xs h-7 px-3 rounded-[8px] font-medium text-white transition-all duration-150 flex items-center gap-1.5"
+              style={{ background: 'var(--color-primary-600)' }}
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+              </svg>
+              Stop &amp; Transcribe
+            </button>
+          )}
+        </div>
+      </div>
+
+      {sttStatus === 'transcribing' && <p className="text-xs animate-pulse text-content-muted">Transcribing audio…</p>}
+      {sttStatus === 'error' && sttError && <p className="text-xs" style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}>{sttError}</p>}
+
+      <textarea
+        ref={transcriptRef}
+        value={promptInput}
+        onChange={(e) => {
+          setPromptInput(e.target.value);
+          setTranscriptText(e.target.value);
+        }}
+        placeholder="Spoken content will appear here after recording, or type a topic manually"
+        className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[50px] transition-all duration-150 bg-surface-raised text-content-primary"
+        style={{ border: '1px solid var(--border-default)' }}
+        rows={2}
+      />
+
+      <div className="flex items-center gap-2">
+        <AITipsButton lessonId={lessonId} />
+        <select
+          value={promptType}
+          onChange={(e) => setPromptType(e.target.value as PromptType)}
+          className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary"
+          style={{ border: '1px solid var(--border-default)' }}
+        >
+          <option value="long_answer">Long Answer</option>
+          <option value="short_answer">Short Answer</option>
+          <option value="multiple_choice">Multiple Choice</option>
+        </select>
+        <AIPreferencesDialog />
+        <div className={`rotating-glow-wrap${isGenerating ? ' generating' : ''}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => onGenerate()}
+                disabled={isGenerating || recorder.isRecording}
+                size="sm"
+                className="px-4 py-1.5 rounded-full font-semibold"
+                style={{
+                  background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+                  color: 'white',
+                  opacity: 1,
+                }}
+              >
+                {isGenerating ? (
+                  <span aria-label="Generating…" style={{ display: 'inline-flex' }}>
+                    {GENERATING_CHARS.map((ch: string, i: number) => (
+                      <span
+                        key={i}
+                        className={ch === '.' ? 'generating-char' : 'generating-shimmer'}
+                        style={{ animationDelay: `${i * 0.07}s` }}
+                      >
+                        {ch}
+                      </span>
+                    ))}
+                  </span>
+                ) : 'Generate Prompts'}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Use AI to generate 5 discussion prompt candidates from your transcript and uploaded files. Takes 5 to 15 seconds.</TooltipContent>
+          </Tooltip>
+        </div>
+        {DEBUG_TOOLS && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={handleRunAllCombinations}
+                disabled={isGenerating || !!sweepProgress || recorder.isRecording}
+                variant="outline"
+                size="sm"
+                className="text-xs font-semibold"
+                style={{ borderColor: 'rgba(239,68,68,0.4)', color: 'oklch(0.55 0.22 27)' }}
+              >
+                {sweepProgress ? `${sweepProgress.current}/${sweepProgress.total}…` : 'Run All Combinations'}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Generate all 81 combinations sequentially.</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+
+      {generationWarning && (
+        <p className="text-xs rounded-lg px-3 py-2" style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.25)', color: '#b45309' }}>
+          {generationWarning}
+        </p>
+      )}
+
+      {DEBUG_TOOLS && sweepProgress && (
+        <p className="text-xs rounded-lg px-3 py-2 animate-pulse"
+          style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', color: '#6366f1' }}>
+          Generating {sweepProgress.current} / {sweepProgress.total} — {sweepProgress.label}
+        </p>
+      )}
+
+      {candidates.length > 0 && (
+        <div className="space-y-2">
+          {candidates.map((c: GeneratedPrompt, i: number) => (
+            <div key={i}>
+              {selectedIndex === i ? (
+                <div
+                  className="p-3 rounded-xl text-sm"
+                  style={{ background: 'rgba(45,158,45,0.06)', border: '2px solid var(--color-primary-400)' }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full capitalize" style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-600)' }}>
+                      {c.promptType.replaceAll('_', ' ')}
+                    </span>
+                    <span className="text-xs font-medium text-brand-500">Selected (Editing)</span>
+                  </div>
+                  <textarea
+                    value={promptInput}
+                    onChange={(e) => {
+                      setPromptInput(e.target.value);
+                      setTranscriptText(e.target.value);
+                    }}
+                    className="w-full px-3 py-2.5 text-sm rounded-[10px] min-h-[80px] resize-y leading-snug transition-all duration-150 bg-surface-raised text-content-primary"
+                    style={{ border: '1px solid var(--border-default)' }}
+                    placeholder="Edit this prompt..."
+                  />
+                </div>
+              ) : (
+                <CandidateCard candidate={c} isSelected={false} onSelect={() => handleSelectCandidate(c, i)} />
+              )}
+
+              {selectedIndex === i && c.promptType === 'multiple_choice' && (
+                <MultipleChoiceEditor
+                  nameGroup={`correct-option-${i}`}
+                  options={c.mcOptions?.map((opt: any) => ({
+                    label: opt.label,
+                    text: editingOptions[opt.label] ?? opt.text
+                  })) || []}
+                  correctOption={overrideCorrectOption}
+                  onCorrectOptionChange={setOverrideCorrectOption}
+                  onOptionTextChange={(label: string, text: string) => setEditingOptions({ ...editingOptions, [label]: text })}
+                  feedbackEnabled={feedbackEnabled}
+                  onFeedbackChange={setFeedbackEnabled}
+                />
+              )}
+
+              {selectedIndex === i && (
+                <button
+                  onClick={() => { setPendingCandidate(c); setShowTimerDialog(true); }}
+                  disabled={!promptInput.trim() || !isConnected}
+                  className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
+                  style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))' }}
+                >
+                  Publish This Question →
+                </button>
+              )}
+            </div>
+          ))}
+
+          <div className="flex gap-2 pt-1">
+            <Button onClick={onRegenerate} disabled={isGenerating} variant="outline" size="sm" className="text-xs">
+              {isGenerating ? 'Regenerating…' : 'Regenerate'}
+            </Button>
+            {DEBUG_TOOLS && (
+              <Button onClick={handleCopyReport} disabled={isGenerating || candidates.length === 0} variant="outline" size="sm" className="text-xs">
+                {copiedReport ? 'Copied!' : 'Copy Report'}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function ManualCreationPanel({
+  promptType, setPromptType, promptInput, setPromptInput, setTranscriptText,
+  manualOptions, setManualOptions, overrideCorrectOption, setOverrideCorrectOption,
+  feedbackEnabled, setFeedbackEnabled
+}: any) {
+  return (
+    <>
+      <div className="flex items-center gap-2 mb-2">
+        <select
+          value={promptType}
+          onChange={(e) => setPromptType(e.target.value as PromptType)}
+          className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary"
+          style={{ border: '1px solid var(--border-default)' }}
+        >
+          <option value="long_answer">Long Answer</option>
+          <option value="short_answer">Short Answer</option>
+          <option value="multiple_choice">Multiple Choice</option>
+        </select>
+      </div>
+
+      <textarea
+        value={promptInput}
+        onChange={(e) => {
+          setPromptInput(e.target.value);
+          setTranscriptText(e.target.value);
+        }}
+        placeholder="Type your question here manually..."
+        className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[80px] transition-all duration-150 bg-surface-raised text-content-primary"
+        style={{ border: '1px solid var(--border-default)' }}
+        rows={3}
+      />
+
+      {promptType === 'multiple_choice' && (
+        <MultipleChoiceEditor
+          nameGroup="manual-correct-option"
+          options={['A', 'B', 'C', 'D'].map((label) => ({
+            label,
+            text: manualOptions[label] || ''
+          }))}
+          correctOption={overrideCorrectOption}
+          onCorrectOptionChange={setOverrideCorrectOption}
+          onOptionTextChange={(label, text) => setManualOptions({ ...manualOptions, [label]: text })}
+          feedbackEnabled={feedbackEnabled}
+          onFeedbackChange={setFeedbackEnabled}
+        />
+      )}
+    </>
   );
 }

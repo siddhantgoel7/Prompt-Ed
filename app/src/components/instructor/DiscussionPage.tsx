@@ -194,21 +194,23 @@ export function DiscussionPage({
 
   const { channel, isConnected } = useRealtime(lessonId, 'instructor');
 
+  const handleNewResponse = useCallback((payload: any) => {
+    const newResponse = payload.payload?.response;
+    if (newResponse && newResponse.discussion_id === discussionId) {
+      setResponses((prev) => {
+        // Deduplicate just in case — Supabase Realtime can deliver the same broadcast
+        // event twice on reconnect. Returning prev skips the re-render entirely.
+        if (prev.some(r => r.id === newResponse.id)) return prev;
+        return [newResponse, ...prev];
+      });
+    }
+  }, [discussionId]);
+
   useEffect(() => {
     if (!channel || !isConnected) return;
 
-    channel.on('broadcast', { event: 'response:new' }, (payload) => {
-      const newResponse = payload.payload?.response;
-      if (newResponse && newResponse.discussion_id === discussionId) {
-        setResponses((prev) => {
-          // Deduplicate just in case — Supabase Realtime can deliver the same broadcast
-          // event twice on reconnect. Returning prev skips the re-render entirely.
-          if (prev.some(r => r.id === newResponse.id)) return prev;
-          return [newResponse, ...prev];
-        });
-      }
-    });
-  }, [channel, isConnected, discussionId]);
+    channel.on('broadcast', { event: 'response:new' }, handleNewResponse);
+  }, [channel, isConnected, handleNewResponse]);
 
   const isMC = initialDiscussion.prompt_type === 'multiple_choice';
 
