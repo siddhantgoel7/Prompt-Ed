@@ -18,6 +18,7 @@ import { AIPreferencesDialog } from './AIPreferencesDialog';
 import { AITipsButton } from './AITipsButton';
 import { transcribeAudioApi } from '@/lib/api/aiApi';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
+import { GeneralQuestionsTab } from './GeneralQuestionsTab';
 import type { TokenUsage } from '@/types/ai';
 import { DEBUG_TOOLS } from '@/lib/debug';
 import { useDebugSweep } from '@/hooks/useDebugSweep';
@@ -86,7 +87,7 @@ export function ActiveCenter(props: Partial<{
   const [manualOptions, setManualOptions] = React.useState<Record<string, string>>({
     A: '', B: '', C: '', D: ''
   });
-  const [creationMode, setCreationMode] = React.useState<'ai' | 'manual'>('ai');
+  const [creationMode, setCreationMode] = React.useState<'ai' | 'manual' | 'general'>('ai');
   const [showTimerDialog, setShowTimerDialog] = React.useState(false);
   const { copiedReport, sweepProgress, handleCopyReport, handleRunAllCombinations } = useDebugSweep({
     lessonId, transcriptText, candidates, isGenerating,
@@ -258,10 +259,11 @@ export function ActiveCenter(props: Partial<{
           border: '1px solid var(--border-default)',
         }}
       >
-        <Tabs value={creationMode} onValueChange={(v) => setCreationMode(v as 'ai' | 'manual')} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+        <Tabs value={creationMode} onValueChange={(v) => setCreationMode(v as 'ai' | 'manual' | 'general')} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="ai">AI Generation</TabsTrigger>
             <TabsTrigger value="manual">Manual Creation</TabsTrigger>
+            <TabsTrigger value="general">General Questions</TabsTrigger>
           </TabsList>
 
           <TabsContent value="ai" className="space-y-3 mt-0">
@@ -545,6 +547,10 @@ export function ActiveCenter(props: Partial<{
 
           </TabsContent>
 
+          <TabsContent value="general" className="mt-0">
+            <GeneralQuestionsTab />
+          </TabsContent>
+
           <TabsContent value="manual" className="space-y-3 mt-0">
             <div className="flex items-center gap-2 mb-2">
               <select
@@ -606,7 +612,7 @@ export function ActiveCenter(props: Partial<{
         )}
 
         {/* Start Discussion button */}
-        {!activeDiscussionId && (
+        {!activeDiscussionId && creationMode !== 'general' && (
           <div className="pt-3 flex justify-end border-t border-line-subtle">
             <button
               onClick={() => setShowTimerDialog(true)}

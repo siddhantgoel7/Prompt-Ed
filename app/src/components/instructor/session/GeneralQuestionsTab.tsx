@@ -2,6 +2,7 @@
 'use client';
 
 import * as React from 'react';
+const GENERATING_CHARS = 'Generating...'.split('');
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -14,7 +15,8 @@ export function GeneralQuestionsTab() {
     const context = React.useContext(SessionContext);
     const [showTimerDialog, setShowTimerDialog] = React.useState(false);
     const [pendingQuestion, setPendingQuestion] = React.useState<GeneralQuestion | null>(null);
-    const [pendingFeedbackEnabled, setPendingFeedbackEnabled] = React.useState(false);
+    const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
+    const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
 
     if (!context) return null;
 
@@ -30,7 +32,25 @@ export function GeneralQuestionsTab() {
 
     const hasReadyFiles = files.some(f => f.status === 'ready');
 
-    const handlePublish = (question: GeneralQuestion, feedbackEnabled: boolean, timerSeconds: number | null) => {
+    // Reset selection when questions change (e.g. regenerated)
+    const prevLengthRef = React.useRef(generalQuestions.length);
+    if (generalQuestions.length !== prevLengthRef.current) {
+        prevLengthRef.current = generalQuestions.length;
+        setSelectedIndex(null);
+        setFeedbackEnabled(false);
+    }
+
+    const handleSelect = (index: number) => {
+        if (selectedIndex === index) {
+            setSelectedIndex(null);
+            setFeedbackEnabled(false);
+        } else {
+            setSelectedIndex(index);
+            setFeedbackEnabled(false);
+        }
+    };
+
+    const handlePublish = (question: GeneralQuestion, timerSeconds: number | null) => {
         const candidate: GeneratedPrompt = {
             promptText: question.prompt_text,
             promptType: 'multiple_choice',
@@ -42,23 +62,41 @@ export function GeneralQuestionsTab() {
     const handleTimerConfirm = (timerSeconds: number | null) => {
         setShowTimerDialog(false);
         if (pendingQuestion) {
-            handlePublish(pendingQuestion, pendingFeedbackEnabled, timerSeconds);
+            handlePublish(pendingQuestion, timerSeconds);
             setPendingQuestion(null);
-            setPendingFeedbackEnabled(false);
         }
     };
 
     return (
         <div className="space-y-3">
-            {/* Generate button */}
-            <button
-                onClick={generateGeneralQuestions}
-                disabled={isGeneratingGeneral || !hasReadyFiles}
-                className="w-full px-3 py-2 text-sm font-semibold text-white rounded-[10px] disabled:opacity-50 disabled:cursor-not-allowed btn-primary-glow transition-all duration-150"
-                style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))' }}
-            >
-                {isGeneratingGeneral ? 'Generating Questions...' : generalQuestions.length > 0 ? 'Regenerate Questions' : 'Generate General Questions'}
-            </button>
+            {/* Generate button — matches Generate Prompts style */}
+            <div className="flex justify-center">
+                <div className={`rotating-glow-wrap${isGeneratingGeneral ? ' generating' : ''}`}>
+                    <button
+                        onClick={generateGeneralQuestions}
+                        disabled={isGeneratingGeneral || !hasReadyFiles}
+                        className="px-6 py-2 text-sm font-semibold text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
+                        style={{
+                            background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+                            opacity: 1,
+                        }}
+                    >
+                        {isGeneratingGeneral ? (
+                            <span aria-label="Generating…" style={{ display: 'inline-flex' }}>
+                                {GENERATING_CHARS.map((ch, i) => (
+                                    <span
+                                        key={i}
+                                        className={ch === '.' ? 'generating-char' : 'generating-shimmer'}
+                                        style={{ animationDelay: `${i * 0.07}s` }}
+                                    >
+                                        {ch}
+                                    </span>
+                                ))}
+                            </span>
+                        ) : generalQuestions.length > 0 ? 'Regenerate General Questions' : 'Generate General Questions'}
+                    </button>
+                </div>
+            </div>
 
             {!hasReadyFiles && generalQuestions.length === 0 && (
                 <p className="text-xs text-muted-foreground text-center py-2">
@@ -87,20 +125,123 @@ export function GeneralQuestionsTab() {
 
             {/* Question list */}
             {generalQuestions.length > 0 && (
-                <ScrollArea className="h-[calc(100vh-220px)] pr-1">
+                <ScrollArea className="h-[calc(100vh-280px)] pr-1">
                     <div className="space-y-2">
                         {generalQuestions.map((q, i) => (
-                            <GeneralQuestionCard
-                                key={q.id}
-                                question={q}
-                                index={i}
-                                isConnected={isConnected}
-                                onPublish={(feedbackEnabled) => {
-                                    setPendingQuestion(q);
-                                    setPendingFeedbackEnabled(feedbackEnabled);
-                                    setShowTimerDialog(true);
-                                }}
-                            />
+                            <div key={q.id}>
+                                {selectedIndex === i ? (
+                                    /* Selected: expanded card matching AI generation selected style */
+                                    <div
+                                        className="p-3 rounded-xl text-sm"
+                                        style={{
+                                            background: 'rgba(45,158,45,0.06)',
+                                            border: '2px solid var(--color-primary-400)',
+                                        }}
+                                    >
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span
+                                                className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize text-brand-600"
+                                                style={{ background: 'var(--color-primary-alpha-12)' }}
+                                            >
+                                                Multiple Choice
+                                            </span>
+                                            <span className="text-xs font-medium text-brand-500">
+                                                Selected
+                                            </span>
+                                        </div>
+
+                                        <p className="leading-snug text-sm text-content-primary mb-2">
+                                            {q.prompt_text}
+                                        </p>
+
+                                        <ul className="space-y-1 mb-3">
+                                            {q.mc_options.map((opt) => (
+                                                <li key={opt.label} className="text-xs flex items-start gap-1">
+                                                    <span
+                                                        className={`font-semibold mr-0.5 ${opt.label === q.correct_option ? 'text-brand-500' : 'text-content-secondary'}`}
+                                                    >
+                                                        {opt.label}.
+                                                    </span>
+                                                    <span className={opt.label === q.correct_option ? 'text-brand-500 font-medium' : 'text-content-muted'}>
+                                                        {opt.text}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ul>
+
+                                        {/* Feedback toggle */}
+                                        <div className="mb-2 pt-2 border-t border-line-subtle">
+                                            <div className="flex items-center gap-1.5">
+                                                <label className="flex items-center gap-2 text-xs font-medium cursor-pointer text-content-secondary">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={feedbackEnabled}
+                                                        onChange={(e) => setFeedbackEnabled(e.target.checked)}
+                                                        className="accent-[var(--color-primary-500)]"
+                                                    />
+                                                    Show correctness feedback
+                                                </label>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About correctness feedback" />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>When enabled, students see correct or incorrect feedback immediately after submitting.</TooltipContent>
+                                                </Tooltip>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={() => { setPendingQuestion(q); setShowTimerDialog(true); }}
+                                            disabled={!isConnected}
+                                            className="mt-1 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
+                                            style={{
+                                                background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+                                            }}
+                                        >
+                                            Publish This Question →
+                                        </button>
+                                    </div>
+                                ) : (
+                                    /* Not selected: compact clickable card matching CandidateCard style */
+                                    <button
+                                        onClick={() => handleSelect(i)}
+                                        className="w-full text-left p-3 rounded-xl text-sm transition-all duration-150"
+                                        style={{
+                                            background: 'var(--surface-raised)',
+                                            border: '1px solid var(--border-default)',
+                                            color: 'var(--text-primary)',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-300)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-default)';
+                                        }}
+                                    >
+                                        <div className="flex items-center gap-2 mb-1.5">
+                                            <span
+                                                className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize text-brand-600"
+                                                style={{ background: 'var(--color-primary-alpha-12)' }}
+                                            >
+                                                Multiple Choice
+                                            </span>
+                                        </div>
+                                        <p className="leading-snug text-sm text-content-primary">
+                                            {q.prompt_text}
+                                        </p>
+                                        <ul className="mt-2 space-y-1">
+                                            {q.mc_options.map((opt) => (
+                                                <li key={opt.label} className="text-xs text-content-muted">
+                                                    <span className="font-semibold mr-1 text-content-secondary">
+                                                        {opt.label}.
+                                                    </span>
+                                                    {opt.text}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </button>
+                                )}
+                            </div>
                         ))}
                     </div>
                 </ScrollArea>
@@ -109,96 +250,8 @@ export function GeneralQuestionsTab() {
             <StartDiscussionDialog
                 open={showTimerDialog}
                 onConfirm={handleTimerConfirm}
-                onCancel={() => { setShowTimerDialog(false); setPendingQuestion(null); setPendingFeedbackEnabled(false); }}
+                onCancel={() => { setShowTimerDialog(false); setPendingQuestion(null); }}
             />
-        </div>
-    );
-}
-
-function GeneralQuestionCard({
-    question,
-    index,
-    isConnected,
-    onPublish,
-}: {
-    question: GeneralQuestion;
-    index: number;
-    isConnected: boolean;
-    onPublish: (feedbackEnabled: boolean) => void;
-}) {
-    const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
-
-    return (
-        <div
-            className="p-3 rounded-xl text-sm"
-            style={{
-                background: 'var(--surface-raised)',
-                border: '1px solid var(--border-default)',
-            }}
-        >
-            <div className="flex items-center gap-2 mb-1.5">
-                <span
-                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-brand-600"
-                    style={{ background: 'var(--color-primary-alpha-12)' }}
-                >
-                    Q{index + 1}
-                </span>
-                <span
-                    className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize text-content-muted"
-                    style={{ background: 'rgba(0,0,0,0.04)' }}
-                >
-                    Multiple Choice
-                </span>
-            </div>
-
-            <p className="leading-snug text-sm text-content-primary mb-2">
-                {question.prompt_text}
-            </p>
-
-            <ul className="space-y-1 mb-2">
-                {question.mc_options.map((opt) => (
-                    <li key={opt.label} className="text-xs text-content-muted flex items-start gap-1">
-                        <span className={`font-semibold mr-0.5 ${opt.label === question.correct_option ? 'text-brand-500' : 'text-content-secondary'}`}>
-                            {opt.label}.
-                        </span>
-                        <span className={opt.label === question.correct_option ? 'text-brand-500 font-medium' : ''}>
-                            {opt.text}
-                        </span>
-                    </li>
-                ))}
-            </ul>
-
-            {/* Feedback toggle — matches MultipleChoiceEditor pattern */}
-            <div className="mb-2 pt-2 border-t border-line-subtle">
-                <div className="flex items-center gap-1.5">
-                    <label className="flex items-center gap-2 text-xs font-medium cursor-pointer text-content-secondary">
-                        <input
-                            type="checkbox"
-                            checked={feedbackEnabled}
-                            onChange={(e) => setFeedbackEnabled(e.target.checked)}
-                            className="accent-[var(--color-primary-500)]"
-                        />
-                        Show correctness feedback
-                    </label>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About correctness feedback" />
-                        </TooltipTrigger>
-                        <TooltipContent>When enabled, students see correct or incorrect feedback immediately after submitting.</TooltipContent>
-                    </Tooltip>
-                </div>
-            </div>
-
-            <button
-                onClick={() => onPublish(feedbackEnabled)}
-                disabled={!isConnected}
-                className="w-full rounded-[8px] text-xs py-1.5 font-semibold text-white transition-all duration-150 disabled:opacity-50"
-                style={{
-                    background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-                }}
-            >
-                Publish to Students
-            </button>
         </div>
     );
 }

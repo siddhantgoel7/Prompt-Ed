@@ -11,7 +11,6 @@ import type { LessonFile } from '@/types/ai';
 import { SessionContext } from './SessionContext';
 import { DiscussionHistory } from './DiscussionHistory';
 import { FilesTab } from './FilesTab';
-import { GeneralQuestionsTab } from './GeneralQuestionsTab';
 
 /** Renders the session sidebar with Discussions and Files tabs. Supports collapsing. */
 export function ActiveSidebar(props: {
@@ -123,35 +122,14 @@ export function ActiveSidebar(props: {
               <polyline points="14 2 14 8 20 8"/>
             </svg>
           </button>
-          <button
-            title="General Questions"
-            onClick={() => openTab('general')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150"
-            style={{ color: activeTab === 'general' ? 'var(--color-primary-500)' : 'var(--text-muted)', background: activeTab === 'general' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.10)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = activeTab === 'general' ? 'rgba(45,158,45,0.10)' : 'transparent';
-              (e.currentTarget as HTMLButtonElement).style.color = activeTab === 'general' ? 'var(--color-primary-500)' : 'var(--text-muted)';
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-              <line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-          </button>
         </div>
       ) : (
         /* Expanded: full tab panel */
         <div className="flex-1 overflow-hidden p-3">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
-            <TabsList className="w-full grid grid-cols-3 mb-3">
+            <TabsList className="w-full grid grid-cols-2 mb-3">
               <TabsTrigger value="discussions" className="text-xs">Discussions</TabsTrigger>
               <TabsTrigger value="files" className="text-xs">Files</TabsTrigger>
-              <TabsTrigger value="general" className="text-xs">General</TabsTrigger>
             </TabsList>
 
             <TabsContent value="discussions" className="mt-0 flex-1">
@@ -172,9 +150,6 @@ export function ActiveSidebar(props: {
               />
             </TabsContent>
 
-            <TabsContent value="general" className="mt-0 flex-1">
-              <GeneralQuestionsTab />
-            </TabsContent>
           </Tabs>
         </div>
       )}
