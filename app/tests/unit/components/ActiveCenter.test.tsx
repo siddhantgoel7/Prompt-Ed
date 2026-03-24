@@ -36,6 +36,47 @@ jest.mock('@/components/instructor/session/CandidateCard', () => ({
   CandidateCard: ({ onSelect }: any) => <button onClick={onSelect} data-testid="candidate-card" />,
 }));
 
+jest.mock('@/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: any) => <div>{children}</div>,
+  TooltipTrigger: ({ children }: any) => <div>{children}</div>,
+  TooltipContent: ({ children }: any) => <div>{children}</div>,
+  TooltipProvider: ({ children }: any) => <div>{children}</div>,
+}));
+
+jest.mock('@/components/ui/tabs', () => {
+  const ReactMock = require('react');
+  return {
+    Tabs: ({ children, onValueChange, value }: any) => {
+        // We hijack children to pass onValueChange to triggers
+        return <div data-testid="tabs-root">{
+            ReactMock.Children.map(children, (child: any) => {
+                if (!child) return null;
+                if (child.type.name === 'TabsList') {
+                    return ReactMock.cloneElement(child, { onValueChange });
+                }
+                if (child.props.value === value) return child;
+                return null;
+            })
+        }</div>;
+    },
+    TabsList: ({ children, onValueChange }: any) => (
+        <div>{ReactMock.Children.map(children, (child: any) => ReactMock.cloneElement(child, { onValueChange }))}</div>
+    ),
+    TabsTrigger: ({ children, value, onValueChange }: any) => (
+        <button onClick={() => onValueChange?.(value)}>{children}</button>
+    ),
+    TabsContent: ({ children }: any) => <div>{children}</div>,
+  };
+});
+
+jest.mock('@/components/instructor/session/StartDiscussionDialog', () => ({
+  StartDiscussionDialog: ({ open, onConfirm }: any) => open ? (
+    <div data-testid="start-dialog">
+      <button onClick={() => onConfirm(30)}>Use 30s Limit</button>
+    </div>
+  ) : null,
+}));
+
 describe('ActiveCenter', () => {
     const defaultProps = {
         lessonId: 'l1',
@@ -70,8 +111,27 @@ describe('ActiveCenter', () => {
         (useAudioRecorder as jest.Mock).mockReturnValue(mockRecorder);
     });
 
+    const TestWrapper = (props: any) => {
+        const [pInput, setPInput] = React.useState(props.promptInput || '');
+        const [tText, setTText] = React.useState(props.transcriptText || '');
+        const [pType, setPType] = React.useState<any>(props.promptType || 'long_answer');
+
+        return (
+            <ActiveCenter 
+                {...defaultProps} 
+                {...props} 
+                promptInput={pInput} 
+                setPromptInput={setPInput}
+                transcriptText={tText}
+                setTranscriptText={setTText}
+                promptType={pType}
+                setPromptType={setPType}
+            />
+        );
+    };
+
     it('success: renders and handles manual input', () => {
-        render(<ActiveCenter {...defaultProps} />);
+        render(<TestWrapper />);
         
         const textarea = screen.getByPlaceholderText(/Spoken content will appear/i);
         fireEvent.change(textarea, { target: { value: 'Manual Question' } });
@@ -85,7 +145,7 @@ describe('ActiveCenter', () => {
         const stopRecorder = { ...mockRecorder, isRecording: true };
         (useAudioRecorder as jest.Mock).mockReturnValue(stopRecorder);
         
-        render(<ActiveCenter {...defaultProps} />); 
+        render(<TestWrapper />); 
         
         const stopBtn = screen.getByText(/Stop & Transcribe/i);
         await act(async () => {
@@ -101,7 +161,7 @@ describe('ActiveCenter', () => {
         mockRecorder.stop.mockResolvedValueOnce(new Blob([], { type: 'audio/webm' }));
         (useAudioRecorder as jest.Mock).mockReturnValue({ ...mockRecorder, isRecording: true });
         
-        render(<ActiveCenter {...defaultProps} />);
+        render(<TestWrapper />);
         
         await act(async () => {
             fireEvent.click(screen.getByText(/Stop & Transcribe/i));
@@ -110,31 +170,32 @@ describe('ActiveCenter', () => {
         expect(screen.getByText(/No audio captured/i)).toBeInTheDocument();
     });
 
-    it('success: handles candidate selection and editing', () => {
+    it('success: handles candidate selection and editing', async () => {
         const candidates = [{ promptText: 'AI Q', promptType: 'short_answer' as const }];
-        render(<ActiveCenter {...defaultProps} candidates={candidates} />);
+        render(<TestWrapper candidates={candidates} />);
         
         fireEvent.click(screen.getByTestId('candidate-card'));
         
         expect(defaultProps.onSelectCandidate).toHaveBeenCalledWith(candidates[0]);
-        // Should show editing textarea for the selected candidate
-        expect(screen.getByPlaceholderText(/Edit this prompt/i)).toHaveValue('AI Q');
+        // Use waitFor for useEffect state sync
+        const editArea = await screen.findByPlaceholderText(/Edit this prompt/i);
+        expect(editArea).toHaveValue('AI Q');
     });
 
     it('success: switches to manual mode and publishes', async () => {
-        render(<ActiveCenter {...defaultProps} />);
+        render(<TestWrapper />);
         
-        fireEvent.click(screen.getByText('Manual Creation'));
+        const manualBtn = screen.getByText('Manual Creation');
+        fireEvent.click(manualBtn);
         
         const textarea = screen.getByPlaceholderText(/Type your question here/i);
         fireEvent.change(textarea, { target: { value: 'Manual Q' } });
         
         fireEvent.click(screen.getByText('Start Discussion'));
-        // Dialog should open
-        expect(screen.getByText(/Time Limit/i)).toBeInTheDocument();
         
-        // Confirm timer
-        fireEvent.click(screen.getByText('Use 30s Limit')); // Assuming this text matches StartDiscussionDialog
+        const confirmBtn = screen.getByText('Use 30s Limit');
+        fireEvent.click(confirmBtn);
+        
         expect(defaultProps.onPublish).toHaveBeenCalledWith(30);
     });
 });

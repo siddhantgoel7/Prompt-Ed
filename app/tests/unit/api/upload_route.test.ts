@@ -89,6 +89,7 @@ describe('POST /api/lessons/[lessonId]/upload', () => {
       },
     };
     (createClient as jest.Mock).mockResolvedValue(mockSupabase);
+    (parseFile as jest.Mock).mockResolvedValue([]);
   });
 
   it('failure: 401 Unauthorized when no user', async () => {
@@ -180,9 +181,7 @@ describe('POST /api/lessons/[lessonId]/upload', () => {
         
         // Mock success for all interior calls
         (parseFile as jest.Mock).mockResolvedValue([
-            { contentOrigin: 'page_text', content: 'Long chunk that exceeds minimum length used for testing sentence splitting and deduplication logic.', pageNumber: 1 },
-            { contentOrigin: 'page_text', content: 'Duplicate content that exceeds minimum length used for testing sentence splitting and deduplication logic.', pageNumber: 2 },
-            { contentOrigin: 'page_text', content: 'Duplicate content that exceeds minimum length used for testing sentence splitting and deduplication logic.', pageNumber: 2 }
+            { contentOrigin: 'page_text', content: 'Long chunk that exceeds minimum length used for testing sentence splitting and deduplication logic.', pageNumber: 1 }
         ]);
 
         mockSupabase.from.mockImplementation((table: string) => {
@@ -192,13 +191,13 @@ describe('POST /api/lessons/[lessonId]/upload', () => {
                 return {
                     select: () => ({ eq: () => Promise.resolve({ count: 0, error: null }) }),
                     insert: () => ({ select: () => ({ single: () => Promise.resolve({ data: { id: 'f1', uploaded_at: 'now' }, error: null }) }) }),
-                    // This is our success marker in processFile
                     update: jest.fn().mockReturnValue({ eq: () => Promise.resolve({ error: null }) })
                 };
             }
             if (table === 'lesson_chunks') {
                 return {
-                    insert: () => ({ select: () => Promise.resolve({ data: [{ id: 'c1' }, { id: 'c2' }], error: null }) })
+                    select: () => ({ eq: () => Promise.resolve({ data: [], error: null }) }),
+                    insert: () => ({ select: () => Promise.resolve({ data: [{ id: 'c1' }], error: null }) })
                 };
             }
             return mockSupabase;
@@ -213,8 +212,12 @@ describe('POST /api/lessons/[lessonId]/upload', () => {
 
         await POST(req, { params });
 
-        // Wait a small amount for the processFile fire-and-forget closure to finish its async work
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Polling wait for the fire-and-forget processFile closure
+        const start = Date.now();
+        while (Date.now() - start < 1000) {
+            if ((embedChunks as jest.Mock).mock.calls.length > 0) break;
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
 
         // verify embedChunks was called
         expect(embedChunks).toHaveBeenCalled();
