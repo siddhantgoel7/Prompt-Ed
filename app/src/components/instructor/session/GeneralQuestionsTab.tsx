@@ -3,6 +3,8 @@
 
 import * as React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { GeneralQuestion, GeneratedPrompt } from '@/types/ai';
 import { SessionContext } from './SessionContext';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
@@ -12,6 +14,7 @@ export function GeneralQuestionsTab() {
     const context = React.useContext(SessionContext);
     const [showTimerDialog, setShowTimerDialog] = React.useState(false);
     const [pendingQuestion, setPendingQuestion] = React.useState<GeneralQuestion | null>(null);
+    const [pendingFeedbackEnabled, setPendingFeedbackEnabled] = React.useState(false);
 
     if (!context) return null;
 
@@ -27,20 +30,21 @@ export function GeneralQuestionsTab() {
 
     const hasReadyFiles = files.some(f => f.status === 'ready');
 
-    const handlePublish = (question: GeneralQuestion, timerSeconds: number | null) => {
+    const handlePublish = (question: GeneralQuestion, feedbackEnabled: boolean, timerSeconds: number | null) => {
         const candidate: GeneratedPrompt = {
             promptText: question.prompt_text,
             promptType: 'multiple_choice',
             mcOptions: question.mc_options,
         };
-        handlePublishAiCandidate(candidate, question.correct_option, true, timerSeconds);
+        handlePublishAiCandidate(candidate, question.correct_option, feedbackEnabled, timerSeconds);
     };
 
     const handleTimerConfirm = (timerSeconds: number | null) => {
         setShowTimerDialog(false);
         if (pendingQuestion) {
-            handlePublish(pendingQuestion, timerSeconds);
+            handlePublish(pendingQuestion, pendingFeedbackEnabled, timerSeconds);
             setPendingQuestion(null);
+            setPendingFeedbackEnabled(false);
         }
     };
 
@@ -91,7 +95,11 @@ export function GeneralQuestionsTab() {
                                 question={q}
                                 index={i}
                                 isConnected={isConnected}
-                                onPublish={() => { setPendingQuestion(q); setShowTimerDialog(true); }}
+                                onPublish={(feedbackEnabled) => {
+                                    setPendingQuestion(q);
+                                    setPendingFeedbackEnabled(feedbackEnabled);
+                                    setShowTimerDialog(true);
+                                }}
                             />
                         ))}
                     </div>
@@ -101,7 +109,7 @@ export function GeneralQuestionsTab() {
             <StartDiscussionDialog
                 open={showTimerDialog}
                 onConfirm={handleTimerConfirm}
-                onCancel={() => { setShowTimerDialog(false); setPendingQuestion(null); }}
+                onCancel={() => { setShowTimerDialog(false); setPendingQuestion(null); setPendingFeedbackEnabled(false); }}
             />
         </div>
     );
@@ -116,8 +124,10 @@ function GeneralQuestionCard({
     question: GeneralQuestion;
     index: number;
     isConnected: boolean;
-    onPublish: () => void;
+    onPublish: (feedbackEnabled: boolean) => void;
 }) {
+    const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
+
     return (
         <div
             className="p-3 rounded-xl text-sm"
@@ -158,8 +168,29 @@ function GeneralQuestionCard({
                 ))}
             </ul>
 
+            {/* Feedback toggle — matches MultipleChoiceEditor pattern */}
+            <div className="mb-2 pt-2 border-t border-line-subtle">
+                <div className="flex items-center gap-1.5">
+                    <label className="flex items-center gap-2 text-xs font-medium cursor-pointer text-content-secondary">
+                        <input
+                            type="checkbox"
+                            checked={feedbackEnabled}
+                            onChange={(e) => setFeedbackEnabled(e.target.checked)}
+                            className="accent-[var(--color-primary-500)]"
+                        />
+                        Show correctness feedback
+                    </label>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About correctness feedback" />
+                        </TooltipTrigger>
+                        <TooltipContent>When enabled, students see correct or incorrect feedback immediately after submitting.</TooltipContent>
+                    </Tooltip>
+                </div>
+            </div>
+
             <button
-                onClick={onPublish}
+                onClick={() => onPublish(feedbackEnabled)}
                 disabled={!isConnected}
                 className="w-full rounded-[8px] text-xs py-1.5 font-semibold text-white transition-all duration-150 disabled:opacity-50"
                 style={{
