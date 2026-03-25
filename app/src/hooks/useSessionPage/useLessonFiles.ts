@@ -63,7 +63,7 @@ export function useLessonFiles(lessonId: string) {
             a.download = fileName;
             document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
+            a.remove();
             URL.revokeObjectURL(blobUrl);
         } catch (err) {
             console.error('Failed to open file', err);

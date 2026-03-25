@@ -60,20 +60,9 @@ function ActionButton({
   iconClassName: string;
 }) {
   const isFlagged = mode === 'flagged';
-  let label = 'Flag as Inappropriate';
-  if (isFlagged) {
-    if (isBeingFlagged) {
-      label = 'Restoring...';
-    } else {
-      label = 'Unflag';
-    }
-  } else {
-    if (isBeingFlagged) {
-      label = 'Removing...';
-    } else {
-      label = 'Flag as Inappropriate';
-    }
-  }
+  const label = isFlagged
+    ? (isBeingFlagged ? 'Restoring...' : 'Unflag')
+    : (isBeingFlagged ? 'Removing...' : 'Flag as Inappropriate');
 
   return (
     <button
@@ -163,14 +152,9 @@ export function ResponseCard({
     </>
   );
 
-  let dataVariant: string | undefined = undefined;
-  if (isSelected) {
-    if (isFlagged) {
-      dataVariant = 'flagged-selected';
-    } else {
-      dataVariant = 'highlighted-selected';
-    }
-  }
+  const dataVariant = isSelected
+    ? (isFlagged ? 'flagged-selected' : 'highlighted-selected')
+    : undefined;
 
   return (
     <div

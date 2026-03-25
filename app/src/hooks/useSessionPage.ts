@@ -306,7 +306,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   const draftKey = `lesson:${lessonId}:instructor-draft`;
 
   useEffect(() => {
-    if (!lesson || lesson.status !== 'active') return;
+    if (lesson?.status !== 'active') return;
     localStorage.setItem(
       draftKey,
       JSON.stringify({ promptInput, transcriptText, promptType, savedAt: new Date().toISOString() })
@@ -325,7 +325,7 @@ export function useSessionPage(lessonId: string): SessionVM {
   }, [draftKey, setPromptInput, setTranscriptText, setPromptType]);
 
   useEffect(() => {
-    if (!lesson || lesson.status !== 'active') return;
+    if (lesson?.status !== 'active') return;
 
     if (syncIntervalRef.current) {
       clearInterval(syncIntervalRef.current);
@@ -390,7 +390,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     a.download = fileName;
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    a.remove();
     URL.revokeObjectURL(url);
   }, []);
 
