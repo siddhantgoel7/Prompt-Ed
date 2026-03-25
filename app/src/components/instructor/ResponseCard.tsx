@@ -60,9 +60,16 @@ function ActionButton({
   iconClassName: string;
 }) {
   const isFlagged = mode === 'flagged';
-  const label = isFlagged
-    ? (isBeingFlagged ? 'Restoring...' : 'Unflag')
-    : (isBeingFlagged ? 'Removing...' : 'Flag as Inappropriate');
+  let label = 'Flag as Inappropriate';
+  if (isFlagged) {
+    if (isBeingFlagged) {
+      label = 'Restoring...';
+    } else {
+      label = 'Unflag';
+    }
+  } else if (isBeingFlagged) {
+    label = 'Removing...';
+  }
 
   return (
     <button
@@ -92,6 +99,51 @@ function ActionButton({
   );
 }
 
+function ResponseCardContent({
+  variant,
+  isSelected,
+  responseText,
+  timeString,
+}: {
+  variant: ResponseCardVariant;
+  isSelected: boolean;
+  responseText: string;
+  timeString: string;
+}) {
+  const s = variantStyles[variant];
+
+  const textClassName = cn(
+    'whitespace-pre-wrap break-words transition-all duration-300 text-content-primary',
+    isSelected ? s.selectedText : s.unselectedText,
+    variant === 'full' && 'leading-relaxed',
+  );
+
+  const timestampClassName = cn(
+    'font-medium transition-all duration-300 text-content-muted',
+    isSelected ? s.selectedTimestamp : s.unselectedTimestamp,
+  );
+
+  if (variant === 'compact') {
+    return (
+      <>
+        <p className={textClassName}>{responseText}</p>
+        <p className={cn(timestampClassName, 'uppercase tracking-wider')}>
+          {timeString}
+        </p>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <p className={textClassName}>{responseText}</p>
+      <div className={cn(timestampClassName, 'flex justify-end items-center gap-2')}>
+        <span suppressHydrationWarning>{timeString}</span>
+      </div>
+    </>
+  );
+}
+
 export function ResponseCard({
   variant,
   mode = 'normal',
@@ -104,57 +156,31 @@ export function ResponseCard({
 }: ResponseCardProps) {
   const s = variantStyles[variant];
   const isFlagged = mode === 'flagged';
-
   const timeString = new Date(createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // Selected state styles — tinted backgrounds that work in both light + dark mode
-  const selectedStyle = isFlagged
-    ? { background: 'var(--color-error-alpha-10)', border: '2px solid var(--color-error-alpha-50)', boxShadow: '0 4px 24px var(--color-error-alpha-12)' }
-    : { background: 'var(--color-highlight-alpha-10)', border: '2px solid var(--color-highlight-alpha-55)', boxShadow: '0 4px 24px var(--color-highlight-alpha-12)' };
+  let background = 'var(--color-highlight-alpha-10)';
+  let border = '2px solid var(--color-highlight-alpha-55)';
+  let boxShadow = '0 4px 24px var(--color-highlight-alpha-12)';
+  if (isFlagged) {
+    background = 'var(--color-error-alpha-10)';
+    border = '2px solid var(--color-error-alpha-50)';
+    boxShadow = '0 4px 24px var(--color-error-alpha-12)';
+  }
 
+  const selectedStyle = { background, border, boxShadow };
   const unselectedStyle = {
     background: 'var(--surface-raised)',
     border: '1px solid var(--border-default)',
   };
 
-  const content = (
-    <>
-      <p
-        className={cn(
-          'whitespace-pre-wrap break-words transition-all duration-300 text-content-primary',
-          isSelected ? s.selectedText : s.unselectedText,
-          variant === 'full' && 'leading-relaxed',
-        )}
-      >
-        {responseText}
-      </p>
-
-      {variant === 'compact' ? (
-        <p
-          className={cn(
-            'font-medium uppercase tracking-wider transition-all duration-300 text-content-muted',
-            isSelected ? s.selectedTimestamp : s.unselectedTimestamp,
-          )}
-        >
-          {timeString}
-        </p>
-      ) : (
-        <div
-          className={cn(
-            'flex justify-end items-center gap-2 font-medium transition-all duration-300 text-content-muted',
-            isSelected ? s.selectedTimestamp : s.unselectedTimestamp,
-          )}
-        >
-          <span suppressHydrationWarning>{timeString}</span>
-        </div>
-      )}
-
-    </>
-  );
-
-  const dataVariant = isSelected
-    ? (isFlagged ? 'flagged-selected' : 'highlighted-selected')
-    : undefined;
+  let dataVariant: string | undefined = undefined;
+  if (isSelected) {
+    if (isFlagged) {
+      dataVariant = 'flagged-selected';
+    } else {
+      dataVariant = 'highlighted-selected';
+    }
+  }
 
   return (
     <div
@@ -175,7 +201,12 @@ export function ResponseCard({
         onClick={onToggle}
         aria-label={isSelected ? 'Deselect response' : 'Select response'}
       >
-        {content}
+        <ResponseCardContent
+          variant={variant}
+          isSelected={isSelected}
+          responseText={responseText}
+          timeString={timeString}
+        />
       </button>
 
       {isSelected && (
