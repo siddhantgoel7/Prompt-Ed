@@ -589,6 +589,23 @@ export function ActiveCenter(props: Partial<{
                 onFeedbackChange={setFeedbackEnabled}
               />
             )}
+
+            {/* Start Discussion — manual tab only */}
+            {!activeDiscussionId && (
+              <div className="pt-3 flex justify-end border-t border-line-subtle">
+                <button
+                  onClick={() => setShowTimerDialog(true)}
+                  disabled={!promptInput.trim() || !isConnected}
+                  data-testid="start-discussion-button"
+                  className="px-4 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
+                  style={{
+                    background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+                  }}
+                >
+                  Start Discussion
+                </button>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
@@ -603,23 +620,6 @@ export function ActiveCenter(props: Partial<{
           >
             {publishError}
           </p>
-        )}
-
-        {/* Start Discussion button */}
-        {!activeDiscussionId && (
-          <div className="pt-3 flex justify-end border-t border-line-subtle">
-            <button
-              onClick={() => setShowTimerDialog(true)}
-              disabled={!promptInput.trim() || !isConnected}
-              data-testid="start-discussion-button"
-              className="px-4 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
-              style={{
-                background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-              }}
-            >
-              Start Discussion
-            </button>
-          </div>
         )}
 
         <StartDiscussionDialog
