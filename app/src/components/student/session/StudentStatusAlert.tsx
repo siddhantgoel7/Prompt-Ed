@@ -7,11 +7,11 @@ export function StudentStatusAlert({
   variant = 'default',
   title,
   description,
-}: {
+}: Readonly<{
   variant?: 'default' | 'destructive';
   title: string;
   description?: string | null;
-}) {
+}>) {
   const isDestructive = variant === 'destructive';
 
   const style: React.CSSProperties = isDestructive

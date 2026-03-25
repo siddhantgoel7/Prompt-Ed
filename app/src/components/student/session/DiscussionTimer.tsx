@@ -21,7 +21,7 @@ interface DiscussionTimerProps {
  * Student-facing countdown timer — delegates all rendering to the shared CircularTimer.
  * Provides data-testid="student-timer" for Playwright E2E targeting.
  */
-export function DiscussionTimer({ timerEndTime, timerTotalSeconds }: DiscussionTimerProps) {
+export function DiscussionTimer({ timerEndTime, timerTotalSeconds }: Readonly<DiscussionTimerProps>) {
   return (
     <CircularTimer
       timerEndTime={timerEndTime}

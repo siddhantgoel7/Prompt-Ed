@@ -16,13 +16,13 @@ import { FilterToggle } from '@/components/instructor/FilterToggle';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
 
 /** Isolated response list — owns its own selection state so clicks don't re-render the whole page. */
-function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag }: {
+function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag }: Readonly<{
   responses: Response[];
   flaggedResponses: Response[];
   onRemoveResponse: (id: string) => void;
   onRestoreResponse: (id: string) => Promise<void>;
   canFlag: boolean;
-}) {
+}>) {
   const {
     selectedIds, flaggingId, showHighlightedOnly,
     toggleSelected, handleFlagInappropriate,
@@ -142,7 +142,7 @@ export function DiscussionPage({
   initialResponses,
   initialFlaggedResponses,
   initialIsActive
-}: DiscussionClientProps) {
+}: Readonly<DiscussionClientProps>) {
 
   // ── Initialize State with Server Data (Hydration) ──────────────────────────
   // Server-fetched data is seeded into useState so that realtime updates can

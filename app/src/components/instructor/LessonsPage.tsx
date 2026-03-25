@@ -12,7 +12,7 @@ import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 
 /** Renders the lessons page for a course, with loading/not-found states and lesson management dialogs. */
-export function LessonsPage({ courseId }: { courseId: string }) {
+export function LessonsPage({ courseId }: Readonly<{ courseId: string }>) {
   const page = useLessonsPage(courseId);
 
   if (page.loading) {

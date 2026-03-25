@@ -13,7 +13,7 @@ import { DiscussionHistory } from './DiscussionHistory';
 import { FilesTab } from './FilesTab';
 
 /** Renders the session sidebar with Discussions and Files tabs. Supports collapsing. */
-export function ActiveSidebar(props: {
+export function ActiveSidebar(props: Readonly<{
   discussions?: DiscussionWithResponseCount[];
   activeDiscussionId?: string | null;
   responses?: Response[];
@@ -22,7 +22,7 @@ export function ActiveSidebar(props: {
   onUploadFile?: (file: File) => Promise<void>;
   onDeleteFile?: (fileId: string) => Promise<void>;
   studentCount?: number;
-}) {
+}>) {
   const context = React.useContext(SessionContext);
   const discussions = context ? context.discussions : props.discussions!;
   const activeDiscussionId = context ? (context.activeDiscussion?.id ?? null) : props.activeDiscussionId!;
@@ -103,7 +103,7 @@ export function ActiveSidebar(props: {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function CollapsedSidebarView({ activeTab, openTab }: any) {
+function CollapsedSidebarView({ activeTab, openTab }: Readonly<any>) {
   return (
     <div className="flex flex-col items-center gap-3 pt-4 px-2">
       <button
@@ -133,7 +133,7 @@ function CollapsedSidebarView({ activeTab, openTab }: any) {
 
 function ExpandedSidebarView({
   activeTab, setActiveTab, discussions, activeDiscussionId, files, isUploading, onUploadFile, onDeleteFile
-}: any) {
+}: Readonly<any>) {
   return (
     <div className="flex-1 overflow-hidden p-3">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">

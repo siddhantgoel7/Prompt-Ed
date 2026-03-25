@@ -8,10 +8,10 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 export function InstructorDashboardHeader({
   loggingOut,
   onLogout,
-}: {
+}: Readonly<{
   loggingOut: boolean;
   onLogout: () => void;
-}) {
+}>) {
   return (
     <header
       className="glass sticky top-0 z-50"

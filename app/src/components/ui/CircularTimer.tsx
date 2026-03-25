@@ -50,7 +50,7 @@ function formatTime(secs: number): string {
  * Accessibility: the root element carries aria-label with the live remaining time so
  * screen readers can announce it. The SVG arc is aria-hidden because it is decorative.
  */
-export function CircularTimer({ timerEndTime, timerTotalSeconds, testId }: CircularTimerProps) {
+export function CircularTimer({ timerEndTime, timerTotalSeconds, testId }: Readonly<CircularTimerProps>) {
   // Initialise synchronously so there is no flash of "00:00" on first render.
   const [remaining, setRemaining] = React.useState<number>(() =>
     Math.max(0, Math.ceil((timerEndTime - Date.now()) / 1000))

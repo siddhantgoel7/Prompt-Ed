@@ -22,7 +22,7 @@ interface StartDiscussionDialogProps {
 }
 
 /** Modal for setting a time limit before starting a discussion. */
-export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel = 'Start Discussion' }: StartDiscussionDialogProps) {
+export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel = 'Start Discussion' }: Readonly<StartDiscussionDialogProps>) {
   const [noLimit, setNoLimit] = React.useState(false);
   const [minutes, setMinutes] = React.useState(1);
   const [seconds, setSeconds] = React.useState(0);

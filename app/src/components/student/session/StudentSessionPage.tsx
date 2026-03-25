@@ -88,7 +88,7 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
 
   // Fire confetti when a correct MC answer feedback is shown
   useEffect(() => {
-    if (feedbackPeriodActive && isSubmitCorrect === true && typeof globalThis.window !== 'undefined') {
+    if (feedbackPeriodActive && isSubmitCorrect === true && globalThis.window !== undefined) {
       import('canvas-confetti')
         .then(({ default: confetti }) => {
           confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 9999 });

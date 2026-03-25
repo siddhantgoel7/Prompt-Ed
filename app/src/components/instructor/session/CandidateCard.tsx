@@ -11,11 +11,11 @@ export function CandidateCard({
     candidate,
     isSelected,
     onSelect,
-}: {
+}: Readonly<{
     candidate: GeneratedPrompt;
     isSelected: boolean;
     onSelect: () => void;
-}) {
+}>) {
     return (
         <button
             onClick={onSelect}

@@ -12,13 +12,13 @@ export function CoursesSection({
   onAccess,
   onEdit,
   onDelete,
-}: {
+}: Readonly<{
   courses: Course[];
   onAdd: () => void;
   onAccess: (courseId: string) => void;
   onEdit: (course: Course) => void;
   onDelete: (courseId: string) => void;
-}) {
+}>) {
   return (
     <section className="mx-auto w-full max-w-6xl px-2 md:px-6">
       <div className="mb-8 flex items-center justify-between gap-4">

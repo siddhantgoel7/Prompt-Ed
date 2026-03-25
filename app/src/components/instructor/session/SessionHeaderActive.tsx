@@ -27,7 +27,7 @@ import { HamburgerMenu } from './HamburgerMenu';
  * Active-session header with logo, lesson title, join PIN code, Display/End/Split View/Settings buttons.
  * Reads values from SessionContext when available, falling back to explicit props for testing.
  */
-export function SessionHeaderActive(props: {
+export function SessionHeaderActive(props: Readonly<{
   title?: string;
   lessonId?: string;
   pinCode?: string | null;
@@ -35,7 +35,7 @@ export function SessionHeaderActive(props: {
   onDisplay?: () => void;
   onEnd?: () => void;
   onSplitView: () => void;
-}) {
+}>) {
   const context = React.useContext(SessionContext);
   const title = context ? context.lesson.title : props.title!;
   const lessonId = context ? context.lesson.id : props.lessonId;

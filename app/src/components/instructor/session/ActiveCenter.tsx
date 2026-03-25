@@ -39,7 +39,7 @@ interface ActiveCenterProps {
   onRegenerate: () => void; onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => void;
 }
 
-export function ActiveCenter(props: Partial<ActiveCenterProps>) {
+export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
   const state = useActiveCenterStateMapping(props);
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
   const [sttStatus, setSttStatus] = React.useState<'idle' | 'transcribing' | 'error'>('idle');
@@ -328,13 +328,13 @@ function AIGenerationPanel({
               {recorder.fmt(recorder.elapsed)}
             </span>
           )}
-          {!recorder.isRecording ? (
-            <button onClick={recorder.start} disabled={isGenerating || sttStatus === 'transcribing'} className="text-xs h-7 px-3 rounded-[8px] font-medium transition-all duration-150 disabled:opacity-50 flex items-center gap-1.5" style={{ background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.30)', color: 'var(--recording-text, oklch(0.55 0.22 27))' }}>
-              <MicIcon /> Record
-            </button>
-          ) : (
+          {recorder.isRecording ? (
             <button onClick={handleStopAndTranscribe} className="text-xs h-7 px-3 rounded-[8px] font-medium text-white transition-all duration-150 flex items-center gap-1.5" style={{ background: 'var(--color-primary-600)' }}>
               <StopIcon /> Stop & Transcribe
+            </button>
+          ) : (
+            <button onClick={recorder.start} disabled={isGenerating || sttStatus === 'transcribing'} className="text-xs h-7 px-3 rounded-[8px] font-medium transition-all duration-150 disabled:opacity-50 flex items-center gap-1.5" style={{ background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.30)', color: 'var(--recording-text, oklch(0.55 0.22 27))' }}>
+              <MicIcon /> Record
             </button>
           )}
         </div>
@@ -413,7 +413,7 @@ function ManualCreationPanel({
 const MicIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" x2="12" y1="19" y2="22" /></svg>;
 const StopIcon = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>;
 
-function PromptTypeSelect({ value, onChange }: { value: string, onChange: (v: string) => void }) {
+function PromptTypeSelect({ value, onChange }: Readonly<{ value: string, onChange: (v: string) => void }>) {
   return (
     <select value={value} onChange={(e) => onChange(e.target.value)} className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary" style={{ border: '1px solid var(--border-default)' }}>
       <option value="long_answer">Long Answer</option><option value="short_answer">Short Answer</option><option value="multiple_choice">Multiple Choice</option>

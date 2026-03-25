@@ -15,7 +15,7 @@ const sizes = {
 };
 
 /** The PromptED logo — simple (no tagline) or full (with tagline). Adapts for dark/light mode. */
-export function AppLogo({ size = 'md', variant = 'simple', className = '' }: AppLogoProps) {
+export function AppLogo({ size = 'md', variant = 'simple', className = '' }: Readonly<AppLogoProps>) {
   const { width, height } = sizes[size];
   const src = variant === 'full' ? '/prompted_logo.svg' : '/prompted_logo_simple.svg';
 

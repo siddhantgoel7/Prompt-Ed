@@ -46,10 +46,10 @@ interface PaneState {
 function DiscussionList({
   discussions,
   onSelect,
-}: {
+}: Readonly<{
   discussions: DiscussionWithResponseCount[];
   onSelect: (id: string) => void;
-}) {
+}>) {
   const active = discussions.filter((d) => d.status === 'active');
   const closed = discussions.filter((d) => d.status === 'closed');
 
@@ -144,12 +144,12 @@ function DiscussionDetail({
   responses,
   loading,
   onBack,
-}: {
+}: Readonly<{
   discussion: DiscussionWithResponseCount;
   responses: Response[];
   loading: boolean;
   onBack: () => void;
-}) {
+}>) {
   const isMC = discussion.prompt_type === 'multiple_choice' && !!discussion.mc_options;
   const distribution: Record<string, number> = {};
   if (isMC && discussion.mc_options) {
@@ -268,12 +268,12 @@ function Pane({
   discussions,
   liveActiveDiscussionId,
   liveActiveResponses,
-}: {
+}: Readonly<{
   label: string;
   discussions: DiscussionWithResponseCount[];
   liveActiveDiscussionId?: string | null;
   liveActiveResponses?: Response[];
-}) {
+}>) {
   const [state, setState] = React.useState<PaneState>({
     selectedDiscussionId: null,
     responses: [],
@@ -357,7 +357,7 @@ export function SplitView({
   onBack,
   liveActiveDiscussionId,
   liveActiveResponses = [],
-}: SplitViewProps) {
+}: Readonly<SplitViewProps>) {
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col bg-surface-base"

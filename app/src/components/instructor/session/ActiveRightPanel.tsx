@@ -19,11 +19,11 @@ import { ResponseListTab } from './ResponseListTab';
 // ---------------------------------------------------------------------------
 
 /** Displays live student responses, analytics, and timer for the active discussion. Supports collapsing. */
-export function ActiveRightPanel(props: {
+export function ActiveRightPanel(props: Readonly<{
   responses?: Response[];
   activeDiscussion?: Discussion | null;
   studentCount?: number;
-}) {
+}>) {
   const contextProps = useActiveRightPanelContext(props);
   const { responses, activeDiscussion, activeDiscussionId, timerEndTime, timerTotalSeconds } = contextProps;
 
@@ -109,7 +109,7 @@ export function ActiveRightPanel(props: {
 
 // ─── Internal Hooks ──────────────────────────────────────────────────────────
 
-function useActiveRightPanelContext(props: any) {
+function useActiveRightPanelContext(props: Readonly<any>) {
   const context = React.useContext(SessionContext);
   const studentCount = context ? context.studentCount : (props.studentCount ?? 0);
 
@@ -148,7 +148,7 @@ function calculateMCDistribution(activeDiscussion: any, responses: any[]) {
 
 function CollapsedSidebarIcons({
   responses, activeTab, openTab, hasActiveDiscussion, hasTimer
-}: any) {
+}: Readonly<any>) {
   let timerTitle = 'Timer';
   if (hasActiveDiscussion) {
     timerTitle = hasTimer ? 'Timer running' : 'No time limit';
@@ -163,7 +163,7 @@ function CollapsedSidebarIcons({
   );
 }
 
-function SideIconButton({ icon, title, count, isActive, onClick, activeIndicator }: any) {
+function SideIconButton({ icon, title, count, isActive, onClick, activeIndicator }: Readonly<any>) {
   return (
     <button
       title={title}

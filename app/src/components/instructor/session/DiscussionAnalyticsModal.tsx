@@ -11,7 +11,9 @@ import {
 } from '@/components/ui/dialog';
 import { Tooltip as UITooltip, TooltipContent as UITooltipContent, TooltipTrigger as UITooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
-import * as Recharts from 'recharts';
+import {
+  ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid
+} from 'recharts';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 
@@ -22,11 +24,11 @@ export function DiscussionAnalyticsContent({
   discussion,
   responses,
   studentCount,
-}: {
+}: Readonly<{
   discussion: Discussion;
   responses: Response[];
   studentCount: number;
-}) {
+}>) {
   const total = responses.length;
   const isActive = discussion.status === 'active';
   const snapshot = isActive
@@ -78,7 +80,7 @@ export function DiscussionAnalyticsContent({
         <StatCard label="Responses" value={String(total)} />
         <StatCard
           label="Response Rate"
-          value={responseRate !== null ? `${responseRate}%` : '—'}
+          value={responseRate === null ? '—' : `${responseRate}%`}
           sub={snapshot > 0 ? `${total} / ${snapshot} students` : undefined}
           infoText="Responses received divided by the number of students who joined during this discussion."
         />
@@ -93,9 +95,9 @@ export function DiscussionAnalyticsContent({
             Answer Distribution
           </p>
           <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <Recharts.ResponsiveContainer width="100%" height={200}>
-              <Recharts.PieChart>
-                <Recharts.Pie
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
                   data={mcChartData}
                   dataKey="count"
                   nameKey="label"
@@ -108,14 +110,14 @@ export function DiscussionAnalyticsContent({
                   labelLine={false}
                 >
                   {mcChartData.map((entry, i) => (
-                    <Recharts.Cell
+                    <Cell
                       key={entry.label}
                       fill={entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]}
                     />
                   ))}
-                </Recharts.Pie>
-                <Recharts.Tooltip
-                  formatter={(value, name) => [`${value} votes`, `Option ${name}`]}
+                </Pie>
+                <Tooltip
+                  formatter={(value: any, name: any) => [`${value} votes`, `Option ${name}`]}
                   contentStyle={{
                     background: 'var(--surface-overlay)',
                     border: '1px solid var(--border-default)',
@@ -124,8 +126,8 @@ export function DiscussionAnalyticsContent({
                     fontSize: '12px',
                   }}
                 />
-              </Recharts.PieChart>
-            </Recharts.ResponsiveContainer>
+              </PieChart>
+            </ResponsiveContainer>
 
             {/* Legend table */}
             <div className="w-full sm:w-48 shrink-0 space-y-1.5">
@@ -166,12 +168,12 @@ export function DiscussionAnalyticsContent({
           >
             Response Timeline (per minute)
           </p>
-          <Recharts.ResponsiveContainer width="100%" height={160}>
-            <Recharts.BarChart data={timelineData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-              <Recharts.CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
-              <Recharts.XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-              <Recharts.YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-              <Recharts.Tooltip
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart data={timelineData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+              <Tooltip
                 contentStyle={{
                   background: 'var(--surface-overlay)',
                   border: '1px solid var(--border-default)',
@@ -179,11 +181,11 @@ export function DiscussionAnalyticsContent({
                   color: 'var(--text-primary)',
                   fontSize: '12px',
                 }}
-                formatter={(v) => [`${v} responses`, 'Count']}
+                formatter={(v: any) => [`${v} responses`, 'Count']}
               />
-              <Recharts.Bar dataKey="Responses" fill="var(--color-primary-500)" radius={[3, 3, 0, 0]} />
-            </Recharts.BarChart>
-          </Recharts.ResponsiveContainer>
+              <Bar dataKey="Responses" fill="var(--color-primary-500)" radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
 

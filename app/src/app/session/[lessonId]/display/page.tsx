@@ -4,9 +4,9 @@ import { redirect, notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { SessionDisplayView } from '@/components/instructor/session/SessionDisplayView';
 
-export default async function SessionDisplayPage(props: {
+export default async function SessionDisplayPage(props: Readonly<{
   params: Promise<{ lessonId: string }>;
-}) {
+}>) {
   const { lessonId } = await props.params;
   const supabase = await createClient();
 

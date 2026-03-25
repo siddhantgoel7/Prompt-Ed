@@ -37,9 +37,10 @@ type LessonWithMeta = Lesson & LessonMeta;
  * (kind: 'create') or a lesson info card with access and delete actions (kind: 'lesson').
  */
 export function LessonCard(
-  props:
+  props: Readonly<
     | { kind: 'create'; onCreate: () => void }
     | { kind: 'lesson'; lesson: Lesson; onAccess: () => void; onDelete: () => void }
+  >
 ) {
   if (props.kind === 'create') {
     return (

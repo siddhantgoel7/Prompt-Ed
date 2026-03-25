@@ -35,7 +35,7 @@ export function FlaggedFilterToggle({
   showFlagged,
   onToggle,
   onHide,
-}: FlaggedFilterToggleProps) {
+}: Readonly<FlaggedFilterToggleProps>) {
   const s = variantStyles[variant];
 
   return (

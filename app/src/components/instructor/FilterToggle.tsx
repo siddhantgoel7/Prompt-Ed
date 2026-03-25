@@ -35,7 +35,7 @@ export function FilterToggle({
   showHighlightedOnly,
   onToggle,
   onShowAll,
-}: FilterToggleProps) {
+}: Readonly<FilterToggleProps>) {
   const s = variantStyles[variant];
 
   return (

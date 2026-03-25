@@ -18,7 +18,7 @@ export function StudentPromptCard({
   showCorrectness,
   correctOption,
   disabled,
-}: {
+}: Readonly<{
   discussion: Discussion;
   selectedOption?: string | null;
   onSelectOption?: (label: string) => void;
@@ -27,7 +27,7 @@ export function StudentPromptCard({
   showCorrectness?: boolean;
   correctOption?: string | null;
   disabled?: boolean;
-}) {
+}>) {
   const isMC =
     discussion.prompt_type === 'multiple_choice' &&
     !!discussion.mc_options &&
@@ -90,7 +90,7 @@ export function StudentPromptCard({
 
 function MCOptionButton({
   opt, selectedOption, submittedOption, showCorrectness, correctOption, disabled, onSelect
-}: any) {
+}: Readonly<any>) {
   const label = opt.label;
   const isThis = label === submittedOption;
   const isCorrectOpt = label === correctOption;
