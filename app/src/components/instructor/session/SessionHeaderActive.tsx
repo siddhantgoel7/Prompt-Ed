@@ -2,7 +2,7 @@
 // Contains three zones:
 //   Left   — PromptED logo + lesson title (truncated on small screens)
 //   Center — Live join PIN + mini QR thumbnail (links to the join URL in a new tab)
-//   Right  — ThemeToggle + HamburgerMenu (Display QR/Code, Split View, Settings, End Session)
+//   Right  — ThemeToggle + HamburgerMenu (Display QR/Code, Split View, End Session)
 //
 // The HamburgerMenu lives in HamburgerMenu.tsx — extracted because it has its own
 // state, refs, effects, and is self-contained and potentially reusable.
@@ -24,7 +24,7 @@ import { SessionContext } from './SessionContext';
 import { HamburgerMenu } from './HamburgerMenu';
 
 /**
- * Active-session header with logo, lesson title, join PIN code, Display/End/Split View/Settings buttons.
+ * Active-session header with logo, lesson title, join PIN code, Display/End/Split View buttons.
  * Reads values from SessionContext when available, falling back to explicit props for testing.
  */
 export function SessionHeaderActive(props: {

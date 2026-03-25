@@ -5,7 +5,6 @@
 // Items:
 //   "Display QR/Code" — opens full-screen projector view (SessionDisplayView)
 //   "Split View"      — enters split-screen mode showing slide + responses side by side
-//   "Settings"        — placeholder (not yet wired)
 //   "End Session"     — ends the lesson; shown in red as a destructive action
 //
 // The menu closes on any outside click via a document-level mousedown listener.
@@ -45,7 +44,6 @@ export function HamburgerMenu({
   const menuItems: { label: string; onClick?: () => void; danger?: boolean; disabled?: boolean }[] = [
     { label: 'Display QR/Code', onClick: () => { onDisplay?.(); setOpen(false); } },
     { label: 'Split View',      onClick: () => { onSplitView?.(); setOpen(false); } },
-    { label: 'Settings' }, // TODO: wire up settings panel
     // "End Session" label is queried by name in Jest/Playwright tests — update those
     // tests if this text ever changes (previously a standalone button labeled "End").
     { label: endingLesson ? 'Ending…' : 'End Session', onClick: () => { onEnd?.(); setOpen(false); }, danger: true, disabled: endingLesson },
