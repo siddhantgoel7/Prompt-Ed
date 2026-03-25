@@ -72,6 +72,30 @@ async function setupInstructorSession(page: Page) {
 
     // Suppress the one-time AI tips spotlight so it doesn't block clicks in tests.
     await page.addInitScript(() => sessionStorage.setItem('ai-tips-seen-timer-lesson-id', 'true'));
+
+    // Stub Supabase Realtime WebSocket using Playwright's native WS interception.
+    // This ensures isConnected=true in CI without a real Supabase connection.
+    // Supabase Realtime uses Phoenix array protocol: [join_ref, ref, topic, event, payload]
+    await page.routeWebSocket(/.*/, (ws) => {
+        ws.onMessage((msg) => {
+            try {
+                const data = JSON.parse(msg as string);
+                if (Array.isArray(data)) {
+                    const [joinRef, ref, topic, event] = data;
+                    if (event === 'phx_join') {
+                        ws.send(JSON.stringify([joinRef, ref, topic, 'phx_reply', { status: 'ok', response: {} }]));
+                    } else if (event === 'heartbeat') {
+                        ws.send(JSON.stringify([null, ref, 'phoenix', 'phx_reply', { status: 'ok', response: {} }]));
+                    }
+                } else if (data.event === 'phx_join') {
+                    ws.send(JSON.stringify({ topic: data.topic, event: 'phx_reply', payload: { status: 'ok', response: {} }, ref: data.ref }));
+                } else if (data.event === 'heartbeat') {
+                    ws.send(JSON.stringify({ topic: 'phoenix', event: 'phx_reply', payload: { status: 'ok', response: {} }, ref: data.ref }));
+                }
+            } catch (_) { /* ignore */ }
+        });
+    });
+
     await page.goto(`/session/${LESSON_ID}`);
     await expect(page.getByText('Timer Test Lesson')).toBeVisible({ timeout: 15_000 });
 }

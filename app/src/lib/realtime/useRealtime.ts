@@ -118,5 +118,5 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
     reconnect,
     studentCount,
   };
-  /* eslint-enable react-hooks/refs */
+   
 }
