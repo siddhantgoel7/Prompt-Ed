@@ -37,7 +37,7 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
   const [isConnected, setIsConnected] = useState(false);
   const supabaseRef = useRef(createClient());
   // Force re-render when channel changes
-  const [, forceUpdate] = useState(0);
+  const [tick, setTick] = useState(0);
   // Bump to force the effect to re-run (used by reconnect)
   const [connectAttempt, setConnectAttempt] = useState(0);
   // Live count of students currently present in the session channel
@@ -73,14 +73,14 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
           console.log(`${role} subscribed to lesson ${lessonId}`);
           setIsConnected(true);
           channelRef.current = channel;
-          forceUpdate(prev => prev + 1); // Trigger re-render
+          setTick(prev => prev + 1); // Trigger re-render
 
           // Announce presence so others can count this participant
           await channel.track({ role, joined_at: new Date().toISOString() });
         } else if (status === 'CLOSED') {
           setIsConnected(false);
           channelRef.current = null;
-          forceUpdate(prev => prev + 1); // Trigger re-render
+          setTick(prev => prev + 1); // Trigger re-render
         }
       });
 
@@ -103,12 +103,12 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
       setConnectAttempt(prev => prev + 1);
     };
 
-    window.addEventListener('offline', handleOffline);
-    window.addEventListener('online', handleOnline);
+    globalThis.window.addEventListener('offline', handleOffline);
+    globalThis.window.addEventListener('online', handleOnline);
 
     return () => {
-      window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('online', handleOnline);
+      globalThis.window.removeEventListener('offline', handleOffline);
+      globalThis.window.removeEventListener('online', handleOnline);
     };
   }, []);
 

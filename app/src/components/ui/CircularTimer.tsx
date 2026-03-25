@@ -75,7 +75,7 @@ export function CircularTimer({ timerEndTime, timerTotalSeconds, testId }: Reado
   const strokeDashoffset = circumference * (1 - progress);
   const isExpired = remaining <= 0;
   // Warn when < 20% of time remains — proportional to total duration, not a fixed cutoff.
-  const isUrgent = progress < 0.20 && !isExpired;
+  const isUrgent = progress < 0.2 && !isExpired;
 
   // --accent-blush is defined in :root but not overridden in .dark; see globals.css note.
   const arcColor = isExpired || isUrgent ? 'var(--accent-blush)' : 'var(--color-primary-400)';

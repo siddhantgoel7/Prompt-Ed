@@ -135,7 +135,7 @@ function MCOptionButton({
   };
 
   const radioBg = RADIO_MAP[state] || 'transparent';
-  const radioBorder = radioBg !== 'transparent' ? `2px solid ${radioBg}` : '2px solid var(--border-default)';
+  const radioBorder = radioBg === 'transparent' ? '2px solid var(--border-default)' : `2px solid ${radioBg}`;
 
   return (
     <button

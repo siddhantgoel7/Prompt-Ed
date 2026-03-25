@@ -227,13 +227,13 @@ export function DiscussionAnalyticsModal({
   discussion,
   responses,
   studentCount,
-}: {
+}: Readonly<{
   open: boolean;
   onClose: () => void;
   discussion: Discussion | null;
   responses: Response[];
   studentCount: number;
-}) {
+}>) {
   if (!discussion) return null;
 
   return (
@@ -256,7 +256,7 @@ export function DiscussionAnalyticsModal({
 }
 
 /** Small stat display card used inside the analytics modal. */
-export function StatCard({ label, value, sub, infoText }: { label: string; value: string; sub?: string; infoText?: string }) {
+export function StatCard({ label, value, sub, infoText }: Readonly<{ label: string; value: string; sub?: string; infoText?: string }>) {
   return (
     <div
       className="rounded-xl p-3 bg-surface-raised border border-line-subtle"

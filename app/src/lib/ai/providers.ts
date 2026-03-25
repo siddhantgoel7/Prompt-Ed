@@ -5,6 +5,8 @@ import OpenAI from 'openai';
 import { GoogleGenerativeAI, type Part, type Content } from '@google/generative-ai';
 import type { TokenUsage } from '@/types/ai';
 
+export type ImageMimeType = 'image/png' | 'image/jpeg' | 'image/webp';
+
 /** Represents a single message in the chat history passed to the LLM. */
 export type AIMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
@@ -80,7 +82,7 @@ export interface AIProvider {
 
     generateVisionDescription(
         base64Image: string,
-        mimeType: 'image/png' | 'image/jpeg' | 'image/webp',
+        mimeType: ImageMimeType,
         contextHint?: string
     ): Promise<string>;
 
@@ -118,7 +120,7 @@ export interface AIProvider {
         slideNumber: number,
         bodyText: string,
         notesText: string,
-        images: Array<{ base64: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp' }>
+        images: Array<{ base64: string; mimeType: ImageMimeType }>
     ): Promise<string>;
 }
 
@@ -164,7 +166,7 @@ export class OpenAIProvider implements AIProvider {
     /** Sends a single image to gpt-4o and returns a factual text description of visual content. */
     async generateVisionDescription(
         base64Image: string,
-        mimeType: 'image/png' | 'image/jpeg' | 'image/webp',
+        mimeType: ImageMimeType,
         contextHint?: string
     ): Promise<string> {
         const systemPrompt = SINGLE_IMAGE_SYSTEM_PROMPT;
@@ -253,7 +255,7 @@ export class OpenAIProvider implements AIProvider {
         slideNumber: number,
         bodyText: string,
         notesText: string,
-        images: Array<{ base64: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp' }>
+        images: Array<{ base64: string; mimeType: ImageMimeType }>
     ): Promise<string> {
         const systemPrompt = PPTX_SLIDE_SYSTEM_PROMPT;
 
@@ -356,7 +358,7 @@ export class GeminiProvider implements AIProvider {
     /** Sends a single image to gemini-1.5-pro and returns a factual text description of visual content. */
     async generateVisionDescription(
         base64Image: string,
-        mimeType: 'image/png' | 'image/jpeg' | 'image/webp',
+        mimeType: ImageMimeType,
         contextHint?: string
     ): Promise<string> {
         const systemPrompt = SINGLE_IMAGE_SYSTEM_PROMPT;
@@ -424,7 +426,7 @@ export class GeminiProvider implements AIProvider {
         slideNumber: number,
         bodyText: string,
         notesText: string,
-        images: Array<{ base64: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp' }>
+        images: Array<{ base64: string; mimeType: ImageMimeType }>
     ): Promise<string> {
         const systemPrompt = PPTX_SLIDE_SYSTEM_PROMPT;
 

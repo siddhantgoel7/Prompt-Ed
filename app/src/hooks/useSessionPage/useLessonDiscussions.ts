@@ -1,8 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
+import type { Discussion, DiscussionWithResponseCount, PromptType } from '@/types/discussion';
 import type { Response } from '@/types/response';
 import type { GeneratedPrompt } from '@/types/ai';
-import type { PromptType } from '@/types/discussion';
 
 import {
     fetchDiscussionsApi,

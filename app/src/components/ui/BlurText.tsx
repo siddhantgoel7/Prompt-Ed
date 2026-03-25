@@ -28,7 +28,7 @@ interface BlurTextProps {
  * The wrapper element carries `aria-label` so screen readers read the full string
  * rather than one character at a time.
  */
-export function BlurText({ text, className = '', style, initialDelay = 200, staggerMs = 45 }: BlurTextProps) {
+export function BlurText({ text, className = '', style, initialDelay = 200, staggerMs = 45 }: Readonly<BlurTextProps>) {
   const chars = text.split('');
   return (
     <span className={className} aria-label={text} style={style}>
