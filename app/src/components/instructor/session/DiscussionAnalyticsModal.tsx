@@ -103,9 +103,10 @@ export function DiscussionAnalyticsContent({
           >
             Answer Distribution
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
+          <div className="flex flex-row gap-4 items-center">
+            <div className="w-1/2">
+            <ResponsiveContainer width="100%" height={160}>
+              <PieChart margin={{ top: 2, right: 2, bottom: 2, left: 2 }}>
                 <Pie
                   data={mcChartData}
                   dataKey="count"
@@ -137,31 +138,38 @@ export function DiscussionAnalyticsContent({
                 />
               </PieChart>
             </ResponsiveContainer>
+            </div>
 
             {/* Legend table */}
-            <div className="w-full sm:w-48 shrink-0 space-y-1.5">
+            <div className="w-1/2 space-y-3">
               {mcChartData.map((entry, i) => (
-                <div key={entry.label} className="flex items-start gap-2 text-xs">
+                <div key={entry.label} className="flex items-start gap-2">
                   <span
-                    className="mt-0.5 h-2.5 w-2.5 rounded-full shrink-0"
+                    className="mt-1 h-2.5 w-2.5 rounded-full shrink-0"
                     style={{ background: entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length] }}
                   />
-                  <span className="w-full" style={{ color: entry.isCorrect ? 'var(--color-primary-500)' : 'var(--text-secondary)' }}>
-                    <span className={entry.isCorrect ? 'font-semibold' : ''}>
-                      {entry.label}. {entry.text}
-                    </span>
-                    {entry.isCorrect && (
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span
-                        className="ml-1 text-[10px] px-1 py-0.5 rounded font-medium"
-                        style={{ background: 'rgba(45,158,45,0.15)', color: 'var(--color-primary-500)' }}
+                        className="text-xs leading-snug"
+                        style={{ color: entry.isCorrect ? 'var(--color-primary-500)' : 'var(--text-secondary)', fontWeight: entry.isCorrect ? 600 : 400 }}
                       >
-                        Correct
+                        {entry.label}. {entry.text}
                       </span>
-                    )}
-                    <span className="ml-1.5 font-semibold text-content-primary">
-                      {entry.count} ({entry.percentage}%)
-                    </span>
-                  </span>
+                      {entry.isCorrect && (
+                        <span
+                          className="text-[10px] px-1.5 py-0.5 rounded font-semibold shrink-0"
+                          style={{ background: 'rgba(45,158,45,0.15)', color: 'var(--color-primary-500)' }}
+                        >
+                          ✓ Correct
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-baseline gap-1.5 mt-0.5">
+                      <span className="text-sm font-bold text-content-primary">{entry.percentage}%</span>
+                      <span className="text-xs text-content-muted">{entry.count} votes</span>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
