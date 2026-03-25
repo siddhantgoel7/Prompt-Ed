@@ -123,7 +123,7 @@ export function LessonCard(
         <button
           type="button"
           onClick={props.onAccess}
-          className="absolute inset-[-130px_-16px_-16px_-16px] z-10 opacity-0 cursor-pointer w-[calc(100%+32px)] h-[calc(100%+146px)] focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-2xl"
+          className="absolute inset-0 z-10 opacity-0 cursor-pointer w-full h-full focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-2xl"
           aria-label={`Open lesson: ${lesson.title}`}
         />
         <h3 className="text-sm font-semibold leading-snug line-clamp-1 mb-0.5 text-content-primary relative z-0">

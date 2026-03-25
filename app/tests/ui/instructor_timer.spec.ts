@@ -228,7 +228,7 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
         await expect(page.getByText('Set Time Limit')).toBeVisible({ timeout: 5_000 });
 
         // Select No Time Limit
-        await page.getByRole('checkbox').click();
+        await page.getByText('No Time Limit').click();
         await page.getByRole('button', { name: /Start Discussion/i }).last().click();
 
         // Navigate to Timer tab to see the timer section
@@ -273,7 +273,7 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
 
         await page.getByTestId('start-discussion-button').click();
         await expect(page.getByText('Set Time Limit')).toBeVisible({ timeout: 5_000 });
-        await page.getByRole('checkbox').click(); // No time limit
+        await page.getByText('No Time Limit').click(); // No time limit
         await page.getByRole('button', { name: /Start Discussion/i }).last().click();
 
         // Navigate to Timer tab where Close Discussion button lives

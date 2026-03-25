@@ -183,7 +183,7 @@ test.describe('Instructor AI Features & Tools', () => {
 
         // Wait for and interact with the timer dialog
         await expect(page.getByText('Set Time Limit')).toBeVisible({ timeout: 5000 });
-        await page.getByTestId('no-time-limit-checkbox').click();
+        await page.getByText('No Time Limit').click();
         // Click the dialog's confirm button (labelled "Start Discussion" by default)
         await page.getByRole('button', { name: /Start Discussion/i }).last().click();
 
