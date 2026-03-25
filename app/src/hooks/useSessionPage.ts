@@ -423,18 +423,18 @@ export function useSessionPage(lessonId: string): SessionVM {
           `Time: ${new Date(d.created_at).toLocaleString()}`
         );
 
+        const optionLines: string[] = [];
         if (d.prompt_type === 'multiple_choice') {
-          lines.push('Options:');
-
-          const options = d.mc_options ?? [];
-          if (options.length === 0) {
-            lines.push('  - No options recorded');
+          optionLines.push('Options:');
+          if (!d.mc_options || d.mc_options.length === 0) {
+            optionLines.push('  - No options recorded');
           } else {
-            options.forEach((option, optionIndex) => {
-              lines.push(`  ${optionIndex + 1}. ${option.text}`);
+            d.mc_options.forEach((option, optionIndex) => {
+              optionLines.push(`  ${optionIndex + 1}. ${option.text}`);
             });
           }
         }
+        lines.push(...optionLines);
 
         lines.push('Responses:');
 

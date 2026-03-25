@@ -130,16 +130,12 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
 
           <TabsContent value="manual" className="space-y-3 mt-0">
             <ManualCreationPanel
-              {...state}
-              {...handlers}
-              overrideCorrectOption={overrideCorrectOption}
-              setOverrideCorrectOption={setOverrideCorrectOption}
-              feedbackEnabled={feedbackEnabled}
-              setFeedbackEnabled={setFeedbackEnabled}
-              manualOptions={manualOptions}
-              setManualOptions={setManualOptions}
-              setShowTimerDialog={setShowTimerDialog}
-              publishError={publishError}
+              promptType={state.promptType} setPromptType={state.setPromptType}
+              promptInput={state.promptInput} setPromptInput={state.setPromptInput}
+              setTranscriptText={state.setTranscriptText}
+              overrideCorrectOption={overrideCorrectOption} setOverrideCorrectOption={setOverrideCorrectOption}
+              feedbackEnabled={feedbackEnabled} setFeedbackEnabled={setFeedbackEnabled}
+              manualOptions={manualOptions} setManualOptions={setManualOptions}
             />
           </TabsContent>
         </Tabs>
@@ -202,6 +198,7 @@ function useActiveCenterStateMapping(props: Partial<ActiveCenterProps>) {
       onSelectCandidate: props.onSelectCandidate!,
       onRegenerate: props.onRegenerate!,
       onPublishAiCandidate: props.onPublishAiCandidate,
+      onClose: props.onClose!,
       activeDiscussionId: props.activeDiscussionId!,
     };
   }
@@ -227,11 +224,34 @@ function useActiveCenterStateMapping(props: Partial<ActiveCenterProps>) {
     onSelectCandidate: context.selectCandidate,
     onRegenerate: context.regenerateCandidates,
     onPublishAiCandidate: context.handlePublishAiCandidate,
+    onClose: context.handleCloseDiscussion,
     activeDiscussionId: context.activeDiscussion?.id ?? null,
   };
 }
 
-function useActiveCenterHandlers(allProps: any) {
+function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
+  recorder: ReturnType<typeof useAudioRecorder>;
+  selectedIndex: number | null;
+  setSelectedIndex: (v: number | null) => void;
+  sttStatus: 'idle' | 'transcribing' | 'error';
+  setSttStatus: (v: 'idle' | 'transcribing' | 'error') => void;
+  setSttError: (v: string | null) => void;
+  overrideCorrectOption: string | null;
+  setOverrideCorrectOption: (v: string | null) => void;
+  feedbackEnabled: boolean;
+  setFeedbackEnabled: (v: boolean) => void;
+  editingOptions: Record<string, string>;
+  setEditingOptions: (v: Record<string, string>) => void;
+  manualOptions: Record<string, string>;
+  setManualOptions: (v: Record<string, string>) => void;
+  creationMode: 'ai' | 'manual';
+  setCreationMode: (v: 'ai' | 'manual') => void;
+  showTimerDialog: boolean;
+  setShowTimerDialog: (v: boolean) => void;
+  pendingCandidate: GeneratedPrompt | null;
+  setPendingCandidate: (v: GeneratedPrompt | null) => void;
+  setPublishError: (v: string | null) => void;
+}>) {
   const {
     lessonId, recorder, onGenerate, setTranscriptText, setPromptInput,
     onSelectCandidate, setSelectedIndex, setOverrideCorrectOption, setEditingOptions,
@@ -260,7 +280,7 @@ function useActiveCenterHandlers(allProps: any) {
     if (p.promptType === 'multiple_choice' && p.mcOptions) {
       const correctOpt = p.mcOptions.find(o => o.is_correct);
       setOverrideCorrectOption(correctOpt ? correctOpt.label : null);
-      setEditingOptions(p.mcOptions.reduce((acc: any, opt: any) => ({ ...acc, [opt.label]: opt.text }), {}));
+      setEditingOptions(p.mcOptions.reduce((acc: Record<string, string>, opt: { label: string; text: string }) => ({ ...acc, [opt.label]: opt.text }), {}));
     } else {
       setOverrideCorrectOption(null); setEditingOptions({});
     }
@@ -316,7 +336,27 @@ function AIGenerationPanel({
   editingOptions, setEditingOptions, overrideCorrectOption, setOverrideCorrectOption,
   feedbackEnabled, setFeedbackEnabled, setPendingCandidate, setShowTimerDialog,
   isConnected, onRegenerate, handleCopyReport, copiedReport
-}: any) {
+}: Readonly<ActiveCenterProps & {
+  recorder: ReturnType<typeof useAudioRecorder>;
+  sttStatus: 'idle' | 'transcribing' | 'error';
+  sttError: string | null;
+  handleStopAndTranscribe: () => void;
+  handleRunAllCombinations: () => void;
+  sweepProgress: { current: number; total: number; label: string } | null;
+  selectedIndex: number | null;
+  handleSelectCandidate: (p: GeneratedPrompt, i: number) => void;
+  editingOptions: Record<string, string>;
+  setEditingOptions: (v: Record<string, string>) => void;
+  overrideCorrectOption: string | null;
+  setOverrideCorrectOption: (v: string | null) => void;
+  feedbackEnabled: boolean;
+  setFeedbackEnabled: (v: boolean) => void;
+  setPendingCandidate: (v: GeneratedPrompt | null) => void;
+  setShowTimerDialog: (v: boolean) => void;
+  copiedReport: boolean;
+  handleCopyReport: () => void;
+  transcriptRef: React.RefObject<HTMLTextAreaElement | null>;
+}>) {
   return (
     <>
       <div className="flex items-center justify-between">
@@ -371,7 +411,7 @@ function AIGenerationPanel({
               )}
               {selectedIndex === i && c.promptType === 'multiple_choice' && (
                 <MultipleChoiceEditor
-                  nameGroup={`correct-option-${i}`} options={c.mcOptions?.map((opt: any) => ({ label: opt.label, text: editingOptions[opt.label] ?? opt.text })) || []}
+                  nameGroup={`correct-option-${i}`} options={c.mcOptions?.map((opt: { label: string; text: string }) => ({ label: opt.label, text: editingOptions[opt.label] ?? opt.text })) || []}
                   correctOption={overrideCorrectOption} onCorrectOptionChange={setOverrideCorrectOption}
                   onOptionTextChange={(label: string, text: string) => setEditingOptions({ ...editingOptions, [label]: text })}
                   feedbackEnabled={feedbackEnabled} onFeedbackChange={setFeedbackEnabled}
@@ -391,7 +431,19 @@ function ManualCreationPanel({
   promptType, setPromptType, promptInput, setPromptInput, setTranscriptText,
   manualOptions, setManualOptions, overrideCorrectOption, setOverrideCorrectOption,
   feedbackEnabled, setFeedbackEnabled
-}: any) {
+}: Readonly<{
+  promptType: PromptType;
+  setPromptType: (v: PromptType) => void;
+  promptInput: string;
+  setPromptInput: (v: string) => void;
+  setTranscriptText: (v: string) => void;
+  manualOptions: Record<string, string>;
+  setManualOptions: (v: Record<string, string>) => void;
+  overrideCorrectOption: string | null;
+  setOverrideCorrectOption: (v: string | null) => void;
+  feedbackEnabled: boolean;
+  setFeedbackEnabled: (v: boolean) => void;
+}>) {
   return (
     <>
       <div className="flex items-center gap-2 mb-2"><PromptTypeSelect value={promptType} onChange={(v) => setPromptType(v as PromptType)} /></div>
@@ -431,7 +483,7 @@ function GeneratingIndicator() {
   );
 }
 
-function SweepButton({ onRun, disabled, progress }: any) {
+function SweepButton({ onRun, disabled, progress }: Readonly<{ onRun: () => void; disabled: boolean; progress: { current: number; total: number } | null }>) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -445,9 +497,9 @@ function SweepButton({ onRun, disabled, progress }: any) {
 }
 
 const WarningMessage = ({ message }: { message: string }) => <p className="text-xs rounded-lg px-3 py-2" style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.25)', color: '#b45309' }}>{message}</p>;
-const SweepProgressMessage = ({ progress }: any) => <p className="text-xs rounded-lg px-3 py-2 animate-pulse" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', color: '#6366f1' }}>Generating {progress.current} / {progress.total} — {progress.label}</p>;
+const SweepProgressMessage = ({ progress }: Readonly<{ progress: { current: number; total: number; label: string } }>) => <p className="text-xs rounded-lg px-3 py-2 animate-pulse" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', color: '#6366f1' }}>Generating {progress.current} / {progress.total} — {progress.label}</p>;
 
-function SelectedCandidateEditor({ promptInput, setPromptInput, setTranscriptText, type }: any) {
+function SelectedCandidateEditor({ promptInput, setPromptInput, setTranscriptText, type }: Readonly<{ promptInput: string; setPromptInput: (v: string) => void; setTranscriptText: (v: string) => void; type: string }>) {
   return (
     <div className="p-3 rounded-xl text-sm" style={{ background: 'rgba(45,158,45,0.06)', border: '2px solid var(--color-primary-400)' }}>
       <div className="flex items-center gap-2 mb-2">
@@ -459,11 +511,11 @@ function SelectedCandidateEditor({ promptInput, setPromptInput, setTranscriptTex
   );
 }
 
-function PublishButton({ onPublish, disabled }: any) {
+function PublishButton({ onPublish, disabled }: Readonly<{ onPublish: () => void; disabled: boolean }>) {
   return <button onClick={onPublish} disabled={disabled} className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow" style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))' }}>Publish This Question →</button>;
 }
 
-function CandidateActions({ onRegenerate, onCopyReport, isGenerating, hasCandidates, copiedReport }: any) {
+function CandidateActions({ onRegenerate, onCopyReport, isGenerating, hasCandidates, copiedReport }: Readonly<{ onRegenerate: () => void; onCopyReport: () => void; isGenerating: boolean; hasCandidates: boolean; copiedReport: boolean }>) {
   return (
     <div className="flex gap-2 pt-1">
       <Button onClick={onRegenerate} disabled={isGenerating} variant="outline" size="sm" className="text-xs">{isGenerating ? 'Regenerating…' : 'Regenerate'}</Button>

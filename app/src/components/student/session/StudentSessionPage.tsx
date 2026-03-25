@@ -12,6 +12,7 @@ import { DiscussionTimer } from './DiscussionTimer';
 import { TimerExpiredMessage } from './TimerExpiredMessage';
 
 import { useStudentSession } from '@/hooks/useStudentSession';
+import type { Discussion } from '@/types/discussion';
 
 /** Renders the student session UI, routing between waiting/active/submitted/ended states. */
 export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>) {
@@ -139,7 +140,7 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
       case 'error':
         return null;
       case 'active':
-        if (activeDiscussion?.status !== 'active') return null;
+        if (!activeDiscussion || activeDiscussion.status !== 'active') return null;
         return (
           <ActiveView
             isTimerExpired={isTimerExpired}
@@ -247,11 +248,26 @@ function ActiveView({
   isTimerExpired, activeDiscussion, hasTimer, timerEndTime, timerTotalSeconds,
   selectedOption, handleSelectOption, isMC, responseText, setResponseText,
   handleSubmit, effectiveCanSubmit, submitting, submitAttempted
-}: Readonly<any>) {
+}: Readonly<{
+  isTimerExpired: boolean;
+  activeDiscussion: Discussion;
+  hasTimer: boolean;
+  timerEndTime: number | null;
+  timerTotalSeconds: number | null;
+  selectedOption: string | null;
+  handleSelectOption: (label: string) => void;
+  isMC: boolean;
+  responseText: string;
+  setResponseText: (v: string) => void;
+  handleSubmit: () => void;
+  effectiveCanSubmit: boolean;
+  submitting: boolean;
+  submitAttempted: boolean;
+}>) {
   if (isTimerExpired) {
     const correctOption = activeDiscussion?.correct_option;
     const correctOptionText = correctOption
-      ? activeDiscussion?.mc_options?.find((o: any) => o.label === correctOption)?.text ?? null
+      ? activeDiscussion.mc_options?.find((o: { label: string }) => o.label === correctOption)?.text ?? null
       : null;
     return (
       <TimerExpiredMessage
@@ -264,7 +280,7 @@ function ActiveView({
   }
   return (
     <div className="space-y-4">
-      {hasTimer && (
+      {hasTimer && timerEndTime && timerTotalSeconds && (
         <div className="flex justify-center">
           <DiscussionTimer timerEndTime={timerEndTime} timerTotalSeconds={timerTotalSeconds} />
         </div>
@@ -283,7 +299,21 @@ function ActiveView({
   );
 }
 
-function SubmittedView(props: Readonly<any>) {
+interface SharedSubmittedProps {
+  activeDiscussion: Discussion | null;
+  isMC: boolean;
+  isTimerExpired: boolean;
+  feedbackPeriodActive: boolean;
+  isSubmitCorrect: boolean | null;
+  selectedOption: string | null;
+  correctOptionLabel: string | null;
+  hasTimer: boolean;
+  timerEndTime: number | null;
+  timerTotalSeconds: number | null;
+  submittedAnswerText: string | null;
+}
+
+function SubmittedView(props: Readonly<SharedSubmittedProps>) {
   const { activeDiscussion } = props;
   if (!activeDiscussion) {
     return <StudentStatusAlert title="Response submitted" description="You're all set. Wait for the next prompt." />;
@@ -296,11 +326,12 @@ function SubmittedView(props: Readonly<any>) {
   );
 }
 
-function SubmittedMCView(props: Readonly<any>) {
+function SubmittedMCView(props: Readonly<SharedSubmittedProps>) {
   const { activeDiscussion, feedbackPeriodActive, isSubmitCorrect, selectedOption, correctOptionLabel, hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds } = props;
+  if (!activeDiscussion) return null;
 
   if (activeDiscussion.feedback_enabled) {
-    if (feedbackPeriodActive) {
+    if (feedbackPeriodActive && isSubmitCorrect !== null) {
       return (
         <>
           <FeedbackResultBanner isCorrect={isSubmitCorrect} />
@@ -308,7 +339,7 @@ function SubmittedMCView(props: Readonly<any>) {
         </>
       );
     }
-    if (hasTimer && !isTimerExpired) {
+    if (hasTimer && !isTimerExpired && timerEndTime && timerTotalSeconds) {
       return (
         <>
           <div className="flex justify-center"><DiscussionTimer timerEndTime={timerEndTime} timerTotalSeconds={timerTotalSeconds} /></div>
@@ -335,8 +366,9 @@ function FeedbackResultBanner({ isCorrect }: Readonly<{ isCorrect: boolean }>) {
   );
 }
 
-function SubmittedDefaultView({ hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds, activeDiscussion, selectedOption }: Readonly<any>) {
-  const showTimer = hasTimer && !isTimerExpired;
+function SubmittedDefaultView({ hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds, activeDiscussion, selectedOption }: Readonly<SharedSubmittedProps>) {
+  const showTimer = hasTimer && !isTimerExpired && timerEndTime && timerTotalSeconds;
+  if (!activeDiscussion) return null;
   return (
     <>
       {showTimer && <div className="flex justify-center"><DiscussionTimer timerEndTime={timerEndTime} timerTotalSeconds={timerTotalSeconds} /></div>}
@@ -349,8 +381,8 @@ function SubmittedDefaultView({ hasTimer, isTimerExpired, timerEndTime, timerTot
   );
 }
 
-function SubmittedOpenView({ hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds, activeDiscussion, submittedAnswerText }: Readonly<any>) {
-  if (hasTimer && !isTimerExpired) {
+function SubmittedOpenView({ hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds, activeDiscussion, submittedAnswerText }: Readonly<SharedSubmittedProps>) {
+  if (hasTimer && !isTimerExpired && timerEndTime && timerTotalSeconds) {
     return (
       <>
         <div className="flex justify-center">
@@ -360,6 +392,7 @@ function SubmittedOpenView({ hasTimer, isTimerExpired, timerEndTime, timerTotalS
       </>
     );
   }
+  if (!activeDiscussion) return null;
   return (
     <>
       <StudentPromptCard discussion={activeDiscussion} disabled />

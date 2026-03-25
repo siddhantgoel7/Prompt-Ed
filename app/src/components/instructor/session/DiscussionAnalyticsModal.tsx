@@ -112,7 +112,7 @@ export function DiscussionAnalyticsContent({
                   labelLine={false}
                 />
                 <Tooltip
-                  formatter={(value: any, name: any) => [`${value} votes`, `Option ${name}`]}
+                  formatter={(value: any, name: any) => [`${value} votes`, `Option ${name}`]} // eslint-disable-line @typescript-eslint/no-explicit-any
                   contentStyle={{
                     background: 'var(--surface-overlay)',
                     border: '1px solid var(--border-default)',
@@ -176,7 +176,7 @@ export function DiscussionAnalyticsContent({
                   color: 'var(--text-primary)',
                   fontSize: '12px',
                 }}
-                formatter={(v: any) => [`${v} responses`, 'Count']}
+                formatter={(v: any) => [`${v} responses`, 'Count']} // eslint-disable-line @typescript-eslint/no-explicit-any
               />
               <Bar dataKey="Responses" fill="var(--color-primary-500)" radius={[3, 3, 0, 0]} />
             </BarChart>

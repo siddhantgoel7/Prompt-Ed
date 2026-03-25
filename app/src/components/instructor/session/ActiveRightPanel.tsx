@@ -109,7 +109,11 @@ export function ActiveRightPanel(props: Readonly<{
 
 // ─── Internal Hooks ──────────────────────────────────────────────────────────
 
-function useActiveRightPanelContext(props: Readonly<any>) {
+function useActiveRightPanelContext(props: Readonly<{
+  responses?: Response[];
+  activeDiscussion?: Discussion | null;
+  studentCount?: number;
+}>) {
   const context = React.useContext(SessionContext);
   const studentCount = context ? context.studentCount : (props.studentCount ?? 0);
 
@@ -130,11 +134,11 @@ function useActiveRightPanelContext(props: Readonly<any>) {
   };
 }
 
-function calculateMCDistribution(activeDiscussion: any, responses: any[]) {
+function calculateMCDistribution(activeDiscussion: Discussion | null | undefined, responses: Response[]) {
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
   const distribution: Record<string, number> = {};
   if (isMC && activeDiscussion?.mc_options) {
-    activeDiscussion.mc_options.forEach((opt: any) => { distribution[opt.label] = 0; });
+    activeDiscussion.mc_options.forEach((opt: { label: string }) => { distribution[opt.label] = 0; });
     responses.forEach(r => {
       if (r.selected_option && distribution[r.selected_option] !== undefined) {
         distribution[r.selected_option]++;
@@ -148,7 +152,13 @@ function calculateMCDistribution(activeDiscussion: any, responses: any[]) {
 
 function CollapsedSidebarIcons({
   responses, activeTab, openTab, hasActiveDiscussion, hasTimer
-}: Readonly<any>) {
+}: Readonly<{
+  responses: Response[];
+  activeTab: string;
+  openTab: (tab: string) => void;
+  hasActiveDiscussion: boolean;
+  hasTimer: boolean;
+}>) {
   let timerTitle = 'Timer';
   if (hasActiveDiscussion) {
     timerTitle = hasTimer ? 'Timer running' : 'No time limit';
@@ -163,7 +173,14 @@ function CollapsedSidebarIcons({
   );
 }
 
-function SideIconButton({ icon, title, count, isActive, onClick, activeIndicator }: Readonly<any>) {
+function SideIconButton({ icon, title, count, isActive, onClick, activeIndicator }: Readonly<{
+  icon: 'users' | 'metrics' | 'timer';
+  title: string;
+  count?: number;
+  isActive: boolean;
+  onClick: () => void;
+  activeIndicator?: boolean;
+}>) {
   return (
     <button
       title={title}
@@ -188,7 +205,20 @@ const UsersIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="no
 const MetricsIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>;
 const TimerIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>;
 
-function ExpandedSidebarContent(props: any) {
+function ExpandedSidebarContent(props: Readonly<ReturnType<typeof useActiveRightPanelContext> & {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  distribution: Record<string, number>;
+  selectedIds: string[];
+  showHighlightedOnly: boolean;
+  flaggingId: string | null;
+  toggleSelected: (id: string) => void;
+  handleFlagInappropriate: (id: string) => Promise<void>;
+  setShowHighlightedOnly: (v: boolean | ((p: boolean) => boolean)) => void;
+  filterResponses: (r: Response[]) => Response[];
+  openTab: (tab: string) => void;
+  isMC: boolean;
+}>) {
   const { activeTab, setActiveTab, activeDiscussion, responses, distribution, activeDiscussionId, timerEndTime, timerTotalSeconds, handleCloseDiscussion, handleExtendTimer, handleEditTimer, peakStudentCount, isMC } = props;
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden">

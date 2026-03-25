@@ -56,8 +56,9 @@ function validateZipIntegrity(zip: JSZip) {
 
   let totalSize = 0;
   for (const file of entries) {
-    const uncompressedSize = (file as any).uncompressedSize ?? (file as any)._data?.uncompressedSize ?? 0;
-    const compressedSize = (file as any)._data?.compressedSize ?? 0;
+    const f = file as unknown as { uncompressedSize?: number; _data?: { uncompressedSize?: number; compressedSize?: number } };
+    const uncompressedSize = f.uncompressedSize ?? f._data?.uncompressedSize ?? 0;
+    const compressedSize = f._data?.compressedSize ?? 0;
     if (compressedSize > 0 && (uncompressedSize / compressedSize) > MAX_COMPRESSION_RATIO) {
       throw new Error(`PPTX extraction aborted: High compression ratio detected in ${file.name}`);
     }
@@ -173,27 +174,30 @@ function extractTextNodes(xml: string): string {
 
   // pptx structure for text nodes is deeply nested: 
   // <a:p> -> <a:r> -> <a:t> OR <a:p> -> <a:fld> -> <a:t>
-  const findText = (obj: any) => {
+  const findText = (obj: Record<string, unknown>): void => {
     if (!obj || typeof obj !== 'object') return;
     
     // a:t is the actual text node
     if (obj['a:t']) {
       const val = obj['a:t'];
       if (typeof val === 'string') texts.push(val);
-      else if (val?.['#text']) texts.push(val['#text']);
+      else if (val && typeof val === 'object' && '#text' in val) {
+        const textVal = (val as Record<string, unknown>)['#text'];
+        if (typeof textVal === 'string') texts.push(textVal);
+      }
     }
 
     // Recursively scan all keys
     for (const key in obj) {
       if (key !== 'a:t') {
         const val = obj[key];
-        if (Array.isArray(val)) val.forEach(findText);
-        else findText(val);
+        if (Array.isArray(val)) val.forEach((v) => findText(v as Record<string, unknown>));
+        else if (val && typeof val === 'object') findText(val as Record<string, unknown>);
       }
     }
   };
 
-  findText(jsonObj);
+  findText(jsonObj as Record<string, unknown>);
   
   return texts
     .join(' ')
@@ -211,8 +215,8 @@ function findNotesSlideTarget(relsXml: string, slideNumber: number): string | nu
   
   if (!relationships) return `ppt/notesSlides/notesSlide${slideNumber}.xml`;
   
-  const list = Array.isArray(relationships) ? relationships : [relationships];
-  const notesRel = list.find((r: any) => r['@_Type']?.endsWith('notesSlide'));
+  const list = Array.isArray(relationships) ? (relationships as Record<string, string>[]) : [relationships as Record<string, string>];
+  const notesRel = list.find((r) => r['@_Type']?.endsWith('notesSlide'));
   const target = notesRel?.['@_Target'];
 
   if (target) {
@@ -234,11 +238,11 @@ function findImageTargets(relsXml: string): string[] {
   
   if (!relationships) return [];
   
-  const list = Array.isArray(relationships) ? relationships : [relationships];
+  const list = Array.isArray(relationships) ? (relationships as Record<string, string>[]) : [relationships as Record<string, string>];
   return list
-    .filter((r: any) => r['@_Type']?.endsWith('/image'))
-    .map((r: any) => r['@_Target'])
-    .filter(Boolean);
+    .filter((r) => r['@_Type']?.endsWith('/image'))
+    .map((r) => r['@_Target'])
+    .filter(Boolean) as string[];
 }
 
 /** Resolves a relative image target from a slide .rels entry to its absolute zip path. */

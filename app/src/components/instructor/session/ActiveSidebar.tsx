@@ -103,7 +103,7 @@ export function ActiveSidebar(props: Readonly<{
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function CollapsedSidebarView({ activeTab, openTab }: Readonly<any>) {
+function CollapsedSidebarView({ activeTab, openTab }: Readonly<{ activeTab: string; openTab: (tab: string) => void }>) {
   return (
     <div className="flex flex-col items-center gap-3 pt-4 px-2">
       <button
@@ -133,7 +133,16 @@ function CollapsedSidebarView({ activeTab, openTab }: Readonly<any>) {
 
 function ExpandedSidebarView({
   activeTab, setActiveTab, discussions, activeDiscussionId, files, isUploading, onUploadFile, onDeleteFile
-}: Readonly<any>) {
+}: Readonly<{
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  discussions: DiscussionWithResponseCount[];
+  activeDiscussionId: string | null;
+  files: LessonFile[];
+  isUploading: boolean;
+  onUploadFile: (file: File) => Promise<void>;
+  onDeleteFile: (fileId: string) => Promise<void>;
+}>) {
   return (
     <div className="flex-1 overflow-hidden p-3">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">

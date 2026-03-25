@@ -172,7 +172,24 @@ const stdDev = (vals: number[]): number => {
 };
 const wordCount = (text: string) => text.split(/\s+/).filter(Boolean).length;
 
-function generateTextReport(results: any[], TYPE_LABEL: any, cap: any, wordCount: any, BLOOMS_ENCODE: any, stdDev: any) {
+type SweepResultReport = {
+  combo: { promptType: PromptType; difficulty: string; style: string; length: string };
+  timeMs: number;
+  candidates: GeneratedPrompt[];
+  warning?: string;
+  error?: string;
+  tokenUsage?: TokenUsage;
+  model?: string;
+};
+
+function generateTextReport(
+  results: SweepResultReport[],
+  TYPE_LABEL: Record<string, string>,
+  cap: (s: string) => string,
+  wordCount: (s: string) => number,
+  BLOOMS_ENCODE: Record<string, number>,
+  stdDev: (vals: number[]) => number
+) {
   const txtLines: string[] = [];
   results.forEach((r, i) => {
     const timeSec = Math.round(r.timeMs / 1000);
@@ -185,22 +202,22 @@ function generateTextReport(results: any[], TYPE_LABEL: any, cap: any, wordCount
       txtLines.push(`Tokens: ${r.tokenUsage.promptTokens} prompt + ${r.tokenUsage.completionTokens} completion = ${r.tokenUsage.totalTokens} total | Cost: $${costUsd.toFixed(6)}`);
     }
     if (r.warning) txtLines.push(`Warning: ${r.warning} | Fallback: true`);
-    const wcs = r.candidates.map((c: any) => wordCount(c.promptText));
-    const meanWC = (wcs.reduce((a: number, b: number) => a + b, 0) / wcs.length).toFixed(1);
-    const uniqueTopics = new Set(r.candidates.map((c: any) => c.topicArea).filter(Boolean)).size;
-    const bloomsVals = r.candidates.map((c: any) => c.bloomsLevel ? (BLOOMS_ENCODE[c.bloomsLevel] ?? 0) : 0).filter((v: number) => v > 0);
+    const wcs = r.candidates.map((c: GeneratedPrompt) => wordCount(c.promptText));
+    const meanWC = (wcs.reduce((a: number, b: number) => a + b, 0) / (wcs.length || 1)).toFixed(1);
+    const uniqueTopics = new Set(r.candidates.map((c: GeneratedPrompt) => c.topicArea).filter(Boolean)).size;
+    const bloomsVals = r.candidates.map((c: GeneratedPrompt) => c.bloomsLevel ? (BLOOMS_ENCODE[c.bloomsLevel] ?? 0) : 0).filter((v: number) => v > 0);
     const bSpread = stdDev(bloomsVals).toFixed(2);
     txtLines.push(`Topic diversity: ${uniqueTopics}/5 | Bloom's spread: ${bSpread} | Mean words: ${meanWC}`);
     if (r.combo.promptType === 'multiple_choice') {
       const bias: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
-      r.candidates.forEach((c: any) => { const lbl = c.mcOptions?.find((o: any) => o.is_correct)?.label; if (lbl) bias[lbl] = (bias[lbl] || 0) + 1; });
+      r.candidates.forEach((c: GeneratedPrompt) => { const lbl = c.mcOptions?.find((o: { is_correct?: boolean; label: string }) => o.is_correct)?.label; if (lbl) bias[lbl] = (bias[lbl] || 0) + 1; });
       txtLines.push(`MC position bias: ${Object.entries(bias).map(([k, v]) => k + ':' + v).join(' ')}`);
     }
     txtLines.push('');
-    r.candidates.forEach((c: any, ci: number) => {
+    r.candidates.forEach((c: GeneratedPrompt, ci: number) => {
       txtLines.push(`${ci + 1}. ${c.promptText}`);
       if (c.mcOptions && c.mcOptions.length > 0) {
-        c.mcOptions.forEach((opt: any) => { txtLines.push(`   ${opt.label}. ${opt.text}${opt.is_correct ? ' [CORRECT]' : ''}`); });
+        c.mcOptions.forEach((opt: { label: string; text: string; is_correct?: boolean }) => { txtLines.push(`   ${opt.label}. ${opt.text}${opt.is_correct ? ' [CORRECT]' : ''}`); });
       }
       if (c.bloomsLevel) txtLines.push(`   Bloom's: ${c.bloomsLevel}`);
       if (c.topicArea) txtLines.push(`   Topic: ${c.topicArea}`);
@@ -212,7 +229,12 @@ function generateTextReport(results: any[], TYPE_LABEL: any, cap: any, wordCount
   return txtLines.join('\n');
 }
 
-function generateCsvReport(results: any[], BLOOMS_ENCODE: any, stdDev: any, wordCount: any) {
+function generateCsvReport(
+  results: SweepResultReport[],
+  BLOOMS_ENCODE: Record<string, number>,
+  stdDev: (vals: number[]) => number,
+  wordCount: (s: string) => number
+) {
   const csvLines: string[] = [[
     'combo_number', 'prompt_type', 'difficulty', 'style', 'length', 'temperature',
     'time_s', 'model', 'prompt_tokens', 'completion_tokens', 'total_tokens',
@@ -232,12 +254,12 @@ function generateCsvReport(results: any[], BLOOMS_ENCODE: any, stdDev: any, word
     const ttok = r.tokenUsage?.totalTokens ?? '';
     const fallbackUsed = r.warning ? 'true' : 'false';
     const costUsd = r.tokenUsage ? (r.tokenUsage.promptTokens * 0.15 / 1_000_000) + (r.tokenUsage.completionTokens * 0.6 / 1_000_000) : 0;
-    const higherOrderCount = r.candidates.filter((c: any) => (BLOOMS_ENCODE[c.bloomsLevel ?? ''] ?? 0) >= 4).length;
+    const higherOrderCount = r.candidates.filter((c: GeneratedPrompt) => (BLOOMS_ENCODE[c.bloomsLevel ?? ''] ?? 0) >= 4).length;
     const costPerHOQ = higherOrderCount > 0 ? (costUsd / higherOrderCount).toFixed(6) : 'N/A';
-    const uniqueTopics = new Set(r.candidates.map((c: any) => c.topicArea).filter(Boolean)).size;
-    const bloomsVals = r.candidates.map((c: any) => BLOOMS_ENCODE[c.bloomsLevel ?? ''] ?? 0).filter((v: number) => v > 0);
+    const uniqueTopics = new Set(r.candidates.map((c: GeneratedPrompt) => c.topicArea).filter(Boolean)).size;
+    const bloomsVals = r.candidates.map((c: GeneratedPrompt) => BLOOMS_ENCODE[c.bloomsLevel ?? ''] ?? 0).filter((v: number) => v > 0);
     const bSpread = stdDev(bloomsVals).toFixed(2);
-    const wcs = r.candidates.map((c: any) => wordCount(c.promptText));
+    const wcs = r.candidates.map((c: GeneratedPrompt) => wordCount(c.promptText));
     const meanWC = wcs.length ? (wcs.reduce((a: number, b: number) => a + b, 0) / wcs.length).toFixed(1) : '';
     const lenVar = stdDev(wcs).toFixed(2);
     const mcBias = r.combo.promptType === 'multiple_choice' ? calculateMcBias(r.candidates) : '';
@@ -246,15 +268,15 @@ function generateCsvReport(results: any[], BLOOMS_ENCODE: any, stdDev: any, word
       csvLines.push([i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE_BY_TYPE[r.combo.promptType as PromptType], timeSec, mdl, ptok, ctok, ttok, fallbackUsed, r.error ?? r.warning ?? '', costUsd ? costUsd.toFixed(6) : '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''].map(escapeCsv).join(','));
       return;
     }
-    r.candidates.forEach((c: any, ci: number) => {
+    r.candidates.forEach((c: GeneratedPrompt, ci: number) => {
       const pwc = wordCount(c.promptText);
       const isQ = c.promptText.trim().endsWith('?') ? 'true' : 'false';
       const missing = (['bloomsLevel', 'topicArea', 'rationale'] as const).filter(f => !c[f]).join(',') || 'none';
-      const mcA = c.mcOptions?.find((o: any) => o.label === 'A')?.text ?? '';
-      const mcB = c.mcOptions?.find((o: any) => o.label === 'B')?.text ?? '';
-      const mcC = c.mcOptions?.find((o: any) => o.label === 'C')?.text ?? '';
-      const mcD = c.mcOptions?.find((o: any) => o.label === 'D')?.text ?? '';
-      const correct = c.mcOptions?.find((o: any) => o.is_correct)?.label ?? '';
+      const mcA = c.mcOptions?.find((o: { label: string }) => o.label === 'A')?.text ?? '';
+      const mcB = c.mcOptions?.find((o: { label: string }) => o.label === 'B')?.text ?? '';
+      const mcC = c.mcOptions?.find((o: { label: string }) => o.label === 'C')?.text ?? '';
+      const mcD = c.mcOptions?.find((o: { label: string }) => o.label === 'D')?.text ?? '';
+      const correct = c.mcOptions?.find((o: { is_correct?: boolean; label: string }) => o.is_correct)?.label ?? '';
       csvLines.push([i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE_BY_TYPE[r.combo.promptType as PromptType], timeSec, mdl, ptok, ctok, ttok, fallbackUsed, r.warning ?? '', costUsd.toFixed(6), costPerHOQ, uniqueTopics, bSpread, meanWC, lenVar, mcBias, ci + 1, c.promptText, pwc, isQ, missing, c.bloomsLevel ?? '', c.topicArea ?? '', c.rationale ?? '', mcA, mcB, mcC, mcD, correct, mcA.length, mcB.length, mcC.length, mcD.length].map(escapeCsv).join(','));
     });
   });
@@ -270,10 +292,10 @@ function downloadFile(content: string, filename: string, mime: string) {
   a.remove(); URL.revokeObjectURL(url);
 }
 
-function calculateMcBias(candidates: any[]) {
+function calculateMcBias(candidates: GeneratedPrompt[]) {
   const bias: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
-  candidates.forEach((c: any) => {
-    const lbl = c.mcOptions?.find((o: any) => o.is_correct)?.label;
+  candidates.forEach((c: GeneratedPrompt) => {
+    const lbl = c.mcOptions?.find((o: { is_correct?: boolean; label: string }) => o.is_correct)?.label;
     if (lbl) bias[lbl] = (bias[lbl] || 0) + 1;
   });
   return Object.entries(bias).map(([k, v]) => `${k}:${v}`).join(' ');

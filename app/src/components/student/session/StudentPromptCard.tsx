@@ -90,7 +90,15 @@ export function StudentPromptCard({
 
 function MCOptionButton({
   opt, selectedOption, submittedOption, showCorrectness, correctOption, disabled, onSelect
-}: Readonly<any>) {
+}: Readonly<{
+  opt: MCOptionSafe;
+  selectedOption?: string | null;
+  submittedOption?: string | null;
+  showCorrectness?: boolean;
+  correctOption?: string | null;
+  disabled?: boolean;
+  onSelect?: (label: string) => void;
+}>) {
   const label = opt.label;
   const isThis = label === submittedOption;
   const isCorrectOpt = label === correctOption;

@@ -6,7 +6,27 @@ import { createClient } from '@/lib/supabase/server';
 import { parseFile } from '@/lib/ai/parsers';
 import { embedChunks } from '@/lib/ai/embedChunks';
 import { OpenAIProvider } from '@/lib/ai/providers';
-import type { ChunkMetadata } from '@/types/ai';
+import type { ChunkMetadata, ParsedSection } from '@/types/ai';
+import type { SupabaseClient, User } from '@supabase/supabase-js';
+
+interface LessonFileRecord {
+  id: string;
+  lesson_id: string;
+  file_name: string;
+  file_type: string;
+  file_size_bytes: number;
+  storage_path: string;
+  status: string;
+  uploaded_at: string;
+}
+
+interface ChunkRow {
+  lesson_id: string;
+  lesson_file_id: string;
+  content_type: string;
+  content: string;
+  metadata: ChunkMetadata;
+}
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
 const MAX_CHUNKS_PER_FILE = 500;
@@ -87,7 +107,7 @@ function detectFileType(buffer: Buffer): 'pdf' | 'pptx' | null {
  * Uploads a lecture file, then parses and embeds it in the background.
  * Returns immediately with status 'processing' while background work continues.
  */
-async function validateLessonOwnership(supabase: any, user: any, lessonId: string) {
+async function validateLessonOwnership(supabase: SupabaseClient, user: User, lessonId: string) {
   const { data: lesson, error: lessonError } = await supabase
     .from('lessons')
     .select('id, course_id')
@@ -110,7 +130,7 @@ async function validateLessonOwnership(supabase: any, user: any, lessonId: strin
   return { success: true };
 }
 
-async function uploadStorageAndRecord(supabase: any, lessonId: string, file: File, buffer: Buffer, detectedType: string) {
+async function uploadStorageAndRecord(supabase: SupabaseClient, lessonId: string, file: File, buffer: Buffer, detectedType: string) {
   // Max 5 files per lesson
   const { count } = await supabase
     .from('lesson_files')
@@ -141,8 +161,8 @@ async function uploadStorageAndRecord(supabase: any, lessonId: string, file: Fil
   return { fileRecord };
 }
 
-function chunkSections(sections: any[], fileName: string, lessonId: string, fileRecordId: string, pagesWithVision: Set<number>) {
-  const chunkRows: any[] = [];
+function chunkSections(sections: ParsedSection[], fileName: string, lessonId: string, fileRecordId: string, pagesWithVision: Set<number>) {
+  const chunkRows: ChunkRow[] = [];
   let chunkIndex = 0;
 
   for (const section of sections) {
@@ -154,7 +174,7 @@ function chunkSections(sections: any[], fileName: string, lessonId: string, file
   return chunkRows.slice(0, MAX_CHUNKS_PER_FILE);
 }
 
-function createChunksForSection(section: any, fileName: string, lessonId: string, fileRecordId: string, pagesWithVision: Set<number>, startIndex: number) {
+function createChunksForSection(section: ParsedSection, fileName: string, lessonId: string, fileRecordId: string, pagesWithVision: Set<number>, startIndex: number): ChunkRow[] {
   // Suppress label soup if visual_description exists
   if (section.contentOrigin === 'page_text' && section.pageNumber != null && pagesWithVision.has(section.pageNumber)) {
     if (isLabelSoup(section.content)) return [];
@@ -184,7 +204,7 @@ function createChunksForSection(section: any, fileName: string, lessonId: string
 async function runBackgroundProcessing(
   buffer: Buffer,
   detectedType: 'pdf' | 'pptx',
-  fileRecord: any,
+  fileRecord: LessonFileRecord,
   lessonId: string,
   fileName: string,
   aiProvider: OpenAIProvider
@@ -195,7 +215,7 @@ async function runBackgroundProcessing(
     const pagesWithVision = new Set(sections.filter(s => s.contentOrigin === 'visual_description' && s.pageNumber != null).map(s => s.pageNumber!));
 
     const chunkRows = chunkSections(sections, fileName, lessonId, fileRecord.id, pagesWithVision);
-    const finalRows = chunkRows.filter((row, i) => {
+    const finalRows = chunkRows.filter((row: ChunkRow, i) => {
       for (let j = 0; j < i; j++) { if (jaccardSimilarity(row.content, chunkRows[j].content) > 0.7) return false; }
       return true;
     });
@@ -208,7 +228,7 @@ async function runBackgroundProcessing(
     const { data: insertedChunks, error: chunksError } = await supabase.from('lesson_chunks').insert(finalRows).select('id');
     if (chunksError || !insertedChunks) throw new Error(chunksError?.message ?? 'Failed to insert chunks');
 
-    await embedChunks(insertedChunks.map((c, i) => ({ id: c.id, content: finalRows[i].content })), supabase, aiProvider);
+    await embedChunks((insertedChunks as { id: string }[]).map((c, i) => ({ id: c.id, content: finalRows[i].content })), supabase, aiProvider);
     await supabase.from('lesson_files').update({ status: 'ready' }).eq('id', fileRecord.id);
 
   } catch (err) {
@@ -261,7 +281,7 @@ export async function POST(
       fileType: detectedType,
       fileSizeBytes: file.size,
       status: 'processing',
-      uploadedAt: (fileRecord as { uploaded_at: string }).uploaded_at,
+      uploadedAt: (fileRecord as LessonFileRecord).uploaded_at,
     });
 
   } catch (err) {

@@ -183,7 +183,10 @@ export function useLessonDiscussions(
     if (!newDiscussion) { setPublishing(false); return; }
 
     if (channel) {
-      const studentSafe = { ...newDiscussion, mc_options: candidate.mcOptions ? candidate.mcOptions.map(({ label, text }: any) => ({ label, text })) : null };
+      const studentSafe = {
+        ...newDiscussion,
+        mc_options: candidate.mcOptions ? candidate.mcOptions.map(({ label, text }: { label: string; text: string }) => ({ label, text })) : null
+      };
       await (channel as RealtimeLikeChannel).send({ type: 'broadcast', event: 'discussion:published', payload: { discussion: studentSafe } });
     }
 
@@ -254,25 +257,37 @@ function useDiscussionTimerInternal(activeDiscussion: Discussion | null, channel
   return { timerEndTime, timerSeconds, setTimerState, clearTimerState, handleExtendTimer, handleEditTimer };
 }
 
-function useResponseManagementInternal(activeDiscussion: Discussion | null, setDiscussions: any) {
+function useResponseManagementInternal(
+  activeDiscussion: Discussion | null,
+  setDiscussions: (fn: (prev: DiscussionWithResponseCount[]) => DiscussionWithResponseCount[]) => void
+) {
   const [responses, setResponses] = useState<Response[]>([]);
   const [flaggedResponses, setFlaggedResponses] = useState<Response[]>([]);
 
   const fetchResponses = useCallback(async () => {
-    if (!activeDiscussion) { setResponses([]); return; }
+    if (!activeDiscussion) {
+      queueMicrotask(() => setResponses([]));
+      return;
+    }
     const data = await fetchResponsesApi(activeDiscussion.id);
     setResponses(data);
   }, [activeDiscussion]);
 
   const fetchFlaggedResponses = useCallback(async () => {
-    if (!activeDiscussion) { setFlaggedResponses([]); return; }
+    if (!activeDiscussion) {
+      queueMicrotask(() => setFlaggedResponses([]));
+      return;
+    }
     const data = await fetchFlaggedResponsesApi(activeDiscussion.id);
     setFlaggedResponses(data);
   }, [activeDiscussion]);
 
   useEffect(() => {
-    fetchResponses();
-    fetchFlaggedResponses();
+    const load = async () => {
+      await fetchResponses();
+      await fetchFlaggedResponses();
+    };
+    load();
   }, [activeDiscussion?.id, fetchResponses, fetchFlaggedResponses]);
 
   const removeResponse = useCallback(async (id: string) => {
@@ -282,8 +297,8 @@ function useResponseManagementInternal(activeDiscussion: Discussion | null, setD
       if (item) updateFlaggedResponses(item, setFlaggedResponses);
       return prev.filter(r => r.id !== id);
     });
-    const updateCount = (prev: any) => prev.map((d: any) => d.id === activeDiscussion?.id ? { ...d, response_count: Math.max((d.response_count ?? 1) - 1, 0) } : d);
-    setDiscussions(updateCount);
+    const updateCountFn = (prev: DiscussionWithResponseCount[]) => prev.map((d) => d.id === activeDiscussion?.id ? { ...d, response_count: Math.max((d.response_count ?? 1) - 1, 0) } : d);
+    setDiscussions(updateCountFn);
   }, [activeDiscussion, setDiscussions]);
 
   const restoreResponse = useCallback(async (id: string) => {
@@ -293,7 +308,7 @@ function useResponseManagementInternal(activeDiscussion: Discussion | null, setD
       if (item) handleRestoredResponse(item, setResponses);
       return prev.filter(r => r.id !== id);
     });
-    setDiscussions((prev: any) => prev.map((d: any) => d.id === activeDiscussion?.id ? { ...d, response_count: (d.response_count ?? 0) + 1 } : d));
+    setDiscussions((prev: DiscussionWithResponseCount[]) => prev.map((d) => d.id === activeDiscussion?.id ? { ...d, response_count: (d.response_count ?? 0) + 1 } : d));
   }, [activeDiscussion, setDiscussions]);
 
   return { responses, setResponses, flaggedResponses, fetchResponses, removeResponse, restoreResponse };
@@ -301,15 +316,19 @@ function useResponseManagementInternal(activeDiscussion: Discussion | null, setD
 
 // ─── Refactoring Helpers ──────────────────────────────────────────────────────
 
-function handleNewResponse(response: Response, setResponses: any, setDiscussions: any) {
+function handleNewResponse(
+  response: Response,
+  setResponses: (fn: (prev: Response[]) => Response[]) => void,
+  setDiscussions: (fn: (prev: DiscussionWithResponseCount[]) => DiscussionWithResponseCount[]) => void
+) {
   setResponses((prev: Response[]) => prev.some((r) => r.id === response.id) ? prev : [response, ...prev]);
-  setDiscussions((prev: any[]) => prev.map((d) => d.id === response.discussion_id ? { ...d, response_count: (d.response_count ?? 0) + 1 } : d));
+  setDiscussions((prev: DiscussionWithResponseCount[]) => prev.map((d) => d.id === response.discussion_id ? { ...d, response_count: (d.response_count ?? 0) + 1 } : d));
 }
 
-function updateFlaggedResponses(item: Response, setFlaggedResponses: any) {
+function updateFlaggedResponses(item: Response, setFlaggedResponses: (fn: (prev: Response[]) => Response[]) => void) {
   setFlaggedResponses((f: Response[]) => f.some(r => r.id === item.id) ? f : [{ ...item, flagged_at: new Date().toISOString() }, ...f]);
 }
 
-function handleRestoredResponse(item: Response, setResponses: any) {
+function handleRestoredResponse(item: Response, setResponses: (fn: (prev: Response[]) => Response[]) => void) {
   setResponses((r: Response[]) => r.some(x => x.id === item.id) ? r : [{ ...item, flagged_at: null }, ...r]);
 }

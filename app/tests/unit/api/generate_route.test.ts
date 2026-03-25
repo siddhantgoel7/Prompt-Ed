@@ -32,7 +32,7 @@ describe('Generate API Route', () => {
         jest.clearAllMocks();
         mockSupabase = {
             auth: { getUser: jest.fn() },
-            from: jest.fn().mockImplementation((table) => {
+            from: jest.fn().mockImplementation((table: string) => {
                 if (table === 'lessons') return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { course_id: 'c1' }, error: null }) }) }) };
                 if (table === 'courses') return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { instructor_id: 'u1' }, error: null }) }) }) };
                 if (table === 'instructor_ai_preferences') return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null, error: { code: 'PGRST116' } }) }) }) };
@@ -51,7 +51,7 @@ describe('Generate API Route', () => {
 
     it('failure: 404 when lesson not found', async () => {
         mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
-        mockSupabase.from.mockImplementation((table) => {
+        mockSupabase.from.mockImplementation((table: string) => {
             if (table === 'lessons') return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null, error: { message: 'Not found' } }) }) }) };
             return mockSupabase;
         });
@@ -63,7 +63,7 @@ describe('Generate API Route', () => {
 
     it('failure: 403 Forbidden for wrong instructor', async () => {
         mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
-        mockSupabase.from.mockImplementation((table) => {
+        mockSupabase.from.mockImplementation((table: string) => {
             if (table === 'lessons') return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { course_id: 'c1' }, error: null }) }) }) };
             if (table === 'courses') return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { instructor_id: 'other' }, error: null }) }) }) };
             return mockSupabase;

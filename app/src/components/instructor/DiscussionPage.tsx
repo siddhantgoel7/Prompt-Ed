@@ -194,7 +194,7 @@ export function DiscussionPage({
 
   const { channel, isConnected } = useRealtime(lessonId, 'instructor');
 
-  const handleNewResponse = useCallback((payload: any) => {
+  const handleNewResponse = useCallback((payload: { payload?: { response?: Response } }) => {
     const newResponse = payload.payload?.response;
     if (newResponse?.discussion_id === discussionId) {
       setResponses((prev) => {

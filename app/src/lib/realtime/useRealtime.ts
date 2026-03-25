@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -37,7 +37,7 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
   const [isConnected, setIsConnected] = useState(false);
   const supabaseRef = useRef(createClient());
   // Force re-render when channel changes
-  const [updateCount, setUpdateCount] = useState(0);
+  const [updateCount, forceUpdate] = useReducer((x) => x + 1, 0);
   // Bump to force the effect to re-run (used by reconnect)
   const [connectAttempt, setConnectAttempt] = useState(0);
   // Live count of students currently present in the session channel
@@ -73,14 +73,14 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
           console.log(`${role} subscribed (rev ${updateCount})`);
           setIsConnected(true);
           channelRef.current = channel;
-          setUpdateCount(prev => prev + 1); // Trigger re-render
+          forceUpdate(); // Trigger re-render
 
           // Announce presence so others can count this participant
           await channel.track({ role, joined_at: new Date().toISOString() });
         } else if (status === 'CLOSED') {
           setIsConnected(false);
           channelRef.current = null;
-          setUpdateCount(prev => prev + 1); // Trigger re-render
+          forceUpdate(); // Trigger re-render
         }
       });
 
