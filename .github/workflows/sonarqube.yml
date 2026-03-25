@@ -6,6 +6,10 @@ on:
       - main
       - "sprint-*"
       - sonarqube
+  pull_request:
+    branches:
+      - main
+      - "sprint-*"
 
 
 jobs:
