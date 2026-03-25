@@ -33,3 +33,4 @@ site/
 *.log
 
 .claude
+*.txt
