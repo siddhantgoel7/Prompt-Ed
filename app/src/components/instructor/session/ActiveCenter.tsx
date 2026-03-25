@@ -6,13 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-
 import * as React from 'react';
 import type { GeneratedPrompt } from '@/types/ai';
 import type { PromptType } from '@/types/discussion';
 import { SessionContext } from './SessionContext';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { CandidateCard } from './CandidateCard';
+import { CandidateCard, CANDIDATE_COLLAPSE_MS } from './CandidateCard';
 import { MultipleChoiceEditor } from './MultipleChoiceEditor';
 import { AIPreferencesDialog } from './AIPreferencesDialog';
 import { AITipsButton } from './AITipsButton';
@@ -21,8 +20,6 @@ import { StartDiscussionDialog } from './StartDiscussionDialog';
 import type { TokenUsage } from '@/types/ai';
 import { DEBUG_TOOLS } from '@/lib/debug';
 import { useDebugSweep } from '@/hooks/useDebugSweep';
-
-
 
 /**
  * Central panel of the active session view.
@@ -39,7 +36,6 @@ export function ActiveCenter(props: Partial<{
   isConnected: boolean;
   activeDiscussionId: string | null;
   onPublish: () => void;
-  onClose: (discussionId: string) => void;
   transcriptText: string;
   setTranscriptText: (v: string) => void;
   promptType: PromptType;
@@ -78,11 +74,13 @@ export function ActiveCenter(props: Partial<{
   const activeDiscussionId = context ? (context.activeDiscussion?.id ?? null) : props.activeDiscussionId!;
   const recorder = useAudioRecorder();
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
+  const [exitingIndex, setExitingIndex] = React.useState<number | null>(null);
+  const exitingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [sttStatus, setSttStatus] = React.useState<'idle' | 'transcribing' | 'error'>('idle');
   const [sttError, setSttError] = React.useState<string | null>(null);
+  // Used by manual mode MC only — AI candidate editing state lives in CandidateCard.
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
   const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
-  const [editingOptions, setEditingOptions] = React.useState<Record<string, string>>({});
   const [manualOptions, setManualOptions] = React.useState<Record<string, string>>({
     A: '', B: '', C: '', D: ''
   });
@@ -92,7 +90,12 @@ export function ActiveCenter(props: Partial<{
     lessonId, transcriptText, candidates, isGenerating,
     generationWarning, generationTimeMs, lastTokenUsage, lastModel, promptType,
   });
-  const [pendingCandidate, setPendingCandidate] = React.useState<GeneratedPrompt | null>(null);
+  // Holds the fully-built candidate + MC state while the timer dialog is open.
+  const [pendingPublishArgs, setPendingPublishArgs] = React.useState<{
+    candidate: GeneratedPrompt;
+    correctOption: string | null;
+    feedbackEnabled: boolean;
+  } | null>(null);
   const [publishError, setPublishError] = React.useState<string | null>(null);
 
   const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
@@ -104,12 +107,14 @@ export function ActiveCenter(props: Partial<{
     }
   }, [transcriptText]);
 
-  // Reset selection when candidates change
+  // Reset all selection and manual-mode state when a new set of candidates arrives.
   React.useEffect(() => {
     setSelectedIndex(null);
+    setExitingIndex(null);
+    if (exitingTimerRef.current) clearTimeout(exitingTimerRef.current);
+    setPendingPublishArgs(null);
     setOverrideCorrectOption(null);
     setFeedbackEnabled(false);
-    setEditingOptions({});
     setManualOptions({ A: '', B: '', C: '', D: '' });
     setPublishError(null);
   }, [candidates]);
@@ -141,65 +146,36 @@ export function ActiveCenter(props: Partial<{
   }, [lessonId, recorder, setTranscriptText, setPromptInput, onGenerate]);
 
   const handleSelectCandidate = (p: GeneratedPrompt, index: number) => {
+    // Mark the outgoing card as exiting so it can finish its collapse animation.
+    if (selectedIndex !== null && selectedIndex !== index) {
+      if (exitingTimerRef.current) clearTimeout(exitingTimerRef.current);
+      setExitingIndex(selectedIndex);
+      exitingTimerRef.current = setTimeout(() => setExitingIndex(null), CANDIDATE_COLLAPSE_MS);
+    }
     setSelectedIndex(index);
     onSelectCandidate(p);
-
     setPromptInput(p.promptText);
     setTranscriptText(p.promptText);
-
-    // Initialize correct option based on AI suggestion
-    if (p.promptType === 'multiple_choice' && p.mcOptions) {
-      const correctOpt = p.mcOptions.find(o => o.is_correct);
-      setOverrideCorrectOption(correctOpt ? correctOpt.label : null);
-
-      const initialOpts = p.mcOptions.reduce((acc, opt) => {
-        acc[opt.label] = opt.text;
-        return acc;
-      }, {} as Record<string, string>);
-      setEditingOptions(initialOpts);
-    } else {
-      setOverrideCorrectOption(null);
-      setEditingOptions({});
-    }
   };
 
-  const handlePublishSelected = (p: GeneratedPrompt, timerSeconds: number | null = null) => {
-    let publishedCandidate = p;
-    if (p.promptType === 'multiple_choice' && p.mcOptions) {
-      publishedCandidate = {
-        ...p,
-        promptText: promptInput,
-        mcOptions: p.mcOptions.map(opt => ({
-          ...opt,
-          text: editingOptions[opt.label] ?? opt.text
-        }))
-      };
-    } else {
-      publishedCandidate = {
-        ...p,
-        promptText: promptInput
-      };
-    }
-
-    if (onPublishAiCandidate) {
-      onPublishAiCandidate(publishedCandidate, overrideCorrectOption, feedbackEnabled, timerSeconds);
-      setSelectedIndex(null);
-      setPublishError(null);
-    }
-  };
-
-  // Called after instructor confirms timer dialog
+  // Called after instructor confirms timer dialog.
+  // Two entry points: AI candidate publish (via CandidateCard) and manual mode publish.
   const handleTimerConfirm = (timerSeconds: number | null) => {
     setShowTimerDialog(false);
 
-    // If triggered by "Publish This Question →" on an AI candidate, publish that candidate
-    if (pendingCandidate) {
-      const candidate = pendingCandidate;
-      setPendingCandidate(null);
-      handlePublishSelected(candidate, timerSeconds);
+    // AI candidate path — CandidateCard sets pendingPublishArgs before opening the dialog.
+    if (pendingPublishArgs) {
+      const { candidate, correctOption, feedbackEnabled: fe } = pendingPublishArgs;
+      setPendingPublishArgs(null);
+      if (onPublishAiCandidate) {
+        onPublishAiCandidate(candidate, correctOption, fe, timerSeconds);
+        setSelectedIndex(null);
+        setPublishError(null);
+      }
       return;
     }
 
+    // Manual creation path.
     if (creationMode === 'manual') {
       if (promptType === 'multiple_choice') {
         if (!overrideCorrectOption) {
@@ -226,24 +202,7 @@ export function ActiveCenter(props: Partial<{
         return;
       }
       onPublish(timerSeconds);
-      return;
     }
-    // AI Mode
-    if (selectedIndex !== null && candidates[selectedIndex]) {
-      setPublishError(null);
-      handlePublishSelected(candidates[selectedIndex], timerSeconds);
-      return;
-    }
-    if (promptType === 'multiple_choice' && candidates.length > 0) {
-      setPublishError('Please select a generated AI prompt to publish.');
-      return;
-    }
-    if (promptType === 'multiple_choice') {
-      setPublishError('Please generate AI prompts and select one to publish, or switch to Manual Creation mode.');
-      return;
-    }
-    setPublishError(null);
-    onPublish(timerSeconds);
   };
 
   return (
@@ -437,75 +396,20 @@ export function ActiveCenter(props: Partial<{
             {candidates.length > 0 && (
               <div className="space-y-2">
                 {candidates.map((c: GeneratedPrompt, i: number) => (
-                  <div key={i}>
-                    {selectedIndex === i ? (
-                      <div
-                        className="p-3 rounded-xl text-sm"
-                        style={{
-                          background: 'rgba(45,158,45,0.06)',
-                          border: '2px solid var(--color-primary-400)',
-                        }}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <span
-                            className="text-xs font-medium px-2 py-0.5 rounded-full capitalize"
-                            style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-600)' }}
-                          >
-                            {c.promptType.replace('_', ' ')}
-                          </span>
-                          <span className="text-xs font-medium text-brand-500">
-                            Selected (Editing)
-                          </span>
-                        </div>
-                        <textarea
-                          value={promptInput}
-                          onChange={(e) => {
-                            setPromptInput(e.target.value);
-                            setTranscriptText(e.target.value);
-                          }}
-                          className="w-full px-3 py-2.5 text-sm rounded-[10px] min-h-[80px] resize-y leading-snug transition-all duration-150 bg-surface-raised text-content-primary"
-                          style={{
-                            border: '1px solid var(--border-default)',
-                          }}
-                          placeholder="Edit this prompt..."
-                        />
-                      </div>
-                    ) : (
-                      <CandidateCard
-                        candidate={c}
-                        isSelected={false}
-                        onSelect={() => handleSelectCandidate(c, i)}
-                      />
-                    )}
-
-                    {selectedIndex === i && c.promptType === 'multiple_choice' && (
-                      <MultipleChoiceEditor
-                        nameGroup={`correct-option-${i}`}
-                        options={c.mcOptions?.map((opt: { label: string; text: string; is_correct?: boolean }) => ({
-                          label: opt.label,
-                          text: editingOptions[opt.label] ?? opt.text
-                        })) || []}
-                        correctOption={overrideCorrectOption}
-                        onCorrectOptionChange={setOverrideCorrectOption}
-                        onOptionTextChange={(label, text) => setEditingOptions({ ...editingOptions, [label]: text })}
-                        feedbackEnabled={feedbackEnabled}
-                        onFeedbackChange={setFeedbackEnabled}
-                      />
-                    )}
-
-                    {selectedIndex === i && (
-                      <button
-                        onClick={() => { setPendingCandidate(c); setShowTimerDialog(true); }}
-                        disabled={!promptInput.trim() || !isConnected}
-                        className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
-                        style={{
-                          background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-                        }}
-                      >
-                        Publish This Question →
-                      </button>
-                    )}
-                  </div>
+                  <CandidateCard
+                    key={i}
+                    candidate={c}
+                    index={i}
+                    isSelected={selectedIndex === i}
+                    onSelect={() => handleSelectCandidate(c, i)}
+                    promptInput={selectedIndex === i ? promptInput : c.promptText}
+                    onPromptInputChange={(v) => { setPromptInput(v); setTranscriptText(v); }}
+                    isConnected={isConnected}
+                    onRequestPublish={(candidate, correctOption, fe) => {
+                      setPendingPublishArgs({ candidate, correctOption, feedbackEnabled: fe });
+                      setShowTimerDialog(true);
+                    }}
+                  />
                 ))}
 
                 <div className="flex gap-2 pt-1">
@@ -625,7 +529,7 @@ export function ActiveCenter(props: Partial<{
         <StartDiscussionDialog
           open={showTimerDialog}
           onConfirm={handleTimerConfirm}
-          onCancel={() => { setShowTimerDialog(false); setPendingCandidate(null); }}
+          onCancel={() => { setShowTimerDialog(false); setPendingPublishArgs(null); }}
         />
       </div>
     </div>
