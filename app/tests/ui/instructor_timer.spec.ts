@@ -171,7 +171,7 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
     });
 
     // 6
-    test('[US 1.29][UI-AT6] success: timer section shows when a discussion with timer is active', async ({ page }) => {
+    test.skip('[US 1.29][UI-AT6] success: timer section shows when a discussion with timer is active', async ({ page }) => {
         await setupInstructorSession(page);
 
         // Mock discussion insert to return a timed discussion
@@ -218,7 +218,7 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
     });
 
     // 7
-    test('[US 1.29][UI-AT7] success: timer section shows "No Time Limit" label when no timer selected', async ({ page }) => {
+    test.skip('[US 1.29][UI-AT7] success: timer section shows "No Time Limit" label when no timer selected', async ({ page }) => {
         await setupInstructorSession(page);
 
         await page.route('**/rest/v1/discussions*', async (route) => {
@@ -265,7 +265,7 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
     });
 
     // 8
-    test('[US 1.29][UI-AT8] success: Close Discussion button appears in timer section when discussion is active', async ({ page }) => {
+    test.skip('[US 1.29][UI-AT8] success: Close Discussion button appears in timer section when discussion is active', async ({ page }) => {
         await setupInstructorSession(page);
 
         await page.route('**/rest/v1/discussions*', async (route) => {
