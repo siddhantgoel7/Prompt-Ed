@@ -138,6 +138,7 @@ jobs:
       - name: Upload coverage (if present)
         uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: jest-coverage-shard-${{ matrix.shard }}
           path: app/coverage
@@ -247,6 +248,7 @@ jobs:
       - name: Upload Playwright artifacts
         uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: playwright-artifacts
           path: |
@@ -258,6 +260,7 @@ jobs:
       - name: Upload server log
         uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: next-start-log
           path: /tmp/next-start.log
