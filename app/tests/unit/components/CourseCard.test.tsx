@@ -41,14 +41,14 @@ describe('CourseCard', () => {
         expect(screen.getByText(/24/)).toBeInTheDocument();
         expect(screen.getByText(/2026/)).toBeInTheDocument();
 
-        fireEvent.click(screen.getByText('Test Course'));
+        fireEvent.click(screen.getByRole('button', { name: /Open Course/i }));
         expect(props.onAccess).toHaveBeenCalled();
     });
 
     it('success: handles keyboard access (Enter/Space)', async () => {
         const user = userEvent.setup();
         render(<CourseCard {...props} />);
-        const card = screen.getByRole('button', { name: /Test Course/i });
+        const card = screen.getByRole('button', { name: /Open Course/i });
         
         await user.click(card); // click works automatically in these tests
         expect(props.onAccess).toHaveBeenCalledTimes(1);

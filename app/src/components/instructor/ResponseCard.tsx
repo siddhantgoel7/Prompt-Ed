@@ -60,9 +60,20 @@ function ActionButton({
   iconClassName: string;
 }) {
   const isFlagged = mode === 'flagged';
-  const label = isFlagged
-    ? (isBeingFlagged ? 'Restoring...' : 'Unflag')
-    : (isBeingFlagged ? 'Removing...' : 'Flag as Inappropriate');
+  let label = 'Flag as Inappropriate';
+  if (isFlagged) {
+    if (isBeingFlagged) {
+      label = 'Restoring...';
+    } else {
+      label = 'Unflag';
+    }
+  } else {
+    if (isBeingFlagged) {
+      label = 'Removing...';
+    } else {
+      label = 'Flag as Inappropriate';
+    }
+  }
 
   return (
     <button
@@ -149,13 +160,39 @@ export function ResponseCard({
         </div>
       )}
 
+    </>
+  );
+
+  let dataVariant: string | undefined = undefined;
+  if (isSelected) {
+    if (isFlagged) {
+      dataVariant = 'flagged-selected';
+    } else {
+      dataVariant = 'highlighted-selected';
+    }
+  }
+
+  return (
+    <div
+      className={cn(
+        'rounded-xl transition-all duration-300 ease-in-out relative block',
+        isSelected ? cn(s.selectedPadding, 'my-4 z-10') : s.unselectedPadding,
+      )}
+      data-highlighted={isSelected ? 'true' : undefined}
+      data-variant={dataVariant}
+      style={isSelected ? selectedStyle : unselectedStyle}
+    >
+      <div className="relative z-0 pointer-events-none">
+        {content}
+      </div>
+      <button
+        type="button"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-xl"
+        aria-label={isSelected ? "Deselect response" : "Select response"}
+        onClick={onToggle}
+      />
       {isSelected && (
-        <div
-          className={cn(
-            s.actionBarSpacing,
-            'flex items-center justify-end animate-in fade-in slide-in-from-top-1 duration-200 border-t border-line-default',
-          )}
-        >
+        <div className="absolute bottom-5 right-5 z-20">
           {onFlag ? (
             <ActionButton
               mode={mode}
@@ -167,27 +204,6 @@ export function ResponseCard({
           ) : null}
         </div>
       )}
-    </>
-  );
-
-  const dataVariant = isSelected
-    ? (isFlagged ? 'flagged-selected' : 'highlighted-selected')
-    : undefined;
-
-  return (
-    <button
-      type="button"
-      aria-label="Student response"
-      className={cn(
-        'rounded-xl cursor-pointer transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full text-left appearance-none border-none p-0 block font-inherit',
-        isSelected ? cn(s.selectedPadding, 'my-4 z-10 relative') : s.unselectedPadding,
-      )}
-      data-highlighted={isSelected ? 'true' : undefined}
-      data-variant={dataVariant}
-      style={isSelected ? selectedStyle : unselectedStyle}
-      onClick={onToggle}
-    >
-      {content}
-    </button>
+    </div>
   );
 }

@@ -72,10 +72,8 @@ export function LessonCard(
   const badge = statusToBadge(lesson.status);
 
   return (
-    <button
-      type="button"
-      onClick={props.onAccess}
-      className="h-28 rounded-2xl relative p-4 flex flex-col justify-between cursor-pointer card-hover group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full text-left appearance-none border-none p-0"
+    <div
+      className="h-28 rounded-2xl relative p-4 flex flex-col justify-between card-hover group w-full text-left"
       style={{
         background: 'var(--surface-glass)',
         backdropFilter: 'blur(10px)',
@@ -84,8 +82,8 @@ export function LessonCard(
         boxShadow: '0 2px 12px var(--color-black-alpha-06)',
       }}
     >
-      {/* Status badge */}
-      <div className="flex items-center justify-between">
+      {/* Top row: Status Badge and Delete Action */}
+      <div className="flex items-center justify-between relative z-20">
         <span
           className="text-xs font-medium px-2.5 py-0.5 rounded-full"
           style={{ background: badge.bg, color: badge.text }}
@@ -93,8 +91,8 @@ export function LessonCard(
           {badge.label}
         </span>
 
-        {/* Delete button */}
         <button
+          type="button"
           title="Delete lesson"
           onClick={(e) => {
             e.stopPropagation();
@@ -119,17 +117,21 @@ export function LessonCard(
         </button>
       </div>
 
-      {/* Lesson info */}
-      <div>
-        <h3
-          className="text-sm font-semibold leading-snug line-clamp-1 mb-0.5 text-content-primary"
-        >
+      {/* Main card content with stretched link */}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={props.onAccess}
+          className="absolute inset-[-130px_-16px_-16px_-16px] z-10 opacity-0 cursor-pointer w-[calc(100%+32px)] h-[calc(100%+146px)] focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-2xl"
+          aria-label={`Open lesson: ${lesson.title}`}
+        />
+        <h3 className="text-sm font-semibold leading-snug line-clamp-1 mb-0.5 text-content-primary relative z-0">
           {lesson.title}
         </h3>
-        <p className="text-xs text-content-muted">
+        <p className="text-xs text-content-muted relative z-0">
           {formatDate(lesson.date_created)}
         </p>
       </div>
-    </button>
+    </div>
   );
 }

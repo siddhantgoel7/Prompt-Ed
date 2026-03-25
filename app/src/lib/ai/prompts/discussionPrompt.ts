@@ -289,11 +289,12 @@ ${assignments}
 
 /** Returns per-type generation rules injected into the user prompt. */
 function getTypeInstructions(promptType: PromptType, preferences?: AIPromptPreferences): string {
-  const lengthInstruction = preferences?.length === 'brief'
-    ? ' Keep the question itself very brief and punchy.'
-    : preferences?.length === 'detailed'
-      ? ' The question should be detailed and provide substantial context before asking the core question.'
-      : '';
+  let lengthInstruction = '';
+  if (preferences?.length === 'brief') {
+    lengthInstruction = ' Keep the question itself very brief and punchy.';
+  } else if (preferences?.length === 'detailed') {
+    lengthInstruction = ' The question should be detailed and provide substantial context before asking the core question.';
+  }
 
   switch (promptType) {
     case 'multiple_choice':

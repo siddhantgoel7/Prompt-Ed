@@ -32,25 +32,25 @@ export function CourseCard({
   onDelete: () => void;
 }) {
   return (
-    <button
-      type="button"
-      className="glass relative overflow-hidden rounded-2xl card-hover cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full text-left appearance-none border-none p-0 block"
+    <div
+      className="glass relative overflow-hidden rounded-2xl card-hover group w-full text-left p-0 block"
       style={{
         boxShadow: '0 2px 16px var(--color-primary-alpha-06), 0 1px 3px var(--color-black-alpha-06)',
       }}
-      onClick={onAccess}
     >
       {/* Top action menu */}
-      <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+      <div className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 bg-surface-raised text-content-secondary"
+              type="button"
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 bg-surface-raised text-content-secondary hover:bg-surface-raised/80"
               style={{
                 border: '1px solid var(--border-default)',
               }}
               onClick={(e) => e.stopPropagation()}
             >
+              <span className="sr-only">Course actions</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <circle cx="12" cy="5" r="1.5" />
                 <circle cx="12" cy="12" r="1.5" />
@@ -86,7 +86,6 @@ export function CourseCard({
             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
           </svg>
         </div>
-        {/* Decorative corner orb */}
         <div
           className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full opacity-20"
           style={{ background: 'var(--color-primary-300)' }}
@@ -105,8 +104,9 @@ export function CourseCard({
         </h3>
 
         <button
+          type="button"
           onClick={onAccess}
-          className="w-full py-2 rounded-[10px] text-sm font-semibold transition-all duration-150"
+          className="relative z-10 w-full py-2 rounded-[10px] text-sm font-semibold transition-all duration-150 after:absolute after:inset-0 after:z-0 after:cursor-pointer"
           style={{
             background: 'var(--color-primary-alpha-12)',
             color: 'var(--color-primary-600)',
@@ -126,6 +126,6 @@ export function CourseCard({
           Open Course
         </button>
       </div>
-    </button>
+    </div>
   );
 }

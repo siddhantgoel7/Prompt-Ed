@@ -34,7 +34,7 @@ export function BlurText({ text, className = '', style, initialDelay = 200, stag
     <span className={className} aria-label={text} style={style}>
       {chars.map((char, i) => (
         <span
-          key={i}
+          key={`blur-char-${i}-${char}`}
           style={{
             display: 'inline-block',
             animation: 'blurIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both',

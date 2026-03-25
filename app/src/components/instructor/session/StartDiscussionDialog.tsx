@@ -57,14 +57,14 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
         <div className="space-y-5 py-2">
           {/* No Time Limit toggle */}
           <label className="flex items-center gap-3 cursor-pointer select-none">
-            <div
-              role="checkbox"
-              aria-checked={noLimit}
-              aria-label="No Time Limit"
+            <input
+              type="checkbox"
+              checked={noLimit}
+              onChange={() => setNoLimit((v) => !v)}
+              className="sr-only"
               data-testid="no-time-limit-checkbox"
-              tabIndex={0}
-              onClick={() => setNoLimit((v) => !v)}
-              onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') setNoLimit((v) => !v); }}
+            />
+            <div
               className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${noLimit ? 'bg-primary border-primary' : 'border-border bg-transparent'
                 }`}
             >

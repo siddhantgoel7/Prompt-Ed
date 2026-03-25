@@ -194,7 +194,7 @@ function generateTextReport(results: any[], TYPE_LABEL: any, cap: any, wordCount
     if (r.combo.promptType === 'multiple_choice') {
       const bias: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
       r.candidates.forEach((c: any) => { const lbl = c.mcOptions?.find((o: any) => o.is_correct)?.label; if (lbl) bias[lbl] = (bias[lbl] || 0) + 1; });
-      txtLines.push(`MC position bias: ${Object.entries(bias).map(([k, v]) => `${k}:${v}`).join(' ')}`);
+      txtLines.push(`MC position bias: ${Object.entries(bias).map(([k, v]) => k + ':' + v).join(' ')}`);
     }
     txtLines.push('');
     r.candidates.forEach((c: any, ci: number) => {

@@ -59,9 +59,6 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
 
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
   const correctOptionLabel = activeDiscussion?.correct_option ?? null;
-  const correctOptionText = correctOptionLabel
-    ? activeDiscussion?.mc_options?.find((o) => o.label === correctOptionLabel)?.text ?? null
-    : null;
 
   // Use loose null check so undefined (from older mocks / no timer) is treated same as null
   const hasTimer = timerEndTime != null && timerTotalSeconds != null;
@@ -223,7 +220,7 @@ function LoadingView() {
       <div className="flex items-center gap-1.5">
         {[0, 1, 2].map((i) => (
           <span
-            key={i}
+            key={`loading-dot-${i}`}
             className="block w-2 h-2 rounded-full"
             style={{
               background: 'var(--color-primary-400)',

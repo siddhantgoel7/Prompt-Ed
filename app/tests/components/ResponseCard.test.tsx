@@ -97,7 +97,7 @@ describe('ResponseCard — visual emphasis (full variant)', () => {
     const onToggle = jest.fn();
     renderCard({ onToggle });
 
-    await user.click(screen.getByText(/Sample student response/));
+    await user.click(screen.getByLabelText(/Select response/i));
     expect(onToggle).toHaveBeenCalledTimes(1);
   });
 });

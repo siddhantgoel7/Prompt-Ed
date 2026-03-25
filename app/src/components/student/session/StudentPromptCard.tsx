@@ -96,7 +96,10 @@ function MCOptionButton({
   const isCorrectOpt = label === correctOption;
 
   const getOptionState = () => {
-    if (!submittedOption) return disabled ? 'disabled' : (selectedOption === label ? 'selected' : 'unselected');
+    if (!submittedOption) {
+      if (disabled) return 'disabled';
+      return selectedOption === label ? 'selected' : 'unselected';
+    }
     if (!showCorrectness) return isThis ? 'submitted' : 'other';
     if (isThis && isCorrectOpt) return 'correct-submitted';
     if (isThis && !isCorrectOpt) return 'wrong-submitted';

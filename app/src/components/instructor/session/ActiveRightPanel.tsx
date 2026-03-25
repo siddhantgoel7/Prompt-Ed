@@ -149,9 +149,10 @@ function calculateMCDistribution(activeDiscussion: any, responses: any[]) {
 function CollapsedSidebarIcons({
   responses, activeTab, openTab, hasActiveDiscussion, hasTimer
 }: any) {
-  const timerTitle = hasActiveDiscussion
-    ? (hasTimer ? 'Timer running' : 'No time limit')
-    : 'Timer';
+  let timerTitle = 'Timer';
+  if (hasActiveDiscussion) {
+    timerTitle = hasTimer ? 'Timer running' : 'No time limit';
+  }
 
   return (
     <div className="flex flex-col items-center gap-3 pt-4">
