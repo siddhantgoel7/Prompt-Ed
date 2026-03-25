@@ -3,13 +3,17 @@
 // Right panel of the active session view: live student responses, analytics, and timer.
 // Supports collapsing to a narrow icon strip.
 //
+// When a discussion is active, a persistent "Close Discussion" strip is shown at the
+// top of the panel (above the tabs when expanded, as an icon button when collapsed).
+// This keeps the most time-sensitive action visible without requiring a tab switch.
+//
 // Tab layout:
 //   "Responses"  (value="list")      — ResponseListTab: live responses, MC breakdown, flags
 //   "Metrics"    (value="analytics") — DiscussionAnalyticsContent: participation stats
-//   "Timer"      (value="timer")     — TimerTab: countdown + extend/edit + Close Discussion
+//   "Timer"      (value="timer")     — TimerTab: countdown + extend/edit controls
 //
 // Extracted sub-components (each in their own file):
-//   TimerTab.tsx        — timer display, edit/extend controls, Close Discussion button
+//   TimerTab.tsx        — timer display, edit/extend controls
 //   ResponseListTab.tsx — response cards, MC option breakdown, flagged response management
 //
 // The CircularTimer shared component (src/components/ui/CircularTimer.tsx) is used by
@@ -58,11 +62,19 @@ export function ActiveRightPanel(props: {
 
   const [collapsed, setCollapsed] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('list');
+  const [closing, setClosing] = React.useState(false);
 
   function openTab(tab: string) {
     setActiveTab(tab);
     setCollapsed(false);
   }
+
+  const handleClose = React.useCallback(async () => {
+    if (!activeDiscussionId) return;
+    setClosing(true);
+    await handleCloseDiscussion(activeDiscussionId);
+    setClosing(false);
+  }, [activeDiscussionId, handleCloseDiscussion]);
 
   const {
     selectedIds, flaggingId, showHighlightedOnly,
@@ -145,6 +157,22 @@ export function ActiveRightPanel(props: {
       {/* ── Collapsed: icon strip with tab shortcuts ── */}
       {collapsed ? (
         <div className="flex flex-col items-center gap-3 pt-4">
+          {/* Close discussion icon — only when a discussion is active */}
+          {hasActiveDiscussion && (
+            <button
+              title={closing ? 'Closing…' : 'Close Discussion'}
+              onClick={handleClose}
+              disabled={closing}
+              aria-label="Close active discussion"
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 disabled:opacity-50"
+              style={{ background: 'rgba(245,158,11,0.15)', color: 'oklch(0.6 0.18 60)', border: '1px solid rgba(245,158,11,0.35)' }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+              </svg>
+            </button>
+          )}
+
           {/* Responses icon */}
           <button
             title={`${responses.length} responses`}
@@ -204,6 +232,41 @@ export function ActiveRightPanel(props: {
       ) : (
         /* ── Expanded: full tabbed content ── */
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden">
+
+          {/* ── Close Discussion strip — visible whenever a discussion is active ── */}
+          {hasActiveDiscussion && (
+            <div
+              className="mx-3 mt-2.5 mb-1 flex items-center justify-between px-3 py-2 rounded-xl"
+              style={{
+                background: 'rgba(245,158,11,0.10)',
+                border: '1px solid rgba(245,158,11,0.30)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2 h-2 rounded-full animate-pulse flex-shrink-0"
+                  style={{ background: 'oklch(0.75 0.18 60)' }}
+                />
+                <span className="text-xs font-medium" style={{ color: 'oklch(0.6 0.18 60)' }}>
+                  Discussion active
+                </span>
+              </div>
+              <button
+                onClick={handleClose}
+                disabled={closing}
+                aria-label="Close active discussion"
+                className="text-xs font-semibold px-2.5 py-1 rounded-lg transition-all duration-150 disabled:opacity-50"
+                style={{
+                  background: closing ? 'rgba(245,158,11,0.15)' : 'rgba(245,158,11,0.20)',
+                  border: '1px solid rgba(245,158,11,0.40)',
+                  color: 'oklch(0.6 0.18 60)',
+                }}
+              >
+                {closing ? 'Closing…' : 'Close Discussion'}
+              </button>
+            </div>
+          )}
+
           <div className="px-3 pt-2">
             <TabsList className="w-full grid grid-cols-3">
               <TabsTrigger value="list" className="text-xs">Responses</TabsTrigger>
