@@ -139,7 +139,7 @@ describe('ResponseCard — flagged mode visual styling', () => {
 
     const card = container.firstChild as HTMLElement;
     // Selected flagged state uses red styling — check semantic attribute, not color values
-    expect(card).toHaveAttribute('data-variant', 'flagged-selected');
+    expect(card.querySelector('button')).toHaveAttribute('data-variant', 'flagged-selected');
     // Should have z-10 for elevation
     expect(card.className).toMatch(/z-10/);
   });

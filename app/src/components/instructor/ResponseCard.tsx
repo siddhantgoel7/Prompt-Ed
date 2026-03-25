@@ -175,22 +175,25 @@ export function ResponseCard({
   return (
     <div
       className={cn(
-        'rounded-xl transition-all duration-300 ease-in-out relative block',
-        isSelected ? cn(s.selectedPadding, 'my-4 z-10') : s.unselectedPadding,
+        'relative block transition-all duration-300 ease-in-out',
+        isSelected ? 'my-4 z-10' : 'z-0',
       )}
-      data-highlighted={isSelected ? 'true' : undefined}
-      data-variant={dataVariant}
-      style={isSelected ? selectedStyle : unselectedStyle}
     >
-      <div className="relative z-0 pointer-events-none">
-        {content}
-      </div>
       <button
         type="button"
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-xl"
-        aria-label={isSelected ? "Deselect response" : "Select response"}
+        className={cn(
+          'rounded-xl text-left appearance-none p-0 border-none transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full cursor-pointer',
+          isSelected ? s.selectedPadding : s.unselectedPadding,
+        )}
+        data-highlighted={isSelected ? 'true' : undefined}
+        data-variant={dataVariant}
+        style={isSelected ? selectedStyle : unselectedStyle}
         onClick={onToggle}
-      />
+        aria-label={isSelected ? 'Deselect response' : 'Select response'}
+      >
+        {content}
+      </button>
+
       {isSelected && (
         <div className="absolute bottom-5 right-5 z-20">
           {onFlag ? (
