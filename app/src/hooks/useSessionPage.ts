@@ -343,7 +343,7 @@ export function useSessionPage(lessonId: string): SessionVM {
 
   const handleDisplay = useCallback(() => {
     if (!lesson) return;
-    if (typeof globalThis.window === 'undefined') return;
+    if (globalThis.window === undefined) return;
     globalThis.window.open(`/session/${lesson.id}/display`, '_blank', 'noopener,noreferrer');
   }, [lesson]);
 

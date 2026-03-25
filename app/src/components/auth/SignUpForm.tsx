@@ -50,7 +50,7 @@ export function SignUpForm() {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);

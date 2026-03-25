@@ -12,7 +12,7 @@ import {
 import { Tooltip as UITooltip, TooltipContent as UITooltipContent, TooltipTrigger as UITooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import {
-  ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid
+  ResponsiveContainer, PieChart, Pie, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
@@ -48,12 +48,14 @@ export function DiscussionAnalyticsContent({
       }
     });
     const totalVotes = Object.values(dist).reduce((sum, count) => sum + count, 0);
-    return discussion.mc_options.map((opt) => ({
+    return discussion.mc_options.map((opt, i) => ({
       label: opt.label,
       text: opt.text,
       count: dist[opt.label] ?? 0,
       percentage: totalVotes > 0 ? Math.round(((dist[opt.label] ?? 0) / totalVotes) * 100) : 0,
       isCorrect: discussion.correct_option === opt.label,
+      // Pass fill directly to avoid using deprecated Cell component in some recharts versions
+      fill: discussion.correct_option === opt.label ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]
     }));
   })();
 
@@ -108,14 +110,7 @@ export function DiscussionAnalyticsContent({
                   paddingAngle={1}
                   label={false}
                   labelLine={false}
-                >
-                  {mcChartData.map((entry, i) => (
-                    <Cell
-                      key={entry.label}
-                      fill={entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]}
-                    />
-                  ))}
-                </Pie>
+                />
                 <Tooltip
                   formatter={(value: any, name: any) => [`${value} votes`, `Option ${name}`]}
                   contentStyle={{

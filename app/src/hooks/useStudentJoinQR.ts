@@ -5,7 +5,7 @@ import QRCode from 'qrcode';
 
 export function useStudentJoinQR(lessonId: string | undefined, width: number) {
   const joinUrl =
-    lessonId && typeof globalThis.window !== 'undefined'
+    lessonId && globalThis.window !== undefined
       ? `${globalThis.window.location.origin}/student/${lessonId}`
       : null;
   const [qrState, setQrState] = useState<{ lessonId: string; dataUrl: string } | null>(null);

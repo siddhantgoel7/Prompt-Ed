@@ -44,7 +44,7 @@ export function useDebugSweep({
       short_answer: 'Short Answer',
       multiple_choice: 'Multiple Choice',
     };
-    const timeSec = generationTimeMs != null ? `${Math.round(generationTimeMs / 1000)}s` : '—';
+    const timeSec = generationTimeMs !== null ? `${Math.round(generationTimeMs / 1000)}s` : '—';
     const contextLabel = generationWarning ? 'No context (fallback)' : 'Files + Transcript';
 
     const lines: string[] = [
@@ -181,7 +181,7 @@ function generateTextReport(results: any[], TYPE_LABEL: any, cap: any, wordCount
     if (r.error) { txtLines.push(`ERROR: ${r.error}`, ''); return; }
     if (r.model) txtLines.push(`Model: ${r.model} | Temperature: ${TEMPERATURE_BY_TYPE[r.combo.promptType as PromptType]}`);
     if (r.tokenUsage) {
-      const costUsd = (r.tokenUsage.promptTokens * 0.15 / 1_000_000) + (r.tokenUsage.completionTokens * 0.60 / 1_000_000);
+      const costUsd = (r.tokenUsage.promptTokens * 0.15 / 1_000_000) + (r.tokenUsage.completionTokens * 0.6 / 1_000_000);
       txtLines.push(`Tokens: ${r.tokenUsage.promptTokens} prompt + ${r.tokenUsage.completionTokens} completion = ${r.tokenUsage.totalTokens} total | Cost: $${costUsd.toFixed(6)}`);
     }
     if (r.warning) txtLines.push(`Warning: ${r.warning} | Fallback: true`);
@@ -231,7 +231,7 @@ function generateCsvReport(results: any[], BLOOMS_ENCODE: any, stdDev: any, word
     const ctok = r.tokenUsage?.completionTokens ?? '';
     const ttok = r.tokenUsage?.totalTokens ?? '';
     const fallbackUsed = r.warning ? 'true' : 'false';
-    const costUsd = r.tokenUsage ? (r.tokenUsage.promptTokens * 0.15 / 1_000_000) + (r.tokenUsage.completionTokens * 0.60 / 1_000_000) : 0;
+    const costUsd = r.tokenUsage ? (r.tokenUsage.promptTokens * 0.15 / 1_000_000) + (r.tokenUsage.completionTokens * 0.6 / 1_000_000) : 0;
     const higherOrderCount = r.candidates.filter((c: any) => (BLOOMS_ENCODE[c.bloomsLevel ?? ''] ?? 0) >= 4).length;
     const costPerHOQ = higherOrderCount > 0 ? (costUsd / higherOrderCount).toFixed(6) : 'N/A';
     const uniqueTopics = new Set(r.candidates.map((c: any) => c.topicArea).filter(Boolean)).size;

@@ -89,7 +89,7 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
       channelRef.current = null;
       setIsConnected(false);
     };
-  }, [lessonId, role, connectAttempt]);
+  }, [lessonId, role, connectAttempt, tick]);
 
   // Detect browser online/offline to immediately update connection status
   useEffect(() => {

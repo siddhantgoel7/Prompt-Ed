@@ -24,7 +24,7 @@ export function LessonCreateDialog({
   title: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: React.FormEventHandler<HTMLFormElement>;
+  onSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => void;
   error: string | null;
   saving: boolean;
 }>) {

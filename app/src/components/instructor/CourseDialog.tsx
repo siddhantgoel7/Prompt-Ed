@@ -33,7 +33,7 @@ export function CourseDialog({
   mode: 'add' | 'edit';
   value: CreateCourseInput;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => void;
   error: string | null;
   saving: boolean;
 }>) {
