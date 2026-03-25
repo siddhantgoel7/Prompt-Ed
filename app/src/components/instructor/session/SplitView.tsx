@@ -225,30 +225,34 @@ function DiscussionDetail({
 
       {/* Responses */}
       <ScrollArea className="flex-1 px-4 py-3">
-        {loading ? (
-          <div className="space-y-2">
-            <div className="skeleton-shimmer h-16 w-full rounded-xl" />
-            <div className="skeleton-shimmer h-16 w-full rounded-xl" />
-          </div>
-        ) : responses.length === 0 ? (
-          <p className="text-sm py-6 text-center text-content-muted">
-            No responses yet.
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {responses.map((r) => (
-              <ResponseCard
-                key={r.id}
-                variant="full"
-                responseText={r.response_text}
-                createdAt={r.created_at}
-                isSelected={false}
-                isBeingFlagged={false}
-                onToggle={() => {}}
-              />
-            ))}
-          </div>
-        )}
+        {(() => {
+          if (loading) return (
+            <div className="space-y-2">
+              <div className="skeleton-shimmer h-16 w-full rounded-xl" />
+              <div className="skeleton-shimmer h-16 w-full rounded-xl" />
+            </div>
+          );
+          if (responses.length === 0) return (
+            <p className="text-sm py-6 text-center text-content-muted">
+              No responses yet.
+            </p>
+          );
+          return (
+            <div className="space-y-2">
+              {responses.map((r) => (
+                <ResponseCard
+                  key={r.id}
+                  variant="full"
+                  responseText={r.response_text}
+                  createdAt={r.created_at}
+                  isSelected={false}
+                  isBeingFlagged={false}
+                  onToggle={() => {}}
+                />
+              ))}
+            </div>
+          );
+        })()}
       </ScrollArea>
     </div>
   );

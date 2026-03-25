@@ -57,8 +57,8 @@ export function LessonCard(
           style={{ background: 'var(--color-primary-alpha-12)' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="2.5" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
         </div>
         <span className="text-sm font-semibold text-content-secondary">
@@ -72,17 +72,10 @@ export function LessonCard(
   const badge = statusToBadge(lesson.status);
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       onClick={props.onAccess}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          props.onAccess();
-        }
-      }}
-      className="h-28 rounded-2xl relative p-4 flex flex-col justify-between cursor-pointer card-hover group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      className="h-28 rounded-2xl relative p-4 flex flex-col justify-between cursor-pointer card-hover group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full text-left appearance-none border-none p-0"
       style={{
         background: 'var(--surface-glass)',
         backdropFilter: 'blur(10px)',
@@ -118,10 +111,10 @@ export function LessonCard(
           }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6l-1 14H6L5 6"/>
-            <path d="M10 11v6M14 11v6"/>
-            <path d="M9 6V4h6v2"/>
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14H6L5 6" />
+            <path d="M10 11v6M14 11v6" />
+            <path d="M9 6V4h6v2" />
           </svg>
         </button>
       </div>
@@ -137,6 +130,6 @@ export function LessonCard(
           {formatDate(lesson.date_created)}
         </p>
       </div>
-    </div>
+    </button>
   );
 }

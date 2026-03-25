@@ -65,8 +65,8 @@ export function useDebugSweep({
         });
       }
       if (c.bloomsLevel) lines.push(`   Bloom's: ${c.bloomsLevel}`);
-      if (c.topicArea)   lines.push(`   Topic: ${c.topicArea}`);
-      if (c.rationale)   lines.push(`   Rationale: ${c.rationale}`);
+      if (c.topicArea) lines.push(`   Topic: ${c.topicArea}`);
+      if (c.rationale) lines.push(`   Rationale: ${c.rationale}`);
       if (i < candidates.length - 1) lines.push('');
     });
 
@@ -203,8 +203,8 @@ function generateTextReport(results: any[], TYPE_LABEL: any, cap: any, wordCount
         c.mcOptions.forEach((opt: any) => { txtLines.push(`   ${opt.label}. ${opt.text}${opt.is_correct ? ' [CORRECT]' : ''}`); });
       }
       if (c.bloomsLevel) txtLines.push(`   Bloom's: ${c.bloomsLevel}`);
-      if (c.topicArea)   txtLines.push(`   Topic: ${c.topicArea}`);
-      if (c.rationale)   txtLines.push(`   Rationale: ${c.rationale}`);
+      if (c.topicArea) txtLines.push(`   Topic: ${c.topicArea}`);
+      if (c.rationale) txtLines.push(`   Rationale: ${c.rationale}`);
       if (ci < r.candidates.length - 1) txtLines.push('');
     });
     txtLines.push('');
@@ -267,7 +267,7 @@ function downloadFile(content: string, filename: string, mime: string) {
   const a = document.createElement('a');
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
+  a.remove(); URL.revokeObjectURL(url);
 }
 
 function calculateMcBias(candidates: any[]) {

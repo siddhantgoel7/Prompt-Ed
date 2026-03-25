@@ -364,7 +364,7 @@ function AIGenerationPanel({
       {candidates.length > 0 && (
         <div className="space-y-2">
           {candidates.map((c: GeneratedPrompt, i: number) => (
-            <div key={i}>
+            <div key={`candidate-${i}`}>
               {selectedIndex === i ? (
                 <SelectedCandidateEditor promptInput={promptInput} setPromptInput={setPromptInput} setTranscriptText={setTranscriptText} type={c.promptType} />
               ) : (
@@ -426,7 +426,7 @@ function GeneratingIndicator() {
   return (
     <span aria-label="Generating…" style={{ display: 'inline-flex' }}>
       {GENERATING_CHARS.map((ch: string, i: number) => (
-        <span key={i} className={ch === '.' ? 'generating-char' : 'generating-shimmer'} style={{ animationDelay: `${i * 0.07}s` }}>{ch}</span>
+        <span key={`gen-char-${i}`} className={ch === '.' ? 'generating-char' : 'generating-shimmer'} style={{ animationDelay: `${i * 0.07}s` }}>{ch}</span>
       ))}
     </span>
   );

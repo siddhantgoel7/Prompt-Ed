@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { CourseCard } from '@/components/instructor/CourseCard';
 import type { Course } from '@/types/course';
 
@@ -44,15 +45,19 @@ describe('CourseCard', () => {
         expect(props.onAccess).toHaveBeenCalled();
     });
 
-    it('success: handles keyboard access (Enter/Space)', () => {
-        const { container } = render(<CourseCard {...props} />);
-        const card = container.firstChild as HTMLElement;
+    it('success: handles keyboard access (Enter/Space)', async () => {
+        const user = userEvent.setup();
+        render(<CourseCard {...props} />);
+        const card = screen.getByRole('button', { name: /Test Course/i });
         
-        fireEvent.keyDown(card, { key: 'Enter' });
+        await user.click(card); // click works automatically in these tests
         expect(props.onAccess).toHaveBeenCalledTimes(1);
 
-        fireEvent.keyDown(card, { key: ' ' });
+        await user.keyboard('{Enter}');
         expect(props.onAccess).toHaveBeenCalledTimes(2);
+
+        await user.keyboard(' ');
+        expect(props.onAccess).toHaveBeenCalledTimes(3);
     });
 
     it('success: opens dropdown and triggers onEdit/onDelete', async () => {

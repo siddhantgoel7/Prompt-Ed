@@ -155,23 +155,23 @@ function buildStyleBlock(style?: string, difficulty?: string): string {
 function buildLengthBlock(length?: string, promptType?: PromptType): string {
   if (promptType === 'multiple_choice') {
     switch (length) {
-      case 'brief':   return '15–20 words for the stem';
+      case 'brief': return '15–20 words for the stem';
       case 'detailed': return '35–55 words for the stem, including a brief clinical or mechanistic setup';
-      default:        return '20–35 words for the stem';
+      default: return '20–35 words for the stem';
     }
   }
   if (promptType === 'long_answer') {
     switch (length) {
-      case 'brief':   return '30–50 words';
+      case 'brief': return '30–50 words';
       case 'detailed': return '80–120 words, including substantial setup context and a multi-part ask';
-      default:        return '50–80 words';
+      default: return '50–80 words';
     }
   }
   // short_answer (and fallback)
   switch (length) {
-    case 'brief':   return '20–30 words';
+    case 'brief': return '20–30 words';
     case 'detailed': return '60–90 words, including setup context';
-    default:        return '30–50 words';
+    default: return '30–50 words';
   }
 }
 
@@ -266,16 +266,16 @@ function buildBloomsDistributionBlock(difficulty?: string, promptType?: PromptTy
 
   if (promptType === 'multiple_choice') {
     switch (difficulty) {
-      case 'basic':        slots = ['remember', 'remember', 'understand', 'understand', 'apply']; break;
-      case 'advanced':     slots = ['apply', 'analyze', 'analyze', 'evaluate', 'evaluate']; break;
-      default:             slots = ['remember', 'understand', 'apply', 'apply', 'analyze']; // intermediate
+      case 'basic': slots = ['remember', 'remember', 'understand', 'understand', 'apply']; break;
+      case 'advanced': slots = ['apply', 'analyze', 'analyze', 'evaluate', 'evaluate']; break;
+      default: slots = ['remember', 'understand', 'apply', 'apply', 'analyze']; // intermediate
     }
   } else {
     // free-response: short_answer and long_answer
     switch (difficulty) {
-      case 'basic':        slots = ['remember', 'understand', 'understand', 'apply', 'apply']; break;
-      case 'advanced':     slots = ['analyze', 'analyze', 'evaluate', 'evaluate', 'create']; break;
-      default:             slots = ['understand', 'apply', 'analyze', 'analyze', 'evaluate']; // intermediate
+      case 'basic': slots = ['remember', 'understand', 'understand', 'apply', 'apply']; break;
+      case 'advanced': slots = ['analyze', 'analyze', 'evaluate', 'evaluate', 'create']; break;
+      default: slots = ['understand', 'apply', 'analyze', 'analyze', 'evaluate']; // intermediate
     }
   }
 

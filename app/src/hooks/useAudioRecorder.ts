@@ -39,7 +39,7 @@ export function useAudioRecorder() {
     const stop = React.useCallback(async (): Promise<Blob> => {
         const recorder = mediaRecorderRef.current;
         if (!recorder || recorder.state === 'inactive') return new Blob([]);
-        
+
         setIsRecording(false);
         if (timerRef.current) clearInterval(timerRef.current);
 
@@ -61,5 +61,5 @@ export function useAudioRecorder() {
 }
 
 function releaseTracks(stream: MediaStream) {
-  stream.getTracks().forEach(t => t.stop());
+    stream.getTracks().forEach(t => t.stop());
 }

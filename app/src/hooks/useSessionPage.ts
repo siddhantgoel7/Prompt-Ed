@@ -162,7 +162,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     removeResponse,
     flaggedResponses,
     restoreResponse,
-  // studentCount passed so publish handlers can snapshot it into participant_snapshot
+    // studentCount passed so publish handlers can snapshot it into participant_snapshot
   } = useLessonDiscussions(lessonId, channel, clearAIState, promptInput, setPromptInput, promptType, studentCount);
 
   const {
@@ -450,9 +450,9 @@ export function useSessionPage(lessonId: string): SessionVM {
             );
           });
         }
-        
+
       });
-      
+
       lines.push('', 'TRANSCRIPTS', '-----------');
       if (transcripts.length === 0) {
         lines.push('No transcripts used.');
@@ -494,7 +494,7 @@ export function useSessionPage(lessonId: string): SessionVM {
 
       const rows = (data ?? []) as ExportDiscussionRow[];
 
-      
+
 
       const csvLines: string[] = [
         [
@@ -542,109 +542,109 @@ export function useSessionPage(lessonId: string): SessionVM {
   }, [lesson, downloadBlob, getSafeLessonFileBase]);
 
   const handleExportStatistics = useCallback(async () => {
-  if (!lesson) return;
+    if (!lesson) return;
 
-  setExportingData(true);
-  setEndError(null);
+    setExportingData(true);
+    setEndError(null);
 
-  try {
-    const { data, error } = await fetchExportDiscussionsApi(lesson.id);
-
-    
-    if (error) {
-      setEndError('Failed to export statistics.');
-      return;
-    }
-
-    const rows = (data ?? []) as ExportDiscussionRow[];
-
-    
-
-    const lessonWithDates = lesson as Lesson & {
-      started_at?: string | null;
-      ended_at?: string | null;
-    };
-
-    const startedAt = formatExportTimestamp(lessonWithDates.started_at);
-    const endedAt = formatExportTimestamp(lessonWithDates.ended_at);
+    try {
+      const { data, error } = await fetchExportDiscussionsApi(lesson.id);
 
 
-    const totalResponses = rows.reduce((sum, d) => sum + (d.responses?.length ?? 0), 0);
-    const avgResponses = rows.length > 0 ? (totalResponses / rows.length).toFixed(2) : '0.00';
+      if (error) {
+        setEndError('Failed to export statistics.');
+        return;
+      }
 
-    const durationMinutes =
-      startedAt && endedAt
-        ? Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000)
-        : '';
+      const rows = (data ?? []) as ExportDiscussionRow[];
 
-    const csvLines: string[] = [];
 
-    csvLines.push('Lesson Statistics');
-    csvLines.push('metric,value');
-    csvLines.push(`lesson_title,${escapeCsv(lesson.title)}`);
-    csvLines.push(`lesson_started_at,${escapeCsv(startedAt)}`);
-    csvLines.push(`lesson_ended_at,${escapeCsv(endedAt)}`);
-    csvLines.push(`session_duration_minutes,${escapeCsv(durationMinutes)}`);
-    csvLines.push(`total_discussions,${escapeCsv(rows.length)}`);
-    csvLines.push(`total_responses,${escapeCsv(totalResponses)}`);
-    csvLines.push(`average_responses_per_discussion,${escapeCsv(avgResponses)}`);
-    csvLines.push(`transcript_segments_used,${escapeCsv(transcripts.length)}`);
-    csvLines.push(`lecture_files_uploaded,${escapeCsv(files.length)}`);
-    csvLines.push('');
 
-    csvLines.push('Discussion Statistics');
-    csvLines.push([
-      'discussion_number',
-      'prompt_text',
-      'prompt_type',
-      'created_at',
-      'closed_at',
-      'participant_snapshot',
-      'response_count',
-      'participation_rate',
-      'first_response_at',
-      'last_response_at',
-      'minutes_to_first_response',
-    ].join(','));
+      const lessonWithDates = lesson as Lesson & {
+        started_at?: string | null;
+        ended_at?: string | null;
+      };
 
-    rows.forEach((d, index) => {
-      const responses = [...(d.responses ?? [])].sort(
-        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      );
+      const startedAt = formatExportTimestamp(lessonWithDates.started_at);
+      const endedAt = formatExportTimestamp(lessonWithDates.ended_at);
 
-      const responseCount = responses.length;
-      const snapshot = d.participant_snapshot ?? 0;
-      const participationRate = snapshot > 0 ? Math.round((responseCount / snapshot) * 100) : '';
-      const firstResponseAt = formatExportTimestamp(responses[0]?.created_at);
-      const lastResponseAt = formatExportTimestamp(responses[responses.length - 1]?.created_at);
-      const minutesToFirstResponse =
-        firstResponseAt
-          ? (
-              (new Date(firstResponseAt).getTime() - new Date(d.created_at).getTime()) / 60000
-            ).toFixed(2)
+
+      const totalResponses = rows.reduce((sum, d) => sum + (d.responses?.length ?? 0), 0);
+      const avgResponses = rows.length > 0 ? (totalResponses / rows.length).toFixed(2) : '0.00';
+
+      const durationMinutes =
+        startedAt && endedAt
+          ? Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000)
           : '';
 
-      csvLines.push([
-        escapeCsv(index + 1),
-        escapeCsv(d.prompt_text),
-        escapeCsv(d.prompt_type),
-        escapeCsv(formatExportTimestamp(d.created_at)),
-        escapeCsv(formatExportTimestamp(d.closed_at)),
-        escapeCsv(snapshot || ''),
-        escapeCsv(responseCount),
-        escapeCsv(participationRate),
-        escapeCsv(firstResponseAt),
-        escapeCsv(lastResponseAt),
-        escapeCsv(minutesToFirstResponse),
-      ].join(','));
-    });
+      const csvLines: string[] = [];
 
-    const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8' });
-    downloadBlob(blob, `${getSafeLessonFileBase()}_statistics.csv`);
-  } finally {
-    setExportingData(false);
-  }
-}, [lesson, transcripts, files, downloadBlob, getSafeLessonFileBase]);
+      csvLines.push('Lesson Statistics');
+      csvLines.push('metric,value');
+      csvLines.push(`lesson_title,${escapeCsv(lesson.title)}`);
+      csvLines.push(`lesson_started_at,${escapeCsv(startedAt)}`);
+      csvLines.push(`lesson_ended_at,${escapeCsv(endedAt)}`);
+      csvLines.push(`session_duration_minutes,${escapeCsv(durationMinutes)}`);
+      csvLines.push(`total_discussions,${escapeCsv(rows.length)}`);
+      csvLines.push(`total_responses,${escapeCsv(totalResponses)}`);
+      csvLines.push(`average_responses_per_discussion,${escapeCsv(avgResponses)}`);
+      csvLines.push(`transcript_segments_used,${escapeCsv(transcripts.length)}`);
+      csvLines.push(`lecture_files_uploaded,${escapeCsv(files.length)}`);
+      csvLines.push('');
+
+      csvLines.push('Discussion Statistics');
+      csvLines.push([
+        'discussion_number',
+        'prompt_text',
+        'prompt_type',
+        'created_at',
+        'closed_at',
+        'participant_snapshot',
+        'response_count',
+        'participation_rate',
+        'first_response_at',
+        'last_response_at',
+        'minutes_to_first_response',
+      ].join(','));
+
+      rows.forEach((d, index) => {
+        const responses = [...(d.responses ?? [])].sort(
+          (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+
+        const responseCount = responses.length;
+        const snapshot = d.participant_snapshot ?? 0;
+        const participationRate = snapshot > 0 ? Math.round((responseCount / snapshot) * 100) : '';
+        const firstResponseAt = formatExportTimestamp(responses[0]?.created_at);
+        const lastResponseAt = formatExportTimestamp(responses[responses.length - 1]?.created_at);
+        const minutesToFirstResponse =
+          firstResponseAt
+            ? (
+              (new Date(firstResponseAt).getTime() - new Date(d.created_at).getTime()) / 60000
+            ).toFixed(2)
+            : '';
+
+        csvLines.push([
+          escapeCsv(index + 1),
+          escapeCsv(d.prompt_text),
+          escapeCsv(d.prompt_type),
+          escapeCsv(formatExportTimestamp(d.created_at)),
+          escapeCsv(formatExportTimestamp(d.closed_at)),
+          escapeCsv(snapshot || ''),
+          escapeCsv(responseCount),
+          escapeCsv(participationRate),
+          escapeCsv(firstResponseAt),
+          escapeCsv(lastResponseAt),
+          escapeCsv(minutesToFirstResponse),
+        ].join(','));
+      });
+
+      const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8' });
+      downloadBlob(blob, `${getSafeLessonFileBase()}_statistics.csv`);
+    } finally {
+      setExportingData(false);
+    }
+  }, [lesson, transcripts, files, downloadBlob, getSafeLessonFileBase]);
 
 
 

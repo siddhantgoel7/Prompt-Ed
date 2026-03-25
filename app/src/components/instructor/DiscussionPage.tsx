@@ -196,7 +196,7 @@ export function DiscussionPage({
 
   const handleNewResponse = useCallback((payload: any) => {
     const newResponse = payload.payload?.response;
-    if (newResponse && newResponse.discussion_id === discussionId) {
+    if (newResponse?.discussion_id === discussionId) {
       setResponses((prev) => {
         // Deduplicate just in case — Supabase Realtime can deliver the same broadcast
         // event twice on reconnect. Returning prev skips the re-render entirely.

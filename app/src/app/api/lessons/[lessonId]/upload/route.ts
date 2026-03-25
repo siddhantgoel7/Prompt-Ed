@@ -160,7 +160,9 @@ function createChunksForSection(section: any, fileName: string, lessonId: string
     if (isLabelSoup(section.content)) return [];
   }
 
-  const chunkSize = section.contentOrigin === 'slide_body' ? 512 : section.contentOrigin === 'slide_notes' ? 768 : 1024;
+  let chunkSize = 1024;
+  if (section.contentOrigin === 'slide_body') chunkSize = 512;
+  else if (section.contentOrigin === 'slide_notes') chunkSize = 768;
   const subChunks = (section.contentOrigin === 'visual_description' ? [section.content] : splitBySentences(section.content, chunkSize, 1)).filter(c => c.trim().length > 50);
 
   return subChunks.map((content, i) => ({

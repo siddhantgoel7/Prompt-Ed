@@ -107,21 +107,21 @@ function MCOptionButton({
 
   const STYLE_MAP: Record<string, React.CSSProperties> = {
     'correct-submitted': { background: 'var(--color-primary-alpha-18)', border: '2px solid var(--color-primary-500)', color: 'var(--color-primary-700)' },
-    'wrong-submitted':   { background: 'var(--color-error-alpha-12)', border: '2px solid var(--color-error-500)', color: 'var(--color-error-600)' },
+    'wrong-submitted': { background: 'var(--color-error-alpha-12)', border: '2px solid var(--color-error-500)', color: 'var(--color-error-600)' },
     'correct-highlight': { background: 'var(--color-primary-alpha-10)', border: '2px solid var(--color-primary-400)', color: 'var(--color-primary-600)' },
-    'submitted':         { background: 'var(--color-primary-alpha-10)', border: '2px solid var(--color-primary-300)', color: 'var(--text-secondary)' },
-    'selected':          { background: 'var(--color-primary-alpha-18)', border: '2px solid var(--color-primary-500)', color: 'var(--text-primary)', cursor: 'pointer' },
-    'disabled':          { background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-secondary)' },
-    'unselected':        { background: 'var(--color-primary-alpha-05)', border: '1.5px solid var(--border-default)', color: 'var(--text-secondary)', cursor: 'pointer' },
-    'other':             { background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-muted)', opacity: 0.6 },
+    'submitted': { background: 'var(--color-primary-alpha-10)', border: '2px solid var(--color-primary-300)', color: 'var(--text-secondary)' },
+    'selected': { background: 'var(--color-primary-alpha-18)', border: '2px solid var(--color-primary-500)', color: 'var(--text-primary)', cursor: 'pointer' },
+    'disabled': { background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-secondary)' },
+    'unselected': { background: 'var(--color-primary-alpha-05)', border: '1.5px solid var(--border-default)', color: 'var(--text-secondary)', cursor: 'pointer' },
+    'other': { background: 'var(--surface-raised)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-muted)', opacity: 0.6 },
   };
 
   const RADIO_MAP: Record<string, string> = {
     'correct-submitted': 'var(--color-primary-500)',
-    'wrong-submitted':   'var(--color-error-500)',
+    'wrong-submitted': 'var(--color-error-500)',
     'correct-highlight': 'var(--color-primary-400)',
-    'submitted':         'var(--color-primary-300)',
-    'selected':          'var(--color-primary-500)',
+    'submitted': 'var(--color-primary-300)',
+    'selected': 'var(--color-primary-500)',
   };
 
   const baseStyle: React.CSSProperties = {

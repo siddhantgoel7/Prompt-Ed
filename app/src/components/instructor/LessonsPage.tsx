@@ -41,9 +41,11 @@ export function LessonsPage({ courseId }: { courseId: string }) {
             {page.course.title}
           </h2>
           <p className="text-sm mt-1 text-content-muted">
-            {page.lessons.length === 0
-              ? 'No lessons yet — create your first'
-              : `${page.lessons.length} lesson${page.lessons.length === 1 ? '' : 's'}`}
+            {(() => {
+              if (page.lessons.length === 0) return 'No lessons yet — create your first';
+              const s = page.lessons.length === 1 ? '' : 's';
+              return `${page.lessons.length} lesson${s}`;
+            })()}
           </p>
         </div>
 

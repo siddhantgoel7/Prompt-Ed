@@ -1,0 +1,157 @@
+
+> app@0.1.0 lint
+> eslint .
+
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/src/app/api/lessons/[lessonId]/upload/route.ts
+   90:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   90:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  113:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  144:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  145:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  157:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  187:15  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/src/components/instructor/DiscussionPage.tsx
+  197:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/src/components/instructor/session/ActiveCenter.tsx
+  235:44   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  264:50   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  264:60   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  320:4    error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  375:85   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  395:4    error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  435:53   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  449:45   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  451:92   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  463:49   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  467:102  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/src/components/instructor/session/ActiveRightPanel.tsx
+  112:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  133:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  133:68  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:4   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  165:85  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  190:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/src/components/instructor/session/ActiveSidebar.tsx
+  106:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  136:4   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/src/components/student/session/StudentPromptCard.tsx
+  93:4  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/src/components/student/session/StudentSessionPage.tsx
+   62:9    warning  'correctOptionText' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  253:4    error    Unexpected any. Specify a different type                                                      @typescript-eslint/no-explicit-any
+  257:48   error    Unexpected any. Specify a different type                                                      @typescript-eslint/no-explicit-any
+  289:31   error    Unexpected any. Specify a different type                                                      @typescript-eslint/no-explicit-any
+  302:33   error    Unexpected any. Specify a different type                                                      @typescript-eslint/no-explicit-any
+  341:128  error    Unexpected any. Specify a different type                                                      @typescript-eslint/no-explicit-any
+  355:130  error    Unexpected any. Specify a different type                                                      @typescript-eslint/no-explicit-any
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/src/hooks/useDebugSweep.ts
+  281:0  error  Parsing error: Declaration or statement expected
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/src/hooks/useSessionPage/useLessonDiscussions.ts
+  187:123  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  258:93   error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  275:5    error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/src/hooks/useSessionPage/useLessonDiscussions.ts:275:5
+  273 |
+  274 |   useEffect(() => {
+> 275 |     fetchResponses();
+      |     ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  276 |     fetchFlaggedResponses();
+  277 |   }, [activeDiscussion?.id, fetchResponses, fetchFlaggedResponses]);
+  278 |  react-hooks/set-state-in-effect
+  286:32   error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  286:53   error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  297:27   error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  297:48   error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  305:62   error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  305:83   error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  307:25   error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  310:70   error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  314:63   error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/src/lib/ai/parsers/pptxParser.ts
+   59:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   59:73  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   60:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  176:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  215:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  239:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  240:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/acceptance/discussion_timer.acceptance.test.tsx
+  24:37  warning  'waitFor' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  24:46  warning  'act' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/acceptance/instructor_session_ended_view.test.tsx
+  344:11  warning  'user' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/ai/generatePrompts.test.ts
+  8:10  warning  'buildSystemPrompt' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  8:29  warning  'buildUserPrompt' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/ai/retrieval_logic.test.ts
+  3:15  warning  'AIProvider' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  4:15  warning  'SupabaseClient' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/api/api_routes_coverage.test.ts
+  10:8  warning  'OpenAI' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/api/auth_callback.test.ts
+  7:23  warning  'NextResponse' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/api/lesson_file_route.test.tsx
+  6:23  warning  'NextResponse' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/api/lesson_files_list_route.test.tsx
+  6:23  warning  'NextResponse' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/api/transcript_route.test.tsx
+   6:23  warning  'NextResponse' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  42:9   warning  'mockOpenAI' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/api/upload_route_sync.test.ts
+  4:23  warning  'NextResponse' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/components/ActiveCenter.test.tsx
+   46:24  warning  'value' is defined but never used. Allowed unused args must match /^_/u              @typescript-eslint/no-unused-vars
+  105:16  warning  'cMode' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  105:23  warning  'setCMode' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/components/ActiveRightPanel.test.tsx
+   2:37  warning  'act' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  10:31  warning  'value' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/components/DiscussionPage.test.tsx
+  103:13  warning  'onRemoveCallback' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/components/SessionEndedView.test.tsx
+  4:10  warning  'SessionContext' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/components/TimerTab.test.tsx
+  2:37  warning  'act' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/hooks/useInstructorDashboard.test.tsx
+  9:3  warning  'updateCourse' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/siddhantgoel/Desktop/401/W26project-DeptofPharmacology/app/tests/unit/hooks/useStudentSession.test.tsx
+  7:3  warning  'fetchStudentActiveDiscussionApi' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  8:3  warning  'submitStudentResponseApi' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+
+✖ 81 problems (55 errors, 26 warnings)
+

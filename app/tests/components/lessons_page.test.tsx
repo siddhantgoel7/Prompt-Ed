@@ -339,7 +339,7 @@ describe('LessonsPage', () => {
 
       await waitFor(() => {
         const lessonTitle = screen.getByText('Introduction to Pharmacology');
-        const lessonCard = lessonTitle.closest('div[class*="cursor-pointer"]');
+        const lessonCard = lessonTitle.closest('button');
         expect(lessonCard).toBeTruthy();
         if (lessonCard) fireEvent.click(lessonCard);
       });

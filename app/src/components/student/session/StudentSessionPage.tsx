@@ -301,7 +301,7 @@ function SubmittedView(props: any) {
 
 function SubmittedMCView(props: any) {
   const { activeDiscussion, feedbackPeriodActive, isSubmitCorrect, selectedOption, correctOptionLabel, hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds } = props;
-  
+
   if (activeDiscussion.feedback_enabled) {
     if (feedbackPeriodActive) {
       return (

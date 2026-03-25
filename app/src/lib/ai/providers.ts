@@ -124,7 +124,7 @@ export interface AIProvider {
 
 /** Concrete AI provider backed by the OpenAI API (gpt-4o-mini for chat, text-embedding-3-small for embeddings). */
 export class OpenAIProvider implements AIProvider {
-    private openai: OpenAI;
+    private readonly openai: OpenAI;
 
     constructor(apiKey?: string) {
         this.openai = new OpenAI({ apiKey: apiKey || process.env.OPENAI_API_KEY });
@@ -303,7 +303,7 @@ export class OpenAIProvider implements AIProvider {
  *  cutting PDF vision latency by ~50-65% at ~90% lower token cost.
  */
 export class GeminiProvider implements AIProvider {
-    private genAI: GoogleGenerativeAI;
+    private readonly genAI: GoogleGenerativeAI;
     private readonly model = 'gemini-2.5-flash';
     private readonly NO_VISUAL_CONTENT = 'NO_VISUAL_CONTENT';
 

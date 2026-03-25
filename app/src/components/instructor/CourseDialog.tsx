@@ -86,7 +86,10 @@ export function CourseDialog({
             </Button>
 
             <Button type="submit" disabled={saving} className="flex-1">
-              {saving ? (mode === 'add' ? 'Adding...' : 'Saving...') : mode === 'add' ? 'Add Course' : 'Save Changes'}
+              {(() => {
+                if (saving) return mode === 'add' ? 'Adding...' : 'Saving...';
+                return mode === 'add' ? 'Add Course' : 'Save Changes';
+              })()}
             </Button>
           </div>
         </form>

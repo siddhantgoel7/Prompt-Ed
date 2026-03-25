@@ -60,6 +60,10 @@ function ActionButton({
   iconClassName: string;
 }) {
   const isFlagged = mode === 'flagged';
+  const label = isFlagged
+    ? (isBeingFlagged ? 'Restoring...' : 'Unflag')
+    : (isBeingFlagged ? 'Removing...' : 'Flag as Inappropriate');
+
   return (
     <button
       type="button"
@@ -79,13 +83,11 @@ function ActionButton({
       } : {
         color: 'var(--recording-text, #dc2626)',
         background: 'var(--color-error-alpha-08)',
-        border: '1px solid var(--color-error-alpha-25)',
+        border: '1px solid var(--error-border)',
       }}
     >
       {isFlagged ? <RotateCcw className={iconClassName} /> : <Flag className={iconClassName} />}
-      {isFlagged
-        ? (isBeingFlagged ? 'Restoring...' : 'Unflag')
-        : (isBeingFlagged ? 'Removing...' : 'Flag as Inappropriate')}
+      {label}
     </button>
   );
 }
@@ -168,27 +170,24 @@ export function ResponseCard({
     </>
   );
 
+  const dataVariant = isSelected
+    ? (isFlagged ? 'flagged-selected' : 'highlighted-selected')
+    : undefined;
+
   return (
-    <div
-      role="button"
+    <button
+      type="button"
       aria-label="Student response"
-      tabIndex={0}
       className={cn(
-        'rounded-xl cursor-pointer transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        'rounded-xl cursor-pointer transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full text-left appearance-none border-none p-0 block font-inherit',
         isSelected ? cn(s.selectedPadding, 'my-4 z-10 relative') : s.unselectedPadding,
       )}
       data-highlighted={isSelected ? 'true' : undefined}
-      data-variant={isSelected ? (isFlagged ? 'flagged-selected' : 'highlighted-selected') : undefined}
+      data-variant={dataVariant}
       style={isSelected ? selectedStyle : unselectedStyle}
       onClick={onToggle}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onToggle();
-        }
-      }}
     >
       {content}
-    </div>
+    </button>
   );
 }

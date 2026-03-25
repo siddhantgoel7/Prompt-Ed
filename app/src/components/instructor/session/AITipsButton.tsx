@@ -195,15 +195,14 @@ function TipsModal({ onClose }: { onClose: () => void }) {
         aria-label="Close tips backdrop"
       />
 
-      <div
-        className="relative w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl p-6 enter"
+      <dialog
+        open
+        className="relative w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl p-6 enter p-0 bg-transparent border-0"
         style={{
           background: 'var(--surface-raised)',
           border: '1px solid var(--border-default)',
           boxShadow: '0 8px 40px var(--color-black-alpha-30)',
         }}
-        role="dialog"
-        aria-modal="true"
         aria-labelledby="ai-tips-title"
       >
         {/* Header */}
@@ -223,7 +222,7 @@ function TipsModal({ onClose }: { onClose: () => void }) {
             aria-label="Close tips"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -258,7 +257,7 @@ function TipsModal({ onClose }: { onClose: () => void }) {
             The split-view is for <em>monitoring</em> two discussions side by side, not for running them simultaneously. Close one before activating the next.
           </Tip>
         </div>
-      </div>
+      </dialog>
     </div>,
     document.body,
   );
@@ -370,9 +369,9 @@ export function AITipsButton({ lessonId }: { lessonId: string }) {
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="16" x2="12" y2="12"/>
-          <circle cx="12" cy="8" r="0.5" fill="currentColor" stroke="none"/>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <circle cx="12" cy="8" r="0.5" fill="currentColor" stroke="none" />
         </svg>
       </button>
 

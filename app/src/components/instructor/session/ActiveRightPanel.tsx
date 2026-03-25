@@ -25,8 +25,8 @@ export function ActiveRightPanel(props: {
   studentCount?: number;
 }) {
   const contextProps = useActiveRightPanelContext(props);
-  const { responses, activeDiscussion, studentCount, activeDiscussionId, timerEndTime, timerTotalSeconds } = contextProps;
-  
+  const { responses, activeDiscussion, activeDiscussionId, timerEndTime, timerTotalSeconds } = contextProps;
+
   const [collapsed, setCollapsed] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('list');
 
@@ -36,7 +36,7 @@ export function ActiveRightPanel(props: {
     selectedIds, flaggingId, showHighlightedOnly,
     toggleSelected, handleFlagInappropriate,
     setShowHighlightedOnly, resetSelection, filterResponses,
-  } = useResponseSelection({ onRemove: contextProps.removeResponse ?? (async () => {}) });
+  } = useResponseSelection({ onRemove: contextProps.removeResponse ?? (async () => { }) });
 
   React.useEffect(() => { resetSelection(); }, [activeDiscussion?.id, resetSelection]);
 
@@ -112,7 +112,7 @@ export function ActiveRightPanel(props: {
 function useActiveRightPanelContext(props: any) {
   const context = React.useContext(SessionContext);
   const studentCount = context ? context.studentCount : (props.studentCount ?? 0);
-  
+
   return {
     responses: context ? context.responses : props.responses!,
     activeDiscussion: context ? context.activeDiscussion : props.activeDiscussion!,
@@ -124,7 +124,7 @@ function useActiveRightPanelContext(props: any) {
     activeDiscussionId: context ? (context.activeDiscussion?.id ?? null) : null,
     timerEndTime: context ? context.discussionTimerEndTime : null,
     timerTotalSeconds: context ? context.discussionTimerSeconds : null,
-    handleCloseDiscussion: context ? context.handleCloseDiscussion : () => {},
+    handleCloseDiscussion: context ? context.handleCloseDiscussion : () => { },
     handleExtendTimer: context ? context.handleExtendTimer : undefined,
     handleEditTimer: context ? context.handleEditTimer : undefined,
   };
@@ -149,11 +149,15 @@ function calculateMCDistribution(activeDiscussion: any, responses: any[]) {
 function CollapsedSidebarIcons({
   responses, activeTab, openTab, hasActiveDiscussion, hasTimer
 }: any) {
+  const timerTitle = hasActiveDiscussion
+    ? (hasTimer ? 'Timer running' : 'No time limit')
+    : 'Timer';
+
   return (
     <div className="flex flex-col items-center gap-3 pt-4">
       <SideIconButton icon="users" title={`${responses.length} responses`} count={responses.length} isActive={activeTab === 'list'} onClick={() => openTab('list')} />
       <SideIconButton icon="metrics" title="Metrics" isActive={activeTab === 'analytics'} onClick={() => openTab('analytics')} />
-      <SideIconButton icon="timer" title={hasActiveDiscussion ? (hasTimer ? 'Timer running' : 'No time limit') : 'Timer'} isActive={activeTab === 'timer'} onClick={() => openTab('timer')} activeIndicator={hasActiveDiscussion} />
+      <SideIconButton icon="timer" title={timerTitle} isActive={activeTab === 'timer'} onClick={() => openTab('timer')} activeIndicator={hasActiveDiscussion} />
     </div>
   );
 }
@@ -184,7 +188,7 @@ const MetricsIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="
 const TimerIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>;
 
 function ExpandedSidebarContent(props: any) {
-  const { activeTab, setActiveTab, activeDiscussion, responses, flaggedResponses, distribution, activeDiscussionId, timerEndTime, timerTotalSeconds, handleCloseDiscussion, handleExtendTimer, handleEditTimer, peakStudentCount, isMC } = props;
+  const { activeTab, setActiveTab, activeDiscussion, responses, distribution, activeDiscussionId, timerEndTime, timerTotalSeconds, handleCloseDiscussion, handleExtendTimer, handleEditTimer, peakStudentCount, isMC } = props;
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden">
       <div className="px-3 pt-2">

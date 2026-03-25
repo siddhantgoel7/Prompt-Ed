@@ -32,20 +32,13 @@ export function CourseCard({
   onDelete: () => void;
 }) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      className="glass relative overflow-hidden rounded-2xl card-hover cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+    <button
+      type="button"
+      className="glass relative overflow-hidden rounded-2xl card-hover cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full text-left appearance-none border-none p-0 block"
       style={{
         boxShadow: '0 2px 16px var(--color-primary-alpha-06), 0 1px 3px var(--color-black-alpha-06)',
       }}
       onClick={onAccess}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onAccess();
-        }
-      }}
     >
       {/* Top action menu */}
       <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
@@ -59,9 +52,9 @@ export function CourseCard({
               onClick={(e) => e.stopPropagation()}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="5" r="1.5"/>
-                <circle cx="12" cy="12" r="1.5"/>
-                <circle cx="12" cy="19" r="1.5"/>
+                <circle cx="12" cy="5" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="12" cy="19" r="1.5" />
               </svg>
             </button>
           </DropdownMenuTrigger>
@@ -89,8 +82,8 @@ export function CourseCard({
           style={{ background: 'var(--color-primary-alpha-18)' }}
         >
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
           </svg>
         </div>
         {/* Decorative corner orb */}
@@ -133,6 +126,6 @@ export function CourseCard({
           Open Course
         </button>
       </div>
-    </div>
+    </button>
   );
 }
