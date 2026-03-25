@@ -140,7 +140,7 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
       case 'error':
         return null;
       case 'active':
-        if (!activeDiscussion || activeDiscussion.status !== 'active') return null;
+        if (activeDiscussion?.status !== 'active') return null;
         return (
           <ActiveView
             isTimerExpired={isTimerExpired}

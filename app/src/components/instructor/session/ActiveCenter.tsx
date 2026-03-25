@@ -39,10 +39,12 @@ interface ActiveCenterProps {
   onRegenerate: () => void; onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => void;
 }
 
+type SttStatus = 'idle' | 'transcribing' | 'error';
+
 export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
   const state = useActiveCenterStateMapping(props);
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
-  const [sttStatus, setSttStatus] = React.useState<'idle' | 'transcribing' | 'error'>('idle');
+  const [sttStatus, setSttStatus] = React.useState<SttStatus>('idle');
   const [sttError, setSttError] = React.useState<string | null>(null);
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
   const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);

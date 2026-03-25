@@ -178,21 +178,20 @@ function extractTextNodes(xml: string): string {
     if (!obj || typeof obj !== 'object') return;
     
     // a:t is the actual text node
-    if (obj['a:t']) {
-      const val = obj['a:t'];
-      if (typeof val === 'string') texts.push(val);
-      else if (val && typeof val === 'object' && '#text' in val) {
-        const textVal = (val as Record<string, unknown>)['#text'];
-        if (typeof textVal === 'string') texts.push(textVal);
-      }
+    const t = obj['a:t'];
+    if (typeof t === 'string') {
+      texts.push(t);
+    } else if (t && typeof t === 'object' && typeof (t as Record<string, unknown>)['#text'] === 'string') {
+      texts.push((t as Record<string, unknown>)['#text'] as string);
     }
 
-    // Recursively scan all keys
-    for (const key in obj) {
-      if (key !== 'a:t') {
-        const val = obj[key];
-        if (Array.isArray(val)) val.forEach((v) => findText(v as Record<string, unknown>));
-        else if (val && typeof val === 'object') findText(val as Record<string, unknown>);
+    // Recursively scan all keys except 'a:t' (already handled)
+    for (const [key, val] of Object.entries(obj)) {
+      if (key === 'a:t') continue;
+      if (Array.isArray(val)) {
+        val.forEach((v) => findText(v as Record<string, unknown>));
+      } else if (val && typeof val === 'object') {
+        findText(val as Record<string, unknown>);
       }
     }
   };
@@ -242,7 +241,7 @@ function findImageTargets(relsXml: string): string[] {
   return list
     .filter((r) => r['@_Type']?.endsWith('/image'))
     .map((r) => r['@_Target'])
-    .filter(Boolean) as string[];
+    .filter(Boolean);
 }
 
 /** Resolves a relative image target from a slide .rels entry to its absolute zip path. */

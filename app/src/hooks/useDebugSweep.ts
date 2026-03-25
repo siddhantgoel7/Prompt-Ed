@@ -196,7 +196,7 @@ function generateTextReport(
     const label = `${TYPE_LABEL[r.combo.promptType]} — ${cap(r.combo.difficulty)}, ${cap(r.combo.style)}, ${cap(r.combo.length)} — ${timeSec}s`;
     txtLines.push(`=== ${i + 1}. ${label} ===`);
     if (r.error) { txtLines.push(`ERROR: ${r.error}`, ''); return; }
-    if (r.model) txtLines.push(`Model: ${r.model} | Temperature: ${TEMPERATURE_BY_TYPE[r.combo.promptType as PromptType]}`);
+    if (r.model) txtLines.push(`Model: ${r.model} | Temperature: ${TEMPERATURE_BY_TYPE[r.combo.promptType]}`);
     if (r.tokenUsage) {
       const costUsd = (r.tokenUsage.promptTokens * 0.15 / 1_000_000) + (r.tokenUsage.completionTokens * 0.6 / 1_000_000);
       txtLines.push(`Tokens: ${r.tokenUsage.promptTokens} prompt + ${r.tokenUsage.completionTokens} completion = ${r.tokenUsage.totalTokens} total | Cost: $${costUsd.toFixed(6)}`);
@@ -265,7 +265,7 @@ function generateCsvReport(
     const mcBias = r.combo.promptType === 'multiple_choice' ? calculateMcBias(r.candidates) : '';
 
     if (r.error || r.candidates.length === 0) {
-      csvLines.push([i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE_BY_TYPE[r.combo.promptType as PromptType], timeSec, mdl, ptok, ctok, ttok, fallbackUsed, r.error ?? r.warning ?? '', costUsd ? costUsd.toFixed(6) : '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''].map(escapeCsv).join(','));
+      csvLines.push([i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE_BY_TYPE[r.combo.promptType], timeSec, mdl, ptok, ctok, ttok, fallbackUsed, r.error ?? r.warning ?? '', costUsd ? costUsd.toFixed(6) : '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''].map(escapeCsv).join(','));
       return;
     }
     r.candidates.forEach((c: GeneratedPrompt, ci: number) => {
@@ -277,7 +277,7 @@ function generateCsvReport(
       const mcC = c.mcOptions?.find((o: { label: string }) => o.label === 'C')?.text ?? '';
       const mcD = c.mcOptions?.find((o: { label: string }) => o.label === 'D')?.text ?? '';
       const correct = c.mcOptions?.find((o: { is_correct?: boolean; label: string }) => o.is_correct)?.label ?? '';
-      csvLines.push([i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE_BY_TYPE[r.combo.promptType as PromptType], timeSec, mdl, ptok, ctok, ttok, fallbackUsed, r.warning ?? '', costUsd.toFixed(6), costPerHOQ, uniqueTopics, bSpread, meanWC, lenVar, mcBias, ci + 1, c.promptText, pwc, isQ, missing, c.bloomsLevel ?? '', c.topicArea ?? '', c.rationale ?? '', mcA, mcB, mcC, mcD, correct, mcA.length, mcB.length, mcC.length, mcD.length].map(escapeCsv).join(','));
+      csvLines.push([i + 1, r.combo.promptType, r.combo.difficulty, r.combo.style, r.combo.length, TEMPERATURE_BY_TYPE[r.combo.promptType], timeSec, mdl, ptok, ctok, ttok, fallbackUsed, r.warning ?? '', costUsd.toFixed(6), costPerHOQ, uniqueTopics, bSpread, meanWC, lenVar, mcBias, ci + 1, c.promptText, pwc, isQ, missing, c.bloomsLevel ?? '', c.topicArea ?? '', c.rationale ?? '', mcA, mcB, mcC, mcD, correct, mcA.length, mcB.length, mcC.length, mcD.length].map(escapeCsv).join(','));
     });
   });
   return csvLines.join('\n');

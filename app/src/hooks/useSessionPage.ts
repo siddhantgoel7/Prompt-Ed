@@ -434,9 +434,7 @@ export function useSessionPage(lessonId: string): SessionVM {
             });
           }
         }
-        lines.push(...optionLines);
-
-        lines.push('Responses:');
+        lines.push(...optionLines, 'Responses:');
 
         const res = d.responses ?? [];
         if (res.length === 0) {
