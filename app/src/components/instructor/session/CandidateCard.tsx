@@ -23,9 +23,6 @@ interface Props {
   index: number;
   isSelected: boolean;
   onSelect: () => void;
-  /** Current prompt text owned by the parent — used for the textarea value and publish payload. */
-  promptInput: string;
-  onPromptInputChange: (v: string) => void;
   isConnected: boolean;
   onRequestPublish: (
     candidate: GeneratedPrompt,
@@ -39,11 +36,10 @@ export function CandidateCard({
   index,
   isSelected,
   onSelect,
-  promptInput,
-  onPromptInputChange,
   isConnected,
   onRequestPublish,
 }: Props) {
+  const [editText, setEditText] = React.useState(candidate.promptText);
   const [editingOptions, setEditingOptions] = React.useState<Record<string, string>>({});
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
   const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
@@ -63,6 +59,7 @@ export function CandidateCard({
     if (isSelected) {
       setIsExpanded(true);
       setAnimKey((k) => k + 1);
+      setEditText(candidate.promptText);
       setEditingOptions(
         candidate.mcOptions?.reduce(
           (acc, opt) => ({ ...acc, [opt.label]: opt.text }),
@@ -86,13 +83,13 @@ export function CandidateCard({
       candidate.promptType === 'multiple_choice' && candidate.mcOptions
         ? {
             ...candidate,
-            promptText: promptInput,
+            promptText: editText,
             mcOptions: candidate.mcOptions.map((opt) => ({
               ...opt,
               text: editingOptions[opt.label] ?? opt.text,
             })),
           }
-        : { ...candidate, promptText: promptInput };
+        : { ...candidate, promptText: editText };
 
     onRequestPublish(published, overrideCorrectOption, feedbackEnabled);
   };
@@ -210,8 +207,8 @@ export function CandidateCard({
           </p>
 
           <textarea
-            value={promptInput}
-            onChange={(e) => onPromptInputChange(e.target.value)}
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
             className="w-full px-3 py-2.5 text-sm rounded-[10px] min-h-[80px] resize-y leading-snug bg-surface-raised text-content-primary"
             style={{
               position:      'absolute',
@@ -297,7 +294,7 @@ export function CandidateCard({
         <button
           key={animKey}
           onClick={handlePublish}
-          disabled={!promptInput.trim() || !isConnected}
+          disabled={!editText.trim() || !isConnected}
           className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
           style={{
             background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',

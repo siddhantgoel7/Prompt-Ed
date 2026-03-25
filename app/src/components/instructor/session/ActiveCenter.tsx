@@ -154,8 +154,6 @@ export function ActiveCenter(props: Partial<{
     }
     setSelectedIndex(index);
     onSelectCandidate(p);
-    setPromptInput(p.promptText);
-    setTranscriptText(p.promptText);
   };
 
   // Called after instructor confirms timer dialog.
@@ -402,8 +400,6 @@ export function ActiveCenter(props: Partial<{
                     index={i}
                     isSelected={selectedIndex === i}
                     onSelect={() => handleSelectCandidate(c, i)}
-                    promptInput={selectedIndex === i ? promptInput : c.promptText}
-                    onPromptInputChange={(v) => { setPromptInput(v); setTranscriptText(v); }}
                     isConnected={isConnected}
                     onRequestPublish={(candidate, correctOption, fe) => {
                       setPendingPublishArgs({ candidate, correctOption, feedbackEnabled: fe });
