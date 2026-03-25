@@ -44,7 +44,7 @@ export function useDebugSweep({
       short_answer: 'Short Answer',
       multiple_choice: 'Multiple Choice',
     };
-    const timeSec = generationTimeMs !== null ? `${Math.round(generationTimeMs / 1000)}s` : '—';
+    const timeSec = generationTimeMs === null ? '—' : `${Math.round(generationTimeMs / 1000)}s`;
     const contextLabel = generationWarning ? 'No context (fallback)' : 'Files + Transcript';
 
     const lines: string[] = [

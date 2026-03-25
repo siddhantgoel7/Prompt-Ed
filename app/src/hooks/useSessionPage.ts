@@ -590,10 +590,7 @@ export function useSessionPage(lessonId: string): SessionVM {
         `average_responses_per_discussion,${escapeCsv(avgResponses)}`,
         `transcript_segments_used,${escapeCsv(transcripts.length)}`,
         `lecture_files_uploaded,${escapeCsv(files.length)}`,
-        ''
-      );
-
-      csvLines.push(
+        '',
         'Discussion Statistics',
         [
           'discussion_number',
