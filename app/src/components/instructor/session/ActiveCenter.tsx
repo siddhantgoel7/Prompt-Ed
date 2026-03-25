@@ -40,6 +40,7 @@ interface ActiveCenterProps {
 }
 
 type SttStatus = 'idle' | 'transcribing' | 'error';
+type CreationMode = 'ai' | 'manual';
 
 export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
   const state = useActiveCenterStateMapping(props);
@@ -235,8 +236,8 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
   recorder: ReturnType<typeof useAudioRecorder>;
   selectedIndex: number | null;
   setSelectedIndex: (v: number | null) => void;
-  sttStatus: 'idle' | 'transcribing' | 'error';
-  setSttStatus: (v: 'idle' | 'transcribing' | 'error') => void;
+  sttStatus: SttStatus;
+  setSttStatus: (v: SttStatus) => void;
   setSttError: (v: string | null) => void;
   overrideCorrectOption: string | null;
   setOverrideCorrectOption: (v: string | null) => void;
@@ -246,8 +247,8 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
   setEditingOptions: (v: Record<string, string>) => void;
   manualOptions: Record<string, string>;
   setManualOptions: (v: Record<string, string>) => void;
-  creationMode: 'ai' | 'manual';
-  setCreationMode: (v: 'ai' | 'manual') => void;
+  creationMode: CreationMode;
+  setCreationMode: (v: CreationMode) => void;
   showTimerDialog: boolean;
   setShowTimerDialog: (v: boolean) => void;
   pendingCandidate: GeneratedPrompt | null;
@@ -340,7 +341,7 @@ function AIGenerationPanel({
   isConnected, onRegenerate, handleCopyReport, copiedReport
 }: Readonly<ActiveCenterProps & {
   recorder: ReturnType<typeof useAudioRecorder>;
-  sttStatus: 'idle' | 'transcribing' | 'error';
+  sttStatus: SttStatus;
   sttError: string | null;
   handleStopAndTranscribe: () => void;
   handleRunAllCombinations: () => void;
