@@ -179,7 +179,9 @@ test.describe('Instructor AI Features & Tools', () => {
 
         // Clicking "Publish This Question →" opens the StartDiscussionDialog (timer config).
         // The POST to /rest/v1/discussions only fires after the dialog is confirmed.
-        await page.getByRole('button', { name: /Publish This Question/i }).click();
+        const publishAiBtn = page.getByTestId('publish-ai-question-button');
+        await expect(publishAiBtn).toBeEnabled({ timeout: 15000 });
+        await publishAiBtn.click();
 
         // Wait for and interact with the timer dialog
         await expect(page.getByText('Set Time Limit')).toBeVisible({ timeout: 5000 });

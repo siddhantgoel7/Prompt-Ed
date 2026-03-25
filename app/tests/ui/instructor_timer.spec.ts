@@ -88,7 +88,9 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
         await promptArea.fill('What is a beta blocker?');
 
         // Click Start Discussion
-        await page.getByTestId('start-discussion-button').click();
+        const startBtn = page.getByTestId('start-discussion-button');
+        await expect(startBtn).toBeEnabled({ timeout: 15000 });
+        await startBtn.click();
 
         // Dialog should appear
         await expect(page.getByText('Set Time Limit')).toBeVisible({ timeout: 5_000 });

@@ -515,7 +515,7 @@ function SelectedCandidateEditor({ promptInput, setPromptInput, setTranscriptTex
 }
 
 function PublishButton({ onPublish, disabled }: Readonly<{ onPublish: () => void; disabled: boolean }>) {
-  return <button onClick={onPublish} disabled={disabled} className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow" style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))' }}>Publish This Question →</button>;
+  return <button data-testid="publish-ai-question-button" onClick={onPublish} disabled={disabled} className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow" style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))' }}>Publish This Question →</button>;
 }
 
 function CandidateActions({ onRegenerate, onCopyReport, isGenerating, hasCandidates, copiedReport }: Readonly<{ onRegenerate: () => void; onCopyReport: () => void; isGenerating: boolean; hasCandidates: boolean; copiedReport: boolean }>) {
