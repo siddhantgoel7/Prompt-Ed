@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import * as React from 'react';
-import type { GeneratedPrompt } from '@/types/ai';
+import type { GeneratedPrompt, TokenUsage } from '@/types/ai';
 import type { PromptType } from '@/types/discussion';
 import { SessionContext } from './SessionContext';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
@@ -16,7 +16,6 @@ import { AIPreferencesDialog } from './AIPreferencesDialog';
 import { AITipsButton } from './AITipsButton';
 import { transcribeAudioApi } from '@/lib/api/aiApi';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
-import type { TokenUsage } from '@/types/ai';
 import { DEBUG_TOOLS } from '@/lib/debug';
 import { useDebugSweep } from '@/hooks/useDebugSweep';
 

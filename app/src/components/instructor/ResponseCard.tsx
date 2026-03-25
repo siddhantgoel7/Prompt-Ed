@@ -52,13 +52,13 @@ function ActionButton({
   onFlag,
   className,
   iconClassName,
-}: {
+}: Readonly<{
   mode: ResponseCardMode;
   isBeingFlagged: boolean;
   onFlag: () => void;
   className: string;
   iconClassName: string;
-}) {
+}>) {
   const isFlagged = mode === 'flagged';
   let label = 'Flag as Inappropriate';
   if (isFlagged) {
@@ -104,12 +104,12 @@ function ResponseCardContent({
   isSelected,
   responseText,
   timeString,
-}: {
+}: Readonly<{
   variant: ResponseCardVariant;
   isSelected: boolean;
   responseText: string;
   timeString: string;
-}) {
+}>) {
   const s = variantStyles[variant];
 
   const textClassName = cn(
@@ -153,7 +153,7 @@ export function ResponseCard({
   isBeingFlagged,
   onToggle,
   onFlag,
-}: ResponseCardProps) {
+}: Readonly<ResponseCardProps>) {
   const s = variantStyles[variant];
   const isFlagged = mode === 'flagged';
   const timeString = new Date(createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

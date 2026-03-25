@@ -14,13 +14,12 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signUpWithEmail, signInWithGoogle } from '@/lib/supabase/auth';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { OAuthButton } from './OAuthButton';
 import { EmailConfirmation } from './EmailConfirmation';
-import { useSearchParams } from 'next/navigation';
 
 type SignUpFormData = {
   fullName: string;
@@ -51,7 +50,7 @@ export function SignUpForm() {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);

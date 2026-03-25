@@ -26,7 +26,7 @@ export function MultipleChoiceEditor({
     feedbackEnabled,
     onFeedbackChange,
     nameGroup,
-}: MultipleChoiceEditorProps) {
+}: Readonly<MultipleChoiceEditorProps>) {
     return (
         <div
             className="mt-2 p-4 rounded-xl bg-surface-raised"

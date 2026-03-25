@@ -263,7 +263,7 @@ function TipsModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function Tip({ index, title, children }: { index: number; title: string; children: React.ReactNode }) {
+function Tip({ index, title, children }: Readonly<{ index: number; title: string; children: React.ReactNode }>) {
   return (
     <div className="flex gap-3">
       <span
@@ -280,7 +280,7 @@ function Tip({ index, title, children }: { index: number; title: string; childre
   );
 }
 
-function TipBullet({ label, children }: { label: string; children: React.ReactNode }) {
+function TipBullet({ label, children }: Readonly<{ label: string; children: React.ReactNode }>) {
   return (
     <li className="flex gap-1.5 items-baseline list-none">
       <span className="font-semibold text-brand-500 flex-shrink-0">{label} —</span>
@@ -306,7 +306,7 @@ function TipBullet({ label, children }: { label: string; children: React.ReactNo
  *     spotlight reappears the next time the session is visited — matching the
  *     "once per session when created" intent.
  */
-export function AITipsButton({ lessonId }: { lessonId: string }) {
+export function AITipsButton({ lessonId }: Readonly<{ lessonId: string }>) {
   const STORAGE_KEY = `ai-tips-seen-${lessonId}`;
 
   const [hasSeenTips, setHasSeenTips] = React.useState<boolean>(() => {

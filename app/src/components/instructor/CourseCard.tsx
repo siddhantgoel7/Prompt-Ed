@@ -25,12 +25,12 @@ export function CourseCard({
   onAccess,
   onEdit,
   onDelete,
-}: {
+}: Readonly<{
   course: Course;
   onAccess: () => void;
   onEdit: () => void;
   onDelete: () => void;
-}) {
+}>) {
   return (
     <div
       className="glass relative overflow-hidden rounded-2xl card-hover group w-full text-left p-0 block"

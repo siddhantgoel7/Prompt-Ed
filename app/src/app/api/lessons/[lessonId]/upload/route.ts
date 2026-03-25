@@ -196,7 +196,7 @@ async function runBackgroundProcessing(
 
     const chunkRows = chunkSections(sections, fileName, lessonId, fileRecord.id, pagesWithVision);
     const finalRows = chunkRows.filter((row, i) => {
-      for (let j = 0; j < i; j++) { if (jaccardSimilarity(row.content, chunkRows[j].content) > 0.70) return false; }
+      for (let j = 0; j < i; j++) { if (jaccardSimilarity(row.content, chunkRows[j].content) > 0.7) return false; }
       return true;
     });
 

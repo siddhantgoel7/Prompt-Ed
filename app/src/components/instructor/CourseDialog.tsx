@@ -26,7 +26,7 @@ export function CourseDialog({
   onSubmit,
   error,
   saving,
-}: {
+}: Readonly<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
@@ -36,7 +36,7 @@ export function CourseDialog({
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   error: string | null;
   saving: boolean;
-}) {
+}>) {
   const handleAddImage = React.useCallback(() => {
     // placeholder
   }, []);
