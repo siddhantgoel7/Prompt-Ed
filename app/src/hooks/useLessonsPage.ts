@@ -106,7 +106,7 @@ export function useLessonsPage(courseId: string) {
   );
 
   const submitCreate = React.useCallback(
-    async (e: React.FormEvent) => {
+    async (e: React.SyntheticEvent<HTMLFormElement>) => {
       e.preventDefault();
       setError(null);
 

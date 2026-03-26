@@ -6,7 +6,7 @@ const GENERATING_CHARS = 'Generating...'.split('');
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import type { GeneralQuestion, GeneratedPrompt } from '@/types/ai';
+import type { GeneralQuestion, GeneratedPrompt, MCOption } from '@/types/ai';
 import { SessionContext } from './SessionContext';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
 
@@ -156,7 +156,7 @@ export function GeneralQuestionsTab() {
                                         </p>
 
                                         <ul className="space-y-1 mb-3">
-                                            {q.mc_options.map((opt) => (
+                                            {q.mc_options.map((opt: MCOption) => (
                                                 <li key={opt.label} className="text-xs flex items-start gap-1">
                                                     <span
                                                         className={`font-semibold mr-0.5 ${opt.label === q.correct_option ? 'text-brand-500' : 'text-content-secondary'}`}
@@ -231,7 +231,7 @@ export function GeneralQuestionsTab() {
                                             {q.prompt_text}
                                         </p>
                                         <ul className="mt-2 space-y-1">
-                                            {q.mc_options.map((opt) => (
+                                            {q.mc_options.map((opt: MCOption) => (
                                                 <li key={opt.label} className="text-xs text-content-muted">
                                                     <span className="font-semibold mr-1 text-content-secondary">
                                                         {opt.label}.

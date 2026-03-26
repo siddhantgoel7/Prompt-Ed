@@ -9,16 +9,15 @@ type Props = {
 }
 
 /** Renders the join code overlay div; visible when state is true, hidden otherwise. */
-export default function DisplayCodeState({ code, state } : Props) {
+export default function DisplayCodeState({ code, state } : Readonly<Props>) {
   if (!code) {
-    console.log("Error: There is no code to display!")
-    return
+    console.log("Error: There is no code to display!");
+    return null;
   }
-  else {
-    return (
-      <div className={state ? 'display_code_component visible' : 'display_code_component'}>
-        <h1 className='display_code_text'>Join Code: {code}</h1>
-      </div>
-    )
-  }
+
+  return (
+    <div className={state ? 'display_code_component visible' : 'display_code_component'}>
+      <h1 className='display_code_text'>Join Code: {code}</h1>
+    </div>
+  );
 }

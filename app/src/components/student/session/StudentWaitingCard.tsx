@@ -3,7 +3,7 @@
 'use client';
 
 /** Renders a centered waiting message while no discussion is active. */
-export function StudentWaitingCard({ text }: { text?: string }) {
+export function StudentWaitingCard({ text }: Readonly<{ text?: string }>) {
   return (
     <div
       className="rounded-2xl p-10 text-center enter"

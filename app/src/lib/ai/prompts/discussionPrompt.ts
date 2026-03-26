@@ -2,6 +2,7 @@
 // Edit CANDIDATE_COUNT and the prompt text here to tune AI behavior without touching pipeline code.
 import type { PromptType } from '@/types/discussion';
 import type { AIPromptPreferences } from '@/types/ai';
+import { secureShuffle } from '../../utils/random';
 
 /**
  * ============================================================
@@ -154,23 +155,23 @@ function buildStyleBlock(style?: string, difficulty?: string): string {
 function buildLengthBlock(length?: string, promptType?: PromptType): string {
   if (promptType === 'multiple_choice') {
     switch (length) {
-      case 'brief':   return '15–20 words for the stem';
+      case 'brief': return '15–20 words for the stem';
       case 'detailed': return '35–55 words for the stem, including a brief clinical or mechanistic setup';
-      default:        return '20–35 words for the stem';
+      default: return '20–35 words for the stem';
     }
   }
   if (promptType === 'long_answer') {
     switch (length) {
-      case 'brief':   return '30–50 words';
+      case 'brief': return '30–50 words';
       case 'detailed': return '80–120 words, including substantial setup context and a multi-part ask';
-      default:        return '50–80 words';
+      default: return '50–80 words';
     }
   }
   // short_answer (and fallback)
   switch (length) {
-    case 'brief':   return '20–30 words';
+    case 'brief': return '20–30 words';
     case 'detailed': return '60–90 words, including setup context';
-    default:        return '30–50 words';
+    default: return '30–50 words';
   }
 }
 
@@ -265,20 +266,20 @@ function buildBloomsDistributionBlock(difficulty?: string, promptType?: PromptTy
 
   if (promptType === 'multiple_choice') {
     switch (difficulty) {
-      case 'basic':        slots = ['remember', 'remember', 'understand', 'understand', 'apply']; break;
-      case 'advanced':     slots = ['apply', 'analyze', 'analyze', 'evaluate', 'evaluate']; break;
-      default:             slots = ['remember', 'understand', 'apply', 'apply', 'analyze']; // intermediate
+      case 'basic': slots = ['remember', 'remember', 'understand', 'understand', 'apply']; break;
+      case 'advanced': slots = ['apply', 'analyze', 'analyze', 'evaluate', 'evaluate']; break;
+      default: slots = ['remember', 'understand', 'apply', 'apply', 'analyze']; // intermediate
     }
   } else {
     // free-response: short_answer and long_answer
     switch (difficulty) {
-      case 'basic':        slots = ['remember', 'understand', 'understand', 'apply', 'apply']; break;
-      case 'advanced':     slots = ['analyze', 'analyze', 'evaluate', 'evaluate', 'create']; break;
-      default:             slots = ['understand', 'apply', 'analyze', 'analyze', 'evaluate']; // intermediate
+      case 'basic': slots = ['remember', 'understand', 'understand', 'apply', 'apply']; break;
+      case 'advanced': slots = ['analyze', 'analyze', 'evaluate', 'evaluate', 'create']; break;
+      default: slots = ['understand', 'apply', 'analyze', 'analyze', 'evaluate']; // intermediate
     }
   }
 
-  const shuffled = [...slots].sort(() => Math.random() - 0.5);
+  const shuffled = secureShuffle([...slots]);
   const assignments = shuffled.map((level, i) => `  Candidate ${i + 1}: "${level}"`).join('\n');
   return `<bloom_distribution>
 Assign "bloomsLevel" to each candidate exactly as listed. Do not reuse a level unless it appears twice in this list.
@@ -288,11 +289,12 @@ ${assignments}
 
 /** Returns per-type generation rules injected into the user prompt. */
 function getTypeInstructions(promptType: PromptType, preferences?: AIPromptPreferences): string {
-  const lengthInstruction = preferences?.length === 'brief'
-    ? ' Keep the question itself very brief and punchy.'
-    : preferences?.length === 'detailed'
-      ? ' The question should be detailed and provide substantial context before asking the core question.'
-      : '';
+  let lengthInstruction = '';
+  if (preferences?.length === 'brief') {
+    lengthInstruction = ' Keep the question itself very brief and punchy.';
+  } else if (preferences?.length === 'detailed') {
+    lengthInstruction = ' The question should be detailed and provide substantial context before asking the core question.';
+  }
 
   switch (promptType) {
     case 'multiple_choice':

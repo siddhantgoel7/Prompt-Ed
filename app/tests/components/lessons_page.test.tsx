@@ -338,10 +338,8 @@ describe('LessonsPage', () => {
       render(<LessonsPage courseId={courseId} />);
 
       await waitFor(() => {
-        const lessonTitle = screen.getByText('Introduction to Pharmacology');
-        const lessonCard = lessonTitle.closest('div[class*="cursor-pointer"]');
-        expect(lessonCard).toBeTruthy();
-        if (lessonCard) fireEvent.click(lessonCard);
+        const lessonCard = screen.getByRole('button', { name: /Open lesson: Introduction to Pharmacology/i });
+        fireEvent.click(lessonCard);
       });
 
       await waitFor(() => {

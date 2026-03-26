@@ -8,7 +8,7 @@ import type { SessionVM } from '@/hooks/useSessionPage';
 export const SessionContext = React.createContext<SessionVM | null>(null);
 
 /** Provides the session VM to all child components via SessionContext. */
-export function SessionProvider({ vm, children }: { vm: SessionVM; children: React.ReactNode }) {
+export function SessionProvider({ vm, children }: Readonly<{ vm: SessionVM; children: React.ReactNode }>) {
     return <SessionContext.Provider value={vm}>{children}</SessionContext.Provider>;
 }
 

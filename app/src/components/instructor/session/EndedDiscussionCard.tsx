@@ -21,11 +21,13 @@ export function EndedDiscussionCard({
   discussion,
   index,
   total,
-}: {
+  lessonId,
+}: Readonly<{
   discussion: Discussion;
   index: number;
   total: number;
-}) {
+  lessonId?: string;
+}>) {
   const [analyticsOpen, setAnalyticsOpen] = React.useState(false);
   const [modalResponses, setModalResponses] = React.useState<Response[]>([]);
   const [loadingResponses, setLoadingResponses] = React.useState(false);
@@ -95,7 +97,7 @@ export function EndedDiscussionCard({
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={openAnalytics}
           disabled={loadingResponses}
@@ -103,6 +105,24 @@ export function EndedDiscussionCard({
         >
           {loadingResponses ? 'Loading…' : 'View Analytics'}
         </button>
+        {/* Word Cloud link — only shown for free-text discussions (short/long answer) that have
+            at least one response and a known lessonId. Opens the interactive word cloud page in
+            a new tab so the instructor can keep the session view open alongside it. */}
+        {lessonId && responseCount > 0 &&
+          (discussion.prompt_type === 'short_answer' || discussion.prompt_type === 'long_answer') && (
+          <a
+            href={`/session/${lessonId}/word-cloud/${discussion.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid="word-cloud-link"
+            className="text-xs h-7 px-3 rounded-[8px] font-medium transition-all duration-150 inline-flex items-center gap-1 bg-surface-raised border border-line-default text-content-secondary hover:text-content-primary"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+            </svg>
+            Word Cloud
+          </a>
+        )}
         {responseCount > 0 && (
           <button
             onClick={() => setExpanded((p) => !p)}
@@ -136,6 +156,7 @@ export function EndedDiscussionCard({
         discussion={discussion}
         responses={modalResponses}
         studentCount={snapshot ?? 0}
+        lessonId={lessonId}
       />
     </div>
   );

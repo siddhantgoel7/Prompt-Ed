@@ -24,12 +24,12 @@ function SummaryBar({
   totalResponses,
   startedAt,
   endedAt,
-}: {
+}: Readonly<{
   totalDiscussions: number;
   totalResponses: number;
   startedAt?: string | null;
   endedAt?: string | null;
-}) {
+}>) {
   const duration = React.useMemo(() => {
     if (!startedAt || !endedAt) return null;
     const ms = new Date(endedAt).getTime() - new Date(startedAt).getTime();
@@ -65,7 +65,7 @@ function SummaryBar({
 // ---------------------------------------------------------------------------
 
 /** Renders the ended-session summary layout with discussions, transcripts, and lecture material sections. */
-export function SessionEndedView(props: { vm?: SessionVM }) {
+export function SessionEndedView(props: Readonly<{ vm?: SessionVM }>) {
   const context = React.useContext(SessionContext);
   const vm = context || props.vm!;
   const lesson = vm.lesson;
@@ -160,6 +160,7 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
                   discussion={d}
                   index={i}
                   total={vm.lessonDiscussions.length}
+                  lessonId={lesson.id}
                 />
               ))}
           </div>

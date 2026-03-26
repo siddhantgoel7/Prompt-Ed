@@ -8,7 +8,7 @@ type OAuthButtonProps = {
 };
 
 /** Renders an outline button labeled "Continue with {providerLabel}" for OAuth sign-in. */
-export function OAuthButton({ loading, onClick, providerLabel }: OAuthButtonProps) {
+export function OAuthButton({ loading, onClick, providerLabel }: Readonly<OAuthButtonProps>) {
   return (
     <Button
       variant="outline"

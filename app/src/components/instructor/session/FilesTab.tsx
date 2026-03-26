@@ -13,12 +13,12 @@ export function FilesTab({
     isUploading,
     onUploadFile,
     onDeleteFile,
-}: {
+}: Readonly<{
     files: LessonFile[];
     isUploading: boolean;
     onUploadFile: (file: File) => Promise<void>;
     onDeleteFile: (fileId: string) => Promise<void>;
-}) {
+}>) {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [uploadError, setUploadError] = React.useState<string | null>(null);
 

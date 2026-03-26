@@ -52,13 +52,36 @@ test.describe('Instructor AI Features & Tools', () => {
 
         // Suppress the one-time AI tips spotlight so it doesn't block clicks in tests.
         await page.addInitScript(() => sessionStorage.setItem('ai-tips-seen-ai-lesson-id', 'true'));
+
+        // Stub Supabase Realtime WebSocket using Playwright's native WS interception.
+        // This ensures isConnected=true in CI without a real Supabase connection.
+        // Supabase Realtime uses Phoenix array protocol: [join_ref, ref, topic, event, payload]
+        await page.routeWebSocket(/.*/, (ws) => {
+            ws.onMessage((msg) => {
+                try {
+                    const data = JSON.parse(msg as string);
+                    if (Array.isArray(data)) {
+                        const [joinRef, ref, topic, event] = data;
+                        if (event === 'phx_join') {
+                            ws.send(JSON.stringify([joinRef, ref, topic, 'phx_reply', { status: 'ok', response: {} }]));
+                        } else if (event === 'heartbeat') {
+                            ws.send(JSON.stringify([null, ref, 'phoenix', 'phx_reply', { status: 'ok', response: {} }]));
+                        }
+                    } else if (data.event === 'phx_join') {
+                        ws.send(JSON.stringify({ topic: data.topic, event: 'phx_reply', payload: { status: 'ok', response: {} }, ref: data.ref }));
+                    } else if (data.event === 'heartbeat') {
+                        ws.send(JSON.stringify({ topic: 'phoenix', event: 'phx_reply', payload: { status: 'ok', response: {} }, ref: data.ref }));
+                    }
+                } catch (_) { /* ignore */ }
+            });
+        });
+
         await page.goto('/session/ai-lesson-id');
         await expect(page.getByText('AI Lesson Room')).toBeVisible({ timeout: 15000 });
     });
 
     // 43.1
     test('[US 1.16] success: file upload button exists and tab handles pdf sources', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
         const uploadTab = page.getByRole('tab', { name: 'Files' });
         await expect(uploadTab).toBeVisible({ timeout: 15000 });
         await uploadTab.click();
@@ -69,7 +92,6 @@ test.describe('Instructor AI Features & Tools', () => {
 
     // 43.2
     test('[US 1.17] success: toggle STT transcript capture', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
         const startRecord = page.locator('button:has-text("Record")').or(page.locator('button', { hasText: /^Record$/i }));
         await expect(startRecord).toBeVisible({ timeout: 15000 });
         await expect(page.locator('textarea[placeholder*="Spoken content"]')).toBeVisible({ timeout: 15000 });
@@ -77,7 +99,6 @@ test.describe('Instructor AI Features & Tools', () => {
 
     // 43.3
     test('[US 1.18][US 1.19][US 1.23] success: generates different prompt types and allows selection', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
         await page.route('**/api/lessons/ai-lesson-id/generate', async (route) => {
             const payload = route.request().postDataJSON();
 
@@ -130,7 +151,6 @@ test.describe('Instructor AI Features & Tools', () => {
 
     // 43.4
     test('[US 1.20] success: instructor can edit AI-generated prompts before publishing', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
 
         await page.route('**/api/lessons/ai-lesson-id/generate', async (route) => {
             await route.fulfill({
@@ -183,11 +203,13 @@ test.describe('Instructor AI Features & Tools', () => {
 
         // Clicking "Publish This Question →" opens the StartDiscussionDialog (timer config).
         // The POST to /rest/v1/discussions only fires after the dialog is confirmed.
-        await page.getByRole('button', { name: /Publish This Question/i }).click();
+        const publishAiBtn = page.getByTestId('publish-ai-question-button');
+        await expect(publishAiBtn).toBeEnabled({ timeout: 15000 });
+        await publishAiBtn.click();
 
         // Wait for and interact with the timer dialog
         await expect(page.getByText('Set Time Limit')).toBeVisible({ timeout: 5000 });
-        await page.getByTestId('no-time-limit-checkbox').click();
+        await page.getByText('No Time Limit').click();
         // Click the dialog's confirm button (labelled "Start Discussion" by default)
         await page.getByRole('button', { name: /Start Discussion/i }).last().click();
 
@@ -199,7 +221,6 @@ test.describe('Instructor AI Features & Tools', () => {
     });
 
     test('[US 1.20] failure: cannot publish an empty edited prompt', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
 
         await page.route('**/api/lessons/ai-lesson-id/generate', async (route) => {
             await route.fulfill({

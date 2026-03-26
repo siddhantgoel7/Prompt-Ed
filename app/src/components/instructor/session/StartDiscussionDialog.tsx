@@ -22,7 +22,7 @@ interface StartDiscussionDialogProps {
 }
 
 /** Modal for setting a time limit before starting a discussion. */
-export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel = 'Start Discussion' }: StartDiscussionDialogProps) {
+export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel = 'Start Discussion' }: Readonly<StartDiscussionDialogProps>) {
   const [noLimit, setNoLimit] = React.useState(false);
   const [minutes, setMinutes] = React.useState(1);
   const [seconds, setSeconds] = React.useState(0);
@@ -57,17 +57,16 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
         <div className="space-y-5 py-2">
           {/* No Time Limit toggle */}
           <label className="flex items-center gap-3 cursor-pointer select-none">
-            <div
-              role="checkbox"
-              aria-checked={noLimit}
-              aria-label="No Time Limit"
+            <input
+              type="checkbox"
+              checked={noLimit}
+              onChange={() => setNoLimit((v) => !v)}
+              className="sr-only"
               data-testid="no-time-limit-checkbox"
-              tabIndex={0}
-              onClick={() => setNoLimit((v) => !v)}
-              onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') setNoLimit((v) => !v); }}
-              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                noLimit ? 'bg-primary border-primary' : 'border-border bg-transparent'
-              }`}
+            />
+            <div
+              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${noLimit ? 'bg-primary border-primary' : 'border-border bg-transparent'
+                }`}
             >
               {noLimit && (
                 <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
@@ -89,13 +88,14 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
             <p className="text-sm text-muted-foreground">Set timer duration:</p>
             <div className="flex items-center gap-3">
               <div className="flex flex-col items-center gap-1">
-                <label className="text-xs text-muted-foreground">Min</label>
+                <label className="text-xs text-muted-foreground" htmlFor="timer-min">Min</label>
                 <input
+                  id="timer-min"
                   type="number"
                   min={0}
                   max={59}
                   value={minutes}
-                  onChange={(e) => setMinutes(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                  onChange={(e) => setMinutes(Math.max(0, Math.min(59, Number.parseInt(e.target.value, 10) || 0)))}
                   disabled={noLimit}
                   className="w-16 text-center rounded-lg border border-border bg-background text-foreground px-2 py-2 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-ring"
                   data-testid="timer-minutes"
@@ -103,13 +103,14 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
               </div>
               <span className="text-2xl font-bold text-muted-foreground mt-4">:</span>
               <div className="flex flex-col items-center gap-1">
-                <label className="text-xs text-muted-foreground">Sec</label>
+                <label className="text-xs text-muted-foreground" htmlFor="timer-sec">Sec</label>
                 <input
+                  id="timer-sec"
                   type="number"
                   min={0}
                   max={59}
                   value={seconds}
-                  onChange={(e) => setSeconds(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                  onChange={(e) => setSeconds(Math.max(0, Math.min(59, Number.parseInt(e.target.value, 10) || 0)))}
                   disabled={noLimit}
                   className="w-16 text-center rounded-lg border border-border bg-background text-foreground px-2 py-2 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-ring"
                   data-testid="timer-seconds"

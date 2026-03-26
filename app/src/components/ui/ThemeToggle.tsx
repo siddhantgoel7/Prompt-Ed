@@ -4,7 +4,7 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
 /** Sun/moon toggle button for switching between light and dark mode. */
-export function ThemeToggle({ className = '' }: { className?: string }) {
+export function ThemeToggle({ className = '' }: Readonly<{ className?: string }>) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
