@@ -23,7 +23,7 @@ export function TimerTab({
   onClose,
   onExtendTimer,
   onEditTimer,
-}: {
+}: Readonly<{
   activeDiscussionId: string | null;
   /** Null when the discussion was started without a time limit. */
   timerEndTime: number | null;
@@ -35,7 +35,7 @@ export function TimerTab({
   onExtendTimer?: (extra: number) => Promise<void>;
   /** Replaces the timer entirely; pass null to remove the time limit. */
   onEditTimer?: (newSecs: number | null) => Promise<void>;
-}) {
+}>) {
   // Controls whether the edit-timer dialog (StartDiscussionDialog reused) is visible.
   const [showEditDialog, setShowEditDialog] = React.useState(false);
 
@@ -61,7 +61,7 @@ export function TimerTab({
 
         {/* Timer display: circular countdown or no-time-limit pill */}
         {hasTimer ? (
-          <CircularTimer timerEndTime={timerEndTime!} timerTotalSeconds={timerTotalSeconds!} testId="instructor-timer" />
+          <CircularTimer timerEndTime={timerEndTime} timerTotalSeconds={timerTotalSeconds} testId="instructor-timer" />
         ) : (
           <div
             className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-line-default bg-surface-raised"

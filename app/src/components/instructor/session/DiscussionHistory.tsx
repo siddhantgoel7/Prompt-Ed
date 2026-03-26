@@ -13,10 +13,10 @@ import { formatTime, truncateText } from '@/lib/utils';
 export function DiscussionHistory({
     discussions,
     activeDiscussionId,
-}: {
+}: Readonly<{
     discussions: DiscussionWithResponseCount[];
     activeDiscussionId: string | null;
-}) {
+}>) {
     const params = useParams();
     const lessonId = params.lessonId as string;
 

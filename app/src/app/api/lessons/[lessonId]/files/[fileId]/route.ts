@@ -94,7 +94,7 @@ export async function GET(
   if (!lesson) return NextResponse.json({ error: 'Lesson not found' }, { status: 404 });
 
   const { data: course } = await supabase.from('courses').select('instructor_id').eq('id', lesson.course_id).single();
-  if (!course || course.instructor_id !== user.id) {
+  if (course?.instructor_id !== user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

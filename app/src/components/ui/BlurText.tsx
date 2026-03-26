@@ -28,13 +28,13 @@ interface BlurTextProps {
  * The wrapper element carries `aria-label` so screen readers read the full string
  * rather than one character at a time.
  */
-export function BlurText({ text, className = '', style, initialDelay = 200, staggerMs = 45 }: BlurTextProps) {
+export function BlurText({ text, className = '', style, initialDelay = 200, staggerMs = 45 }: Readonly<BlurTextProps>) {
   const chars = text.split('');
   return (
     <span className={className} aria-label={text} style={style}>
       {chars.map((char, i) => (
         <span
-          key={i}
+          key={`blur-char-${i}-${char}`}
           style={{
             display: 'inline-block',
             animation: 'blurIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both',

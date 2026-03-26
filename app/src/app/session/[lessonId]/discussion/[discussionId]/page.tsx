@@ -12,9 +12,9 @@ interface PageParams {
 /** Fetches discussion and response data server-side, then renders the client DiscussionPage component. */
 export default async function InstructorDiscussionPage({
   params
-}: {
+}: Readonly<{
   params: Promise<PageParams>
-}) {
+}>) {
   const { lessonId, discussionId } = await params;
   const supabase = await createClient();
 

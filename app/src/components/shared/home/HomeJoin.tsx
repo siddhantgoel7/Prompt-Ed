@@ -150,11 +150,10 @@ export function HomeJoin() {
             />
             {/* data-testid="pin-hint" is the test anchor — avoids unicode ✓ character dependency */}
             <p data-testid="pin-hint" className="text-xs text-content-muted">
-              {code.length === 0
-                ? 'PIN is 6 digits'
-                : pinOk
-                  ? '✓ Looks good'
-                  : 'Enter exactly 6 digits'}
+              {(() => {
+                if (code.length === 0) return 'PIN is 6 digits';
+                return pinOk ? '✓ Looks good' : 'Enter exactly 6 digits';
+              })()}
             </p>
           </div>
 

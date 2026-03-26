@@ -1,7 +1,6 @@
 // Root layout for the Next.js app — applies global fonts, metadata, and the HTML/body shell.
 import type { Metadata } from "next";
-import { Inter, DM_Sans } from "next/font/google";
-import { Geist_Mono } from "next/font/google";
+import { Inter, DM_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 

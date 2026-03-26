@@ -26,17 +26,17 @@ export function CourseDialog({
   onSubmit,
   error,
   saving,
-}: {
+}: Readonly<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   mode: 'add' | 'edit';
   value: CreateCourseInput;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => void;
   error: string | null;
   saving: boolean;
-}) {
+}>) {
   const handleAddImage = React.useCallback(() => {
     // placeholder
   }, []);
@@ -86,7 +86,10 @@ export function CourseDialog({
             </Button>
 
             <Button type="submit" disabled={saving} className="flex-1">
-              {saving ? (mode === 'add' ? 'Adding...' : 'Saving...') : mode === 'add' ? 'Add Course' : 'Save Changes'}
+              {(() => {
+                if (saving) return mode === 'add' ? 'Adding...' : 'Saving...';
+                return mode === 'add' ? 'Add Course' : 'Save Changes';
+              })()}
             </Button>
           </div>
         </form>

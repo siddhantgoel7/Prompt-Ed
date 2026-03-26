@@ -12,7 +12,7 @@ import { SessionNotFound } from '@/components/instructor/session/SessionNotFound
 import { SessionProvider } from '@/components/instructor/session/SessionContext';
 
 /** Renders the appropriate session view based on lesson status, wrapped in SessionProvider for context. */
-export function SessionPage({ lessonId }: { lessonId: string }) {
+export function SessionPage({ lessonId }: Readonly<{ lessonId: string }>) {
   const vm = useSessionPage(lessonId);
 
   if (vm.loading) return <SessionLoading />;

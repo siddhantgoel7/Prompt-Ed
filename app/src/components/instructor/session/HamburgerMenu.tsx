@@ -20,13 +20,13 @@ export function HamburgerMenu({
   onSplitView,
   onEnd,
   endingLesson,
-}: {
+}: Readonly<{
   onDisplay?: () => void;
   onSplitView?: () => void;
   onEnd?: () => void;
   /** True while the end-lesson request is in-flight — disables the button to prevent double-firing. */
   endingLesson?: boolean;
-}) {
+}>) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
 
@@ -45,7 +45,7 @@ export function HamburgerMenu({
   const menuItems: { label: string; onClick?: () => void; danger?: boolean; disabled?: boolean }[] = [
     { label: 'Display QR/Code', onClick: () => { onDisplay?.(); setOpen(false); } },
     { label: 'Split View',      onClick: () => { onSplitView?.(); setOpen(false); } },
-    { label: 'Settings' }, // TODO: wire up settings panel
+    { label: 'Settings', disabled: true }, // Placeholder for future features
     // "End Session" label is queried by name in Jest/Playwright tests — update those
     // tests if this text ever changes (previously a standalone button labeled "End").
     { label: endingLesson ? 'Ending…' : 'End Session', onClick: () => { onEnd?.(); setOpen(false); }, danger: true, disabled: endingLesson },

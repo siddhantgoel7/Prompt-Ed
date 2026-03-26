@@ -6,10 +6,10 @@ import * as React from 'react';
 import { SessionContext } from './SessionContext';
 
 /** Displays a green "Connected" badge or a red "Disconnected" badge with a Reconnect button. */
-export function ConnectionStatus(props: {
+export function ConnectionStatus(props: Readonly<{
   isConnected?: boolean;
   onReconnect?: () => void;
-}) {
+}>) {
   const context = React.useContext(SessionContext);
   const isConnected = context ? context.isConnected : props.isConnected!;
   const onReconnect = context ? context.handleReconnect : props.onReconnect!;
@@ -61,9 +61,9 @@ export function ConnectionStatus(props: {
     >
       <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
       <span className="text-sm font-medium text-err-600">
-        {reconnecting ? 'Reconnecting…' : 'Disconnected'}
+        {reconnecting ? 'Reconnecting\u2026' : 'Disconnected'}
       </span>
-      {!reconnecting ? (
+      {reconnecting ? null : (
         <button
           onClick={handleClick}
           className="ml-1 px-2.5 py-1 text-xs rounded-full font-medium text-white transition-all duration-150"
@@ -71,7 +71,7 @@ export function ConnectionStatus(props: {
         >
           Reconnect
         </button>
-      ) : null}
+      )}
     </div>
   );
 }

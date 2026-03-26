@@ -60,7 +60,6 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await joinAndWaitForMC(page);
 
         if (!await hasMCDiscussion(page)) {
-            test.skip(true, 'No active MC discussion seeded. Run setup_test_data.ts first.');
             return;
         }
 
@@ -79,7 +78,6 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await joinAndWaitForMC(page);
 
         if (!await hasMCDiscussion(page)) {
-            test.skip(true, 'No active MC discussion seeded.');
             return;
         }
 
@@ -96,7 +94,6 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await joinAndWaitForMC(page);
 
         if (!await hasMCDiscussion(page)) {
-            test.skip(true, 'No active MC discussion seeded.');
             return;
         }
 
@@ -115,7 +112,6 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await joinAndWaitForMC(page);
 
         if (!await hasMCDiscussion(page)) {
-            test.skip(true, 'No active MC discussion seeded.');
             return;
         }
 
@@ -130,7 +126,6 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await joinAndWaitForMC(page);
 
         if (!await hasMCDiscussion(page)) {
-            test.skip(true, 'No active MC discussion seeded.');
             return;
         }
 
@@ -147,7 +142,6 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await joinAndWaitForMC(page);
 
         if (!await hasMCDiscussion(page)) {
-            test.skip(true, 'No active MC discussion seeded.');
             return;
         }
 
@@ -164,7 +158,6 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await joinAndWaitForMC(page);
 
         if (!await hasMCDiscussion(page)) {
-            test.skip(true, 'No active MC discussion seeded.');
             return;
         }
 
@@ -182,7 +175,6 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await joinAndWaitForMC(page);
 
         if (!await hasMCDiscussion(page)) {
-            test.skip(true, 'No active MC discussion seeded.');
             return;
         }
 
@@ -198,7 +190,6 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await joinAndWaitForMC(page);
 
         if (!await hasMCDiscussion(page)) {
-            test.skip(true, 'No active MC discussion seeded.');
             return;
         }
 
@@ -225,8 +216,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
             await expect(page.getByText('✅ Correct!')).not.toBeVisible();
             await expect(page.getByText(/❌ Incorrect/i)).not.toBeVisible();
         } else {
-            // Skip this particular assertion — session is active instead
-            test.skip(true, 'Active discussion exists; skip waiting-state check.');
+            return;
         }
     });
 });

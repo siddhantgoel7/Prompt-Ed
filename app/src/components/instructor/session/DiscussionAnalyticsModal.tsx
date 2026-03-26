@@ -12,16 +12,7 @@ import {
 import { Tooltip as UITooltip, TooltipContent as UITooltipContent, TooltipTrigger as UITooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
+  ResponsiveContainer, PieChart, Pie, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
@@ -33,11 +24,11 @@ export function DiscussionAnalyticsContent({
   discussion,
   responses,
   studentCount,
-}: {
+}: Readonly<{
   discussion: Discussion;
   responses: Response[];
   studentCount: number;
-}) {
+}>) {
   const total = responses.length;
   const isActive = discussion.status === 'active';
   const snapshot = isActive
@@ -57,12 +48,14 @@ export function DiscussionAnalyticsContent({
       }
     });
     const totalVotes = Object.values(dist).reduce((sum, count) => sum + count, 0);
-    return discussion.mc_options.map((opt) => ({
+    return discussion.mc_options.map((opt, i) => ({
       label: opt.label,
       text: opt.text,
       count: dist[opt.label] ?? 0,
       percentage: totalVotes > 0 ? Math.round(((dist[opt.label] ?? 0) / totalVotes) * 100) : 0,
       isCorrect: discussion.correct_option === opt.label,
+      // Pass fill directly to avoid using deprecated Cell component in some recharts versions
+      fill: discussion.correct_option === opt.label ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]
     }));
   })();
 
@@ -89,7 +82,7 @@ export function DiscussionAnalyticsContent({
         <StatCard label="Responses" value={String(total)} />
         <StatCard
           label="Response Rate"
-          value={responseRate !== null ? `${responseRate}%` : '—'}
+          value={responseRate === null ? '—' : `${responseRate}%`}
           sub={snapshot > 0 ? `${total} / ${snapshot} students` : undefined}
           infoText="Responses received divided by the number of students who joined during this discussion."
         />
@@ -117,16 +110,9 @@ export function DiscussionAnalyticsContent({
                   paddingAngle={1}
                   label={false}
                   labelLine={false}
-                >
-                  {mcChartData.map((entry, i) => (
-                    <Cell
-                      key={entry.label}
-                      fill={entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]}
-                    />
-                  ))}
-                </Pie>
+                />
                 <Tooltip
-                  formatter={(value, name) => [`${value} votes`, `Option ${name}`]}
+                  formatter={(value: any, name: any) => [`${value} votes`, `Option ${name}`]} // eslint-disable-line @typescript-eslint/no-explicit-any
                   contentStyle={{
                     background: 'var(--surface-overlay)',
                     border: '1px solid var(--border-default)',
@@ -190,7 +176,7 @@ export function DiscussionAnalyticsContent({
                   color: 'var(--text-primary)',
                   fontSize: '12px',
                 }}
-                formatter={(v) => [`${v} responses`, 'Count']}
+                formatter={(v: any) => [`${v} responses`, 'Count']} // eslint-disable-line @typescript-eslint/no-explicit-any
               />
               <Bar dataKey="Responses" fill="var(--color-primary-500)" radius={[3, 3, 0, 0]} />
             </BarChart>
@@ -236,13 +222,13 @@ export function DiscussionAnalyticsModal({
   discussion,
   responses,
   studentCount,
-}: {
+}: Readonly<{
   open: boolean;
   onClose: () => void;
   discussion: Discussion | null;
   responses: Response[];
   studentCount: number;
-}) {
+}>) {
   if (!discussion) return null;
 
   return (
@@ -265,7 +251,7 @@ export function DiscussionAnalyticsModal({
 }
 
 /** Small stat display card used inside the analytics modal. */
-export function StatCard({ label, value, sub, infoText }: { label: string; value: string; sub?: string; infoText?: string }) {
+export function StatCard({ label, value, sub, infoText }: Readonly<{ label: string; value: string; sub?: string; infoText?: string }>) {
   return (
     <div
       className="rounded-xl p-3 bg-surface-raised border border-line-subtle"

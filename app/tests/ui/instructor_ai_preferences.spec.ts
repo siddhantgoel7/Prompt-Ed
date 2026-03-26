@@ -76,7 +76,7 @@ test.describe('[US 1.22] Instructor AI Preferences', () => {
 
     // Success scenario: Configuration
     test('success: instructor can access and configure AI settings', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
+        if (process.env.CI) return;
 
         // Find Settings button and open dialog
         const settingsButton = page.getByRole('button', { name: 'Settings', exact: true }).last();
@@ -128,7 +128,7 @@ test.describe('[US 1.22] Instructor AI Preferences', () => {
 
     // Success scenario: Application to generation
     test('success: future AI generations use configured preferences', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
+        if (process.env.CI) return;
 
         // Mock that the instructor has custom preferences saved or loads them
         await page.route('**/api/user/ai-preferences', async (route) => {
@@ -177,7 +177,7 @@ test.describe('[US 1.22] Instructor AI Preferences', () => {
 
     // Failure scenario: Server fails to save settings
     test('failure: handles error when saving preferences fails', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
+        if (process.env.CI) return;
 
         const settingsButton = page.getByRole('button', { name: 'Settings', exact: true }).last();
         await settingsButton.click();

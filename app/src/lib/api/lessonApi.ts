@@ -1,6 +1,7 @@
 // Client-side Supabase helpers for lesson and course CRUD operations.
 import { createClient } from '@/lib/supabase/client';
 import type { CreateLessonInput } from '@/types/lesson';
+import { generateSecureAlphanumeric } from '@/lib/utils/random';
 
 export async function getOwnedCourse(courseId: string, instructorId: string) {
     const supabase = createClient();
@@ -29,7 +30,7 @@ export async function createLesson(courseId: string, input: CreateLessonInput) {
             {
                 title: input.title.trim(),
                 course_id: courseId,
-                pin_code: Math.random().toString(36).substring(2, 8).toUpperCase(),
+                pin_code: generateSecureAlphanumeric(6),
             },
         ])
         .select();

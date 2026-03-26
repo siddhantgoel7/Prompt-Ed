@@ -36,7 +36,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
     it('[US 1.29][UNIT3] success: "No Time Limit" checkbox is unchecked by default', () => {
         renderDialog();
         const checkbox = screen.getByRole('checkbox');
-        expect(checkbox).toHaveAttribute('aria-checked', 'false');
+        expect(checkbox).not.toBeChecked();
     });
 
     // 66.4
@@ -44,7 +44,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         renderDialog();
         const checkbox = screen.getByRole('checkbox');
         fireEvent.click(checkbox);
-        expect(checkbox).toHaveAttribute('aria-checked', 'true');
+        expect(checkbox).toBeChecked();
     });
 
     // 66.5

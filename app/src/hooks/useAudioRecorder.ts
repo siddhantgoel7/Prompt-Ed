@@ -19,9 +19,12 @@ export function useAudioRecorder() {
     const start = React.useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-                ? 'audio/webm;codecs=opus'
-                : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+            let mimeType = '';
+            if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                mimeType = 'audio/webm;codecs=opus';
+            } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+                mimeType = 'audio/webm';
+            }
             const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
             chunksRef.current = [];
             recorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
@@ -36,18 +39,20 @@ export function useAudioRecorder() {
     }, []);
 
     /** Stops recording and resolves with the complete audio Blob. */
-    const stop = React.useCallback((): Promise<Blob> => {
+    const stop = React.useCallback(async (): Promise<Blob> => {
+        const recorder = mediaRecorderRef.current;
+        if (!recorder || recorder.state === 'inactive') return new Blob([]);
+
+        setIsRecording(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+
         return new Promise((resolve) => {
-            const recorder = mediaRecorderRef.current;
-            if (!recorder) { resolve(new Blob([])); return; }
             recorder.onstop = () => {
                 const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
-                recorder.stream.getTracks().forEach((t) => t.stop());
+                releaseTracks(recorder.stream);
                 resolve(blob);
             };
             recorder.stop();
-            setIsRecording(false);
-            if (timerRef.current) clearInterval(timerRef.current);
         });
     }, []);
 
@@ -56,4 +61,8 @@ export function useAudioRecorder() {
         `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
     return { isRecording, elapsed, fmt, start, stop };
+}
+
+function releaseTracks(stream: MediaStream) {
+    stream.getTracks().forEach(t => t.stop());
 }

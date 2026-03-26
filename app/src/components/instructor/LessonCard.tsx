@@ -37,9 +37,10 @@ type LessonWithMeta = Lesson & LessonMeta;
  * (kind: 'create') or a lesson info card with access and delete actions (kind: 'lesson').
  */
 export function LessonCard(
-  props:
+  props: Readonly<
     | { kind: 'create'; onCreate: () => void }
     | { kind: 'lesson'; lesson: Lesson; onAccess: () => void; onDelete: () => void }
+  >
 ) {
   if (props.kind === 'create') {
     return (
@@ -57,8 +58,8 @@ export function LessonCard(
           style={{ background: 'var(--color-primary-alpha-12)' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="2.5" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
         </div>
         <span className="text-sm font-semibold text-content-secondary">
@@ -73,8 +74,7 @@ export function LessonCard(
 
   return (
     <div
-      onClick={props.onAccess}
-      className="h-28 rounded-2xl relative p-4 flex flex-col justify-between cursor-pointer card-hover group"
+      className="h-28 rounded-2xl relative p-4 flex flex-col justify-between card-hover group w-full text-left"
       style={{
         background: 'var(--surface-glass)',
         backdropFilter: 'blur(10px)',
@@ -83,8 +83,8 @@ export function LessonCard(
         boxShadow: '0 2px 12px var(--color-black-alpha-06)',
       }}
     >
-      {/* Status badge */}
-      <div className="flex items-center justify-between">
+      {/* Top row: Status Badge and Delete Action */}
+      <div className="flex items-center justify-between relative z-20">
         <span
           className="text-xs font-medium px-2.5 py-0.5 rounded-full"
           style={{ background: badge.bg, color: badge.text }}
@@ -92,8 +92,8 @@ export function LessonCard(
           {badge.label}
         </span>
 
-        {/* Delete button */}
         <button
+          type="button"
           title="Delete lesson"
           onClick={(e) => {
             e.stopPropagation();
@@ -110,22 +110,26 @@ export function LessonCard(
           }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6l-1 14H6L5 6"/>
-            <path d="M10 11v6M14 11v6"/>
-            <path d="M9 6V4h6v2"/>
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14H6L5 6" />
+            <path d="M10 11v6M14 11v6" />
+            <path d="M9 6V4h6v2" />
           </svg>
         </button>
       </div>
 
-      {/* Lesson info */}
-      <div>
-        <h3
-          className="text-sm font-semibold leading-snug line-clamp-1 mb-0.5 text-content-primary"
-        >
+      {/* Main card content with stretched link */}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={props.onAccess}
+          className="absolute inset-0 z-10 opacity-0 cursor-pointer w-full h-full focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-2xl"
+          aria-label={`Open lesson: ${lesson.title}`}
+        />
+        <h3 className="text-sm font-semibold leading-snug line-clamp-1 mb-0.5 text-content-primary relative z-0">
           {lesson.title}
         </h3>
-        <p className="text-xs text-content-muted">
+        <p className="text-xs text-content-muted relative z-0">
           {formatDate(lesson.date_created)}
         </p>
       </div>

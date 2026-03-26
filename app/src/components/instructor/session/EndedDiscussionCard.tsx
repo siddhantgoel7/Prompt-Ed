@@ -21,11 +21,11 @@ export function EndedDiscussionCard({
   discussion,
   index,
   total,
-}: {
+}: Readonly<{
   discussion: Discussion;
   index: number;
   total: number;
-}) {
+}>) {
   const [analyticsOpen, setAnalyticsOpen] = React.useState(false);
   const [modalResponses, setModalResponses] = React.useState<Response[]>([]);
   const [loadingResponses, setLoadingResponses] = React.useState(false);

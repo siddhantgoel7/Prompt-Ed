@@ -33,11 +33,9 @@ import { RealtimeChannel } from '@supabase/supabase-js';
  * Related User Stories: US 1.27, US 1.28, US 2.09, US 1.39, US 1.40
  */
 export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
-  const channelRef = useRef<RealtimeChannel | null>(null);
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const supabaseRef = useRef(createClient());
-  // Force re-render when channel changes
-  const [, forceUpdate] = useState(0);
   // Bump to force the effect to re-run (used by reconnect)
   const [connectAttempt, setConnectAttempt] = useState(0);
   // Live count of students currently present in the session channel
@@ -67,27 +65,24 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
     });
 
     // Subscribe to the channel
-    channel
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log(`${role} subscribed to lesson ${lessonId}`);
-          setIsConnected(true);
-          channelRef.current = channel;
-          forceUpdate(prev => prev + 1); // Trigger re-render
+    channel.subscribe(async (status: string) => {
+      if (status === 'SUBSCRIBED') {
+        console.log(`${role} subscribed (attempt ${connectAttempt})`);
+        setIsConnected(true);
+        setChannel(channel);
 
-          // Announce presence so others can count this participant
-          await channel.track({ role, joined_at: new Date().toISOString() });
-        } else if (status === 'CLOSED') {
-          setIsConnected(false);
-          channelRef.current = null;
-          forceUpdate(prev => prev + 1); // Trigger re-render
-        }
-      });
+        // Announce presence so others can count this participant
+        await channel.track({ role, joined_at: new Date().toISOString() });
+      } else if (status === 'CLOSED') {
+        setIsConnected(false);
+        setChannel(null);
+      }
+    });
 
     return () => {
       channel.unsubscribe();
-      channelRef.current = null;
       setIsConnected(false);
+      setChannel(null);
     };
   }, [lessonId, role, connectAttempt]);
 
@@ -96,39 +91,32 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
     const handleOffline = () => setIsConnected(false);
     const handleOnline = () => {
       // Browser is back online — reconnect the channel
-      if (channelRef.current) {
-        channelRef.current.unsubscribe();
-        channelRef.current = null;
-      }
+      setIsConnected(false);
+      setChannel(null);
       setConnectAttempt(prev => prev + 1);
     };
 
-    window.addEventListener('offline', handleOffline);
-    window.addEventListener('online', handleOnline);
+    globalThis.window.addEventListener('offline', handleOffline);
+    globalThis.window.addEventListener('online', handleOnline);
 
     return () => {
-      window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('online', handleOnline);
+      globalThis.window.removeEventListener('offline', handleOffline);
+      globalThis.window.removeEventListener('online', handleOnline);
     };
   }, []);
 
   const reconnect = useCallback(() => {
     // Tear down existing channel and re-subscribe by bumping the attempt counter
-    if (channelRef.current) {
-      channelRef.current.unsubscribe();
-      channelRef.current = null;
-      setIsConnected(false);
-    }
+    setIsConnected(false);
+    setChannel(null);
     setConnectAttempt(prev => prev + 1);
   }, []);
 
-  // Safe to return ref.current here because forceUpdate ensures re-renders
-  /* eslint-disable react-hooks/refs */
   return {
-    channel: channelRef.current,
+    channel,
     isConnected,
     reconnect,
     studentCount,
   };
-  /* eslint-enable react-hooks/refs */
+   
 }

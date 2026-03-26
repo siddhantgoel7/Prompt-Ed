@@ -13,14 +13,13 @@
 // consistent with LoginForm without duplicating style objects.
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import * as React from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signUpWithEmail, signInWithGoogle } from '@/lib/supabase/auth';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { OAuthButton } from './OAuthButton';
 import { EmailConfirmation } from './EmailConfirmation';
-import { useSearchParams } from 'next/navigation';
 
 type SignUpFormData = {
   fullName: string;
@@ -33,16 +32,16 @@ type SignUpFormData = {
 export function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [formData, setFormData] = useState<SignUpFormData>({
+  const [formData, setFormData] = React.useState<SignUpFormData>({
     fullName: '',
     email: '',
     password: '',
     agreeToTerms: false,
   });
 
-  const [error, setError] = useState<string | null>(searchParams.get('error'));
-  const [loading, setLoading] = useState(false);
-  const [confirmedEmail, setConfirmedEmail] = useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(searchParams.get('error'));
+  const [loading, setLoading] = React.useState(false);
+  const [confirmedEmail, setConfirmedEmail] = React.useState<string | null>(null);
 
   const setField = <K extends keyof SignUpFormData>(
     key: K,
@@ -51,7 +50,7 @@ export function SignUpForm() {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);

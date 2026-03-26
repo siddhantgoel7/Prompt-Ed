@@ -46,10 +46,10 @@ interface PaneState {
 function DiscussionList({
   discussions,
   onSelect,
-}: {
+}: Readonly<{
   discussions: DiscussionWithResponseCount[];
   onSelect: (id: string) => void;
-}) {
+}>) {
   const active = discussions.filter((d) => d.status === 'active');
   const closed = discussions.filter((d) => d.status === 'closed');
 
@@ -144,12 +144,12 @@ function DiscussionDetail({
   responses,
   loading,
   onBack,
-}: {
+}: Readonly<{
   discussion: DiscussionWithResponseCount;
   responses: Response[];
   loading: boolean;
   onBack: () => void;
-}) {
+}>) {
   const isMC = discussion.prompt_type === 'multiple_choice' && !!discussion.mc_options;
   const distribution: Record<string, number> = {};
   if (isMC && discussion.mc_options) {
@@ -225,30 +225,34 @@ function DiscussionDetail({
 
       {/* Responses */}
       <ScrollArea className="flex-1 px-4 py-3">
-        {loading ? (
-          <div className="space-y-2">
-            <div className="skeleton-shimmer h-16 w-full rounded-xl" />
-            <div className="skeleton-shimmer h-16 w-full rounded-xl" />
-          </div>
-        ) : responses.length === 0 ? (
-          <p className="text-sm py-6 text-center text-content-muted">
-            No responses yet.
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {responses.map((r) => (
-              <ResponseCard
-                key={r.id}
-                variant="full"
-                responseText={r.response_text}
-                createdAt={r.created_at}
-                isSelected={false}
-                isBeingFlagged={false}
-                onToggle={() => {}}
-              />
-            ))}
-          </div>
-        )}
+        {(() => {
+          if (loading) return (
+            <div className="space-y-2">
+              <div className="skeleton-shimmer h-16 w-full rounded-xl" />
+              <div className="skeleton-shimmer h-16 w-full rounded-xl" />
+            </div>
+          );
+          if (responses.length === 0) return (
+            <p className="text-sm py-6 text-center text-content-muted">
+              No responses yet.
+            </p>
+          );
+          return (
+            <div className="space-y-2">
+              {responses.map((r) => (
+                <ResponseCard
+                  key={r.id}
+                  variant="full"
+                  responseText={r.response_text}
+                  createdAt={r.created_at}
+                  isSelected={false}
+                  isBeingFlagged={false}
+                  onToggle={() => {}}
+                />
+              ))}
+            </div>
+          );
+        })()}
       </ScrollArea>
     </div>
   );
@@ -264,12 +268,12 @@ function Pane({
   discussions,
   liveActiveDiscussionId,
   liveActiveResponses,
-}: {
+}: Readonly<{
   label: string;
   discussions: DiscussionWithResponseCount[];
   liveActiveDiscussionId?: string | null;
   liveActiveResponses?: Response[];
-}) {
+}>) {
   const [state, setState] = React.useState<PaneState>({
     selectedDiscussionId: null,
     responses: [],
@@ -353,7 +357,7 @@ export function SplitView({
   onBack,
   liveActiveDiscussionId,
   liveActiveResponses = [],
-}: SplitViewProps) {
+}: Readonly<SplitViewProps>) {
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col bg-surface-base"
