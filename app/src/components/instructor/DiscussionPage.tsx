@@ -13,16 +13,17 @@ import { flagResponseApi, unflagResponseApi } from '@/lib/api/discussionsApi';
 import { useResponseSelection } from '@/hooks/useResponseSelection';
 import { ResponseCard } from '@/components/instructor/ResponseCard';
 import { ExpandableCard } from '@/components/instructor/ExpandableCard';
-import { FilterToggle } from '@/components/instructor/FilterToggle';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
+import { ResponseStatusBar } from '@/components/instructor/ResponseStatusBar';
 
 /** Isolated response list — owns its own selection state so clicks don't re-render the whole page. */
-function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag }: Readonly<{
+function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag, isConnected }: Readonly<{
   responses: Response[];
   flaggedResponses: Response[];
   onRemoveResponse: (id: string) => void;
   onRestoreResponse: (id: string) => Promise<void>;
   canFlag: boolean;
+  isConnected: boolean;
 }>) {
   const {
     selectedIds, flaggingId, showHighlightedOnly,
@@ -68,16 +69,13 @@ function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestore
 
   return (
     <div className="grid gap-4">
-      {/* Filter toggle — appears when responses are highlighted */}
-      {selectedIds.length > 0 && !showFlagged && (
-        <FilterToggle
-          variant="full"
-          selectedCount={selectedIds.length}
-          showHighlightedOnly={showHighlightedOnly}
-          onToggle={() => setShowHighlightedOnly(prev => !prev)}
-          onShowAll={() => setShowHighlightedOnly(false)}
-        />
-      )}
+      {/* Status bar: realtime connection + total count + inline highlight filter */}
+      <ResponseStatusBar
+        isConnected={isConnected}
+        selectedCount={!showFlagged ? selectedIds.length : 0}
+        showHighlightedOnly={showHighlightedOnly}
+        onToggleHighlight={() => setShowHighlightedOnly(prev => !prev)}
+      />
 
       {/* Flagged toggle — appears when flagged responses exist */}
       {flaggedResponses.length > 0 && (
@@ -400,7 +398,7 @@ export function DiscussionPage({
                         key={opt.label}
                         badge={badge}
                         text={opt.text}
-                        rightLabel={<span className="text-sm font-semibold text-content-muted">{count} responses</span>}
+                        rightLabel={<span className="text-sm font-semibold text-content-muted">{count} {count === 1 ? 'response' : 'responses'}</span>}
                         isSelected={isSelected}
                         onClick={() => setSelectedMCOption(isSelected ? null : opt.label)}
                         padding="12px 16px"
@@ -419,29 +417,16 @@ export function DiscussionPage({
             {/* Responses List — hidden for MC since distribution is shown in the options section above */}
             {!isMC && (
               <div className="space-y-4">
-                <div
-                  className="flex justify-between items-center text-sm mb-2 text-content-muted"
-                >
-                  <div className="flex items-center gap-2">
-                    <span>Realtime Status:</span>
-                    <span
-                      className="w-2 h-2 rounded-full"
-                      style={{ background: isConnected ? 'var(--color-primary-400)' : '#f59e0b' }}
-                    />
-                    <span>{isConnected ? 'Connected' : 'Connecting...'}</span>
-                  </div>
-                  <span>Total: {responses.length}</span>
-                </div>
-
                 {responses.length === 0 && flaggedResponses.length === 0 ? (
-                  <div
-                    className="text-center p-12 rounded-2xl bg-surface-raised text-content-muted"
-                    style={{
-                      border: '2px dashed var(--border-default)',
-                    }}
-                  >
-                    <p>No responses recorded yet.</p>
-                  </div>
+                  <>
+                    <ResponseStatusBar isConnected={isConnected} />
+                    <div
+                      className="text-center p-12 rounded-2xl bg-surface-raised text-content-muted"
+                      style={{ border: '2px dashed var(--border-default)' }}
+                    >
+                      <p>No responses recorded yet.</p>
+                    </div>
+                  </>
                 ) : (
                   <ResponseList
                     responses={responses}
@@ -449,6 +434,7 @@ export function DiscussionPage({
                     onRemoveResponse={handleRemoveResponse}
                     onRestoreResponse={handleRestoreResponse}
                     canFlag={true}
+                    isConnected={isConnected}
                   />
                 )}
               </div>
@@ -456,17 +442,7 @@ export function DiscussionPage({
 
             {/* MC: realtime status only (no individual response cards — distribution shown above) */}
             {isMC && (
-              <div className="flex justify-between items-center text-sm text-content-muted">
-                <div className="flex items-center gap-2">
-                  <span>Realtime Status:</span>
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: isConnected ? 'var(--color-primary-400)' : '#f59e0b' }}
-                  />
-                  <span>{isConnected ? 'Connected' : 'Connecting...'}</span>
-                </div>
-                <span>Total votes: {responses.length}</span>
-              </div>
+              <ResponseStatusBar isConnected={isConnected} />
             )}
           </div>
         </div>

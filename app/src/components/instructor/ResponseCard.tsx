@@ -158,7 +158,7 @@ export function ResponseCard({
     />
   ) : (
     // Placeholder to keep layout consistent when no flag action available
-    <div className={cn('shrink-0', s.badgeSize)} />
+    <div className="shrink-0 w-6 h-6" />
   );
 
   const rightLabel = (

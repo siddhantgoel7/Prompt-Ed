@@ -11,7 +11,6 @@ export interface FilterToggleProps {
   selectedCount: number;
   showHighlightedOnly: boolean;
   onToggle: () => void;
-  onShowAll: () => void;
 }
 
 const variantStyles = {
@@ -19,13 +18,11 @@ const variantStyles = {
     wrapper: 'gap-2',
     button: 'gap-1.5 px-3 py-1.5 text-xs',
     icon: 'w-3 h-3',
-    showAll: 'text-xs',
   },
   full: {
     wrapper: 'gap-3',
     button: 'gap-2 px-4 py-2 text-sm',
     icon: 'w-3.5 h-3.5',
-    showAll: 'text-sm',
   },
 } as const;
 
@@ -34,7 +31,6 @@ export function FilterToggle({
   selectedCount,
   showHighlightedOnly,
   onToggle,
-  onShowAll,
 }: Readonly<FilterToggleProps>) {
   const s = variantStyles[variant];
 
@@ -68,17 +64,6 @@ export function FilterToggle({
         </TooltipTrigger>
         <TooltipContent>Show only responses you have highlighted by clicking on them.</TooltipContent>
       </Tooltip>
-      {showHighlightedOnly && (
-        <button
-          type="button"
-          onClick={onShowAll}
-          className={cn('transition-colors text-content-muted', s.showAll)}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; }}
-        >
-          Show all
-        </button>
-      )}
     </div>
   );
 }

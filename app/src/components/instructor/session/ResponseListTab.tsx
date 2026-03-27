@@ -161,7 +161,6 @@ export function ResponseListTab({
             selectedCount={selectedIds.length}
             showHighlightedOnly={showHighlightedOnly}
             onToggle={() => setShowHighlightedOnly(!showHighlightedOnly)}
-            onShowAll={() => setShowHighlightedOnly(false)}
           />
         )}
         {flaggedResponses.length > 0 && (
