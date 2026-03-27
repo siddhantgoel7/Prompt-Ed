@@ -333,7 +333,7 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
 
 function AIGenerationPanel({
   lessonId, recorder, isGenerating, sttStatus, sttError, handleStopAndTranscribe,
-  promptInput, setPromptInput, setTranscriptText, transcriptRef,
+  transcriptText, promptInput, setPromptInput, setTranscriptText, transcriptRef,
   promptType, setPromptType, onGenerate, handleRunAllCombinations, sweepProgress,
   generationWarning, candidates, selectedIndex, handleSelectCandidate,
   editingOptions, setEditingOptions, overrideCorrectOption, setOverrideCorrectOption,
@@ -384,7 +384,7 @@ function AIGenerationPanel({
       </div>
       {sttStatus === 'transcribing' && <p className="text-xs animate-pulse text-content-muted">Transcribing audio…</p>}
       {sttStatus === 'error' && sttError && <p className="text-xs" style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}>{sttError}</p>}
-      <textarea ref={transcriptRef} value={promptInput} onChange={(e) => { setPromptInput(e.target.value); setTranscriptText(e.target.value); }} placeholder="Spoken content will appear here after recording, or type a topic manually" className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden leading-snug min-h-[50px] transition-all duration-150 bg-surface-raised text-content-primary" style={{ border: '1px solid var(--border-default)' }} rows={2} />
+      <textarea ref={transcriptRef} value={transcriptText} onChange={(e) => setTranscriptText(e.target.value)} placeholder="Spoken content will appear here after recording, or type a topic manually" className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden leading-snug min-h-[50px] transition-all duration-150 bg-surface-raised text-content-primary" style={{ border: '1px solid var(--border-default)' }} rows={2} />
       <div className="flex items-center gap-2">
         <AITipsButton lessonId={lessonId} />
         <PromptTypeSelect value={promptType} onChange={(v) => setPromptType(v as PromptType)} />
@@ -516,7 +516,7 @@ function SelectedCandidateEditor({ promptInput, setPromptInput, setTranscriptTex
         <span className="text-xs font-medium px-2 py-0.5 rounded-full capitalize" style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-600)' }}>{type.replaceAll('_', ' ')}</span>
         <span className="text-xs font-medium text-brand-500">Selected (Editing)</span>
       </div>
-      <textarea value={promptInput} onChange={(e) => { setPromptInput(e.target.value); setTranscriptText(e.target.value); }} className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none leading-snug min-h-[80px] transition-all duration-150 bg-surface-raised text-content-primary" style={{ border: '1px solid var(--border-default)' }} placeholder="Edit this prompt..." />
+      <textarea value={promptInput} onChange={(e) => setPromptInput(e.target.value)} className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none leading-snug min-h-[80px] transition-all duration-150 bg-surface-raised text-content-primary" style={{ border: '1px solid var(--border-default)' }} placeholder="Edit this prompt..." />
     </div>
   );
 }
