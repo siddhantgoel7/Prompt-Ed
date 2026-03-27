@@ -395,11 +395,47 @@ export function DiscussionPage({
               </div>
             )}
 
-            {/* Responses List */}
-            <div className="space-y-4">
-              <div
-                className="flex justify-between items-center text-sm mb-2 text-content-muted"
-              >
+            {/* Responses List — hidden for MC since distribution is shown in the options section above */}
+            {!isMC && (
+              <div className="space-y-4">
+                <div
+                  className="flex justify-between items-center text-sm mb-2 text-content-muted"
+                >
+                  <div className="flex items-center gap-2">
+                    <span>Realtime Status:</span>
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ background: isConnected ? 'var(--color-primary-400)' : '#f59e0b' }}
+                    />
+                    <span>{isConnected ? 'Connected' : 'Connecting...'}</span>
+                  </div>
+                  <span>Total: {responses.length}</span>
+                </div>
+
+                {responses.length === 0 && flaggedResponses.length === 0 ? (
+                  <div
+                    className="text-center p-12 rounded-2xl bg-surface-raised text-content-muted"
+                    style={{
+                      border: '2px dashed var(--border-default)',
+                    }}
+                  >
+                    <p>No responses recorded yet.</p>
+                  </div>
+                ) : (
+                  <ResponseList
+                    responses={responses}
+                    flaggedResponses={flaggedResponses}
+                    onRemoveResponse={handleRemoveResponse}
+                    onRestoreResponse={handleRestoreResponse}
+                    canFlag={false}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* MC: realtime status only (no individual response cards — distribution shown above) */}
+            {isMC && (
+              <div className="flex justify-between items-center text-sm text-content-muted">
                 <div className="flex items-center gap-2">
                   <span>Realtime Status:</span>
                   <span
@@ -408,28 +444,9 @@ export function DiscussionPage({
                   />
                   <span>{isConnected ? 'Connected' : 'Connecting...'}</span>
                 </div>
-                <span>Total: {responses.length}</span>
+                <span>Total votes: {responses.length}</span>
               </div>
-
-              {responses.length === 0 && flaggedResponses.length === 0 ? (
-                <div
-                  className="text-center p-12 rounded-2xl bg-surface-raised text-content-muted"
-                  style={{
-                    border: '2px dashed var(--border-default)',
-                  }}
-                >
-                  <p>No responses recorded yet.</p>
-                </div>
-              ) : (
-                <ResponseList
-                  responses={responses}
-                  flaggedResponses={flaggedResponses}
-                  onRemoveResponse={handleRemoveResponse}
-                  onRestoreResponse={handleRestoreResponse}
-                  canFlag={!isMC}
-                />
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
