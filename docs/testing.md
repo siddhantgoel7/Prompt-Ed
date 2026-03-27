@@ -13,7 +13,8 @@ This document describes the comprehensive testing strategy for the PMCOL Teachin
 5. [Running Tests](#running-tests)
 6. [Test Coverage](#test-coverage)
 7. [Static Code Analysis](#static-code-analysis)
-8. [Writing New Tests](#writing-new-tests)
+8. [Stress Testing](#stress-testing)
+9. [Writing New Tests](#writing-new-tests)
 
 ---
 
@@ -936,6 +937,152 @@ sonar-scanner \
 ```
 
 The `sonar-project.properties` file at the repo root provides all other settings automatically. See [`docs/run-local.md`](run-local.md) for environment setup prerequisites.
+
+---
+
+## Stress Testing
+
+### Tool: Apache JMeter
+
+[Apache JMeter](https://jmeter.apache.org/) is an open-source load testing tool used to simulate concurrent users making HTTP requests against a running application. It measures response times, throughput, error rates, and produces an APDEX (Application Performance Index) score — a standardized measure of user satisfaction with response times based on two thresholds:
+
+- **Satisfied** (T): response time ≤ 500 ms
+- **Tolerating** (F): response time > 500 ms and ≤ 1,500 ms
+- **Frustrated**: response time > 1,500 ms or an error
+
+An APDEX of 1.0 is perfect. Scores below 0.5 indicate a majority of users experienced frustrating response times.
+
+All stress tests target the **student response screen** — the highest-traffic surface of the application, where all students are simultaneously active during a live session. The instructor dashboard was not stress tested as it is accessed by a single user per session and is not subject to concurrent load.
+
+---
+
+### Test Environments
+
+| Environment | Description |
+|-------------|-------------|
+| **Localhost** | Next.js production build running on `localhost:3000` on a single local machine |
+| **Vercel** | Production serverless deployment (no screenshot captured; results described below) |
+
+All localhost tests were run on the same machine in the same session. Three JMeter runs were conducted on localhost; one was conducted against Vercel.
+
+---
+
+### Localhost Test Results
+
+#### Run 1 — Baseline: 200 Users
+
+| Parameter | Value |
+|-----------|-------|
+| Virtual users | 200 |
+| Requests per user | 5 |
+| Total samples | 1,000 |
+| Test window | 1:25 AM – 1:26 AM (~1 min) |
+
+| Metric | Value |
+|--------|-------|
+| **APDEX** | **1.000** |
+| Pass rate | **100%** (0 failures) |
+| Average response time | 41.20 ms |
+| Median | 31 ms |
+| Min / Max | 24 ms / 294 ms |
+| 90th percentile | 63 ms |
+| 95th percentile | 83 ms |
+| 99th percentile | 222.92 ms |
+| Throughput | 25.01 req/s |
+
+**Result: PASS.** Under a realistic classroom load of 200 simultaneous students, the application responded perfectly. Every single request completed well within the 500 ms satisfaction threshold with no failures. This is the primary production use case — a typical lecture session — and performance is well within comfortable operating range.
+
+---
+
+#### Run 2 — High Load: 2,000 Users (40-second ramp)
+
+| Parameter | Value |
+|-----------|-------|
+| Virtual users | 2,000 |
+| Requests per user | 5 |
+| Total samples | 10,000 |
+| Ramp-up | 40 seconds |
+| Test window | 1:17 AM – 1:21 AM (~4 min) |
+
+| Metric | Value |
+|--------|-------|
+| **APDEX** | **0.112** |
+| Pass rate | 92.13% (787 failures / **7.87% error rate**) |
+| Average response time | 27,253.56 ms |
+| Median | 2,282 ms |
+| Min / Max | 420 ms / 141,825 ms |
+| 90th percentile | 88,625.90 ms |
+| 95th percentile | 133,922.55 ms |
+| 99th percentile | 135,080.99 ms |
+| Throughput | 37.04 req/s |
+
+**Result: FAIL.** The server was saturated. Average response times exceeded 27 seconds and the 90th percentile surpassed 88 seconds, indicating severe request queuing. The APDEX of 0.112 reflects that the overwhelming majority of simulated users experienced frustrated response times.
+
+---
+
+#### Run 3 — High Load: 2,000 Users (30-second ramp)
+
+| Parameter | Value |
+|-----------|-------|
+| Virtual users | 2,000 |
+| Requests per user | 5 |
+| Total samples | 10,000 |
+| Ramp-up | 30 seconds |
+| Test window | 1:43 AM – 1:47 AM (~4 min) |
+
+| Metric | Value |
+|--------|-------|
+| **APDEX** | **0.090** |
+| Pass rate | 89.71% (1,029 failures / **10.29% error rate**) |
+| Average response time | 30,312.32 ms |
+| Median | 2,403 ms |
+| Min / Max | 476 ms / 143,725 ms |
+| 90th percentile | 98,467.50 ms |
+| 95th percentile | 134,138.00 ms |
+| 99th percentile | 135,168.98 ms |
+| Throughput | 34.97 req/s |
+
+**Result: FAIL.** At 2,000 concurrent users the local Next.js server reached its failure threshold. Performance was consistent with Run 2 — the APDEX of 0.090 reflects near-total saturation. The response time distribution chart confirmed this: of 10,000 requests, the vast majority exceeded 1,500 ms, fewer than 1,750 fell in the 500–1,500 ms toleration band, and only a negligible number completed within 500 ms. Approximately 1,000 requests resulted in outright errors.
+
+---
+
+### Vercel (Production) Test Result
+
+| Parameter | Value |
+|-----------|-------|
+| Virtual users | 10,000 |
+| Requests per user | 4 |
+| Duration | ~40 seconds |
+| Total requests intended | 40,000 |
+| Requests served before shutdown | **~19,160** |
+
+**Result: FAIL.** Under a simulated load of 10,000 concurrent users, Vercel's serverless infrastructure began throttling and shut down the deployment after serving approximately 19,160 requests — less than half of the intended 40,000. Beyond this point, requests received HTTP 5xx responses from the platform. This is consistent with Vercel's serverless function concurrency limits being exceeded under a sustained extreme burst, causing the platform's circuit breaker to terminate execution to protect shared infrastructure.
+
+---
+
+### Summary
+
+| Environment | Users | Total Samples | Error Rate | APDEX | Outcome |
+|-------------|-------|--------------|------------|-------|---------|
+| Localhost | 200 (30s ramp, 5 req) | 1,000 | 0.00% | 1.000 | **Pass** |
+| Localhost | 2,000 (40s ramp, 5 req) | 10,000 | 7.87% | 0.112 | **Fail** |
+| Localhost | 2,000 (30s ramp, 5 req) | 10,000 | 10.29% | 0.090 | **Fail** |
+| Vercel (Production) | 10,000 | ~19,160 served | N/A | N/A | **Fail (platform shutdown)** |
+
+---
+
+### Analysis and Conclusions
+
+The stress tests reveal a clear and expected scalability boundary. **Under realistic classroom conditions of up to 200 concurrent students, the system performs flawlessly** — perfect APDEX, zero errors, all responses under 300 ms. This covers the primary intended use case: a single instructor running one live session with an entire class active simultaneously.
+
+**Failure begins at approximately 2,000 concurrent users on a single local Next.js process.** This is a hardware and single-process Node.js concurrency constraint — a single machine cannot efficiently serve thousands of simultaneous long-lived connections without a load balancer or multiple workers. On Vercel, the serverless platform's own concurrency ceiling becomes the limiting factor, cutting off execution at approximately 19,160 requests under a 10,000-user burst.
+
+**These limits are not a concern for the intended deployment context.** The PMCOL Teaching Tool is designed for a single instructor running one session at a time with a typical university class of 20–200 students. The 200-user baseline test confirms the system handles this load perfectly. Scaling to thousands of simultaneous students in a single session is outside the intended scope.
+
+Should future requirements call for larger deployments, appropriate approaches would include:
+- Upgrading to a Vercel plan with higher serverless concurrency limits
+- Moving to a dedicated server with horizontal scaling (containerized behind a load balancer)
+- Further offloading session state to Supabase Realtime, which is already used for live synchronization and scales independently of the Next.js server
 
 ---
 
