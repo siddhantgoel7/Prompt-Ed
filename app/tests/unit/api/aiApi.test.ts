@@ -41,7 +41,7 @@ describe('aiApi', () => {
 
     it('passes preferencesOverride in body', async () => {
       mockFetch.mockReturnValue(mockOk({ candidates: [] }));
-      const prefs = { difficulty: 'easy' as const, style: 'conceptual' as const, length: 'short' as const, focusAreas: [] };
+      const prefs = { difficulty: 'basic' as const, style: 'factual' as const, length: 'brief' as const, focusAreas: 'pharmacology' };
       await generateCandidatesApi('l1', 'short_answer', '', prefs);
       const body = JSON.parse(mockFetch.mock.calls[0][1].body);
       expect(body.preferencesOverride).toEqual(prefs);

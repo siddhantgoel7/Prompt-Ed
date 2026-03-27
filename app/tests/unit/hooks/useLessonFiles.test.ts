@@ -2,7 +2,7 @@
  * Tests for useLessonFiles hook.
  * Covers fetch, upload (optimistic + error), delete, openFile, and processing poll.
  */
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useLessonFiles } from '@/hooks/useSessionPage/useLessonFiles';
 import { fetchFilesApi, uploadFileApi, deleteFileApi, getFileDownloadUrlApi } from '@/lib/api/filesApi';
 
@@ -17,7 +17,7 @@ jest.mock('@/lib/api/filesApi', () => ({
 global.URL.createObjectURL = jest.fn(() => 'blob:mock');
 global.URL.revokeObjectURL = jest.fn();
 
-const makeFile = (name = 'slides.pdf', size = 1024) =>
+const makeFile = (name = 'slides.pdf') =>
   new File(['content'], name, { type: 'application/pdf' }) as File;
 
 const mockFiles = [
@@ -76,10 +76,8 @@ describe('useLessonFiles', () => {
     (uploadFileApi as jest.Mock).mockResolvedValue(undefined);
     const { result } = renderHook(() => useLessonFiles('l1'));
 
-    let optimisticFile: any;
-    // Spy on setFiles to capture the optimistic entry
     await act(async () => {
-      await result.current.uploadFile(makeFile('lecture.pptx', 2048));
+      await result.current.uploadFile(makeFile('lecture.pptx'));
     });
     // After completion we just verify no crash and files are set
     expect(fetchFilesApi).toHaveBeenCalled();
