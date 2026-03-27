@@ -207,9 +207,7 @@ export function useInstructorDashboard() {
     setDeleting(true);
     setError(null);
 
-    const { lessonsResult, courseResult } = await deleteCourseCascade(modal.course.id);
-
-    if (lessonsResult.error) console.error('Error deleting lessons:', lessonsResult.error);
+    const { courseResult } = await deleteCourseCascade(modal.course.id);
 
     if (courseResult.error) {
       console.error('Error deleting course:', courseResult.error);

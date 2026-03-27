@@ -195,7 +195,6 @@ describe('useInstructorDashboard (error branches)', () => {
     const course = { id: 'c1', title: 'Del' };
     (listInstructorCourses as jest.Mock).mockResolvedValue({ data: [course], error: null });
     (deleteCourseCascade as jest.Mock).mockResolvedValue({
-      lessonsResult: { error: null },
       courseResult: { error: { message: 'FK violation' } },
     });
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -207,28 +206,6 @@ describe('useInstructorDashboard (error branches)', () => {
     expect(result.current.error).toMatch(/Failed to delete/i);
     expect(result.current.deleting).toBe(false);
     expect(result.current.courses).toHaveLength(1); // not removed
-    consoleSpy.mockRestore();
-  });
-
-  it('logs but continues when lessonsResult has an error during delete', async () => {
-    const course = { id: 'c1', title: 'Del' };
-    (listInstructorCourses as jest.Mock).mockResolvedValue({ data: [course], error: null });
-    (deleteCourseCascade as jest.Mock).mockResolvedValue({
-      lessonsResult: { error: { message: 'Lesson delete error' } },
-      courseResult: { error: null },
-    });
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const result = await boot();
-
-    act(() => { result.current.openDelete(course as any); });
-    await act(async () => { await result.current.confirmDelete(); });
-
-    // lessonsResult error is logged but delete still completes
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Error deleting lessons'),
-      expect.anything()
-    );
-    expect(result.current.courses).toHaveLength(0);
     consoleSpy.mockRestore();
   });
 
