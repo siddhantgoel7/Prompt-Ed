@@ -3,7 +3,7 @@
 // Reusable analytics content and modal for a single discussion.
 // Used by ActiveRightPanel (live view inline) and SessionEndedView (modal).
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tooltip as UITooltip, TooltipContent as UITooltipContent, TooltipTrigger as UITooltipTrigger } from '@/components/ui/tooltip';
-import { Info, ExternalLink } from 'lucide-react';
+import { Info, ExternalLink, PieChart as PieChartIcon, BarChart2 } from 'lucide-react';
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
@@ -19,7 +19,6 @@ import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 
 const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444'];
-const CORRECT_COLOR = '#22c55e';
 const DONUT_HEIGHT = 150;
 const DONUT_INNER_RADIUS = 52;
 const DONUT_OUTER_RADIUS = 68;
@@ -27,14 +26,17 @@ const MS_PER_MINUTE = 60_000;
 const MAX_WORD_CLOUD_WORDS = 30;
 
 const CHART_TOOLTIP_STYLE = {
-  background: 'var(--surface-overlay)',
+  background: 'var(--surface-raised)',
   border: '1px solid var(--border-default)',
   borderRadius: '8px',
   color: 'var(--text-primary)',
   fontSize: '12px',
+  boxShadow: '0 4px 16px var(--color-black-alpha-10)',
 } as const;
 
 const CHART_TOOLTIP_WRAPPER = { zIndex: 50 } as const;
+
+const fmtCount = (n: number) => `Count: ${n} ${n === 1 ? 'response' : 'responses'}`;
 
 const WORD_CLOUD_STOP_WORDS = new Set([
   'the', 'and', 'for', 'that', 'with', 'this', 'from', 'have', 'are', 'was', 'were', 'your',
@@ -92,6 +94,84 @@ function DonutChart({
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ zIndex: 1 }}>
         <span className="text-xl font-bold text-content-primary leading-none">{centerLabel}</span>
         <span className="text-[10px] text-content-muted mt-0.5">{centerSub}</span>
+      </div>
+    </div>
+  );
+}
+
+/** Shared donut-or-bar chart section with toggle header and right-side legend. */
+function DistributionSection({
+  title,
+  chartType,
+  onSetChartType,
+  data,
+  centerLabel,
+  centerSub,
+  children,
+}: Readonly<{
+  title: string;
+  chartType: 'donut' | 'bar';
+  onSetChartType: (type: 'donut' | 'bar') => void;
+  data: Array<{ label: string; count: number; fill: string }>;
+  centerLabel: string;
+  centerSub: string;
+  children: React.ReactNode;
+}>) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-content-muted">{title}</p>
+        <div className="flex items-center gap-1">
+          {([['donut', PieChartIcon], ['bar', BarChart2]] as const).map(([type, Icon]) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => onSetChartType(type)}
+              aria-label={`${type} chart`}
+              className="p-1 rounded transition-colors"
+              style={chartType === type ? {
+                background: 'var(--surface-overlay)',
+                color: 'var(--text-primary)',
+              } : {
+                color: 'var(--text-muted)',
+              }}
+            >
+              <Icon className="w-3.5 h-3.5" />
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-row gap-4 items-center">
+        {chartType === 'donut' ? (
+          <DonutChart
+            data={data}
+            centerLabel={centerLabel}
+            centerSub={centerSub}
+            tooltipFormatter={(value, name) => [fmtCount(value), name]}
+          />
+        ) : (
+          <div className="w-1/2 shrink-0">
+            <ResponsiveContainer width="100%" height={DONUT_HEIGHT}>
+              <BarChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+                <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  wrapperStyle={CHART_TOOLTIP_WRAPPER}
+                  separator=""
+                  formatter={(value) => [fmtCount(Number(value ?? 0)), '']}
+                />
+                <Bar dataKey="count" radius={[3, 3, 0, 0]}>
+                  {data.map((entry) => (
+                    <Cell key={entry.label} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+        <div className="w-1/2 space-y-2">{children}</div>
       </div>
     </div>
   );
@@ -248,6 +328,8 @@ export function DiscussionAnalyticsContent({
   };
 
   const totalMcVotes = mcChartData.reduce((s, e) => s + e.count, 0);
+  const [mcChartType, setMcChartType] = useState<'donut' | 'bar'>('donut');
+  const [ciChartType, setCiChartType] = useState<'donut' | 'bar'>('donut');
 
   return (
     <div className="flex flex-col gap-5 pb-4">
@@ -262,81 +344,66 @@ export function DiscussionAnalyticsContent({
         />
       </div>
 
-      {/* ── MC correct / incorrect donut ── */}
+      {/* ── Correct vs Incorrect chart ── */}
       {ciStats && (
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
-            Correct vs Incorrect
-          </p>
-          <div className="flex flex-row gap-4 items-center">
-            <DonutChart
-              data={ciStats.data}
-              centerLabel={`${ciStats.pct}%`}
-              centerSub="correct"
-              tooltipFormatter={(value, name) => [`${value} responses`, name]}
-            />
-            <div className="w-1/2 space-y-2">
-              {ciStats.data.map((entry) => (
-                <div key={entry.label} className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full shrink-0" style={{ background: entry.fill }} />
-                  <span
-                    className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold shrink-0"
-                    style={{
-                      background: entry.label === 'Correct' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
-                      color: entry.fill,
-                    }}
-                  >
-                    {entry.label}
-                  </span>
-                  <span className="text-xs text-content-primary flex-1">
-                    {entry.count} ({ciStats.answered.length > 0 ? Math.round((entry.count / ciStats.answered.length) * 100) : 0}%)
-                  </span>
-                </div>
-              ))}
+        <DistributionSection
+          title="Correct vs Incorrect"
+          chartType={ciChartType}
+          onSetChartType={setCiChartType}
+          data={ciStats.data}
+          centerLabel={`${ciStats.pct}%`}
+          centerSub="correct"
+        >
+          {ciStats.data.map((entry) => (
+            <div key={entry.label} className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: entry.fill }} />
+              <span
+                className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold shrink-0"
+                style={{
+                  background: entry.label === 'Correct' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                  color: entry.fill,
+                }}
+              >
+                {entry.label}
+              </span>
+              <span className="text-xs text-content-primary flex-1">
+                {entry.count} ({ciStats.answered.length > 0 ? Math.round((entry.count / ciStats.answered.length) * 100) : 0}%)
+              </span>
             </div>
-          </div>
-        </div>
+          ))}
+        </DistributionSection>
       )}
 
-      {/* ── MC donut chart ── */}
+      {/* ── MC answer distribution ── */}
       {isMC && mcChartData.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
-            Answer Distribution
-          </p>
-          <div className="flex flex-row gap-4 items-center">
-            <DonutChart
-              data={mcChartData}
-              centerLabel={String(totalMcVotes)}
-              centerSub="responses"
-              tooltipFormatter={(value, name) => [`${value} responses`, `Option ${name}`]}
-            />
-            <div className="w-1/2 space-y-2">
-              {mcChartData.map((entry) => (
-                <div key={entry.label} className="flex items-center gap-2">
+        <DistributionSection
+          title="Answer Distribution"
+          chartType={mcChartType}
+          onSetChartType={setMcChartType}
+          data={mcChartData}
+          centerLabel={String(totalMcVotes)}
+          centerSub="responses"
+        >
+          {mcChartData.map((entry) => (
+            <div key={entry.label} className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: entry.fill }} />
+              <span className="text-xs font-bold shrink-0 w-4" style={{ color: entry.fill }}>
+                {entry.label}
+              </span>
+              <span className="text-xs text-content-primary flex-1">
+                {entry.count} ({entry.percentage}%)
+                {entry.isCorrect && (
                   <span
-                    className="h-2 w-2 rounded-full shrink-0"
-                    style={{ background: entry.fill }}
-                  />
-                  <span className="text-xs font-bold shrink-0 w-4" style={{ color: entry.fill }}>
-                    {entry.label}
+                    className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold ml-1.5"
+                    style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e' }}
+                  >
+                    correct
                   </span>
-                  <span className="text-xs text-content-primary flex-1">
-                    {entry.count} ({entry.percentage}%)
-                    {entry.isCorrect && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold ml-1.5"
-                        style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e' }}
-                      >
-                        correct
-                      </span>
-                    )}
-                  </span>
-                </div>
-              ))}
+                )}
+              </span>
             </div>
-          </div>
-        </div>
+          ))}
+        </DistributionSection>
       )}
 
       {isFreeText && wordCloudData.length > 0 && (
@@ -392,8 +459,8 @@ export function DiscussionAnalyticsContent({
               <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={CHART_TOOLTIP_STYLE}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter={(v: any) => [`${v} responses`, 'Count']}
+                separator=""
+                formatter={(v) => [fmtCount(Number(v ?? 0)), '']}
               />
               <Bar dataKey="Responses" fill="var(--color-primary-500)" radius={[3, 3, 0, 0]} />
             </BarChart>
