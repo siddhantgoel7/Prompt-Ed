@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { Flag, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ExpandableCard } from '@/components/instructor/ExpandableCard';
 
 export type ResponseCardVariant = 'compact' | 'full';
 
@@ -23,124 +25,93 @@ export interface ResponseCardProps {
 
 const variantStyles = {
   compact: {
-    selectedPadding: 'p-6',
-    unselectedPadding: 'p-3',
+    padding: '12px',
     selectedText: 'text-2xl leading-relaxed font-semibold',
     unselectedText: 'text-sm line-clamp-3',
-    selectedTimestamp: 'text-xs mt-4',
-    unselectedTimestamp: 'text-[10px] mt-1.5',
-    actionBarSpacing: 'mt-4 pt-4',
-    flagButton: 'gap-1.5 px-3 py-1.5 text-xs',
-    flagIcon: 'w-3 h-3',
+    timestamp: 'text-[10px] uppercase tracking-wider',
+    badgeIconSize: 'w-3 h-3',
   },
   full: {
-    selectedPadding: 'p-8 md:p-10',
-    unselectedPadding: 'p-5',
-    selectedText: 'text-3xl md:text-4xl font-semibold',
+    padding: '20px',
+    selectedText: 'text-3xl md:text-4xl font-semibold leading-relaxed',
     unselectedText: 'text-base',
-    selectedTimestamp: 'mt-6 text-sm',
-    unselectedTimestamp: 'mt-3 text-xs',
-    actionBarSpacing: 'mt-6 pt-5',
-    flagButton: 'gap-2 px-5 py-2.5 text-sm',
-    flagIcon: 'w-4 h-4',
+    timestamp: 'text-xs',
+    badgeIconSize: 'w-3.5 h-3.5',
   },
 } as const;
 
-function ActionButton({
+/** Circular flag icon that expands to full label on first click, fires action on second click. */
+function FlagBadge({
   mode,
   isBeingFlagged,
   onFlag,
-  className,
-  iconClassName,
+  variant,
 }: Readonly<{
   mode: ResponseCardMode;
   isBeingFlagged: boolean;
   onFlag: () => void;
-  className: string;
-  iconClassName: string;
+  variant: ResponseCardVariant;
 }>) {
+  const [expanded, setExpanded] = useState(false);
+  const s = variantStyles[variant];
   const isFlagged = mode === 'flagged';
-  let label = 'Flag as Inappropriate';
-  if (isFlagged) {
-    if (isBeingFlagged) {
-      label = 'Restoring...';
+
+  const icon = isFlagged
+    ? <RotateCcw className={s.badgeIconSize} />
+    : <Flag className={s.badgeIconSize} />;
+
+  const label = isFlagged
+    ? (isBeingFlagged ? 'Restoring...' : 'Unflag')
+    : (isBeingFlagged ? 'Removing...' : 'Flag as Inappropriate');
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (expanded) {
+      onFlag();
+      setExpanded(false);
     } else {
-      label = 'Unflag';
+      setExpanded(true);
     }
-  } else if (isBeingFlagged) {
-    label = 'Removing...';
-  }
+  };
 
   return (
     <button
       type="button"
       disabled={isBeingFlagged}
-      onClick={(e) => {
-        e.stopPropagation();
-        onFlag();
-      }}
-      className={cn(
-        'inline-flex items-center font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
-        className,
-      )}
-      style={isFlagged ? {
-        color: 'var(--color-primary-600)',
-        background: 'var(--color-primary-alpha-10)',
-        border: '1px solid var(--color-primary-alpha-25)',
-      } : {
-        color: 'var(--recording-text, #dc2626)',
-        background: 'var(--color-error-alpha-08)',
-        border: '1px solid var(--error-border)',
+      onClick={handleClick}
+      onBlur={() => setExpanded(false)}
+      title={label}
+      className="shrink-0 inline-flex items-center rounded-full font-semibold overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+      style={{
+        height: '24px',
+        color: isFlagged ? 'var(--color-primary-600)' : 'var(--recording-text, #dc2626)',
+        background: isFlagged ? 'var(--color-primary-alpha-10)' : 'var(--color-error-alpha-08)',
+        border: isFlagged ? '1px solid var(--color-primary-alpha-25)' : '1px solid var(--error-border)',
       }}
     >
-      {isFlagged ? <RotateCcw className={iconClassName} /> : <Flag className={iconClassName} />}
-      {label}
+      {/* Icon — always 24×24, centered. Button width = this alone when collapsed → circle. */}
+      <span className="w-6 h-6 shrink-0 flex items-center justify-center">
+        {icon}
+      </span>
+      {/* Grid trick: 0fr→1fr, no pixel widths. padding-right only applied when expanded so it never adds width at rest. */}
+      <span
+        style={{
+          display: 'grid',
+          gridTemplateColumns: expanded ? '1fr' : '0fr',
+          transition: 'grid-template-columns 200ms ease-in-out',
+        }}
+      >
+        <span
+          className="overflow-hidden whitespace-nowrap text-xs"
+          style={{
+            paddingRight: expanded ? '8px' : '0',
+            transition: 'padding-right 200ms ease-in-out',
+          }}
+        >
+          {label}
+        </span>
+      </span>
     </button>
-  );
-}
-
-function ResponseCardContent({
-  variant,
-  isSelected,
-  responseText,
-  timeString,
-}: Readonly<{
-  variant: ResponseCardVariant;
-  isSelected: boolean;
-  responseText: string;
-  timeString: string;
-}>) {
-  const s = variantStyles[variant];
-
-  const textClassName = cn(
-    'whitespace-pre-wrap break-words transition-all duration-300 text-content-primary',
-    isSelected ? s.selectedText : s.unselectedText,
-    variant === 'full' && 'leading-relaxed',
-  );
-
-  const timestampClassName = cn(
-    'font-medium transition-all duration-300 text-content-muted',
-    isSelected ? s.selectedTimestamp : s.unselectedTimestamp,
-  );
-
-  if (variant === 'compact') {
-    return (
-      <>
-        <p className={textClassName}>{responseText}</p>
-        <p className={cn(timestampClassName, 'uppercase tracking-wider')}>
-          {timeString}
-        </p>
-      </>
-    );
-  }
-
-  return (
-    <>
-      <p className={textClassName}>{responseText}</p>
-      <div className={cn(timestampClassName, 'flex justify-end items-center gap-2')}>
-        <span suppressHydrationWarning>{timeString}</span>
-      </div>
-    </>
   );
 }
 
@@ -175,53 +146,43 @@ export function ResponseCard({
 
   let dataVariant: string | undefined = undefined;
   if (isSelected) {
-    if (isFlagged) {
-      dataVariant = 'flagged-selected';
-    } else {
-      dataVariant = 'highlighted-selected';
-    }
+    dataVariant = isFlagged ? 'flagged-selected' : 'highlighted-selected';
   }
 
-  return (
-    <div
-      className={cn(
-        'relative block transition-all duration-300 ease-in-out',
-        isSelected ? 'my-4 z-10' : 'z-0',
-      )}
-    >
-      <button
-        type="button"
-        className={cn(
-          'rounded-xl text-left appearance-none p-0 border-none transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full cursor-pointer',
-          isSelected ? s.selectedPadding : s.unselectedPadding,
-        )}
-        data-highlighted={isSelected ? 'true' : undefined}
-        data-variant={dataVariant}
-        style={isSelected ? selectedStyle : unselectedStyle}
-        onClick={onToggle}
-        aria-label={isSelected ? 'Deselect response' : 'Select response'}
-      >
-        <ResponseCardContent
-          variant={variant}
-          isSelected={isSelected}
-          responseText={responseText}
-          timeString={timeString}
-        />
-      </button>
+  const badge = onFlag ? (
+    <FlagBadge
+      mode={mode}
+      isBeingFlagged={isBeingFlagged}
+      onFlag={onFlag}
+      variant={variant}
+    />
+  ) : (
+    // Placeholder to keep layout consistent when no flag action available
+    <div className={cn('shrink-0', s.badgeSize)} />
+  );
 
-      {isSelected && (
-        <div className="absolute bottom-5 right-5 z-20">
-          {onFlag ? (
-            <ActionButton
-              mode={mode}
-              isBeingFlagged={isBeingFlagged}
-              onFlag={onFlag}
-              className={s.flagButton}
-              iconClassName={s.flagIcon}
-            />
-          ) : null}
-        </div>
-      )}
-    </div>
+  const rightLabel = (
+    <span className={cn('font-medium text-content-muted', s.timestamp)} suppressHydrationWarning>
+      {timeString}
+    </span>
+  );
+
+  return (
+    <ExpandableCard
+      badge={badge}
+      text={responseText}
+      rightLabel={rightLabel}
+      isSelected={isSelected}
+      onClick={onToggle}
+      padding={s.padding}
+      selectedStyle={selectedStyle}
+      unselectedStyle={unselectedStyle}
+      selectedTextClassName={s.selectedText}
+      unselectedTextClassName={s.unselectedText}
+      selectedMargin="my-4"
+      data-highlighted={isSelected ? 'true' : undefined}
+      data-variant={dataVariant}
+      ariaLabel={isSelected ? 'Deselect response' : 'Select response'}
+    />
   );
 }

@@ -12,6 +12,7 @@ import { DiscussionAnalyticsContent } from '@/components/instructor/session/Disc
 import { flagResponseApi, unflagResponseApi } from '@/lib/api/discussionsApi';
 import { useResponseSelection } from '@/hooks/useResponseSelection';
 import { ResponseCard } from '@/components/instructor/ResponseCard';
+import { ExpandableCard } from '@/components/instructor/ExpandableCard';
 import { FilterToggle } from '@/components/instructor/FilterToggle';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
 
@@ -213,6 +214,7 @@ export function DiscussionPage({
   }, [channel, isConnected, handleNewResponse]);
 
   const isMC = initialDiscussion.prompt_type === 'multiple_choice';
+  const [selectedMCOption, setSelectedMCOption] = useState<string | null>(null);
 
   const distribution: Record<string, number> = {};
   if (isMC && initialDiscussion.mc_options) {
@@ -355,44 +357,59 @@ export function DiscussionPage({
                   {initialDiscussion.mc_options.map((opt) => {
                     const count = distribution[opt.label] || 0;
                     const isCorrect = initialDiscussion.correct_option === opt.label;
-                    return (
-                      <div
-                        key={opt.label}
-                        className="flex items-center justify-between p-3 rounded-xl"
+                    const isSelected = selectedMCOption === opt.label;
+
+                    const badge = (
+                      <span
+                        className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0"
                         style={isCorrect ? {
-                          background: 'rgba(45,158,45,0.08)',
-                          border: '2px solid var(--color-primary-500)',
+                          background: 'var(--color-primary-500)',
+                          color: 'white',
+                        } : isSelected ? {
+                          background: 'var(--color-highlight-alpha-55)',
+                          color: 'var(--text-primary)',
                         } : {
-                          background: 'var(--surface-raised)',
-                          border: '1px solid var(--border-default)',
+                          background: 'var(--surface-overlay)',
+                          color: 'var(--text-secondary)',
                         }}
                       >
-                        <div className="flex items-center gap-3">
-                          <span
-                            className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold"
-                            style={isCorrect ? {
-                              background: 'var(--color-primary-500)',
-                              color: 'white',
-                            } : {
-                              background: 'var(--surface-overlay)',
-                              color: 'var(--text-secondary)',
-                            }}
-                          >
-                            {opt.label}
-                          </span>
-                          <span
-                            className={isCorrect ? 'font-medium' : ''}
-                            style={{ color: isCorrect ? 'var(--color-primary-500)' : 'var(--text-secondary)' }}
-                          >
-                            {opt.text}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-content-muted">
-                            {count} responses
-                          </span>
-                        </div>
-                      </div>
+                        {opt.label}
+                      </span>
+                    );
+
+                    const selectedStyle = isCorrect ? {
+                      background: 'rgba(45,158,45,0.12)',
+                      border: '2px solid var(--color-primary-500)',
+                      boxShadow: '0 4px 24px rgba(45,158,45,0.12)',
+                    } : {
+                      background: 'var(--color-highlight-alpha-10)',
+                      border: '2px solid var(--color-highlight-alpha-55)',
+                      boxShadow: '0 4px 24px var(--color-highlight-alpha-12)',
+                    };
+
+                    const unselectedStyle = isCorrect ? {
+                      background: 'rgba(45,158,45,0.08)',
+                      border: '2px solid var(--color-primary-500)',
+                    } : {
+                      background: 'var(--surface-raised)',
+                      border: '1px solid var(--border-default)',
+                    };
+
+                    return (
+                      <ExpandableCard
+                        key={opt.label}
+                        badge={badge}
+                        text={opt.text}
+                        rightLabel={<span className="text-sm font-semibold text-content-muted">{count} responses</span>}
+                        isSelected={isSelected}
+                        onClick={() => setSelectedMCOption(isSelected ? null : opt.label)}
+                        padding="12px 16px"
+                        selectedStyle={selectedStyle}
+                        unselectedStyle={unselectedStyle}
+                        selectedTextClassName={`text-3xl font-semibold leading-relaxed ${isCorrect ? 'text-[var(--color-primary-500)]' : 'text-content-primary'}`}
+                        unselectedTextClassName={`text-sm ${isCorrect ? 'font-medium text-[var(--color-primary-500)]' : 'text-[var(--text-secondary)]'}`}
+                        ariaLabel={isSelected ? 'Deselect option' : 'Select option'}
+                      />
                     );
                   })}
                 </div>
