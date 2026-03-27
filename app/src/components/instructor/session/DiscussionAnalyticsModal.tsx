@@ -152,8 +152,7 @@ export function DiscussionAnalyticsContent({
                       )}
                     </div>
                     <div className="flex items-baseline gap-1.5 mt-0.5">
-                      <span className="text-sm font-bold text-content-primary">{entry.percentage}%</span>
-                      <span className="text-xs text-content-muted">{entry.count} votes</span>
+                      <span className="text-sm font-bold text-content-primary">{entry.count} ({entry.percentage}%)</span>
                     </div>
                   </div>
                 </div>
