@@ -267,10 +267,14 @@ export function DiscussionPage({
             >
               Metrics
             </h2>
+            {/* lessonId is required so the ExternalLink button in DiscussionAnalyticsContent
+                opens the interactive word cloud page (/session/[lessonId]/word-cloud/[discussionId])
+                instead of falling back to the static HTML popup. */}
             <DiscussionAnalyticsContent
               discussion={initialDiscussion}
               responses={responses}
               studentCount={studentCount}
+              lessonId={lessonId}
             />
           </div>
 

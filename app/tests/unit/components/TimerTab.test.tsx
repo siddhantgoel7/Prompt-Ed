@@ -7,9 +7,10 @@ jest.mock('@/components/ui/CircularTimer', () => ({
 }));
 
 jest.mock('@/components/instructor/session/StartDiscussionDialog', () => ({
-    StartDiscussionDialog: ({ open, onConfirm }: any) => open ? (
+    StartDiscussionDialog: ({ open, onConfirm, onCancel }: any) => open ? (
         <div data-testid="edit-dialog">
             <button onClick={() => onConfirm(20)}>Confirm 20s</button>
+            <button onClick={onCancel}>Cancel dialog</button>
         </div>
     ) : null,
 }));
@@ -55,5 +56,25 @@ describe('TimerTab', () => {
     it('success: empty state when no active discussion', () => {
         render(<TimerTab {...defaultProps} activeDiscussionId={null} />);
         expect(screen.getByText(/No active discussion/i)).toBeInTheDocument();
+    });
+
+    it('cancels the edit dialog without calling onEditTimer', () => {
+        const onEditTimer = jest.fn();
+        render(<TimerTab {...defaultProps} onEditTimer={onEditTimer} />);
+        fireEvent.click(screen.getByTestId('edit-timer-button'));
+        expect(screen.getByTestId('edit-dialog')).toBeInTheDocument();
+        fireEvent.click(screen.getByText('Cancel dialog'));
+        expect(screen.queryByTestId('edit-dialog')).not.toBeInTheDocument();
+        expect(onEditTimer).not.toHaveBeenCalled();
+    });
+
+    it('fires mouse enter/leave on all timer control buttons', () => {
+        render(<TimerTab {...defaultProps} />);
+        // Exercise style-mutating hover handlers on Edit, +10s, and Close Discussion buttons
+        for (const testId of ['edit-timer-button', 'extend-timer-button', 'close-discussion-button']) {
+            const btn = screen.getByTestId(testId);
+            fireEvent.mouseEnter(btn);
+            fireEvent.mouseLeave(btn);
+        }
     });
 });

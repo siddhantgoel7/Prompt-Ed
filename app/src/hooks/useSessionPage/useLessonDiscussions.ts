@@ -103,6 +103,25 @@ export function useLessonDiscussions(
     return () => clearInterval(interval);
   }, [timerEndTime, activeDiscussion?.id, handleCloseDiscussion]);
 
+  // ── Timer state restore (reconnect / tab-switch fix) ──────────────────────
+  // Problem: React state (timerEndTime) is lost when the component remounts, the instructor
+  // switches browser tabs, or the WebSocket reconnects and fetchDiscussions() re-runs.
+  // Without this effect the timer becomes null, the auto-close interval never fires,
+  // and the discussion stays open past its deadline.
+  //
+  // Solution: whenever activeDiscussion changes identity or its timer fields update,
+  // recompute timerEndTime directly from the DB values (published_at + time_limit_seconds).
+  // Resetting autoCloseCalledRef ensures the interval above fires immediately on the next
+  // 500 ms tick if the deadline has already passed while we were disconnected.
+  useEffect(() => {
+    if (activeDiscussion?.time_limit_seconds && activeDiscussion.published_at) {
+      const endTime = new Date(activeDiscussion.published_at).getTime() + activeDiscussion.time_limit_seconds * 1000;
+      setTimerState(endTime, activeDiscussion.time_limit_seconds);
+      autoCloseCalledRef.current = false;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeDiscussion?.id, activeDiscussion?.time_limit_seconds, activeDiscussion?.published_at]);
+
   // Response Management
   const {
     responses,
