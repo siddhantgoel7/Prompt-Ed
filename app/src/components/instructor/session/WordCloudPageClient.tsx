@@ -46,7 +46,7 @@ function computeWordCloud(responses: Response[]) {
   responses.forEach((r) => {
     const words = r.response_text
       .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, ' ')
+      .replaceAll(/[^a-z0-9\s]/g, ' ')
       .split(/\s+/)
       .map((w) => w.trim())
       .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
@@ -60,30 +60,25 @@ function computeWordCloud(responses: Response[]) {
 
 /** Wraps occurrences of `word` in the text with a highlighted <mark>. */
 function HighlightedText({ text, word }: Readonly<{ text: string; word: string }>) {
-  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escaped = word.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
   const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
-  return (
-    <>
-      {parts.map((part, i) =>
-        part.toLowerCase() === word.toLowerCase() ? (
-          <mark
-            key={i}
-            style={{
-              background: 'rgba(45,158,45,0.22)',
-              color: 'var(--color-primary-500)',
-              borderRadius: '3px',
-              padding: '0 2px',
-              fontWeight: 600,
-            }}
-          >
+  const renderedParts = (() => {
+    let matchCount = 0;
+    let textCount = 0;
+    return parts.map((part) => {
+      const isMatch = part.toLowerCase() === word.toLowerCase();
+      const key = isMatch ? `match-${matchCount++}` : `text-${textCount++}`;
+      if (isMatch) {
+        return (
+          <mark key={key} style={{ background: 'rgba(45,158,45,0.22)', color: 'var(--color-primary-500)', borderRadius: '3px', padding: '0 2px', fontWeight: 600 }}>
             {part}
           </mark>
-        ) : (
-          <React.Fragment key={i}>{part}</React.Fragment>
-        )
-      )}
-    </>
-  );
+        );
+      }
+      return <React.Fragment key={key}>{part}</React.Fragment>;
+    });
+  })();
+  return <>{renderedParts}</>;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -186,27 +181,31 @@ function SpotlightOverlay({
   // even if focus is somewhere else on the page.
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    globalThis.window.addEventListener('keydown', handler);
+    return () => globalThis.window.removeEventListener('keydown', handler);
   }, [onClose]);
 
   return (
     /* Backdrop */
-    <div
+    <button
+      type="button"
       data-testid="spotlight-overlay"
       className="fixed inset-0 z-50 flex items-center justify-center"
       style={{
         background: 'rgba(0,0,0,0.55)',
         backdropFilter: 'blur(4px)',
         animation: 'wcBackdropIn 0.2s ease-out both',
+        border: 'none',
+        cursor: 'default',
+        padding: 0,
       }}
-      onClick={onClose}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       {/* Card */}
-      <div
+      <dialog
         data-testid="spotlight-card"
-        role="dialog"
         aria-modal="true"
+        open
         className="rounded-2xl p-8 mx-6"
         style={{
           position: 'fixed',
@@ -220,8 +219,9 @@ function SpotlightOverlay({
           width: 'min(640px, calc(100vw - 48px))',
           maxHeight: '80vh',
           overflowY: 'auto',
+          margin: 0,
+          padding: '2rem',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         <p
           className="text-base md:text-lg leading-relaxed whitespace-pre-wrap break-words text-content-primary mb-4"
@@ -242,8 +242,8 @@ function SpotlightOverlay({
             Close (Esc)
           </button>
         </div>
-      </div>
-    </div>
+      </dialog>
+    </button>
   );
 }
 
@@ -371,7 +371,7 @@ export function WordCloudPageClient({
               }}
             />
             <span className="text-xs text-content-muted hidden sm:inline">
-              {responses.length} response{responses.length !== 1 ? 's' : ''}
+              {responses.length} response{responses.length === 1 ? '' : 's'}
             </span>
           </div>
           <ThemeToggle />
@@ -399,15 +399,13 @@ export function WordCloudPageClient({
                   <button
                     type="button"
                     data-testid={`word-btn-${entry.word}`}
-                    title={`${entry.word}: ${entry.count} occurrence${entry.count !== 1 ? 's' : ''}`}
+                    title={`${entry.word}: ${entry.count} occurrence${entry.count === 1 ? '' : 's'}`}
                     onClick={() => handleWordClick(entry.word)}
                     className="leading-none transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded px-0.5"
                     style={{
                       fontSize: `${sizePx}px`,
                       fontWeight: isSelected ? 800 : 400,
-                      color: isSelected
-                        ? 'var(--color-primary-500)'
-                        : i % 2 === 0 ? 'var(--color-primary-500)' : 'var(--text-secondary)',
+                      color: (isSelected || i % 2 === 0) ? 'var(--color-primary-500)' : 'var(--text-secondary)',
                       opacity: dimmed ? 0.3 : 1,
                       textDecoration: isSelected ? 'underline' : 'none',
                       textUnderlineOffset: '4px',
@@ -435,7 +433,7 @@ export function WordCloudPageClient({
       </section>
 
       {/* ── Response Cards (below word cloud) ── */}
-      {selectedWord && filteredResponses.length >= 0 && (
+      {selectedWord && filteredResponses.length > 0 && (
         <section className="wc-section-in px-6 pb-10">
           {/* Section header */}
           <div
@@ -448,7 +446,7 @@ export function WordCloudPageClient({
             <p className="text-sm font-semibold text-content-primary">
               <span style={{ color: 'var(--color-primary-500)' }}>&ldquo;{selectedWord}&rdquo;</span>
               <span className="ml-2 text-content-muted font-normal">
-                — {filteredResponses.length} response{filteredResponses.length !== 1 ? 's' : ''}
+                — {filteredResponses.length} response{filteredResponses.length === 1 ? '' : 's'}
               </span>
             </p>
             {selectedResponseId && (

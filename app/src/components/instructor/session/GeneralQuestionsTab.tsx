@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-const GENERATING_CHARS = 'Generating...'.split('');
+const GENERATING_CHARS = 'Generating...'.split('').map((ch, i) => ({ id: `gc-${i}`, ch }));
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -68,6 +68,8 @@ export function GeneralQuestionsTab() {
         }
     };
 
+    const generateButtonLabel = generalQuestions.length > 0 ? 'Regenerate General Questions' : 'Generate General Questions';
+
     return (
         <div className="space-y-3">
             {/* Generate button — matches Generate Prompts style */}
@@ -84,9 +86,9 @@ export function GeneralQuestionsTab() {
                     >
                         {isGeneratingGeneral ? (
                             <span aria-label="Generating…" style={{ display: 'inline-flex' }}>
-                                {GENERATING_CHARS.map((ch, i) => (
+                                {GENERATING_CHARS.map(({ id, ch }, i) => (
                                     <span
-                                        key={i}
+                                        key={id}
                                         className={ch === '.' ? 'generating-char' : 'generating-shimmer'}
                                         style={{ animationDelay: `${i * 0.07}s` }}
                                     >
@@ -94,7 +96,7 @@ export function GeneralQuestionsTab() {
                                     </span>
                                 ))}
                             </span>
-                        ) : generalQuestions.length > 0 ? 'Regenerate General Questions' : 'Generate General Questions'}
+                        ) : generateButtonLabel}
                     </button>
                 </div>
             </div>
@@ -180,7 +182,7 @@ export function GeneralQuestionsTab() {
                                                         onChange={(e) => setFeedbackEnabled(e.target.checked)}
                                                         className="accent-[var(--color-primary-500)]"
                                                     />
-                                                    Show correctness feedback
+                                                    <span>Show correctness feedback</span>
                                                 </label>
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>

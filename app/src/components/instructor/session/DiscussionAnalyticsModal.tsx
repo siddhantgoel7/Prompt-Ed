@@ -40,11 +40,11 @@ export function DiscussionAnalyticsContent({
 }>) {
   const escapeHtml = (value: string) =>
     value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
 
   const total = responses.length;
   const isActive = discussion.status === 'active';
@@ -85,7 +85,7 @@ export function DiscussionAnalyticsContent({
     responses.forEach((r) => {
       const words = r.response_text
         .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, ' ')
+        .replaceAll(/[^a-z0-9\s]/g, ' ')
         .split(/\s+/)
         .map((w) => w.trim())
         .filter((w) => w.length > 2 && !WORD_CLOUD_STOP_WORDS.has(w));
@@ -109,45 +109,46 @@ export function DiscussionAnalyticsContent({
    *   (e.g. when this component is rendered without a lesson context).
    */
   const openWordCloudInNewTab = () => {
-    if (typeof window === 'undefined' || wordCloudData.length === 0) return;
+    if (globalThis.window === undefined || wordCloudData.length === 0) return;
     // Navigate to the dedicated interactive word cloud page when lessonId is available.
     if (lessonId) {
-      window.open(`/session/${lessonId}/word-cloud/${discussion.id}`, '_blank');
+      globalThis.window.open(`/session/${lessonId}/word-cloud/${discussion.id}`, '_blank');
       return;
     }
-    // Fallback: static HTML popup (no lessonId context, e.g. legacy/test usage).
-    const popup = window.open('', '_blank');
+    // Fallback: static HTML popup via blob URL (no lessonId context, e.g. legacy/test usage).
+    const popup = globalThis.window.open('', '_blank');
     if (!popup) return;
     const wordsMarkup = wordCloudData
       .map((entry, i) => {
         const ratio = entry.count / maxWordCount;
         const sizePx = 12 + Math.round(ratio * 16);
         const color = i % 2 === 0 ? '#2d9e2d' : '#374151';
-        return `<span title="${escapeHtml(`${entry.word}: ${entry.count}`)}" style="font-size:${sizePx}px;color:${color};line-height:1;">${escapeHtml(entry.word)}</span>`;
+        const title = escapeHtml(`${entry.word}: ${entry.count}`);
+        return `<span title="${title}" style="font-size:${sizePx}px;color:${color};line-height:1;">${escapeHtml(entry.word)}</span>`;
       })
       .join('');
-    popup.document.write(`
-      <!doctype html>
-      <html lang="en">
-        <head>
-          <meta charset="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>Word Cloud</title>
-          <style>
-            body { margin: 0; padding: 24px; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #f9fafb; color: #111827; }
-            h1 { margin: 0 0 6px; font-size: 24px; }
-            p { margin: 0 0 20px; color: #6b7280; }
-            .cloud { border: 1px solid #e5e7eb; background: #ffffff; border-radius: 12px; padding: 16px; display: flex; flex-wrap: wrap; gap: 10px 14px; }
-          </style>
-        </head>
-        <body>
-          <h1>Word Cloud</h1>
-          <p>${escapeHtml(discussion.prompt_text)}</p>
-          <div class="cloud">${wordsMarkup}</div>
-        </body>
-      </html>
-    `);
-    popup.document.close();
+    const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Word Cloud</title>
+    <style>
+      body { margin: 0; padding: 24px; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #f9fafb; color: #111827; }
+      h1 { margin: 0 0 6px; font-size: 24px; }
+      p { margin: 0 0 20px; color: #6b7280; }
+      .cloud { border: 1px solid #e5e7eb; background: #ffffff; border-radius: 12px; padding: 16px; display: flex; flex-wrap: wrap; gap: 10px 14px; }
+    </style>
+  </head>
+  <body>
+    <h1>Word Cloud</h1>
+    <p>${escapeHtml(discussion.prompt_text)}</p>
+    <div class="cloud">${wordsMarkup}</div>
+  </body>
+</html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    popup.location.href = url;
     popup.focus();
   };
 

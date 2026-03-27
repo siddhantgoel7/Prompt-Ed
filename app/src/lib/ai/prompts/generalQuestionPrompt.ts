@@ -13,11 +13,14 @@ export const GENERAL_QUESTION_COUNT = 10;
  * distractor strategy rules, and structured output schema.
  */
 export function buildGeneralSystemPrompt(preferences?: AIPromptPreferences): string {
-  const difficultyInstruction = preferences?.difficulty === 'basic'
-    ? 'Target the "remember" and "understand" levels of Bloom\'s taxonomy. Questions should test definitions, core mechanisms, and recall.'
-    : preferences?.difficulty === 'advanced'
-      ? 'Target the "analyze", "evaluate", and "create" levels of Bloom\'s taxonomy. Questions should require comparing drug classes, justifying clinical choices, or reasoning through trade-offs.'
-      : 'Target the "apply" and "analyze" levels of Bloom\'s taxonomy. Questions should connect mechanism to effect, interpret clinical scenarios, or work through moderate-complexity drug interactions.';
+  let difficultyInstruction: string;
+  if (preferences?.difficulty === 'basic') {
+    difficultyInstruction = 'Target the "remember" and "understand" levels of Bloom\'s taxonomy. Questions should test definitions, core mechanisms, and recall.';
+  } else if (preferences?.difficulty === 'advanced') {
+    difficultyInstruction = 'Target the "analyze", "evaluate", and "create" levels of Bloom\'s taxonomy. Questions should require comparing drug classes, justifying clinical choices, or reasoning through trade-offs.';
+  } else {
+    difficultyInstruction = 'Target the "apply" and "analyze" levels of Bloom\'s taxonomy. Questions should connect mechanism to effect, interpret clinical scenarios, or work through moderate-complexity drug interactions.';
+  }
 
   return `You are an expert teaching assistant helping a university instructor generate a comprehensive set of multiple-choice questions from their uploaded course materials.
 

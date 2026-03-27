@@ -34,3 +34,6 @@ site/
 
 .claude
 *.txt
+
+# SonarQube scanner output
+.scannerwork/
