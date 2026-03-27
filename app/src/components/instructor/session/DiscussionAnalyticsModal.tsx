@@ -12,7 +12,7 @@ import {
 import { Tooltip as UITooltip, TooltipContent as UITooltipContent, TooltipTrigger as UITooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import {
-  ResponsiveContainer, PieChart, Pie, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid
+  ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
@@ -88,79 +88,87 @@ export function DiscussionAnalyticsContent({
         />
       </div>
 
-      {/* ── MC pie chart ── */}
-      {isMC && mcChartData.length > 0 && (
-        <div>
-          <p
-            className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted"
-          >
-            Answer Distribution
-          </p>
-          <div className="flex flex-row gap-4 items-center">
-            <div className="w-1/2">
-            <ResponsiveContainer width="100%" height={160}>
-              <PieChart margin={{ top: 2, right: 2, bottom: 2, left: 2 }}>
-                <Pie
-                  data={mcChartData}
-                  dataKey="count"
-                  nameKey="label"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={75}
-                  minAngle={2}
-                  paddingAngle={1}
-                  label={false}
-                  labelLine={false}
-                />
-                <Tooltip
-                  formatter={(value: any, name: any) => [`${value} votes`, `Option ${name}`]} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  contentStyle={{
-                    background: 'var(--surface-overlay)',
-                    border: '1px solid var(--border-default)',
-                    borderRadius: '8px',
-                    color: 'var(--text-primary)',
-                    fontSize: '12px',
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            </div>
-
-            {/* Legend table */}
-            <div className="w-1/2 space-y-3">
-              {mcChartData.map((entry, i) => (
-                <div key={entry.label} className="flex items-start gap-2">
-                  <span
-                    className="mt-1 h-2.5 w-2.5 rounded-full shrink-0"
-                    style={{ background: entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length] }}
-                  />
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span
-                        className="text-xs leading-snug"
-                        style={{ color: entry.isCorrect ? 'var(--color-primary-500)' : 'var(--text-secondary)', fontWeight: entry.isCorrect ? 600 : 400 }}
-                      >
-                        {entry.label}. {entry.text}
-                      </span>
-                      {entry.isCorrect && (
-                        <span
-                          className="text-[10px] px-1.5 py-0.5 rounded font-semibold shrink-0"
-                          style={{ background: 'rgba(45,158,45,0.15)', color: 'var(--color-primary-500)' }}
-                        >
-                          ✓ Correct
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-baseline gap-1.5 mt-0.5">
-                      <span className="text-sm font-bold text-content-primary">{entry.count} ({entry.percentage}%)</span>
-                    </div>
-                  </div>
+      {/* ── MC donut chart ── */}
+      {isMC && mcChartData.length > 0 && (() => {
+        const totalVotes = mcChartData.reduce((s, e) => s + e.count, 0);
+        return (
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
+              Answer Distribution
+            </p>
+            <div className="flex flex-row gap-4 items-center">
+              {/* Donut with center overlay */}
+              <div className="relative w-1/2 shrink-0">
+                <ResponsiveContainer width="100%" height={150}>
+                  <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                    <Pie
+                      data={mcChartData}
+                      dataKey="count"
+                      nameKey="label"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={52}
+                      outerRadius={68}
+                      startAngle={90}
+                      endAngle={-270}
+                      minAngle={1}
+                      paddingAngle={0}
+                      label={false}
+                      labelLine={false}
+                      stroke="none"
+                    >
+                      {mcChartData.map((entry) => (
+                        <Cell key={entry.label} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value: any, name: any) => [`${value} votes`, `Option ${name}`]} // eslint-disable-line @typescript-eslint/no-explicit-any
+                      contentStyle={{
+                        background: 'var(--surface-overlay)',
+                        border: '1px solid var(--border-default)',
+                        borderRadius: '8px',
+                        color: 'var(--text-primary)',
+                        fontSize: '12px',
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                {/* Center label */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-xl font-bold text-content-primary leading-none">{totalVotes}</span>
+                  <span className="text-[10px] text-content-muted mt-0.5">votes</span>
                 </div>
-              ))}
+              </div>
+
+              {/* Compact legend */}
+              <div className="w-1/2 space-y-2">
+                {mcChartData.map((entry) => (
+                  <div key={entry.label} className="flex items-center gap-2">
+                    <span
+                      className="h-2 w-2 rounded-full shrink-0"
+                      style={{ background: entry.fill }}
+                    />
+                    <span className="text-xs font-bold shrink-0 w-4" style={{ color: entry.fill }}>
+                      {entry.label}
+                    </span>
+                    <span className="text-xs text-content-primary flex-1">
+                      {entry.count} ({entry.percentage}%)
+                    </span>
+                    {entry.isCorrect && (
+                      <span
+                        className="text-[10px] px-1 py-0.5 rounded font-semibold shrink-0"
+                        style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e' }}
+                      >
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ── Response timeline bar chart ── */}
       {timelineData.length > 0 && (
