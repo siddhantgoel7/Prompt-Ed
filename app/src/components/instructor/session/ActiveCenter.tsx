@@ -279,7 +279,7 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
 
   const handleSelectCandidate = (p: GeneratedPrompt, index: number) => {
     setSelectedIndex(index); onSelectCandidate(p);
-    setPromptInput(p.promptText); setTranscriptText(p.promptText);
+    setPromptInput(p.promptText);
     if (p.promptType === 'multiple_choice' && p.mcOptions) {
       const correctOpt = p.mcOptions.find(o => o.is_correct);
       setOverrideCorrectOption(correctOpt ? correctOpt.label : null);

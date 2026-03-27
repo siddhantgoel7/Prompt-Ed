@@ -88,6 +88,81 @@ export function DiscussionAnalyticsContent({
         />
       </div>
 
+      {/* ── MC correct / incorrect donut ── */}
+      {isMC && discussion.correct_option && (() => {
+        const answered = responses.filter(r => r.is_correct !== null);
+        if (answered.length === 0) return null;
+        const correctCount = answered.filter(r => r.is_correct === true).length;
+        const incorrectCount = answered.filter(r => r.is_correct === false).length;
+        const pct = Math.round((correctCount / answered.length) * 100);
+        const ciData = [
+          { label: 'Correct', count: correctCount, fill: '#22c55e' },
+          { label: 'Incorrect', count: incorrectCount, fill: '#ef4444' },
+        ];
+        return (
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
+              Correct vs Incorrect
+            </p>
+            <div className="flex flex-row gap-4 items-center">
+              <div className="relative w-1/2 shrink-0">
+                <ResponsiveContainer width="100%" height={150}>
+                  <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                    <Pie
+                      data={ciData}
+                      dataKey="count"
+                      nameKey="label"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={52}
+                      outerRadius={68}
+                      startAngle={90}
+                      endAngle={-270}
+                      minAngle={1}
+                      paddingAngle={0}
+                      label={false}
+                      labelLine={false}
+                      stroke="none"
+                    >
+                      {ciData.map((entry) => (
+                        <Cell key={entry.label} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value: any, name: any) => [`${value} votes`, name]} // eslint-disable-line @typescript-eslint/no-explicit-any
+                      contentStyle={{
+                        background: 'var(--surface-overlay)',
+                        border: '1px solid var(--border-default)',
+                        borderRadius: '8px',
+                        color: 'var(--text-primary)',
+                        fontSize: '12px',
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-xl font-bold text-content-primary leading-none">{pct}%</span>
+                  <span className="text-[10px] text-content-muted mt-0.5">correct</span>
+                </div>
+              </div>
+              <div className="w-1/2 space-y-2">
+                {ciData.map((entry) => (
+                  <div key={entry.label} className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full shrink-0" style={{ background: entry.fill }} />
+                    <span className="text-xs text-content-primary flex-1">
+                      {entry.label}
+                    </span>
+                    <span className="text-xs font-bold text-content-primary">
+                      {entry.count} ({answered.length > 0 ? Math.round((entry.count / answered.length) * 100) : 0}%)
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ── MC donut chart ── */}
       {isMC && mcChartData.length > 0 && (() => {
         const totalVotes = mcChartData.reduce((s, e) => s + e.count, 0);
