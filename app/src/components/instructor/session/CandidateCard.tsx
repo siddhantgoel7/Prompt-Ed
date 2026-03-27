@@ -170,16 +170,11 @@ export function CandidateCard({
             </TooltipContent>
           </Tooltip>
 
-          <span
-            className="text-xs font-medium text-brand-500"
-            style={{
-              opacity: isSelected ? 1 : 0,
-              transition: `opacity ${SWAP_MS}ms ease`,
-              pointerEvents: 'none',
-            }}
-          >
-            Selected (Editing)
-          </span>
+          {isSelected && (
+            <span className="text-xs font-medium text-brand-500">
+              Selected (Editing)
+            </span>
+          )}
         </div>
 
         {/* p ↔ textarea crossfade — wrapper is the stage; children are pure visuals */}
@@ -206,21 +201,23 @@ export function CandidateCard({
             {candidate.promptText}
           </p>
 
-          <textarea
-            value={editText}
-            onChange={(e) => setEditText(e.target.value)}
-            className="w-full px-3 py-2.5 text-sm rounded-[10px] min-h-[80px] resize-y leading-snug bg-surface-raised text-content-primary"
-            style={{
-              position:      'absolute',
-              inset:         0,
-              zIndex:        1,
-              border:        '1px solid var(--border-default)',
-              opacity:       isSelected ? 1 : 0,
-              transition:    `opacity ${SWAP_MS}ms ease ${isSelected ? SWAP_STAGGER_MS : 0}ms`,
-              pointerEvents: isSelected ? 'auto' : 'none',
-            }}
-            placeholder="Edit this prompt..."
-          />
+          {isExpanded && (
+            <textarea
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none leading-snug min-h-[80px] bg-surface-raised text-content-primary"
+              style={{
+                position:      'absolute',
+                inset:         0,
+                zIndex:        1,
+                border:        '1px solid var(--border-default)',
+                opacity:       isSelected ? 1 : 0,
+                transition:    `opacity ${SWAP_MS}ms ease ${isSelected ? SWAP_STAGGER_MS : 0}ms`,
+                pointerEvents: isSelected ? 'auto' : 'none',
+              }}
+              placeholder="Edit this prompt..."
+            />
+          )}
         </div>
 
         {/* MC choices */}
@@ -283,7 +280,7 @@ export function CandidateCard({
       </div>
 
       {/* Publish button */}
-      <div
+      {isSelected && <div
         style={{
           overflow: 'hidden',
           maxHeight: isSelected ? '52px' : '0px',
@@ -305,7 +302,7 @@ export function CandidateCard({
         >
           Publish This Question →
         </button>
-      </div>
+      </div>}
     </div>
   );
 }
