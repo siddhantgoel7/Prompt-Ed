@@ -8,11 +8,10 @@ import { createClient } from '@/lib/supabase/server';
  * @see US 1.51
  */
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ lessonId: string }> }
 ) {
   const { lessonId } = await params;
-  void req;
 
   try {
     const supabase = await createClient();

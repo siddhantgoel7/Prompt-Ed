@@ -15,12 +15,10 @@ import { buildGeneralSystemPrompt, buildGeneralUserPrompt, GENERAL_QUESTION_COUN
  * @see US 1.51
  */
 export async function POST(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ lessonId: string }> }
 ) {
   const { lessonId } = await params;
-  // suppress unused var warning — body is reserved for future options
-  void req;
 
   try {
     const supabase = await createClient();

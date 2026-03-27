@@ -2,5 +2,5 @@ projectKey=W26-DeptOfPharmocology
 serverUrl=http://localhost:9000
 serverVersion=26.3.0.120487
 dashboardUrl=http://localhost:9000/dashboard?id=W26-DeptOfPharmocology
-ceTaskId=1927df9a-4812-4397-8b68-a913b23c35cc
-ceTaskUrl=http://localhost:9000/api/ce/task?id=1927df9a-4812-4397-8b68-a913b23c35cc
+ceTaskId=aeeb1e03-19fd-4735-aa9a-db598f9963f1
+ceTaskUrl=http://localhost:9000/api/ce/task?id=aeeb1e03-19fd-4735-aa9a-db598f9963f1

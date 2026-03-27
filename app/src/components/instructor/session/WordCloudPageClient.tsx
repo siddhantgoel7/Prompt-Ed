@@ -270,6 +270,13 @@ export function WordCloudPageClient({
   // Flagged responses are excluded (they are hidden from students too).
   // Deduplication guard (prev.some x.id === r.id) prevents double-adding if the server
   // already included the response in the initial SSR fetch.
+  const handleRealtimeInsert = React.useCallback((payload: { new: Response }) => {
+    const r = payload.new;
+    if (r && !r.flagged_at) {
+      setResponses((prev) => prev.some((x) => x.id === r.id) ? prev : [r, ...prev]);
+    }
+  }, []);
+
   React.useEffect(() => {
     const supabase = createClient();
     const channel = supabase
@@ -283,21 +290,14 @@ export function WordCloudPageClient({
           table: 'responses',
           filter: `discussion_id=eq.${discussion.id}`,
         },
-        (payload: { new: Response }) => {
-          const r = payload.new;
-          if (r && !r.flagged_at) {
-            setResponses((prev) =>
-              prev.some((x) => x.id === r.id) ? prev : [r, ...prev]
-            );
-          }
-        }
+        handleRealtimeInsert
       )
       .subscribe((status) => {
         setIsLive(status === 'SUBSCRIBED');
       });
 
     return () => { supabase.removeChannel(channel); };
-  }, [discussion.id]);
+  }, [discussion.id, handleRealtimeInsert]);
 
   // Toggle: clicking the same word again collapses the response panel.
   // Always clear selectedResponseId so the spotlight doesn't carry over to the new word's panel.
