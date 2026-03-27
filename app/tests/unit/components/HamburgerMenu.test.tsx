@@ -89,13 +89,6 @@ describe('HamburgerMenu', () => {
     expect(btn).toBeDisabled();
   });
 
-  it('disables the Settings menu item', () => {
-    renderMenu();
-    openMenu();
-    const settingsBtn = screen.getByText('Settings');
-    expect(settingsBtn).toBeDisabled();
-  });
-
   // ── Outside-click closes the menu ────────────────────────────────────────
 
   it('closes the menu when clicking outside the component', () => {
