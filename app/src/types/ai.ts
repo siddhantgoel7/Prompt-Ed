@@ -91,6 +91,17 @@ export interface ChunkMetadata {
   recordedAt?: string;
 }
 
+/** A pre-generated general question persisted in the general_questions table. */
+export interface GeneralQuestion {
+  id: string;
+  lesson_id: string;
+  prompt_text: string;
+  mc_options: MCOption[];
+  correct_option: string;
+  display_order: number;
+  created_at: string;
+}
+
 /** A single structured content section returned by a parser, before chunking.
  *  Maps to one logical unit of content (one page's text, one slide's notes, etc.)
  *  and carries the provenance metadata needed to populate ChunkMetadata after splitting. */

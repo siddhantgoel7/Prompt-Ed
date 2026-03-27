@@ -40,41 +40,18 @@ export function ActiveRightPanel(props: {
   activeDiscussion?: Discussion | null;
   studentCount?: number;
 }) {
-  const context = React.useContext(SessionContext);
-  const responses = context ? context.responses : props.responses!;
-  const activeDiscussion = context ? context.activeDiscussion : props.activeDiscussion!;
-  const studentCount = context ? context.studentCount : (props.studentCount ?? 0);
-  const removeResponse = context ? context.removeResponse : undefined;
-  const restoreResponse = context ? context.restoreResponse : undefined;
-  const flaggedResponses = context ? context.flaggedResponses : [];
-  // Peak student count: the highest simultaneous student presence seen during the
-  // current discussion — only goes up, never down. Shown alongside responses.length
-  // to give the instructor a participation rate at a glance (e.g. "8 / 24 students").
-  const peakStudentCount = context ? context.peakStudentCount : studentCount;
-
-  // Timer props from context
-  const activeDiscussionId = context ? (context.activeDiscussion?.id ?? null) : null;
-  const timerEndTime = context ? context.discussionTimerEndTime : null;
-  const timerTotalSeconds = context ? context.discussionTimerSeconds : null;
-  const handleCloseDiscussion = context ? context.handleCloseDiscussion : () => {};
-  const handleExtendTimer = context ? context.handleExtendTimer : undefined;
-  const handleEditTimer = context ? context.handleEditTimer : undefined;
+  const contextProps = useActiveRightPanelContext(props);
+  const { responses, activeDiscussion, activeDiscussionId, timerEndTime, timerTotalSeconds,
+    handleCloseDiscussion, handleExtendTimer, handleEditTimer, peakStudentCount,
+    removeResponse, flaggedResponses } = contextProps;
 
   const [collapsed, setCollapsed] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('list');
-  const [closing, setClosing] = React.useState(false);
 
   function openTab(tab: string) {
     setActiveTab(tab);
     setCollapsed(false);
   }
-
-  const handleClose = React.useCallback(async () => {
-    if (!activeDiscussionId) return;
-    setClosing(true);
-    await handleCloseDiscussion(activeDiscussionId);
-    setClosing(false);
-  }, [activeDiscussionId, handleCloseDiscussion]);
 
   const {
     selectedIds, flaggingId, showHighlightedOnly,
@@ -89,19 +66,7 @@ export function ActiveRightPanel(props: {
   React.useEffect(() => { resetSelection(); }, [activeDiscussion?.id, resetSelection]);
 
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
-
-  // Per-option response count for MC distribution display
-  const distribution: Record<string, number> = {};
-  if (isMC && activeDiscussion?.mc_options) {
-    activeDiscussion.mc_options.forEach(opt => {
-      distribution[opt.label] = 0;
-    });
-    responses.forEach(r => {
-      if (r.selected_option && distribution[r.selected_option] !== undefined) {
-        distribution[r.selected_option]++;
-      }
-    });
-  }
+  const distribution = calculateMCDistribution(activeDiscussion, responses);
 
   const hasActiveDiscussion = !!activeDiscussionId;
   const hasTimer = timerEndTime !== null && timerTotalSeconds !== null;
@@ -154,185 +119,192 @@ export function ActiveRightPanel(props: {
         )}
       </div>
 
-      {/* ── Collapsed: icon strip with tab shortcuts ── */}
-      {collapsed ? (
-        <div className="flex flex-col items-center gap-3 pt-4">
-          {/* Close discussion icon — only when a discussion is active */}
-          {hasActiveDiscussion && (
-            <button
-              title={closing ? 'Closing…' : 'Close Discussion'}
-              onClick={handleClose}
-              disabled={closing}
-              aria-label="Close active discussion"
-              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 disabled:opacity-50"
-              style={{ background: 'rgba(245,158,11,0.15)', color: 'oklch(0.6 0.18 60)', border: '1px solid rgba(245,158,11,0.35)' }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-              </svg>
-            </button>
-          )}
-
-          {/* Responses icon */}
-          <button
-            title={`${responses.length} responses`}
-            onClick={() => openTab('list')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 relative"
-            style={{ color: activeTab === 'list' ? 'var(--color-primary-500)' : 'var(--text-muted)', background: activeTab === 'list' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.10)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = activeTab === 'list' ? 'rgba(45,158,45,0.10)' : 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = activeTab === 'list' ? 'var(--color-primary-500)' : 'var(--text-muted)'; }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            {responses.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold rounded-full flex items-center justify-center text-white bg-brand-500">
-                {responses.length > 9 ? '9+' : responses.length}
-              </span>
-            )}
-          </button>
-
-          {/* Metrics icon */}
-          <button
-            title="Metrics"
-            onClick={() => openTab('analytics')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150"
-            style={{ color: activeTab === 'analytics' ? 'var(--color-primary-500)' : 'var(--text-muted)', background: activeTab === 'analytics' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.10)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = activeTab === 'analytics' ? 'rgba(45,158,45,0.10)' : 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = activeTab === 'analytics' ? 'var(--color-primary-500)' : 'var(--text-muted)'; }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10"/>
-              <line x1="12" y1="20" x2="12" y2="4"/>
-              <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
-          </button>
-
-          {/* Timer icon — highlighted when a discussion is running */}
-          <button
-            title={hasActiveDiscussion ? (hasTimer ? 'Timer running' : 'No time limit') : 'Timer'}
-            onClick={() => openTab('timer')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 relative"
-            style={{ color: activeTab === 'timer' ? 'var(--color-primary-500)' : (hasActiveDiscussion ? 'var(--color-primary-500)' : 'var(--text-muted)'), background: activeTab === 'timer' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.10)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = activeTab === 'timer' ? 'rgba(45,158,45,0.10)' : 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = (activeTab === 'timer' || hasActiveDiscussion) ? 'var(--color-primary-500)' : 'var(--text-muted)'; }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-            {hasActiveDiscussion && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-brand-500" />
-            )}
-          </button>
-        </div>
-      ) : (
-        /* ── Expanded: full tabbed content ── */
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden">
-
-          {/* ── Close Discussion strip — visible whenever a discussion is active ── */}
-          {hasActiveDiscussion && (
-            <div
-              className="mx-3 mt-2.5 mb-1 flex items-center justify-between px-3 py-2 rounded-xl"
-              style={{
-                background: 'rgba(245,158,11,0.10)',
-                border: '1px solid rgba(245,158,11,0.30)',
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <span
-                  className="w-2 h-2 rounded-full animate-pulse flex-shrink-0"
-                  style={{ background: 'oklch(0.75 0.18 60)' }}
-                />
-                <span className="text-xs font-medium" style={{ color: 'oklch(0.6 0.18 60)' }}>
-                  Discussion active
-                </span>
-              </div>
-              <button
-                onClick={handleClose}
-                disabled={closing}
-                aria-label="Close active discussion"
-                className="text-xs font-semibold px-2.5 py-1 rounded-lg transition-all duration-150 disabled:opacity-50"
-                style={{
-                  background: closing ? 'rgba(245,158,11,0.15)' : 'rgba(245,158,11,0.20)',
-                  border: '1px solid rgba(245,158,11,0.40)',
-                  color: 'oklch(0.6 0.18 60)',
-                }}
-              >
-                {closing ? 'Closing…' : 'Close Discussion'}
-              </button>
-            </div>
-          )}
-
-          <div className="px-3 pt-2">
-            <TabsList className="w-full grid grid-cols-3">
-              <TabsTrigger value="list" className="text-xs">Responses</TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs">Metrics</TabsTrigger>
-              <TabsTrigger value="timer" className="text-xs">
-                Timer
-                {hasActiveDiscussion && (
-                  <span className="ml-1.5 w-1.5 h-1.5 rounded-full inline-block bg-brand-500" />
-                )}
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <ScrollArea className="flex-1 mt-3">
-            <div className="px-3 pb-4">
-
-              {/* ── Responses tab ── */}
-              <TabsContent value="list" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-                <ResponseListTab
-                  activeDiscussion={activeDiscussion}
-                  responses={responses}
-                  flaggedResponses={flaggedResponses}
-                  isMC={isMC}
-                  distribution={distribution}
-                  restoreResponse={restoreResponse}
-                  selectedIds={selectedIds}
-                  showHighlightedOnly={showHighlightedOnly}
-                  flaggingId={flaggingId}
-                  toggleSelected={toggleSelected}
-                  handleFlagInappropriate={handleFlagInappropriate}
-                  setShowHighlightedOnly={setShowHighlightedOnly}
-                  filterResponses={filterResponses}
-                />
-              </TabsContent>
-
-              {/* ── Metrics tab ── */}
-              <TabsContent value="analytics" className="mt-0 pt-2 focus-visible:outline-none focus-visible:ring-0">
-                {activeDiscussion ? (
-                  <DiscussionAnalyticsContent
-                    discussion={activeDiscussion}
-                    responses={responses}
-                    studentCount={peakStudentCount}
-                  />
-                ) : (
-                  <p className="text-sm py-8 text-center text-content-muted">
-                    No active discussion
-                  </p>
-                )}
-              </TabsContent>
-
-              {/* ── Timer tab ── */}
-              <TabsContent value="timer" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-                <TimerTab
-                  activeDiscussionId={activeDiscussionId}
-                  timerEndTime={timerEndTime}
-                  timerTotalSeconds={timerTotalSeconds}
-                  onClose={handleCloseDiscussion}
-                  onExtendTimer={handleExtendTimer}
-                  onEditTimer={handleEditTimer}
-                />
-              </TabsContent>
-
-            </div>
-          </ScrollArea>
-        </Tabs>
-      )}
+      <div className="flex-1 flex flex-col h-[calc(100vh-56px)]">
+        {collapsed ? (
+          <CollapsedSidebarIcons
+            responses={responses}
+            activeTab={activeTab}
+            openTab={openTab}
+            hasActiveDiscussion={hasActiveDiscussion}
+            hasTimer={hasTimer}
+          />
+        ) : (
+          <ExpandedSidebarContent
+            {...contextProps}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            distribution={distribution}
+            selectedIds={selectedIds}
+            showHighlightedOnly={showHighlightedOnly}
+            flaggingId={flaggingId}
+            toggleSelected={toggleSelected}
+            handleFlagInappropriate={handleFlagInappropriate}
+            setShowHighlightedOnly={setShowHighlightedOnly}
+            filterResponses={filterResponses}
+            openTab={openTab}
+            isMC={isMC}
+          />
+        )}
+      </div>
     </aside>
+  );
+}
+
+// ─── Internal Hooks ──────────────────────────────────────────────────────────
+
+function useActiveRightPanelContext(props: Readonly<{
+  responses?: Response[];
+  activeDiscussion?: Discussion | null;
+  studentCount?: number;
+}>) {
+  const context = React.useContext(SessionContext);
+
+  if (context) {
+    return {
+      responses: context.responses,
+      activeDiscussion: context.activeDiscussion,
+      studentCount: context.studentCount,
+      removeResponse: context.removeResponse,
+      restoreResponse: context.restoreResponse,
+      flaggedResponses: context.flaggedResponses,
+      peakStudentCount: context.peakStudentCount,
+      activeDiscussionId: context.activeDiscussion?.id ?? null,
+      timerEndTime: context.discussionTimerEndTime,
+      timerTotalSeconds: context.discussionTimerSeconds,
+      handleCloseDiscussion: context.handleCloseDiscussion,
+      handleExtendTimer: context.handleExtendTimer,
+      handleEditTimer: context.handleEditTimer,
+      lessonId: context.lesson?.id,
+    };
+  }
+
+  const studentCount = props.studentCount ?? 0;
+  return {
+    responses: props.responses!,
+    activeDiscussion: props.activeDiscussion!,
+    studentCount,
+    removeResponse: undefined,
+    restoreResponse: undefined,
+    flaggedResponses: [] as Response[],
+    peakStudentCount: studentCount,
+    activeDiscussionId: null,
+    timerEndTime: null,
+    timerTotalSeconds: null,
+    handleCloseDiscussion: () => { },
+    handleExtendTimer: undefined,
+    handleEditTimer: undefined,
+    lessonId: undefined,
+  };
+}
+
+function calculateMCDistribution(activeDiscussion: Discussion | null | undefined, responses: Response[]) {
+  const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
+  const distribution: Record<string, number> = {};
+  if (isMC && activeDiscussion?.mc_options) {
+    activeDiscussion.mc_options.forEach((opt: { label: string }) => { distribution[opt.label] = 0; });
+    responses.forEach(r => {
+      if (r.selected_option && distribution[r.selected_option] !== undefined) {
+        distribution[r.selected_option]++;
+      }
+    });
+  }
+  return distribution;
+}
+
+// ─── Sub-components and Helper Views ──────────────────────────────────────────
+
+function CollapsedSidebarIcons({
+  responses, activeTab, openTab, hasActiveDiscussion, hasTimer
+}: Readonly<{
+  responses: Response[];
+  activeTab: string;
+  openTab: (tab: string) => void;
+  hasActiveDiscussion: boolean;
+  hasTimer: boolean;
+}>) {
+  let timerTitle = 'Timer';
+  if (hasActiveDiscussion) {
+    timerTitle = hasTimer ? 'Timer running' : 'No time limit';
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-3 pt-4">
+      <SideIconButton icon="users" title={`${responses.length} responses`} count={responses.length} isActive={activeTab === 'list'} onClick={() => openTab('list')} />
+      <SideIconButton icon="metrics" title="Metrics" isActive={activeTab === 'analytics'} onClick={() => openTab('analytics')} />
+      <SideIconButton icon="timer" title={timerTitle} isActive={activeTab === 'timer'} onClick={() => openTab('timer')} activeIndicator={hasActiveDiscussion} />
+    </div>
+  );
+}
+
+function SideIconButton({ icon, title, count, isActive, onClick, activeIndicator }: Readonly<{
+  icon: 'users' | 'metrics' | 'timer';
+  title: string;
+  count?: number;
+  isActive: boolean;
+  onClick: () => void;
+  activeIndicator?: boolean;
+}>) {
+  return (
+    <button
+      title={title}
+      onClick={onClick}
+      className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 relative"
+      style={{ color: isActive ? 'var(--color-primary-500)' : 'var(--text-muted)', background: isActive ? 'rgba(45,158,45,0.10)' : 'transparent' }}
+    >
+      {icon === 'users' && <UsersIcon />}
+      {icon === 'metrics' && <MetricsIcon />}
+      {icon === 'timer' && <TimerIcon />}
+      {count !== undefined && count > 0 && (
+        <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold rounded-full flex items-center justify-center text-white bg-brand-500">
+          {count > 9 ? '9+' : count}
+        </span>
+      )}
+      {activeIndicator && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-brand-500" />}
+    </button>
+  );
+}
+
+const UsersIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
+const MetricsIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>;
+const TimerIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>;
+
+function ExpandedSidebarContent(props: Readonly<ReturnType<typeof useActiveRightPanelContext> & {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  distribution: Record<string, number>;
+  selectedIds: string[];
+  showHighlightedOnly: boolean;
+  flaggingId: string | null;
+  toggleSelected: (id: string) => void;
+  handleFlagInappropriate: (id: string) => Promise<void>;
+  setShowHighlightedOnly: (v: boolean | ((p: boolean) => boolean)) => void;
+  filterResponses: (r: Response[]) => Response[];
+  openTab: (tab: string) => void;
+  isMC: boolean;
+}>) {
+  const { activeTab, setActiveTab, activeDiscussion, responses, distribution, activeDiscussionId, timerEndTime, timerTotalSeconds, handleCloseDiscussion, handleExtendTimer, handleEditTimer, peakStudentCount, isMC } = props;
+  return (
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden">
+      <div className="px-3 pt-2">
+        <TabsList className="w-full grid grid-cols-3">
+          <TabsTrigger value="list" className="text-xs">Responses</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs">Metrics</TabsTrigger>
+          <TabsTrigger value="timer" className="text-xs">Timer{activeDiscussionId && <span className="ml-1.5 w-1.5 h-1.5 rounded-full inline-block bg-brand-500" />}</TabsTrigger>
+        </TabsList>
+      </div>
+      <ScrollArea className="flex-1 mt-3">
+        <div className="px-3 pb-4">
+          <TabsContent value="list" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <ResponseListTab {...props} isMC={isMC} distribution={distribution} />
+          </TabsContent>
+          <TabsContent value="analytics" className="mt-0 pt-2 focus-visible:outline-none focus-visible:ring-0">
+            {activeDiscussion ? <DiscussionAnalyticsContent discussion={activeDiscussion} responses={responses} studentCount={peakStudentCount} lessonId={props.lessonId} /> : <p className="text-sm py-8 text-center text-content-muted">No active discussion</p>}
+          </TabsContent>
+          <TabsContent value="timer" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <TimerTab activeDiscussionId={activeDiscussionId} timerEndTime={timerEndTime} timerTotalSeconds={timerTotalSeconds} onClose={handleCloseDiscussion} onExtendTimer={handleExtendTimer} onEditTimer={handleEditTimer} />
+          </TabsContent>
+        </div>
+      </ScrollArea>
+    </Tabs>
   );
 }

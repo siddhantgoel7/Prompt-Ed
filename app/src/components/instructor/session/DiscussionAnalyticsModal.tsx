@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tooltip as UITooltip, TooltipContent as UITooltipContent, TooltipTrigger as UITooltipTrigger } from '@/components/ui/tooltip';
-import { Info } from 'lucide-react';
+import { Info, ExternalLink } from 'lucide-react';
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
@@ -19,16 +19,33 @@ import type { Discussion } from '@/types/discussion';
 
 const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 const CORRECT_COLOR = '#22c55e';
+const WORD_CLOUD_STOP_WORDS = new Set([
+  'the', 'and', 'for', 'that', 'with', 'this', 'from', 'have', 'are', 'was', 'were', 'your',
+  'you', 'their', 'they', 'them', 'but', 'not', 'can', 'all', 'any', 'too', 'very', 'into',
+  'about', 'there', 'what', 'when', 'where', 'which', 'will', 'would', 'should', 'could',
+  'has', 'had', 'been', 'being', 'our', 'out', 'how', 'why', 'its', 'it', 'is', 'to', 'of',
+  'in', 'on', 'at', 'as', 'an', 'a', 'or', 'by', 'we',
+]);
 
 export function DiscussionAnalyticsContent({
   discussion,
   responses,
   studentCount,
+  lessonId,
 }: Readonly<{
   discussion: Discussion;
   responses: Response[];
   studentCount: number;
+  lessonId?: string;
 }>) {
+  const escapeHtml = (value: string) =>
+    value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+
   const total = responses.length;
   const isActive = discussion.status === 'active';
   const snapshot = isActive
@@ -38,6 +55,9 @@ export function DiscussionAnalyticsContent({
 
   // MC distribution
   const isMC = discussion.prompt_type === 'multiple_choice';
+  // isFreeText covers both short_answer and long_answer — both produce word clouds
+  // since they are open-text responses (as opposed to multiple_choice selections).
+  const isFreeText = discussion.prompt_type === 'short_answer' || discussion.prompt_type === 'long_answer';
   const mcChartData = (() => {
     if (!isMC || !discussion.mc_options) return [];
     const dist: Record<string, number> = {};
@@ -58,6 +78,79 @@ export function DiscussionAnalyticsContent({
       fill: discussion.correct_option === opt.label ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]
     }));
   })();
+
+  const wordCloudData = (() => {
+    if (!isFreeText) return [];
+    const counts = new Map<string, number>();
+    responses.forEach((r) => {
+      const words = r.response_text
+        .toLowerCase()
+        .replaceAll(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .map((w) => w.trim())
+        .filter((w) => w.length > 2 && !WORD_CLOUD_STOP_WORDS.has(w));
+      words.forEach((word) => {
+        counts.set(word, (counts.get(word) ?? 0) + 1);
+      });
+    });
+    return Array.from(counts.entries())
+      .map(([word, count]) => ({ word, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 30);
+  })();
+  const maxWordCount = wordCloudData[0]?.count ?? 1;
+
+  /**
+   * Opens the word cloud in a new browser tab.
+   * Primary path: navigate to the dedicated interactive word cloud page
+   *   (/session/[lessonId]/word-cloud/[discussionId]) when lessonId is available.
+   *   That page has real-time updates, clickable words, and the spotlight overlay.
+   * Fallback path: write a minimal static HTML popup when lessonId is not provided
+   *   (e.g. when this component is rendered without a lesson context).
+   */
+  const openWordCloudInNewTab = () => {
+    if (globalThis.window === undefined || wordCloudData.length === 0) return;
+    // Navigate to the dedicated interactive word cloud page when lessonId is available.
+    if (lessonId) {
+      globalThis.window.open(`/session/${lessonId}/word-cloud/${discussion.id}`, '_blank');
+      return;
+    }
+    // Fallback: static HTML popup via blob URL (no lessonId context, e.g. legacy/test usage).
+    const popup = globalThis.window.open('', '_blank');
+    if (!popup) return;
+    const wordsMarkup = wordCloudData
+      .map((entry, i) => {
+        const ratio = entry.count / maxWordCount;
+        const sizePx = 12 + Math.round(ratio * 16);
+        const color = i % 2 === 0 ? '#2d9e2d' : '#374151';
+        const title = escapeHtml(`${entry.word}: ${entry.count}`);
+        return `<span title="${title}" style="font-size:${sizePx}px;color:${color};line-height:1;">${escapeHtml(entry.word)}</span>`;
+      })
+      .join('');
+    const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Word Cloud</title>
+    <style>
+      body { margin: 0; padding: 24px; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #f9fafb; color: #111827; }
+      h1 { margin: 0 0 6px; font-size: 24px; }
+      p { margin: 0 0 20px; color: #6b7280; }
+      .cloud { border: 1px solid #e5e7eb; background: #ffffff; border-radius: 12px; padding: 16px; display: flex; flex-wrap: wrap; gap: 10px 14px; }
+    </style>
+  </head>
+  <body>
+    <h1>Word Cloud</h1>
+    <p>${escapeHtml(discussion.prompt_text)}</p>
+    <div class="cloud">${wordsMarkup}</div>
+  </body>
+</html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    popup.location.href = url;
+    popup.focus();
+  };
 
   // Timestamp buckets — group responses into 1-minute windows
   const timelineData = (() => {
@@ -245,6 +338,46 @@ export function DiscussionAnalyticsContent({
         );
       })()}
 
+      {isFreeText && wordCloudData.length > 0 && (
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wider text-content-muted">
+              Common Word Cloud
+            </p>
+            <button
+              type="button"
+              aria-label="Open word cloud in new tab"
+              onClick={openWordCloudInNewTab}
+              className="inline-flex items-center gap-1 text-xs font-medium text-content-muted hover:text-content-primary transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <div
+            data-testid="word-cloud"
+            className="rounded-xl p-3 bg-surface-raised border border-line-subtle flex flex-wrap gap-x-3 gap-y-2"
+          >
+            {wordCloudData.map((entry, i) => {
+              const ratio = entry.count / maxWordCount;
+              const sizePx = 12 + Math.round(ratio * 16);
+              return (
+                <span
+                  key={entry.word}
+                  title={`${entry.word}: ${entry.count}`}
+                  className="leading-none"
+                  style={{
+                    fontSize: `${sizePx}px`,
+                    color: i % 2 === 0 ? 'var(--color-primary-500)' : 'var(--text-secondary)',
+                  }}
+                >
+                  {entry.word}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ── Response timeline bar chart ── */}
       {timelineData.length > 0 && (
         <div>
@@ -312,12 +445,14 @@ export function DiscussionAnalyticsModal({
   discussion,
   responses,
   studentCount,
+  lessonId,
 }: Readonly<{
   open: boolean;
   onClose: () => void;
   discussion: Discussion | null;
   responses: Response[];
   studentCount: number;
+  lessonId?: string;
 }>) {
   if (!discussion) return null;
 
@@ -334,6 +469,7 @@ export function DiscussionAnalyticsModal({
           discussion={discussion}
           responses={responses}
           studentCount={studentCount}
+          lessonId={lessonId}
         />
       </DialogContent>
     </Dialog>

@@ -160,6 +160,7 @@ export function SessionEndedView(props: Readonly<{ vm?: SessionVM }>) {
                   discussion={d}
                   index={i}
                   total={vm.lessonDiscussions.length}
+                  lessonId={lesson.id}
                 />
               ))}
           </div>

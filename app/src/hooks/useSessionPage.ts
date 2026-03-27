@@ -6,11 +6,12 @@ import { useRealtime } from '@/lib/realtime/useRealtime';
 import type { Lesson } from '@/types/lesson';
 import type { Discussion, DiscussionWithResponseCount, PromptType } from '@/types/discussion';
 import type { Response } from '@/types/response';
-import type { LessonFile, GeneratedPrompt, TokenUsage } from '@/types/ai';
+import type { LessonFile, GeneratedPrompt, GeneralQuestion, TokenUsage } from '@/types/ai';
 
 import { useLessonAI } from './useSessionPage/useLessonAI';
 import { useLessonDiscussions } from './useSessionPage/useLessonDiscussions';
 import { useLessonFiles } from './useSessionPage/useLessonFiles';
+import { useLessonGeneralQuestions } from './useSessionPage/useLessonGeneralQuestions';
 import { generateSecurePin } from '@/lib/utils/random';
 import {
   fetchLessonWithInstructorIdApi,
@@ -111,6 +112,10 @@ export type SessionVM = {
   removeResponse: (responseId: string) => Promise<void>;
   flaggedResponses: Response[];
   restoreResponse: (responseId: string) => Promise<void>;
+  generalQuestions: GeneralQuestion[];
+  isGeneratingGeneral: boolean;
+  generalWarning: string | null;
+  generateGeneralQuestions: () => Promise<void>;
 };
 
 
@@ -172,6 +177,14 @@ export function useSessionPage(lessonId: string): SessionVM {
     deleteFile,
     openFile
   } = useLessonFiles(lessonId);
+
+  const {
+    generalQuestions,
+    isGeneratingGeneral,
+    generalWarning,
+    fetchGeneralQuestions,
+    generateGeneralQuestions,
+  } = useLessonGeneralQuestions(lessonId);
 
   const [transcripts, setTranscripts] = useState<TranscriptRow[]>([]);
   const [transcriptsLoading, setTranscriptsLoading] = useState(false);
@@ -284,11 +297,12 @@ export function useSessionPage(lessonId: string): SessionVM {
 
       await fetchDiscussions();
       await fetchFiles();
+      await fetchGeneralQuestions();
       setLoading(false);
     };
 
     run();
-  }, [lessonId, router, fetchDiscussions, fetchFiles, loadEndedLessonHistory]);
+  }, [lessonId, router, fetchDiscussions, fetchFiles, fetchGeneralQuestions, loadEndedLessonHistory]);
 
   useEffect(() => {
     if (!initializedConnectionRef.current) {
@@ -673,6 +687,10 @@ export function useSessionPage(lessonId: string): SessionVM {
     removeResponse,
     flaggedResponses,
     restoreResponse,
+    generalQuestions,
+    isGeneratingGeneral,
+    generalWarning,
+    generateGeneralQuestions,
   }), [
     lesson, loading, notFound, isConnected, studentCount, peakStudentCount, handleReconnect,
     discussions, activeDiscussion, responses, promptInput,
@@ -692,5 +710,9 @@ export function useSessionPage(lessonId: string): SessionVM {
     removeResponse,
     flaggedResponses,
     restoreResponse,
+    generalQuestions,
+    isGeneratingGeneral,
+    generalWarning,
+    generateGeneralQuestions,
   ]);
 }
