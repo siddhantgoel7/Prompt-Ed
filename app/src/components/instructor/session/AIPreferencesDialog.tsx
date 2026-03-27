@@ -180,7 +180,8 @@ export function AIPreferencesDialog() {
                                         value={localPrefs.focusAreas ?? ''}
                                         onChange={(e) => setLocalPrefs({ ...localPrefs, focusAreas: e.target.value })}
                                         placeholder="e.g., beta-blocker mechanisms, RAAS pathway, adverse effects..."
-                                        className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring min-h-[80px] resize-y"
+                                        className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none leading-snug min-h-[80px] bg-surface-raised text-content-primary"
+                                        style={{ border: '1px solid var(--border-default)' }}
                                     />
                                     <p className={`text-xs text-right ${focusLen > 400 ? 'text-amber-500' : 'text-gray-400'}`}>
                                         {focusLen}/500
