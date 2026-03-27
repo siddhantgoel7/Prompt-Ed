@@ -203,13 +203,13 @@ function assignMCPositions(questions: { promptText: string; mcOptions: MCOption[
   for (let i = 0; i < questions.length; i++) {
     slots.push(labels[i % 4]);
   }
-  slots.sort(() => Math.random() - 0.5);
+  slots.sort(() => Math.random() - 0.5); // NOSONAR — non-security shuffle for answer position diversity
 
   return questions.map((q, i) => {
     if (!q.mcOptions || q.mcOptions.length === 0) return q;
 
     const correctOpt = q.mcOptions.find(o => o.is_correct);
-    const incorrectOpts = q.mcOptions.filter(o => !o.is_correct).sort(() => Math.random() - 0.5);
+    const incorrectOpts = q.mcOptions.filter(o => !o.is_correct).sort(() => Math.random() - 0.5); // NOSONAR — non-security shuffle
     if (!correctOpt) return q;
 
     const targetIdx = labels.indexOf(slots[i]);
