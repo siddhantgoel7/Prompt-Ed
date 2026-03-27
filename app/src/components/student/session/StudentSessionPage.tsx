@@ -65,9 +65,11 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
   const hasTimer = timerEndTime != null && timerTotalSeconds != null;
 
   // For MC, canSubmit from the hook is always false (responseText is empty).
-  // We override it here: MC just needs a connection + active view + no ongoing submit + timer not expired.
+  // We override it here: MC just needs an active view + no ongoing submit + timer not expired.
+  // isConnected is intentionally excluded so the button stays clickable for validation
+  // (handleSubmit short-circuits before any network call when no option is selected).
   const effectiveCanSubmit = isMC
-    ? view === 'active' && !submitting && isConnected && Boolean(activeDiscussion?.id) && !isTimerExpired
+    ? view === 'active' && !submitting && Boolean(activeDiscussion?.id) && !isTimerExpired
     : canSubmit && !isTimerExpired;
 
   // Scenario 2 (timed MC + feedback): when timer expires while student is in 'submitted' view,
