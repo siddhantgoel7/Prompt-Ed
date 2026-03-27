@@ -3,6 +3,7 @@
 // Reusable analytics content and modal for a single discussion.
 // Used by ActiveRightPanel (live view inline) and SessionEndedView (modal).
 
+import { useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,8 +18,24 @@ import {
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 
-const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444'];
 const CORRECT_COLOR = '#22c55e';
+const DONUT_HEIGHT = 150;
+const DONUT_INNER_RADIUS = 52;
+const DONUT_OUTER_RADIUS = 68;
+const MS_PER_MINUTE = 60_000;
+const MAX_WORD_CLOUD_WORDS = 30;
+
+const CHART_TOOLTIP_STYLE = {
+  background: 'var(--surface-overlay)',
+  border: '1px solid var(--border-default)',
+  borderRadius: '8px',
+  color: 'var(--text-primary)',
+  fontSize: '12px',
+} as const;
+
+const CHART_TOOLTIP_WRAPPER = { zIndex: 50 } as const;
+
 const WORD_CLOUD_STOP_WORDS = new Set([
   'the', 'and', 'for', 'that', 'with', 'this', 'from', 'have', 'are', 'was', 'were', 'your',
   'you', 'their', 'they', 'them', 'but', 'not', 'can', 'all', 'any', 'too', 'very', 'into',
@@ -26,6 +43,59 @@ const WORD_CLOUD_STOP_WORDS = new Set([
   'has', 'had', 'been', 'being', 'our', 'out', 'how', 'why', 'its', 'it', 'is', 'to', 'of',
   'in', 'on', 'at', 'as', 'an', 'a', 'or', 'by', 'we',
 ]);
+
+type DonutEntry = { label: string; fill: string; count: number };
+
+function DonutChart({
+  data,
+  centerLabel,
+  centerSub,
+  tooltipFormatter,
+}: Readonly<{
+  data: DonutEntry[];
+  centerLabel: string;
+  centerSub: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tooltipFormatter: (value: any, name: any) => [string, string];
+}>) {
+  return (
+    <div className="relative w-1/2 shrink-0 select-none [&_*]:select-none outline-none">
+      <ResponsiveContainer width="100%" height={DONUT_HEIGHT}>
+        <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+          <Pie
+            data={data}
+            dataKey="count"
+            nameKey="label"
+            cx="50%"
+            cy="50%"
+            innerRadius={DONUT_INNER_RADIUS}
+            outerRadius={DONUT_OUTER_RADIUS}
+            startAngle={90}
+            endAngle={-270}
+            minAngle={1}
+            paddingAngle={0}
+            label={false}
+            labelLine={false}
+            stroke="none"
+          >
+            {data.map((entry) => (
+              <Cell key={entry.label} fill={entry.fill} />
+            ))}
+          </Pie>
+          <Tooltip
+            formatter={tooltipFormatter}
+            wrapperStyle={CHART_TOOLTIP_WRAPPER}
+            contentStyle={CHART_TOOLTIP_STYLE}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ zIndex: 1 }}>
+        <span className="text-xl font-bold text-content-primary leading-none">{centerLabel}</span>
+        <span className="text-[10px] text-content-muted mt-0.5">{centerSub}</span>
+      </div>
+    </div>
+  );
+}
 
 export function DiscussionAnalyticsContent({
   discussion,
@@ -38,27 +108,19 @@ export function DiscussionAnalyticsContent({
   studentCount: number;
   lessonId?: string;
 }>) {
-  const escapeHtml = (value: string) =>
-    value
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-
   const total = responses.length;
   const isActive = discussion.status === 'active';
+  const isMC = discussion.prompt_type === 'multiple_choice';
+  // isFreeText covers both short_answer and long_answer — both produce word clouds
+  // since they are open-text responses (as opposed to multiple_choice selections).
+  const isFreeText = discussion.prompt_type === 'short_answer' || discussion.prompt_type === 'long_answer';
+
   const snapshot = isActive
     ? Math.max(discussion.participant_snapshot ?? 0, studentCount)
     : (discussion.participant_snapshot ?? studentCount);
   const responseRate = snapshot > 0 ? Math.round((total / snapshot) * 100) : null;
 
-  // MC distribution
-  const isMC = discussion.prompt_type === 'multiple_choice';
-  // isFreeText covers both short_answer and long_answer — both produce word clouds
-  // since they are open-text responses (as opposed to multiple_choice selections).
-  const isFreeText = discussion.prompt_type === 'short_answer' || discussion.prompt_type === 'long_answer';
-  const mcChartData = (() => {
+  const mcChartData = useMemo(() => {
     if (!isMC || !discussion.mc_options) return [];
     const dist: Record<string, number> = {};
     discussion.mc_options.forEach((opt) => { dist[opt.label] = 0; });
@@ -74,49 +136,82 @@ export function DiscussionAnalyticsContent({
       count: dist[opt.label] ?? 0,
       percentage: totalVotes > 0 ? Math.round(((dist[opt.label] ?? 0) / totalVotes) * 100) : 0,
       isCorrect: discussion.correct_option === opt.label,
-      // Pass fill directly to avoid using deprecated Cell component in some recharts versions
-      fill: discussion.correct_option === opt.label ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]
+      fill: discussion.correct_option === opt.label ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length],
     }));
-  })();
+  }, [isMC, discussion.mc_options, discussion.correct_option, responses]);
 
-  const wordCloudData = (() => {
+  const ciStats = useMemo(() => {
+    if (!isMC || !discussion.correct_option) return null;
+    const answered = responses.filter(r => r.is_correct !== null);
+    if (answered.length === 0) return null;
+    const correctCount = answered.filter(r => r.is_correct === true).length;
+    const incorrectCount = answered.filter(r => r.is_correct === false).length;
+    return {
+      answered,
+      pct: Math.round((correctCount / answered.length) * 100),
+      data: [
+        { label: 'Correct', count: correctCount, fill: '#22c55e' },
+        { label: 'Incorrect', count: incorrectCount, fill: '#ef4444' },
+      ],
+    };
+  }, [isMC, discussion.correct_option, responses]);
+
+  const wordCloudData = useMemo(() => {
     if (!isFreeText) return [];
     const counts = new Map<string, number>();
     responses.forEach((r) => {
-      const words = r.response_text
+      r.response_text
         .toLowerCase()
         .replaceAll(/[^a-z0-9\s]/g, ' ')
         .split(/\s+/)
         .map((w) => w.trim())
-        .filter((w) => w.length > 2 && !WORD_CLOUD_STOP_WORDS.has(w));
-      words.forEach((word) => {
-        counts.set(word, (counts.get(word) ?? 0) + 1);
-      });
+        .filter((w) => w.length > 2 && !WORD_CLOUD_STOP_WORDS.has(w))
+        .forEach((word) => counts.set(word, (counts.get(word) ?? 0) + 1));
     });
     return Array.from(counts.entries())
       .map(([word, count]) => ({ word, count }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 30);
-  })();
+      .slice(0, MAX_WORD_CLOUD_WORDS);
+  }, [isFreeText, responses]);
+
   const maxWordCount = wordCloudData[0]?.count ?? 1;
+
+  const timelineData = useMemo(() => {
+    if (responses.length === 0 || !discussion.published_at) return [];
+    const base = new Date(discussion.published_at).getTime();
+    const buckets: Record<number, number> = {};
+    responses.forEach((r) => {
+      const bucket = Math.floor((new Date(r.created_at).getTime() - base) / MS_PER_MINUTE);
+      buckets[bucket] = (buckets[bucket] ?? 0) + 1;
+    });
+    const maxBucket = Math.max(...Object.keys(buckets).map(Number));
+    return Array.from({ length: maxBucket + 1 }, (_, i) => ({
+      name: `+${i}m`,
+      Responses: buckets[i] ?? 0,
+    }));
+  }, [responses, discussion.published_at]);
 
   /**
    * Opens the word cloud in a new browser tab.
    * Primary path: navigate to the dedicated interactive word cloud page
    *   (/session/[lessonId]/word-cloud/[discussionId]) when lessonId is available.
-   *   That page has real-time updates, clickable words, and the spotlight overlay.
-   * Fallback path: write a minimal static HTML popup when lessonId is not provided
-   *   (e.g. when this component is rendered without a lesson context).
+   * Fallback path: write a minimal static HTML popup when lessonId is not provided.
    */
   const openWordCloudInNewTab = () => {
-    if (globalThis.window === undefined || wordCloudData.length === 0) return;
-    // Navigate to the dedicated interactive word cloud page when lessonId is available.
+    if (wordCloudData.length === 0) return;
     if (lessonId) {
-      globalThis.window.open(`/session/${lessonId}/word-cloud/${discussion.id}`, '_blank');
+      window.open(`/session/${lessonId}/word-cloud/${discussion.id}`, '_blank');
       return;
     }
-    // Fallback: static HTML popup via blob URL (no lessonId context, e.g. legacy/test usage).
-    const popup = globalThis.window.open('', '_blank');
+    const escapeHtml = (value: string) =>
+      value
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+
+    const popup = window.open('', '_blank');
     if (!popup) return;
     const wordsMarkup = wordCloudData
       .map((entry, i) => {
@@ -152,21 +247,7 @@ export function DiscussionAnalyticsContent({
     popup.focus();
   };
 
-  // Timestamp buckets — group responses into 1-minute windows
-  const timelineData = (() => {
-    if (responses.length === 0 || !discussion.published_at) return [];
-    const base = new Date(discussion.published_at).getTime();
-    const buckets: Record<number, number> = {};
-    responses.forEach((r) => {
-      const bucket = Math.floor((new Date(r.created_at).getTime() - base) / 60000);
-      buckets[bucket] = (buckets[bucket] ?? 0) + 1;
-    });
-    const maxBucket = Math.max(...Object.keys(buckets).map(Number));
-    return Array.from({ length: maxBucket + 1 }, (_, i) => ({
-      name: `+${i}m`,
-      Responses: buckets[i] ?? 0,
-    }));
-  })();
+  const totalMcVotes = mcChartData.reduce((s, e) => s + e.count, 0);
 
   return (
     <div className="flex flex-col gap-5 pb-4">
@@ -182,161 +263,81 @@ export function DiscussionAnalyticsContent({
       </div>
 
       {/* ── MC correct / incorrect donut ── */}
-      {isMC && discussion.correct_option && (() => {
-        const answered = responses.filter(r => r.is_correct !== null);
-        if (answered.length === 0) return null;
-        const correctCount = answered.filter(r => r.is_correct === true).length;
-        const incorrectCount = answered.filter(r => r.is_correct === false).length;
-        const pct = Math.round((correctCount / answered.length) * 100);
-        const ciData = [
-          { label: 'Correct', count: correctCount, fill: '#22c55e' },
-          { label: 'Incorrect', count: incorrectCount, fill: '#ef4444' },
-        ];
-        return (
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
-              Correct vs Incorrect
-            </p>
-            <div className="flex flex-row gap-4 items-center">
-              <div className="relative w-1/2 shrink-0">
-                <ResponsiveContainer width="100%" height={150}>
-                  <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                    <Pie
-                      data={ciData}
-                      dataKey="count"
-                      nameKey="label"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={52}
-                      outerRadius={68}
-                      startAngle={90}
-                      endAngle={-270}
-                      minAngle={1}
-                      paddingAngle={0}
-                      label={false}
-                      labelLine={false}
-                      stroke="none"
-                    >
-                      {ciData.map((entry) => (
-                        <Cell key={entry.label} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value: any, name: any) => [`${value} votes`, name]} // eslint-disable-line @typescript-eslint/no-explicit-any
-                      contentStyle={{
-                        background: 'var(--surface-overlay)',
-                        border: '1px solid var(--border-default)',
-                        borderRadius: '8px',
-                        color: 'var(--text-primary)',
-                        fontSize: '12px',
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-xl font-bold text-content-primary leading-none">{pct}%</span>
-                  <span className="text-[10px] text-content-muted mt-0.5">correct</span>
+      {ciStats && (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
+            Correct vs Incorrect
+          </p>
+          <div className="flex flex-row gap-4 items-center">
+            <DonutChart
+              data={ciStats.data}
+              centerLabel={`${ciStats.pct}%`}
+              centerSub="correct"
+              tooltipFormatter={(value, name) => [`${value} responses`, name]}
+            />
+            <div className="w-1/2 space-y-2">
+              {ciStats.data.map((entry) => (
+                <div key={entry.label} className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full shrink-0" style={{ background: entry.fill }} />
+                  <span
+                    className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold shrink-0"
+                    style={{
+                      background: entry.label === 'Correct' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                      color: entry.fill,
+                    }}
+                  >
+                    {entry.label}
+                  </span>
+                  <span className="text-xs text-content-primary flex-1">
+                    {entry.count} ({ciStats.answered.length > 0 ? Math.round((entry.count / ciStats.answered.length) * 100) : 0}%)
+                  </span>
                 </div>
-              </div>
-              <div className="w-1/2 space-y-2">
-                {ciData.map((entry) => (
-                  <div key={entry.label} className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full shrink-0" style={{ background: entry.fill }} />
-                    <span className="text-xs text-content-primary flex-1">
-                      {entry.label}
-                    </span>
-                    <span className="text-xs font-bold text-content-primary">
-                      {entry.count} ({answered.length > 0 ? Math.round((entry.count / answered.length) * 100) : 0}%)
-                    </span>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
-        );
-      })()}
+        </div>
+      )}
 
       {/* ── MC donut chart ── */}
-      {isMC && mcChartData.length > 0 && (() => {
-        const totalVotes = mcChartData.reduce((s, e) => s + e.count, 0);
-        return (
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
-              Answer Distribution
-            </p>
-            <div className="flex flex-row gap-4 items-center">
-              {/* Donut with center overlay */}
-              <div className="relative w-1/2 shrink-0">
-                <ResponsiveContainer width="100%" height={150}>
-                  <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                    <Pie
-                      data={mcChartData}
-                      dataKey="count"
-                      nameKey="label"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={52}
-                      outerRadius={68}
-                      startAngle={90}
-                      endAngle={-270}
-                      minAngle={1}
-                      paddingAngle={0}
-                      label={false}
-                      labelLine={false}
-                      stroke="none"
-                    >
-                      {mcChartData.map((entry) => (
-                        <Cell key={entry.label} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value: any, name: any) => [`${value} votes`, `Option ${name}`]} // eslint-disable-line @typescript-eslint/no-explicit-any
-                      contentStyle={{
-                        background: 'var(--surface-overlay)',
-                        border: '1px solid var(--border-default)',
-                        borderRadius: '8px',
-                        color: 'var(--text-primary)',
-                        fontSize: '12px',
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                {/* Center label */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-xl font-bold text-content-primary leading-none">{totalVotes}</span>
-                  <span className="text-[10px] text-content-muted mt-0.5">votes</span>
-                </div>
-              </div>
-
-              {/* Compact legend */}
-              <div className="w-1/2 space-y-2">
-                {mcChartData.map((entry) => (
-                  <div key={entry.label} className="flex items-center gap-2">
-                    <span
-                      className="h-2 w-2 rounded-full shrink-0"
-                      style={{ background: entry.fill }}
-                    />
-                    <span className="text-xs font-bold shrink-0 w-4" style={{ color: entry.fill }}>
-                      {entry.label}
-                    </span>
-                    <span className="text-xs text-content-primary flex-1">
-                      {entry.count} ({entry.percentage}%)
-                    </span>
+      {isMC && mcChartData.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
+            Answer Distribution
+          </p>
+          <div className="flex flex-row gap-4 items-center">
+            <DonutChart
+              data={mcChartData}
+              centerLabel={String(totalMcVotes)}
+              centerSub="responses"
+              tooltipFormatter={(value, name) => [`${value} responses`, `Option ${name}`]}
+            />
+            <div className="w-1/2 space-y-2">
+              {mcChartData.map((entry) => (
+                <div key={entry.label} className="flex items-center gap-2">
+                  <span
+                    className="h-2 w-2 rounded-full shrink-0"
+                    style={{ background: entry.fill }}
+                  />
+                  <span className="text-xs font-bold shrink-0 w-4" style={{ color: entry.fill }}>
+                    {entry.label}
+                  </span>
+                  <span className="text-xs text-content-primary flex-1">
+                    {entry.count} ({entry.percentage}%)
                     {entry.isCorrect && (
                       <span
-                        className="text-[10px] px-1 py-0.5 rounded font-semibold shrink-0"
+                        className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold ml-1.5"
                         style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e' }}
                       >
-                        ✓
+                        correct
                       </span>
                     )}
-                  </div>
-                ))}
-              </div>
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        );
-      })()}
+        </div>
+      )}
 
       {isFreeText && wordCloudData.length > 0 && (
         <div>
@@ -381,9 +382,7 @@ export function DiscussionAnalyticsContent({
       {/* ── Response timeline bar chart ── */}
       {timelineData.length > 0 && (
         <div>
-          <p
-            className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted"
-          >
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
             Response Timeline (per minute)
           </p>
           <ResponsiveContainer width="100%" height={160}>
@@ -392,14 +391,9 @@ export function DiscussionAnalyticsContent({
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
               <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{
-                  background: 'var(--surface-overlay)',
-                  border: '1px solid var(--border-default)',
-                  borderRadius: '8px',
-                  color: 'var(--text-primary)',
-                  fontSize: '12px',
-                }}
-                formatter={(v: any) => [`${v} responses`, 'Count']} // eslint-disable-line @typescript-eslint/no-explicit-any
+                contentStyle={CHART_TOOLTIP_STYLE}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                formatter={(v: any) => [`${v} responses`, 'Count']}
               />
               <Bar dataKey="Responses" fill="var(--color-primary-500)" radius={[3, 3, 0, 0]} />
             </BarChart>
@@ -409,9 +403,7 @@ export function DiscussionAnalyticsContent({
 
       {/* ── All responses ── */}
       <div>
-        <p
-          className="text-xs font-semibold uppercase tracking-wider mb-2 text-content-muted"
-        >
+        <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-content-muted">
           All Responses ({total})
         </p>
         {total === 0 ? (
@@ -479,9 +471,7 @@ export function DiscussionAnalyticsModal({
 /** Small stat display card used inside the analytics modal. */
 export function StatCard({ label, value, sub, infoText }: Readonly<{ label: string; value: string; sub?: string; infoText?: string }>) {
   return (
-    <div
-      className="rounded-xl p-3 bg-surface-raised border border-line-subtle"
-    >
+    <div className="rounded-xl p-3 bg-surface-raised border border-line-subtle">
       <p className="text-xs mb-1 text-content-muted flex items-center gap-1">
         {label}
         {infoText && (
