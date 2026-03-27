@@ -12,7 +12,8 @@ This document describes the comprehensive testing strategy for the PMCOL Teachin
 4. [Test Types](#test-types)
 5. [Running Tests](#running-tests)
 6. [Test Coverage](#test-coverage)
-7. [Writing New Tests](#writing-new-tests)
+7. [Static Code Analysis](#static-code-analysis)
+8. [Writing New Tests](#writing-new-tests)
 
 ---
 
@@ -811,6 +812,130 @@ npm run test:coverage
 ```
 
 Then open `app/coverage/lcov-report/index.html` in your browser.
+
+---
+
+## Static Code Analysis
+
+### Tool: SonarQube
+
+[SonarQube](https://www.sonarsource.com/products/sonarqube/) is an open-source static code analysis platform that continuously inspects a codebase for bugs, vulnerabilities, security hotspots, code smells, duplications, and test coverage gaps — without executing the code. It parses source files, applies rule sets for the relevant languages, and produces a dashboard summarising quality across five dimensions: **Security**, **Reliability**, **Maintainability**, **Coverage**, and **Duplications**.
+
+For this project, SonarQube Community Edition was used to analyse the TypeScript/React (Next.js) front-end and server-side API routes that make up the PMCOL Teaching Tool.
+
+---
+
+### Configuration
+
+The scan is configured in [`sonar-project.properties`](../sonar-project.properties) at the repository root:
+
+| Parameter | Value | Purpose |
+|-----------|-------|---------|
+| `sonar.projectKey` | `W26-DeptOfPharmocology` | Unique identifier in the SonarQube server |
+| `sonar.sources` | `app/src` | Application source code only |
+| `sonar.tests` | `app/tests` | Test directory (excluded from production metrics) |
+| `sonar.test.inclusions` | `**/*.test.tsx`, `**/*.test.ts`, `**/*.spec.ts` | Files treated as test code |
+| `sonar.exclusions` | `node_modules`, `.next`, `coverage`, `public`, `dist`, etc. | Dependencies and build artefacts are excluded |
+| `sonar.javascript.lcov.reportPaths` | `app/coverage/lcov.info` | Coverage data from `npm run test:coverage` fed into SonarQube |
+| `sonar.typescript.tsconfigPath` | `app/tsconfig.json` | TypeScript compiler settings used for accurate type-aware analysis |
+
+The scan is triggered automatically by the GitHub Actions workflow defined in `.github/workflows/sonarqube.yml`, which runs on every push to `main` and on pull requests targeting `main` or any `sprint-*` branch. Before calling the scanner, the workflow runs `npm run test:coverage` so that SonarQube receives an up-to-date LCOV coverage report.
+
+---
+
+### What Was Analysed
+
+SonarQube inspected all TypeScript and TSX files under `app/src/`, including:
+
+- **API routes** — Next.js App Router server-side handlers (`/api/auth/callback`, `/api/lessons/[lessonId]/*`, `/api/user/ai-preferences`, etc.)
+- **React components** — instructor dashboard, student session, prompt management, file upload, and shared UI components
+- **Custom hooks** — real-time session management (`useRealtime`, `useSessionPage`), auth, and data-fetching hooks
+- **Service layer** — `courseService`, `lessonService`, `discussionService`, `responseService`
+- **AI pipeline** — file parsers (PDF/PPTX), embedding, RAG-based prompt generation, Whisper transcription handler
+- **Utility and type files** — TypeScript interfaces, Supabase client factories, helper utilities
+
+Test files themselves were excluded from the production quality metrics but their coverage data was fed into the coverage dimension.
+
+---
+
+### Results (Overall Code)
+
+The analysis was run against the `sprint-5-proper-documentation` branch. Results reflect the state of the codebase as of that scan.
+
+| Dimension | Grade | Finding |
+|-----------|-------|---------|
+| **Security** | A | 0 open issues |
+| **Reliability** | A | 0 open issues |
+| **Maintainability** | A | 0 open issues |
+| **Coverage** | — | **80.8%** on ~4 000 lines to cover |
+| **Duplications** | — | **1.1%** on ~16 000 lines |
+| **Security Hotspots** | E | **1** hotspot requiring review |
+| **Accepted Issues** | — | 0 |
+
+---
+
+### Analysis of Findings
+
+#### Security — Grade A (0 issues)
+No security vulnerabilities were detected in the codebase. This reflects deliberate security practices throughout the project:
+- All API routes verify session via the server-side Supabase client before processing requests.
+- The OAuth callback (`/api/auth/callback`) enforces a strict `@ualberta.ca` domain check and immediately deletes and signs out any account that does not meet this requirement.
+- Environment variables containing secrets (`SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`) are accessed only in server-side code and are never exposed to the client bundle.
+- The `is_correct` flag for multiple-choice answers is stripped server-side before being broadcast to student clients.
+
+#### Reliability — Grade A (0 issues)
+No bugs were flagged. The codebase consistently handles error states returned from Supabase and OpenAI, returning appropriate HTTP status codes (`401`, `403`, `404`, `500`) rather than allowing unhandled exceptions to crash routes.
+
+#### Maintainability — Grade A (0 issues)
+No code smells were reported. The codebase is well-structured with a clear separation between UI components, service functions, API routes, and the AI pipeline. TypeScript strict typing throughout eliminates an entire class of runtime issues that SonarQube would otherwise flag as smells.
+
+#### Coverage — 80.8%
+SonarQube consumed the LCOV report produced by `npm run test:coverage`. **80.8% of the ~4 000 coverable lines are exercised by the Jest test suite.** The remaining uncovered lines are primarily:
+- Background fire-and-forget processing paths inside the file upload and transcript routes (these are hard to test synchronously).
+- Edge-case error branches in the AI pipeline that require mocking specific OpenAI failure modes.
+- Some UI-only render paths covered by Playwright end-to-end tests, which produce separate coverage data not merged into the Jest LCOV report.
+
+#### Duplications — 1.1%
+Only 1.1% of the ~16 000 analysed lines are duplicated. The small amount of duplication that exists is deliberate: the ownership verification pattern (checking lesson → course → instructor chain) is intentionally repeated inline across API routes rather than extracted into a shared helper, because each route has slightly different error-handling requirements and premature abstraction was avoided per the project's coding principles.
+
+#### Security Hotspot — 1 (Grade E)
+SonarQube flagged **one security hotspot** for manual review. A hotspot is not a confirmed vulnerability — it is a pattern that requires a human to decide whether the context makes it safe.
+
+**Location:** `app/src/lib/ai/parsers/pptxParser.ts`, line 44
+
+**Flagged pattern:** `JSZip.loadAsync(buffer)`
+
+**SonarQube message:** *"Make sure that expanding this archive file is safe here."*
+
+SonarQube raises this because expanding a ZIP archive from an untrusted source can be exploited via a **zip bomb** (a maliciously crafted archive with an extreme compression ratio that expands to gigabytes of data, exhausting server memory) or **path traversal** (file entries with `../` paths that escape the intended directory).
+
+**Assessment: Safe — mitigations are already in place.** Immediately after `JSZip.loadAsync(buffer)`, the code calls `validateZipIntegrity(zip)`, which enforces three hard limits before any entry is read:
+
+| Guard | Limit | Protects Against |
+|-------|-------|-----------------|
+| `MAX_ENTRIES` | 10 000 entries | Zip files with excessive file count |
+| `MAX_TOTAL_SIZE` | 150 MB uncompressed | Zip bomb memory exhaustion |
+| `MAX_COMPRESSION_RATIO` | 100× | High-ratio decompression attacks |
+
+If any limit is exceeded the function throws immediately, aborting extraction before any data is processed. Additionally, uploaded files are validated by magic-byte detection in the upload route before they ever reach the parser, so only legitimate PPTX files (which are ZIP-based by the OOXML standard) are passed to `parsePptx`. The hotspot was reviewed and marked as **acknowledged/safe**.
+
+---
+
+### How to Re-run the Scan Locally
+
+```bash
+# Step 1: Generate coverage data
+cd app
+npm run test:coverage
+cd ..
+
+# Step 2: Run the scanner (requires sonar-scanner CLI or npm package)
+sonar-scanner \
+  -Dsonar.host.url=http://localhost:9000 \
+  -Dsonar.token=<your-token>
+```
+
+The `sonar-project.properties` file at the repo root provides all other settings automatically. See [`docs/run-local.md`](run-local.md) for environment setup prerequisites.
 
 ---
 

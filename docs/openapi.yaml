@@ -1,41 +1,447 @@
 openapi: 3.0.3
 info:
   title: PMCOL Teaching Tool API
-  version: 0.1.0
-  description: Minimal server endpoints; most data access happens directly from the browser via Supabase.
+  version: 0.2.0
+  description: >
+    Server-side API endpoints for the PMCOL Teaching Tool. Most read/write
+    operations on courses, lessons, discussions, and responses happen directly
+    from the browser via the Supabase client. These routes handle operations
+    that require server-side privileges: OAuth session exchange, admin user
+    lookups, AI generation, file upload/parsing, and audio transcription.
 servers:
-  - url: https://ualberta-cmput401.github.io/W26project-DeptofPharmacology
-    description: Deployed static site (API hosted with the app runtime)
   - url: http://localhost:3000
     description: Local dev server
 paths:
+
+  # ── Auth ──────────────────────────────────────────────────────────────────
+
   /api/auth/callback:
     get:
-      summary: Exchange Supabase OAuth code for a session
+      summary: OAuth callback — exchange authorization code for a session
+      description: >
+        Handles the Google OAuth redirect from Supabase. Exchanges the
+        one-time authorization code for a server-side session cookie, then
+        enforces the @ualberta.ca domain restriction. Accounts that do not
+        meet the domain requirement are immediately signed out and deleted
+        via the admin client before redirecting back to the sign-up page
+        with an error message.
+      tags: [Auth]
       parameters:
         - name: code
           in: query
           required: true
           schema:
             type: string
-          description: Authorization code from Supabase OAuth provider
+          description: One-time authorization code issued by the Supabase OAuth provider.
       responses:
         "302":
-          description: Redirects to instructor dashboard on success
+          description: >
+            Redirects to /instructor_dashboard on success, or to
+            /create_instructor?error=<message> on failure or domain rejection.
           headers:
             Location:
               schema:
                 type: string
-              description: Redirect target (e.g., /instructor_dashboard)
-        "302_error":
-          description: Redirects to /create_instructor?error=<message> when Supabase returns an error
+              description: Redirect target URL.
       security: []
-  /api/socket:
-    get:
-      summary: Placeholder endpoint for Socket.io
+
+  /api/auth/check-email:
+    post:
+      summary: Check whether an email address already has an account
+      description: >
+        Uses the Supabase service-role admin client to look up all registered
+        users and returns whether the given email is already registered.
+        Called during the sign-up flow to prevent duplicate account creation.
+        Requires no session — the check is intentionally unauthenticated so
+        the UI can show a helpful message before the user attempts OAuth.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: instructor@ualberta.ca
       responses:
         "200":
-          description: Indicates placeholder or connected state
+          description: Returns whether the email is already registered.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exists:
+                    type: boolean
+                    example: false
+        "500":
+          description: Supabase admin query failed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security: []
+
+  # ── Lessons — Files ───────────────────────────────────────────────────────
+
+  /api/lessons/{lessonId}/files:
+    get:
+      summary: List all uploaded files for a lesson
+      description: >
+        Returns all files that have been uploaded to a lesson, ordered by
+        upload time descending. Only the instructor who owns the lesson's
+        course may call this endpoint. Each file includes its current
+        processing status (processing | ready | failed).
+      tags: [Lesson Files]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/lessonId"
+      responses:
+        "200":
+          description: Array of lesson file records.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LessonFile"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /api/lessons/{lessonId}/files/{fileId}:
+    get:
+      summary: Get a signed download URL for a lesson file
+      description: >
+        Generates a short-lived (10-minute) Supabase Storage signed URL for
+        downloading the original uploaded file. Ownership is verified before
+        the URL is issued.
+      tags: [Lesson Files]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/lessonId"
+        - $ref: "#/components/parameters/fileId"
+      responses:
+        "200":
+          description: Signed URL and original filename.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    description: Signed Supabase Storage URL (valid for 10 minutes).
+                    example: https://xyz.supabase.co/storage/v1/object/sign/lesson-files/...
+                  fileName:
+                    type: string
+                    example: lecture-week3.pdf
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+    delete:
+      summary: Delete a lesson file and all its extracted chunks
+      description: >
+        Permanently removes a lesson file in three steps: deletes all
+        associated vector chunks from lesson_chunks, removes the database
+        record from lesson_files, then removes the raw file from Supabase
+        Storage. Only the owning instructor may delete files.
+      tags: [Lesson Files]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/lessonId"
+        - $ref: "#/components/parameters/fileId"
+      responses:
+        "200":
+          description: File deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  # ── Lessons — Upload ──────────────────────────────────────────────────────
+
+  /api/lessons/{lessonId}/upload:
+    post:
+      summary: Upload a PDF or PPTX lecture file
+      description: >
+        Accepts a multipart/form-data upload of a PDF or PPTX file (max 25 MB,
+        max 5 files per lesson). The file type is verified by inspecting magic
+        bytes (not just the extension). The route stores the raw file in
+        Supabase Storage and inserts a lesson_files record with status
+        "processing", then immediately returns that record while background
+        processing continues asynchronously.
+
+        Background processing: the file is parsed (text extraction + GPT-4o
+        vision descriptions for image-heavy slides), split into overlapping
+        sentence-boundary chunks, deduplicated by Jaccard similarity, embedded
+        via text-embedding-3-small, and stored in lesson_chunks. When complete,
+        the status updates to "ready" (or "failed" on error).
+
+        Ownership of the lesson is verified before the upload is accepted.
+      tags: [Lesson Files]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/lessonId"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PDF or PPTX file. Max 25 MB. Max 5 files per lesson.
+      responses:
+        "200":
+          description: File accepted. Processing continues in the background.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonFile"
+        "400":
+          description: No file provided, file too large, or unsupported file type.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  # ── Lessons — Transcript ──────────────────────────────────────────────────
+
+  /api/lessons/{lessonId}/transcript:
+    post:
+      summary: Transcribe a live lecture audio recording via Whisper
+      description: >
+        Accepts a multipart/form-data audio file (max 25 MB) and transcribes
+        it using OpenAI Whisper (whisper-1, English). The transcript text is
+        returned immediately in the response. In the background (fire-and-
+        forget), the transcript is embedded with text-embedding-3-small and
+        stored as a lesson_chunk so it becomes available for RAG-based prompt
+        generation.
+
+        Ownership of the lesson is verified before transcription begins.
+      tags: [Lessons]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/lessonId"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [audio]
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                  description: Audio file. Max 25 MB. Any format supported by Whisper.
+      responses:
+        "200":
+          description: Transcript text returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transcript:
+                    type: string
+                    example: "Today we will cover the pharmacokinetics of beta-blockers..."
+        "400":
+          description: No audio provided, file too large, or no speech detected.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  # ── Lessons — AI Generation ───────────────────────────────────────────────
+
+  /api/lessons/{lessonId}/generate:
+    post:
+      summary: Generate AI discussion prompt candidates using RAG
+      description: >
+        Generates a set of discussion prompt candidates for the given lesson
+        using Retrieval-Augmented Generation. The RAG pipeline retrieves the
+        most semantically relevant chunks from lesson_chunks (uploaded files
+        and/or transcripts) and passes them as context to GPT-4o along with
+        any live transcript text provided in the request body.
+
+        The response is a CandidateSet containing multiple prompt options of
+        the requested type. For multiple_choice prompts, the is_correct field
+        on each option is included in the response to the instructor (so the
+        UI can pre-select the correct answer) but is stripped before being
+        broadcast to student clients.
+
+        Supports a mock mode for development (set MOCK_AI=true) that returns
+        deterministic fake prompts without calling OpenAI.
+
+        Ownership of the lesson is verified before generation begins.
+      tags: [Lessons]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/lessonId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                promptType:
+                  type: string
+                  enum: [short_answer, long_answer, multiple_choice]
+                  default: long_answer
+                  description: The type of discussion prompt to generate.
+                transcriptText:
+                  type: string
+                  default: ""
+                  description: Live lecture transcript to include as additional RAG context.
+                preferencesOverride:
+                  $ref: "#/components/schemas/AIPromptPreferences"
+      responses:
+        "200":
+          description: CandidateSet containing generated prompt options.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CandidateSet"
+        "400":
+          description: Invalid promptType value.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  # ── User — AI Preferences ─────────────────────────────────────────────────
+
+  /api/user/ai-preferences:
+    get:
+      summary: Get the authenticated instructor's AI prompt preferences
+      description: >
+        Returns the instructor's saved AI generation preferences (difficulty,
+        style, length, focus areas). If no preferences have been saved yet,
+        returns the default values: difficulty=intermediate, style=socratic,
+        length=standard, focusAreas="".
+      tags: [User]
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Current AI preferences (or defaults if none saved).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AIPromptPreferences"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+    put:
+      summary: Save the authenticated instructor's AI prompt preferences
+      description: >
+        Upserts the instructor's AI generation preferences. All fields are
+        required. focusAreas is trimmed and capped at 500 characters; an
+        empty string is stored as null.
+      tags: [User]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AIPromptPreferences"
+      responses:
+        "200":
+          description: Preferences saved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  # ── Socket (placeholder) ──────────────────────────────────────────────────
+
+  /api/socket:
+    get:
+      summary: Socket.io placeholder (real-time via Supabase Realtime)
+      description: >
+        Stub endpoint. Real-time functionality (live session state, prompt
+        broadcasting, response aggregation) is handled entirely through
+        Supabase Realtime WebSocket channels, not Socket.io. This route
+        exists as a placeholder and is not used in production.
+      tags: [Internal]
+      responses:
+        "200":
+          description: Placeholder response.
           content:
             application/json:
               schema:
@@ -44,3 +450,158 @@ paths:
                   message:
                     type: string
       security: []
+
+# ── Reusable components ────────────────────────────────────────────────────
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+      description: >
+        Supabase session cookie set by /api/auth/callback after a successful
+        OAuth flow. All protected routes use the server-side Supabase client
+        to verify this cookie.
+
+  parameters:
+    lessonId:
+      name: lessonId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: UUID of the lesson.
+    fileId:
+      name: fileId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: UUID of the lesson file.
+
+  responses:
+    Unauthorized:
+      description: No valid session cookie present.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: Authenticated user does not own this lesson's course.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: The requested lesson or file was not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ServerError:
+      description: Unexpected server-side error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Unauthorized
+
+    LessonFile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        lessonId:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+          example: lecture-week3.pdf
+        fileType:
+          type: string
+          enum: [pdf, pptx]
+        fileSizeBytes:
+          type: integer
+          example: 2097152
+        status:
+          type: string
+          enum: [processing, ready, failed]
+          description: >
+            processing — background parsing/embedding is in progress;
+            ready — chunks are embedded and available for RAG;
+            failed — parsing or embedding encountered an unrecoverable error.
+        uploadedAt:
+          type: string
+          format: date-time
+
+    AIPromptPreferences:
+      type: object
+      properties:
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          default: intermediate
+        style:
+          type: string
+          enum: [socratic, direct, conceptual, applied]
+          default: socratic
+        length:
+          type: string
+          enum: [brief, standard, detailed]
+          default: standard
+        focusAreas:
+          type: string
+          maxLength: 500
+          default: ""
+          description: >
+            Free-text hint for the AI (e.g. "pharmacokinetics, drug interactions").
+            Stored as null when empty.
+
+    CandidateSet:
+      type: object
+      description: Set of AI-generated discussion prompt candidates returned to the instructor.
+      properties:
+        promptType:
+          type: string
+          enum: [short_answer, long_answer, multiple_choice]
+        candidates:
+          type: array
+          items:
+            $ref: "#/components/schemas/PromptCandidate"
+
+    PromptCandidate:
+      type: object
+      properties:
+        question:
+          type: string
+          description: The discussion question text.
+        rationale:
+          type: string
+          description: AI-generated explanation of why this question is pedagogically useful.
+        mcOptions:
+          type: array
+          description: Present only when promptType is multiple_choice.
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+                example: A
+              text:
+                type: string
+              is_correct:
+                type: boolean
+                description: >
+                  Included in the instructor response so the UI can pre-select
+                  the correct answer. Stripped before broadcasting to students.
