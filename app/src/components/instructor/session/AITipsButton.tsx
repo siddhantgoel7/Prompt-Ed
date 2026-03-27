@@ -180,19 +180,29 @@ function TipsModal({ onClose }: { onClose: () => void }) {
   return ReactDOM.createPortal(
     <div
       className="fixed inset-0 flex items-center justify-center p-4"
-      style={{ zIndex: 110, background: 'var(--color-black-alpha-30)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
-      onClick={onClose}
+      style={{ zIndex: 110 }}
     >
-      <div
-        className="relative w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl p-6 enter"
+      {/* Backdrop sibling — an actual button for accessibility and simpler code (no stopPropagation needed) */}
+      <button
+        type="button"
+        className="absolute inset-0 w-full h-full"
+        style={{
+          background: 'var(--color-black-alpha-30)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+        }}
+        onClick={onClose}
+        aria-label="Close tips backdrop"
+      />
+
+      <dialog
+        open
+        className="relative w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl p-6 enter p-0 bg-transparent border-0"
         style={{
           background: 'var(--surface-raised)',
           border: '1px solid var(--border-default)',
           boxShadow: '0 8px 40px var(--color-black-alpha-30)',
         }}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
         aria-labelledby="ai-tips-title"
       >
         {/* Header */}
@@ -212,7 +222,7 @@ function TipsModal({ onClose }: { onClose: () => void }) {
             aria-label="Close tips"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -247,13 +257,13 @@ function TipsModal({ onClose }: { onClose: () => void }) {
             The split-view is for <em>monitoring</em> two discussions side by side, not for running them simultaneously. Close one before activating the next.
           </Tip>
         </div>
-      </div>
+      </dialog>
     </div>,
     document.body,
   );
 }
 
-function Tip({ index, title, children }: { index: number; title: string; children: React.ReactNode }) {
+function Tip({ index, title, children }: Readonly<{ index: number; title: string; children: React.ReactNode }>) {
   return (
     <div className="flex gap-3">
       <span
@@ -270,7 +280,7 @@ function Tip({ index, title, children }: { index: number; title: string; childre
   );
 }
 
-function TipBullet({ label, children }: { label: string; children: React.ReactNode }) {
+function TipBullet({ label, children }: Readonly<{ label: string; children: React.ReactNode }>) {
   return (
     <li className="flex gap-1.5 items-baseline list-none">
       <span className="font-semibold text-brand-500 flex-shrink-0">{label} —</span>
@@ -296,7 +306,7 @@ function TipBullet({ label, children }: { label: string; children: React.ReactNo
  *     spotlight reappears the next time the session is visited — matching the
  *     "once per session when created" intent.
  */
-export function AITipsButton({ lessonId }: { lessonId: string }) {
+export function AITipsButton({ lessonId }: Readonly<{ lessonId: string }>) {
   const STORAGE_KEY = `ai-tips-seen-${lessonId}`;
 
   const [hasSeenTips, setHasSeenTips] = React.useState<boolean>(() => {
@@ -359,9 +369,9 @@ export function AITipsButton({ lessonId }: { lessonId: string }) {
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="16" x2="12" y2="12"/>
-          <circle cx="12" cy="8" r="0.5" fill="currentColor" stroke="none"/>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <circle cx="12" cy="8" r="0.5" fill="currentColor" stroke="none" />
         </svg>
       </button>
 

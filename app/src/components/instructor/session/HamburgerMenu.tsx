@@ -19,13 +19,13 @@ export function HamburgerMenu({
   onSplitView,
   onEnd,
   endingLesson,
-}: {
+}: Readonly<{
   onDisplay?: () => void;
   onSplitView?: () => void;
   onEnd?: () => void;
   /** True while the end-lesson request is in-flight — disables the button to prevent double-firing. */
   endingLesson?: boolean;
-}) {
+}>) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
 

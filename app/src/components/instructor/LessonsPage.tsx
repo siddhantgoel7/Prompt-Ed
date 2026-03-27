@@ -12,7 +12,7 @@ import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 
 /** Renders the lessons page for a course, with loading/not-found states and lesson management dialogs. */
-export function LessonsPage({ courseId }: { courseId: string }) {
+export function LessonsPage({ courseId }: Readonly<{ courseId: string }>) {
   const page = useLessonsPage(courseId);
 
   if (page.loading) {
@@ -41,9 +41,11 @@ export function LessonsPage({ courseId }: { courseId: string }) {
             {page.course.title}
           </h2>
           <p className="text-sm mt-1 text-content-muted">
-            {page.lessons.length === 0
-              ? 'No lessons yet — create your first'
-              : `${page.lessons.length} lesson${page.lessons.length === 1 ? '' : 's'}`}
+            {(() => {
+              if (page.lessons.length === 0) return 'No lessons yet — create your first';
+              const s = page.lessons.length === 1 ? '' : 's';
+              return `${page.lessons.length} lesson${s}`;
+            })()}
           </p>
         </div>
 

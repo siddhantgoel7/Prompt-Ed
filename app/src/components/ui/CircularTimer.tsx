@@ -50,7 +50,7 @@ function formatTime(secs: number): string {
  * Accessibility: the root element carries aria-label with the live remaining time so
  * screen readers can announce it. The SVG arc is aria-hidden because it is decorative.
  */
-export function CircularTimer({ timerEndTime, timerTotalSeconds, testId }: CircularTimerProps) {
+export function CircularTimer({ timerEndTime, timerTotalSeconds, testId }: Readonly<CircularTimerProps>) {
   // Initialise synchronously so there is no flash of "00:00" on first render.
   const [remaining, setRemaining] = React.useState<number>(() =>
     Math.max(0, Math.ceil((timerEndTime - Date.now()) / 1000))
@@ -75,7 +75,7 @@ export function CircularTimer({ timerEndTime, timerTotalSeconds, testId }: Circu
   const strokeDashoffset = circumference * (1 - progress);
   const isExpired = remaining <= 0;
   // Warn when < 20% of time remains — proportional to total duration, not a fixed cutoff.
-  const isUrgent = progress < 0.20 && !isExpired;
+  const isUrgent = progress < 0.2 && !isExpired;
 
   // --accent-blush is defined in :root but not overridden in .dark; see globals.css note.
   const arcColor = isExpired || isUrgent ? 'var(--accent-blush)' : 'var(--color-primary-400)';

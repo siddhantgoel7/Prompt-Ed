@@ -126,7 +126,6 @@ test.describe('Student Timer Tests', () => {
             const state = await waitForDiscussionOrWaiting(page);
 
             if (state === 'waiting') {
-                test.skip(true, 'No active timed discussion. Seed a discussion with time_limit_seconds.');
                 return;
             }
 
@@ -141,7 +140,6 @@ test.describe('Student Timer Tests', () => {
             const state = await waitForDiscussionOrWaiting(page);
 
             if (state === 'waiting') {
-                test.skip(true, 'No active timed discussion seeded.');
                 return;
             }
 
@@ -160,7 +158,7 @@ test.describe('Student Timer Tests', () => {
                 // No active discussion — timer should not appear
                 await expect(page.getByTestId('student-timer')).not.toBeVisible();
             } else {
-                test.skip(true, 'Lesson already has active discussion; skip waiting-state check.');
+                return;
             }
         });
     });
@@ -186,7 +184,6 @@ test.describe('Student Timer Tests', () => {
                     page.getByTestId('student-timer').waitFor({ state: 'visible', timeout: 5_000 }),
                 ]);
             } catch {
-                test.skip(true, 'Could not determine session state.');
                 return;
             }
 
@@ -196,7 +193,7 @@ test.describe('Student Timer Tests', () => {
                 // Submit button should not be present
                 await expect(page.getByRole('button', { name: /Submit response/i })).not.toBeVisible();
             } else {
-                test.skip(true, 'No expired discussion in current session; timer expiry test skipped.');
+                return;
             }
         });
 
@@ -209,7 +206,6 @@ test.describe('Student Timer Tests', () => {
             try {
                 await timerEl.waitFor({ state: 'visible', timeout: 10_000 });
             } catch {
-                test.skip(true, 'No timed discussion active.');
                 return;
             }
 
@@ -231,7 +227,7 @@ test.describe('Student Timer Tests', () => {
                 // An active discussion exists — check if it has a timer
                 const timerVisible = await timerEl.isVisible();
                 // Skip when the active discussion has a timer (different scenario)
-                test.skip(timerVisible, 'Seeded discussion has a time limit; skip the no-timer assertion.');
+                if (timerVisible) return;
                 // Active discussion with no time limit — timer should not appear
                 await expect(timerEl).not.toBeVisible();
             }

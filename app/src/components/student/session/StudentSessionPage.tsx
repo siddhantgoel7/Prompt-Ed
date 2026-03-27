@@ -12,9 +12,10 @@ import { DiscussionTimer } from './DiscussionTimer';
 import { TimerExpiredMessage } from './TimerExpiredMessage';
 
 import { useStudentSession } from '@/hooks/useStudentSession';
+import type { Discussion } from '@/types/discussion';
 
 /** Renders the student session UI, routing between waiting/active/submitted/ended states. */
-export function StudentSessionPage({ lessonId }: { lessonId: string }) {
+export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>) {
   const {
     lesson,
     activeDiscussion,
@@ -59,9 +60,6 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
 
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
   const correctOptionLabel = activeDiscussion?.correct_option ?? null;
-  const correctOptionText = correctOptionLabel
-    ? activeDiscussion?.mc_options?.find((o) => o.label === correctOptionLabel)?.text ?? null
-    : null;
 
   // Use loose null check so undefined (from older mocks / no timer) is treated same as null
   const hasTimer = timerEndTime != null && timerTotalSeconds != null;
@@ -91,7 +89,7 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
 
   // Fire confetti when a correct MC answer feedback is shown
   useEffect(() => {
-    if (feedbackPeriodActive && isSubmitCorrect === true && typeof window !== 'undefined') {
+    if (feedbackPeriodActive && isSubmitCorrect === true && globalThis.window !== undefined) {
       import('canvas-confetti')
         .then(({ default: confetti }) => {
           confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 9999 });
@@ -131,26 +129,66 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
     setSubmitAttempted(false); // clear error once they make a selection
   }
 
+  const renderContent = () => {
+    switch (view) {
+      case 'loading':
+        return <LoadingView />;
+      case 'ended':
+        return <EndedView endedMessage={endedMessage ?? undefined} />;
+      case 'waiting':
+        return <StudentWaitingCard />;
+      case 'error':
+        return null;
+      case 'active':
+        if (activeDiscussion?.status !== 'active') return null;
+        return (
+          <ActiveView
+            isTimerExpired={isTimerExpired}
+            activeDiscussion={activeDiscussion}
+            hasTimer={hasTimer}
+            timerEndTime={timerEndTime}
+            timerTotalSeconds={timerTotalSeconds}
+            selectedOption={selectedOption}
+            handleSelectOption={handleSelectOption}
+            isMC={isMC}
+            responseText={responseText}
+            setResponseText={setResponseText}
+            handleSubmit={handleSubmit}
+            effectiveCanSubmit={effectiveCanSubmit}
+            submitting={submitting}
+            submitAttempted={submitAttempted}
+          />
+        );
+      case 'submitted':
+        return (
+          <SubmittedView
+            activeDiscussion={activeDiscussion}
+            isMC={isMC}
+            isTimerExpired={isTimerExpired}
+            feedbackPeriodActive={feedbackPeriodActive}
+            isSubmitCorrect={isSubmitCorrect}
+            selectedOption={selectedOption}
+            correctOptionLabel={correctOptionLabel}
+            hasTimer={hasTimer}
+            timerEndTime={timerEndTime}
+            timerTotalSeconds={timerTotalSeconds}
+            submittedAnswerText={submittedAnswerText}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <StudentSessionShell title={lesson?.title}>
-      {/* Connection hint (optional but nice for production UX) */}
-      {!isConnected && view !== 'loading' ? (
-        <StudentStatusAlert
-          title="Connecting\u2026"
-          description="Trying to establish realtime updates."
-        />
-      ) : null}
-
-      {errorMessage ? (
-        <StudentStatusAlert
-          variant="destructive"
-          title="Something went wrong"
-          description={errorMessage}
-        />
-      ) : null}
-
-      {/* Lesson status indicator */}
-      {view !== 'loading' && view !== 'error' ? (
+      {!isConnected && view !== 'loading' && (
+        <StudentStatusAlert title="Connecting\u2026" description="Trying to establish realtime updates." />
+      )}
+      {errorMessage && (
+        <StudentStatusAlert variant="destructive" title="Something went wrong" description={errorMessage} />
+      )}
+      {view !== 'loading' && view !== 'error' && (
         <div className="flex items-center gap-2">
           {view === 'ended' ? (
             <span
@@ -165,219 +203,213 @@ export function StudentSessionPage({ lessonId }: { lessonId: string }) {
               style={{ background: 'var(--color-primary-alpha-12)', color: 'var(--color-primary-600)' }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-              Active
+              {' '}Active
             </span>
           )}
         </div>
-      ) : null}
-
-      {view === 'loading' ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-4">
-          <div className="flex items-center gap-1.5">
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                className="block w-2 h-2 rounded-full"
-                style={{
-                  background: 'var(--color-primary-400)',
-                  animation: `dotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {view === 'ended' ? (
-        <StudentStatusAlert
-          variant="destructive"
-          title="Lesson ended"
-          description={endedMessage || 'Lesson has ended.'}
-        />
-      ) : null}
-
-      {view === 'waiting' ? (
-        <StudentWaitingCard />
-      ) : null}
-
-      {view === 'active' ? (
-        <div className="space-y-4">
-          {isTimerExpired ? (
-            /* Timer expired without submission — show message (discussion may now be closed) */
-            <TimerExpiredMessage
-              feedbackEnabled={activeDiscussion?.feedback_enabled}
-              correctOption={activeDiscussion?.correct_option}
-              correctOptionText={correctOptionText}
-              isMC={isMC}
-            />
-          ) : activeDiscussion?.status === 'active' ? (
-            /* Normal active discussion */
-            <>
-              {/* Centered countdown timer */}
-              {hasTimer && (
-                <div className="flex justify-center">
-                  <DiscussionTimer
-                    timerEndTime={timerEndTime!}
-                    timerTotalSeconds={timerTotalSeconds!}
-                  />
-                </div>
-              )}
-              <StudentPromptCard
-                discussion={activeDiscussion}
-                selectedOption={selectedOption}
-                onSelectOption={handleSelectOption}
-              />
-              <StudentResponseForm
-                value={isMC ? '' : responseText}
-                onChange={isMC ? () => { } : setResponseText}
-                onSubmit={handleSubmit}
-                disabled={!effectiveCanSubmit}
-                submitting={submitting}
-                showTextarea={!isMC}
-                validationMessage={submitAttempted && isMC && !selectedOption ? 'Please select an answer' : undefined}
-              />
-            </>
-          ) : null}
-        </div>
-      ) : null}
-
-      {view === 'submitted' ? (
-        <div className="space-y-4">
-          {activeDiscussion ? (
-            isMC ? (
-              /* ── Multiple Choice submitted views ── */
-              activeDiscussion.feedback_enabled ? (
-                feedbackPeriodActive ? (
-                  /* Scenario 1 active / Scenario 2 after timer expires — 7-second feedback window */
-                  <>
-                    <div
-                      data-testid="mc-feedback-banner"
-                      data-variant={isSubmitCorrect ? 'correct' : 'incorrect'}
-                      className="text-center text-xl font-bold p-5 rounded-2xl enter"
-                      style={isSubmitCorrect ? {
-                        background: 'var(--color-primary-alpha-12)',
-                        border: '1px solid var(--color-primary-alpha-25)',
-                        color: 'var(--color-primary-700)',
-                      } : {
-                        background: 'var(--color-error-alpha-10)',
-                        border: '1px solid var(--color-error-alpha-25)',
-                        color: 'var(--color-error-600)',
-                      }}
-                    >
-                      {isSubmitCorrect ? 'Great job!' : 'Not quite!'}
-                    </div>
-                    <StudentPromptCard
-                      discussion={activeDiscussion}
-                      submittedOption={selectedOption}
-                      showCorrectness
-                      correctOption={correctOptionLabel}
-                      disabled
-                    />
-                  </>
-                ) : hasTimer && !isTimerExpired ? (
-                  /* Scenario 2 while timer still running — gray highlight + waiting message */
-                  <>
-                    <div className="flex justify-center">
-                      <DiscussionTimer
-                        timerEndTime={timerEndTime!}
-                        timerTotalSeconds={timerTotalSeconds!}
-                      />
-                    </div>
-                    <StudentStatusAlert
-                      title="Response submitted"
-                      description="You're all set. Results will be shown when time's up."
-                    />
-                    <StudentPromptCard
-                      discussion={activeDiscussion}
-                      submittedOption={selectedOption}
-                      showCorrectness={false}
-                      disabled
-                    />
-                  </>
-                ) : (
-                  /* After 7-second feedback period — regular "all done" UI */
-                  <StudentStatusAlert
-                    title="Response submitted"
-                    description="You're all set. Wait for the next prompt."
-                  />
-                )
-              ) : (
-                /* Scenario 3 — no feedback: always show gray highlight */
-                <>
-                  {hasTimer && !isTimerExpired && (
-                    <div className="flex justify-center">
-                      <DiscussionTimer
-                        timerEndTime={timerEndTime!}
-                        timerTotalSeconds={timerTotalSeconds!}
-                      />
-                    </div>
-                  )}
-                  <StudentStatusAlert
-                    title="Response submitted"
-                    description={
-                      hasTimer && !isTimerExpired
-                        ? "You're all set. Results will be shown when time's up."
-                        : "You're all set. Wait for the next prompt."
-                    }
-                  />
-                  <StudentPromptCard
-                    discussion={activeDiscussion}
-                    submittedOption={selectedOption}
-                    showCorrectness={false}
-                    disabled
-                  />
-                </>
-              )
-            ) : (
-              /* ── Short / Long answer submitted views ── */
-              hasTimer && !isTimerExpired ? (
-                /* Timer still running — wait for time to be up */
-                <>
-                  <div className="flex justify-center">
-                    <DiscussionTimer
-                      timerEndTime={timerEndTime!}
-                      timerTotalSeconds={timerTotalSeconds!}
-                    />
-                  </div>
-                  <StudentStatusAlert
-                    title="Response submitted"
-                    description="You're all set. Results will be shown when time's up."
-                  />
-                </>
-              ) : (
-                /* No timer OR timer expired — show full question + student's answer */
-                <>
-                  <StudentPromptCard discussion={activeDiscussion} disabled />
-                  {submittedAnswerText && (
-                    <div
-                      data-testid="submitted-answer-display"
-                      className="rounded-xl p-4"
-                      style={{
-                        background: 'var(--color-primary-alpha-06)',
-                        border: '1px solid var(--color-primary-alpha-15)',
-                        borderLeft: '3px solid var(--color-primary-400)',
-                      }}
-                    >
-                      <p className="text-xs font-semibold mb-1.5 text-brand-600">
-                        Your response
-                      </p>
-                      <p className="text-sm whitespace-pre-wrap text-content-secondary">
-                        {submittedAnswerText}
-                      </p>
-                    </div>
-                  )}
-                </>
-              )
-            )
-          ) : (
-            /* Fallback: no active discussion data (e.g. hook returns null in submitted view) */
-            <StudentStatusAlert
-              title="Response submitted"
-              description="You're all set. Wait for the next prompt."
-            />
-          )}
-        </div>
-      ) : null}
+      )}
+      {renderContent()}
     </StudentSessionShell>
+  );
+}
+
+// ─── Sub-components and Helper Views ───────────────────────────────────────────
+
+function LoadingView() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 gap-4">
+      <div className="flex items-center gap-1.5">
+        {[0, 1, 2].map((i) => (
+          <span
+            key={`loading-dot-${i}`}
+            className="block w-2 h-2 rounded-full"
+            style={{
+              background: 'var(--color-primary-400)',
+              animation: `dotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function EndedView({ endedMessage }: Readonly<{ endedMessage: string | undefined }>) {
+  return (
+    <StudentStatusAlert
+      variant="destructive"
+      title="Lesson ended"
+      description={endedMessage || 'Lesson has ended.'}
+    />
+  );
+}
+
+function ActiveView({
+  isTimerExpired, activeDiscussion, hasTimer, timerEndTime, timerTotalSeconds,
+  selectedOption, handleSelectOption, isMC, responseText, setResponseText,
+  handleSubmit, effectiveCanSubmit, submitting, submitAttempted
+}: Readonly<{
+  isTimerExpired: boolean;
+  activeDiscussion: Discussion;
+  hasTimer: boolean;
+  timerEndTime: number | null;
+  timerTotalSeconds: number | null;
+  selectedOption: string | null;
+  handleSelectOption: (label: string) => void;
+  isMC: boolean;
+  responseText: string;
+  setResponseText: (v: string) => void;
+  handleSubmit: () => void;
+  effectiveCanSubmit: boolean;
+  submitting: boolean;
+  submitAttempted: boolean;
+}>) {
+  if (isTimerExpired) {
+    const correctOption = activeDiscussion?.correct_option;
+    const correctOptionText = correctOption
+      ? activeDiscussion.mc_options?.find((o: { label: string }) => o.label === correctOption)?.text ?? null
+      : null;
+    return (
+      <TimerExpiredMessage
+        feedbackEnabled={activeDiscussion?.feedback_enabled}
+        correctOption={correctOption}
+        correctOptionText={correctOptionText}
+        isMC={isMC}
+      />
+    );
+  }
+  return (
+    <div className="space-y-4">
+      {hasTimer && timerEndTime && timerTotalSeconds && (
+        <div className="flex justify-center">
+          <DiscussionTimer timerEndTime={timerEndTime} timerTotalSeconds={timerTotalSeconds} />
+        </div>
+      )}
+      <StudentPromptCard discussion={activeDiscussion} selectedOption={selectedOption} onSelectOption={handleSelectOption} />
+      <StudentResponseForm
+        value={isMC ? '' : responseText}
+        onChange={isMC ? () => { } : setResponseText}
+        onSubmit={handleSubmit}
+        disabled={!effectiveCanSubmit}
+        submitting={submitting}
+        showTextarea={!isMC}
+        validationMessage={submitAttempted && isMC && !selectedOption ? 'Please select an answer' : undefined}
+      />
+    </div>
+  );
+}
+
+interface SharedSubmittedProps {
+  activeDiscussion: Discussion | null;
+  isMC: boolean;
+  isTimerExpired: boolean;
+  feedbackPeriodActive: boolean;
+  isSubmitCorrect: boolean | null;
+  selectedOption: string | null;
+  correctOptionLabel: string | null;
+  hasTimer: boolean;
+  timerEndTime: number | null;
+  timerTotalSeconds: number | null;
+  submittedAnswerText: string | null;
+}
+
+function SubmittedView(props: Readonly<SharedSubmittedProps>) {
+  const { activeDiscussion } = props;
+  if (!activeDiscussion) {
+    return <StudentStatusAlert title="Response submitted" description="You're all set. Wait for the next prompt." />;
+  }
+
+  return (
+    <div className="space-y-4">
+      {props.isMC ? <SubmittedMCView {...props} /> : <SubmittedOpenView {...props} />}
+    </div>
+  );
+}
+
+function SubmittedMCView(props: Readonly<SharedSubmittedProps>) {
+  const { activeDiscussion, feedbackPeriodActive, isSubmitCorrect, selectedOption, correctOptionLabel, hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds } = props;
+  if (!activeDiscussion) return null;
+
+  if (activeDiscussion.feedback_enabled) {
+    if (feedbackPeriodActive && isSubmitCorrect !== null) {
+      return (
+        <>
+          <FeedbackResultBanner isCorrect={isSubmitCorrect} />
+          <StudentPromptCard discussion={activeDiscussion} submittedOption={selectedOption} showCorrectness correctOption={correctOptionLabel} disabled />
+        </>
+      );
+    }
+    if (hasTimer && !isTimerExpired && timerEndTime && timerTotalSeconds) {
+      return (
+        <>
+          <div className="flex justify-center"><DiscussionTimer timerEndTime={timerEndTime} timerTotalSeconds={timerTotalSeconds} /></div>
+          <StudentStatusAlert title="Response submitted" description="You're all set. Results will be shown when time's up." />
+          <StudentPromptCard discussion={activeDiscussion} submittedOption={selectedOption} showCorrectness={false} disabled />
+        </>
+      );
+    }
+  }
+
+  return <SubmittedDefaultView {...props} />;
+}
+
+function FeedbackResultBanner({ isCorrect }: Readonly<{ isCorrect: boolean }>) {
+  const style = isCorrect ? {
+    background: 'var(--color-primary-alpha-12)', border: '1px solid var(--color-primary-alpha-25)', color: 'var(--color-primary-700)',
+  } : {
+    background: 'var(--color-error-alpha-10)', border: '1px solid var(--color-error-alpha-25)', color: 'var(--color-error-600)',
+  };
+  return (
+    <div data-testid="mc-feedback-banner" data-variant={isCorrect ? 'correct' : 'incorrect'} className="text-center text-xl font-bold p-5 rounded-2xl enter" style={style}>
+      {isCorrect ? 'Great job!' : 'Not quite!'}
+    </div>
+  );
+}
+
+function SubmittedDefaultView({ hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds, activeDiscussion, selectedOption }: Readonly<SharedSubmittedProps>) {
+  const showTimer = hasTimer && !isTimerExpired && timerEndTime && timerTotalSeconds;
+  if (!activeDiscussion) return null;
+  return (
+    <>
+      {showTimer && <div className="flex justify-center"><DiscussionTimer timerEndTime={timerEndTime} timerTotalSeconds={timerTotalSeconds} /></div>}
+      <StudentStatusAlert
+        title="Response submitted"
+        description={showTimer ? "You're all set. Results will be shown when time's up." : "You're all set. Wait for the next prompt."}
+      />
+      <StudentPromptCard discussion={activeDiscussion} submittedOption={selectedOption} showCorrectness={false} disabled />
+    </>
+  );
+}
+
+function SubmittedOpenView({ hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds, activeDiscussion, submittedAnswerText }: Readonly<SharedSubmittedProps>) {
+  if (hasTimer && !isTimerExpired && timerEndTime && timerTotalSeconds) {
+    return (
+      <>
+        <div className="flex justify-center">
+          <DiscussionTimer timerEndTime={timerEndTime} timerTotalSeconds={timerTotalSeconds} />
+        </div>
+        <StudentStatusAlert title="Response submitted" description="You're all set. Results will be shown when time's up." />
+      </>
+    );
+  }
+  if (!activeDiscussion) return null;
+  return (
+    <>
+      <StudentPromptCard discussion={activeDiscussion} disabled />
+      {submittedAnswerText && (
+        <div
+          data-testid="submitted-answer-display"
+          className="rounded-xl p-4"
+          style={{
+            background: 'var(--color-primary-alpha-06)',
+            border: '1px solid var(--color-primary-alpha-15)',
+            borderLeft: '3px solid var(--color-primary-400)',
+          }}
+        >
+          <p className="text-xs font-semibold mb-1.5 text-brand-600">Your response</p>
+          <p className="text-sm whitespace-pre-wrap text-content-secondary">{submittedAnswerText}</p>
+        </div>
+      )}
+    </>
   );
 }

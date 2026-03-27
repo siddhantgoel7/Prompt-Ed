@@ -9,7 +9,7 @@ type EmailConfirmationProps = {
 };
 
 /** Displays a confirmation message with the user's email and a button to navigate to login. */
-export function EmailConfirmation({ email, onGoToLogin }: EmailConfirmationProps) {
+export function EmailConfirmation({ email, onGoToLogin }: Readonly<EmailConfirmationProps>) {
   return (
     <div className="text-center space-y-6">
       <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">

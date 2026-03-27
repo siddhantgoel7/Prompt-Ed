@@ -10,7 +10,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 export function StudentSessionShell({
   title,
   children,
-}: PropsWithChildren<{ title?: string }>) {
+}: Readonly<PropsWithChildren<{ title?: string }>>) {
   const router = useRouter();
 
   return (

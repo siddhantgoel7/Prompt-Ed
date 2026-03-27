@@ -50,7 +50,7 @@ export function ResponseListTab({
   handleFlagInappropriate,
   setShowHighlightedOnly,
   filterResponses,
-}: ResponseListTabProps) {
+}: Readonly<ResponseListTabProps>) {
   const [showFlagged, setShowFlagged] = React.useState(false);
 
   // Separate selection/flagging state for the flagged view — flaggedSelectedIds tracks

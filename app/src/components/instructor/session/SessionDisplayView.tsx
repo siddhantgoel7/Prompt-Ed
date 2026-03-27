@@ -12,11 +12,11 @@
 
 import { useStudentJoinQR } from '@/hooks/useStudentJoinQR';
 
-export function SessionDisplayView(props: {
+export function SessionDisplayView(props: Readonly<{
   lessonId: string;
   title: string;
   pinCode: string | null;
-}) {
+}>) {
   const { lessonId, title, pinCode } = props;
   const { joinUrl, qrDataUrl } = useStudentJoinQR(lessonId, 520);
   const homepageUrl = joinUrl ? new URL(joinUrl).origin : null;

@@ -76,6 +76,12 @@ test.describe('Instructor Reconnect & Autosave Resilience', () => {
         await page.route('**/rest/v1/lesson_files*', async (route) => {
             await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
         });
+        await page.route('**/rest/v1/lesson_chunks*', async (route) => {
+            await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+        });
+        await page.route('**/rest/v1/responses*', async (route) => {
+            await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+        });
 
         await page.goto('/lessons_page/c1');
 
@@ -84,11 +90,13 @@ test.describe('Instructor Reconnect & Autosave Resilience', () => {
         // If this label ever changes (e.g. to 'Live' or 'In Progress'), update this locator.
         await expect(page.locator('span', { hasText: 'Active' })).toBeVisible();
 
-        await page.getByText('Resilient Lesson').click();
+        // Click the lesson card using its ARIA label to navigate
+        await page.locator(`button[aria-label="Open lesson: Resilient Lesson"]`).click();
 
-        await expect(page.getByText('I survived a refresh!')).toBeVisible();
-        // Note: 'Active' status badge on the session header — update if this label ever changes.
-        await expect(page.locator('span', { hasText: 'Active' }).first()).toBeVisible();
+        // Wait for session page to load and verify components
+        await page.waitForURL(/\/session\/active-lesson-id/, { timeout: 15000 });
+        await expect(page.getByText(/I survived a refresh!/i)).toBeVisible({ timeout: 15000 });
+        await expect(page.getByRole('heading', { name: 'Resilient Lesson' })).toBeVisible({ timeout: 10000 });
     });
 
 });

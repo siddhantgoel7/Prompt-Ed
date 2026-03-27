@@ -6,6 +6,7 @@ import type { PromptType } from '@/types/discussion';
 import type { CandidateSet, GeneratedPrompt, MCOption, AIPromptPreferences } from '@/types/ai';
 import { retrieveChunksBySimilarity, retrieveRecentChunks, blendEmbeddings, normalizeEmbedding, type RetrievedChunk } from './retrieveChunks';
 import { buildSystemPrompt, buildUserPrompt, CANDIDATE_COUNT, TEMPERATURE_BY_TYPE } from './prompts/discussionPrompt';
+import { secureRandom, secureShuffle } from '../utils/random';
 
 /**
  * Orchestrates the full RAG → generate pipeline.
@@ -154,8 +155,8 @@ function parseAIResponse(raw: string, promptType: PromptType): GeneratedPrompt[]
  */
 function assignMCPositions(candidates: GeneratedPrompt[]): GeneratedPrompt[] {
   const labels: MCOption['label'][] = ['A', 'B', 'C', 'D'];
-  const extra = labels[Math.floor(Math.random() * labels.length)];
-  const slots = ([...labels, extra] as MCOption['label'][]).sort(() => Math.random() - 0.5);
+  const extra = labels[Math.floor(secureRandom() * labels.length)];
+  const slots = secureShuffle([...labels, extra] as MCOption['label'][]);
 
   return candidates.map((candidate, i) => {
     if (!candidate.mcOptions || candidate.mcOptions.length === 0) return candidate;
@@ -170,7 +171,7 @@ function assignMCPositions(candidates: GeneratedPrompt[]): GeneratedPrompt[] {
 function rotateMCToPosition(options: MCOption[], targetLabel: MCOption['label']): MCOption[] {
   const labels: MCOption['label'][] = ['A', 'B', 'C', 'D'];
   const correctOpt = options.find(o => o.is_correct);
-  const incorrectOpts = options.filter(o => !o.is_correct).sort(() => Math.random() - 0.5);
+  const incorrectOpts = secureShuffle(options.filter(o => !o.is_correct));
 
   if (!correctOpt) return options;
 

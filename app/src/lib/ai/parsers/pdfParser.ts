@@ -12,11 +12,11 @@ function dlog(msg: string) { if (VISION_DEBUG) console.log(msg); }
 /** Polyfills globalThis.Path2D and globalThis.createCanvas needed by pdfjs-serverless. */
 function registerCanvasGlobals() {
   const g = globalThis as unknown as Record<string, unknown>;
-  if (typeof g.Path2D === 'undefined') {
+  if (g.Path2D === undefined) {
     g.Path2D = Path2D;
     dlog('[pdfParser] Polyfilled globalThis.Path2D');
   }
-  if (typeof g.createCanvas === 'undefined') {
+  if (g.createCanvas === undefined) {
     g.createCanvas = createCanvas;
     dlog('[pdfParser] Polyfilled globalThis.createCanvas');
   }

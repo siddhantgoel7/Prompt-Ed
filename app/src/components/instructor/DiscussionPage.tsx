@@ -16,13 +16,13 @@ import { FilterToggle } from '@/components/instructor/FilterToggle';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
 
 /** Isolated response list — owns its own selection state so clicks don't re-render the whole page. */
-function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag }: {
+function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag }: Readonly<{
   responses: Response[];
   flaggedResponses: Response[];
   onRemoveResponse: (id: string) => void;
   onRestoreResponse: (id: string) => Promise<void>;
   canFlag: boolean;
-}) {
+}>) {
   const {
     selectedIds, flaggingId, showHighlightedOnly,
     toggleSelected, handleFlagInappropriate,
@@ -142,7 +142,7 @@ export function DiscussionPage({
   initialResponses,
   initialFlaggedResponses,
   initialIsActive
-}: DiscussionClientProps) {
+}: Readonly<DiscussionClientProps>) {
 
   // ── Initialize State with Server Data (Hydration) ──────────────────────────
   // Server-fetched data is seeded into useState so that realtime updates can
@@ -194,21 +194,23 @@ export function DiscussionPage({
 
   const { channel, isConnected } = useRealtime(lessonId, 'instructor');
 
+  const handleNewResponse = useCallback((payload: { payload?: { response?: Response } }) => {
+    const newResponse = payload.payload?.response;
+    if (newResponse?.discussion_id === discussionId) {
+      setResponses((prev) => {
+        // Deduplicate just in case — Supabase Realtime can deliver the same broadcast
+        // event twice on reconnect. Returning prev skips the re-render entirely.
+        if (prev.some(r => r.id === newResponse.id)) return prev;
+        return [newResponse, ...prev];
+      });
+    }
+  }, [discussionId]);
+
   useEffect(() => {
     if (!channel || !isConnected) return;
 
-    channel.on('broadcast', { event: 'response:new' }, (payload) => {
-      const newResponse = payload.payload?.response;
-      if (newResponse && newResponse.discussion_id === discussionId) {
-        setResponses((prev) => {
-          // Deduplicate just in case — Supabase Realtime can deliver the same broadcast
-          // event twice on reconnect. Returning prev skips the re-render entirely.
-          if (prev.some(r => r.id === newResponse.id)) return prev;
-          return [newResponse, ...prev];
-        });
-      }
-    });
-  }, [channel, isConnected, discussionId]);
+    channel.on('broadcast', { event: 'response:new' }, handleNewResponse);
+  }, [channel, isConnected, handleNewResponse]);
 
   const isMC = initialDiscussion.prompt_type === 'multiple_choice';
 
@@ -306,7 +308,7 @@ export function DiscussionPage({
                         className="w-2 h-2 rounded-full animate-pulse"
                         style={{ background: 'var(--color-primary-500)' }}
                       />
-                      Active
+                      {' '}Active
                     </>
                   ) : (
                     <>
@@ -314,7 +316,7 @@ export function DiscussionPage({
                         className="w-2 h-2 rounded-full"
                         style={{ background: 'var(--text-muted)' }}
                       />
-                      Closed
+                      {' '}Closed
                     </>
                   )}
                 </div>

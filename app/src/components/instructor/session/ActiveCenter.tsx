@@ -5,19 +5,17 @@
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-
 import * as React from 'react';
-import type { GeneratedPrompt } from '@/types/ai';
+import type { GeneratedPrompt, TokenUsage } from '@/types/ai';
 import type { PromptType } from '@/types/discussion';
 import { SessionContext } from './SessionContext';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { CandidateCard, CANDIDATE_COLLAPSE_MS } from './CandidateCard';
+import { CandidateCard } from './CandidateCard';
 import { MultipleChoiceEditor } from './MultipleChoiceEditor';
 import { AIPreferencesDialog } from './AIPreferencesDialog';
 import { AITipsButton } from './AITipsButton';
 import { transcribeAudioApi } from '@/lib/api/aiApi';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
-import type { TokenUsage } from '@/types/ai';
 import { DEBUG_TOOLS } from '@/lib/debug';
 import { useDebugSweep } from '@/hooks/useDebugSweep';
 
@@ -29,74 +27,38 @@ import { useDebugSweep } from '@/hooks/useDebugSweep';
 const GENERATING_CHARS = 'Generating...'.split('');
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export function ActiveCenter(props: Partial<{
-  lessonId: string;
-  promptInput: string;
-  setPromptInput: (v: string) => void;
-  isConnected: boolean;
-  activeDiscussionId: string | null;
-  onPublish: () => void;
-  transcriptText: string;
-  setTranscriptText: (v: string) => void;
-  promptType: PromptType;
-  setPromptType: (v: PromptType) => void;
-  candidates: GeneratedPrompt[];
-  isGenerating: boolean;
-  generationWarning: string | null;
-  generationTimeMs: number | null;
-  lastTokenUsage: TokenUsage | null;
-  lastModel: string | null;
-  onGenerate: (transcriptOverride?: string) => void | Promise<void>;
-  onSelectCandidate: (p: GeneratedPrompt) => void;
-  onRegenerate: () => void;
-  onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => void;
-}>) {
-  const context = React.useContext(SessionContext);
-  const promptInput = context ? context.promptInput : props.promptInput!;
-  const setPromptInput = context ? context.setPromptInput : props.setPromptInput!;
-  const isConnected = context ? context.isConnected : props.isConnected!;
-  const onPublish = context ? (timerSeconds: number | null) => context.handlePublishDiscussion(timerSeconds) : (_timerSeconds: number | null) => props.onPublish!();
-  const transcriptText = context ? context.transcriptText : props.transcriptText!;
-  const setTranscriptText = context ? context.setTranscriptText : props.setTranscriptText!;
-  const promptType = context ? context.promptType : props.promptType!;
-  const setPromptType = context ? context.setPromptType : props.setPromptType!;
-  const candidates = context ? context.candidates : props.candidates!;
-  const isGenerating = context ? context.isGenerating : props.isGenerating!;
-  const generationWarning = context ? context.generationWarning : props.generationWarning!;
-  const generationTimeMs = context ? context.generationTimeMs : props.generationTimeMs ?? null;
-  const lastTokenUsage = context ? context.lastTokenUsage : props.lastTokenUsage ?? null;
-  const lastModel = context ? context.lastModel : props.lastModel ?? null;
-  const onGenerate = context ? context.generateCandidates : props.onGenerate!;
-  const onSelectCandidate = context ? context.selectCandidate : props.onSelectCandidate!;
-  const onRegenerate = context ? context.regenerateCandidates : props.onRegenerate!;
-  const onPublishAiCandidate = context ? context.handlePublishAiCandidate : props.onPublishAiCandidate;
-  const lessonId = context ? context.lesson.id : props.lessonId!;
-  const activeDiscussionId = context ? (context.activeDiscussion?.id ?? null) : props.activeDiscussionId!;
-  const recorder = useAudioRecorder();
+
+interface ActiveCenterProps {
+  lessonId: string; promptInput: string; setPromptInput: (v: string) => void; isConnected: boolean;
+  activeDiscussionId: string | null; onPublish: (timerSeconds: number | null) => void;
+  onClose: (discussionId: string) => void; transcriptText: string; setTranscriptText: (v: string) => void;
+  promptType: PromptType; setPromptType: (v: PromptType) => void; candidates: GeneratedPrompt[];
+  isGenerating: boolean; generationWarning: string | null; generationTimeMs: number | null;
+  lastTokenUsage: TokenUsage | null; lastModel: string | null;
+  onGenerate: (transcriptOverride?: string) => void | Promise<void>; onSelectCandidate: (p: GeneratedPrompt) => void;
+  onRegenerate: () => void; onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => void;
+}
+
+type SttStatus = 'idle' | 'transcribing' | 'error';
+type CreationMode = 'ai' | 'manual';
+
+export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
+  const state = useActiveCenterStateMapping(props);
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
-  const [exitingIndex, setExitingIndex] = React.useState<number | null>(null);
-  const exitingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [sttStatus, setSttStatus] = React.useState<'idle' | 'transcribing' | 'error'>('idle');
+  const [sttStatus, setSttStatus] = React.useState<SttStatus>('idle');
   const [sttError, setSttError] = React.useState<string | null>(null);
-  // Used by manual mode MC only — AI candidate editing state lives in CandidateCard.
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
   const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
-  const [manualOptions, setManualOptions] = React.useState<Record<string, string>>({
-    A: '', B: '', C: '', D: ''
-  });
+  const [editingOptions, setEditingOptions] = React.useState<Record<string, string>>({});
+  const [manualOptions, setManualOptions] = React.useState<Record<string, string>>({ A: '', B: '', C: '', D: '' });
   const [creationMode, setCreationMode] = React.useState<'ai' | 'manual'>('ai');
   const [showTimerDialog, setShowTimerDialog] = React.useState(false);
-  const { copiedReport, sweepProgress, handleCopyReport, handleRunAllCombinations } = useDebugSweep({
-    lessonId, transcriptText, candidates, isGenerating,
-    generationWarning, generationTimeMs, lastTokenUsage, lastModel, promptType,
-  });
-  // Holds the fully-built candidate + MC state while the timer dialog is open.
-  const [pendingPublishArgs, setPendingPublishArgs] = React.useState<{
-    candidate: GeneratedPrompt;
-    correctOption: string | null;
-    feedbackEnabled: boolean;
-  } | null>(null);
+  const [pendingCandidate, setPendingCandidate] = React.useState<GeneratedPrompt | null>(null);
   const [publishError, setPublishError] = React.useState<string | null>(null);
+
+  const { copiedReport, sweepProgress, handleCopyReport, handleRunAllCombinations } = useDebugSweep({
+    ...state, candidates: state.candidates,
+  });
 
   const transcriptRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -105,107 +67,30 @@ export function ActiveCenter(props: Partial<{
       transcriptRef.current.style.height = 'auto';
       transcriptRef.current.style.height = transcriptRef.current.scrollHeight + 'px';
     }
-  }, [transcriptText]);
+  }, [state.transcriptText]);
 
-  // Reset all selection and manual-mode state when a new set of candidates arrives.
   React.useEffect(() => {
-    setSelectedIndex(null);
-    setExitingIndex(null);
-    if (exitingTimerRef.current) clearTimeout(exitingTimerRef.current);
-    setPendingPublishArgs(null);
-    setOverrideCorrectOption(null);
-    setFeedbackEnabled(false);
-    setManualOptions({ A: '', B: '', C: '', D: '' });
-    setPublishError(null);
-  }, [candidates]);
+    setSelectedIndex(null); setOverrideCorrectOption(null); setFeedbackEnabled(false);
+    setEditingOptions({}); setManualOptions({ A: '', B: '', C: '', D: '' }); setPublishError(null);
+  }, [state.candidates]);
 
-  // Stop recording → gpt-4o-transcribe → populate transcriptText → trigger generate
-  const handleStopAndTranscribe = React.useCallback(async () => {
-    setSttError(null);
-    setSttStatus('transcribing');
-
-    const audioBlob = await recorder.stop();
-
-    if (!audioBlob.size) {
-      setSttError('No audio captured. Try again.');
-      setSttStatus('error');
-      return;
-    }
-
-    try {
-      const transcript = await transcribeAudioApi(lessonId, audioBlob);
-      setTranscriptText(transcript ?? '');
-      setPromptInput(transcript ?? '');
-      setSttStatus('idle');
-      // Pass fresh transcript directly to avoid stale state closure.
-      await onGenerate(transcript ?? '');
-    } catch (err) {
-      setSttError(err instanceof Error ? err.message : 'Transcription failed — type manually.');
-      setSttStatus('error');
-    }
-  }, [lessonId, recorder, setTranscriptText, setPromptInput, onGenerate]);
-
-  const handleSelectCandidate = (p: GeneratedPrompt, index: number) => {
-    // Mark the outgoing card as exiting so it can finish its collapse animation.
-    if (selectedIndex !== null && selectedIndex !== index) {
-      if (exitingTimerRef.current) clearTimeout(exitingTimerRef.current);
-      setExitingIndex(selectedIndex);
-      exitingTimerRef.current = setTimeout(() => setExitingIndex(null), CANDIDATE_COLLAPSE_MS);
-    }
-    setSelectedIndex(index);
-    onSelectCandidate(p);
-  };
-
-  // Called after instructor confirms timer dialog.
-  // Two entry points: AI candidate publish (via CandidateCard) and manual mode publish.
-  const handleTimerConfirm = (timerSeconds: number | null) => {
-    setShowTimerDialog(false);
-
-    // AI candidate path — CandidateCard sets pendingPublishArgs before opening the dialog.
-    if (pendingPublishArgs) {
-      const { candidate, correctOption, feedbackEnabled: fe } = pendingPublishArgs;
-      setPendingPublishArgs(null);
-      if (onPublishAiCandidate) {
-        onPublishAiCandidate(candidate, correctOption, fe, timerSeconds);
-        setSelectedIndex(null);
-        setPublishError(null);
-      }
-      return;
-    }
-
-    // Manual creation path.
-    if (creationMode === 'manual') {
-      if (promptType === 'multiple_choice') {
-        if (!overrideCorrectOption) {
-          setPublishError('Please select a correct answer for your multiple-choice question.');
-          return;
-        }
-        setPublishError(null);
-        if (onPublishAiCandidate) {
-          const mcOptions = (['A', 'B', 'C', 'D'] as const).map(label => ({
-            label,
-            text: manualOptions[label] || `Option ${label}`
-          }));
-          onPublishAiCandidate(
-            { promptText: promptInput, promptType: 'multiple_choice', mcOptions },
-            overrideCorrectOption,
-            feedbackEnabled,
-            timerSeconds
-          );
-          setManualOptions({ A: '', B: '', C: '', D: '' });
-          setOverrideCorrectOption(null);
-          setFeedbackEnabled(false);
-          setPromptInput('');
-        }
-        return;
-      }
-      onPublish(timerSeconds);
-    }
-  };
+  const handlers = useActiveCenterHandlers({
+    ...state,
+    selectedIndex, setSelectedIndex,
+    sttStatus, setSttStatus,
+    setSttError,
+    overrideCorrectOption, setOverrideCorrectOption,
+    feedbackEnabled, setFeedbackEnabled,
+    editingOptions, setEditingOptions,
+    manualOptions, setManualOptions,
+    creationMode, setCreationMode,
+    showTimerDialog, setShowTimerDialog,
+    pendingCandidate, setPendingCandidate,
+    setPublishError,
+  });
 
   return (
     <div className="flex-1 p-4 md:p-6 space-y-4">
-
       <div
         className="space-y-3 rounded-2xl p-4"
         style={{
@@ -222,285 +107,48 @@ export function ActiveCenter(props: Partial<{
           </TabsList>
 
           <TabsContent value="ai" className="space-y-3 mt-0">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-content-primary">
-                Generate with AI
-              </span>
-
-              {/* STT recording button */}
-              <div className="flex items-center gap-2">
-                {recorder.isRecording && (
-                  <span
-                    className="flex items-center gap-1 text-xs font-medium"
-                    style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}
-                  >
-                    <span
-                      className="w-2 h-2 rounded-full animate-pulse inline-block"
-                      style={{ background: 'currentColor' }}
-                    />
-                    {recorder.fmt(recorder.elapsed)}
-                  </span>
-                )}
-                {!recorder.isRecording ? (
-                  <button
-                    onClick={recorder.start}
-                    disabled={isGenerating || sttStatus === 'transcribing'}
-                    className="text-xs h-7 px-3 rounded-[8px] font-medium transition-all duration-150 disabled:opacity-50 flex items-center gap-1.5"
-                    style={{
-                      background: 'rgba(239,68,68,0.10)',
-                      border: '1px solid rgba(239,68,68,0.30)',
-                      color: 'var(--recording-text, oklch(0.55 0.22 27))',
-                    }}
-                  >
-                    {/* Mic icon */}
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3Z" />
-                      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                      <line x1="12" x2="12" y1="19" y2="22" />
-                    </svg>
-                    Record
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleStopAndTranscribe}
-                    className="text-xs h-7 px-3 rounded-[8px] font-medium text-white transition-all duration-150 flex items-center gap-1.5"
-                    style={{ background: 'var(--color-primary-600)' }}
-                  >
-                    {/* Stop icon */}
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                    </svg>
-                    Stop &amp; Transcribe
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {sttStatus === 'transcribing' && (
-              <p className="text-xs animate-pulse text-content-muted">
-                Transcribing audio…
-              </p>
-            )}
-            {sttStatus === 'error' && sttError && (
-              <p className="text-xs" style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}>{sttError}</p>
-            )}
-
-            {/* Prompt / context input */}
-            <textarea
-              ref={transcriptRef}
-              value={promptInput}
-              onChange={(e) => {
-                setPromptInput(e.target.value);
-                setTranscriptText(e.target.value); // Keep in sync for STT context
-              }}
-              placeholder="Spoken content will appear here after recording, or type a topic manually"
-              className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[50px] transition-all duration-150 bg-surface-raised text-content-primary"
-              style={{
-                border: '1px solid var(--border-default)',
-              }}
-              rows={2}
+            <AIGenerationPanel
+              {...state}
+              {...handlers}
+              handleStopAndTranscribe={handlers.handleStopAndTranscribe}
+              handleSelectCandidate={handlers.handleSelectCandidate}
+              handleRunAllCombinations={handleRunAllCombinations}
+              sweepProgress={sweepProgress}
+              selectedIndex={selectedIndex}
+              editingOptions={editingOptions}
+              setEditingOptions={setEditingOptions}
+              overrideCorrectOption={overrideCorrectOption}
+              setOverrideCorrectOption={setOverrideCorrectOption}
+              feedbackEnabled={feedbackEnabled}
+              setFeedbackEnabled={setFeedbackEnabled}
+              setPendingCandidate={setPendingCandidate}
+              setShowTimerDialog={setShowTimerDialog}
+              sttStatus={sttStatus}
+              sttError={sttError}
+              handleCopyReport={handleCopyReport}
+              copiedReport={copiedReport}
+              transcriptRef={transcriptRef}
             />
-
-            {/* Prompt type + generate */}
-            <div className="flex items-center gap-2">
-              {/* (i) best-practices button — leftmost, highlighted once per browser session */}
-              <AITipsButton lessonId={lessonId} />
-              <select
-                value={promptType}
-                onChange={(e) => setPromptType(e.target.value as PromptType)}
-                className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary"
-                style={{
-                  border: '1px solid var(--border-default)',
-                }}
-              >
-                <option value="long_answer">Long Answer</option>
-                <option value="short_answer">Short Answer</option>
-                <option value="multiple_choice">Multiple Choice</option>
-              </select>
-
-              <AIPreferencesDialog />
-              <div className={`rotating-glow-wrap${isGenerating ? ' generating' : ''}`}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={() => onGenerate()}
-                      disabled={isGenerating || recorder.isRecording}
-                      size="sm"
-                      className="px-4 py-1.5 rounded-full font-semibold"
-                      style={{
-                        background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-                        color: 'white',
-                        opacity: 1,
-                      }}
-                    >
-                      {isGenerating ? (
-                        <span aria-label="Generating…" style={{ display: 'inline-flex' }}>
-                          {GENERATING_CHARS.map((ch, i) => (
-                            <span
-                              key={i}
-                              className={ch === '.' ? 'generating-char' : 'generating-shimmer'}
-                              style={{ animationDelay: `${i * 0.07}s` }}
-                            >
-                              {ch}
-                            </span>
-                          ))}
-                        </span>
-                      ) : 'Generate Prompts'}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Use AI to generate 5 discussion prompt candidates from your transcript and uploaded files. Takes 5 to 15 seconds.</TooltipContent>
-                </Tooltip>
-              </div>
-              {DEBUG_TOOLS && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={handleRunAllCombinations}
-                      disabled={isGenerating || !!sweepProgress || recorder.isRecording}
-                      variant="outline"
-                      size="sm"
-                      className="text-xs font-semibold"
-                      style={{ borderColor: 'rgba(239,68,68,0.4)', color: 'oklch(0.55 0.22 27)' }}
-                    >
-                      {sweepProgress ? `${sweepProgress.current}/${sweepProgress.total}…` : 'Run All Combinations'}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Generate all 81 type/difficulty/style/length combinations sequentially. Downloads sweep_report.txt and sweep_report.csv when done. ~15–20 min.</TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-
-            {generationWarning && (
-              <p
-                className="text-xs rounded-lg px-3 py-2"
-                style={{
-                  background: 'rgba(245,158,11,0.10)',
-                  border: '1px solid rgba(245,158,11,0.25)',
-                  color: '#b45309',
-                }}
-              >
-                {generationWarning}
-              </p>
-            )}
-
-            {DEBUG_TOOLS && sweepProgress && (
-              <p className="text-xs rounded-lg px-3 py-2 animate-pulse"
-                style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', color: '#6366f1' }}>
-                Generating {sweepProgress.current} / {sweepProgress.total} — {sweepProgress.label}
-              </p>
-            )}
-
-            {/* Candidate cards */}
-            {candidates.length > 0 && (
-              <div className="space-y-2">
-                {candidates.map((c: GeneratedPrompt, i: number) => (
-                  <CandidateCard
-                    key={i}
-                    candidate={c}
-                    index={i}
-                    isSelected={selectedIndex === i}
-                    onSelect={() => handleSelectCandidate(c, i)}
-                    isConnected={isConnected}
-                    onRequestPublish={(candidate, correctOption, fe) => {
-                      setPendingPublishArgs({ candidate, correctOption, feedbackEnabled: fe });
-                      setShowTimerDialog(true);
-                    }}
-                  />
-                ))}
-
-                <div className="flex gap-2 pt-1">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        onClick={onRegenerate}
-                        disabled={isGenerating}
-                        variant="outline"
-                        size="sm"
-                        className="text-xs"
-                      >
-                        {isGenerating ? 'Regenerating…' : 'Regenerate'}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Run AI generation again without changing the transcript or files. Use this if the previous candidates were not satisfactory.</TooltipContent>
-                  </Tooltip>
-                  {DEBUG_TOOLS && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          onClick={handleCopyReport}
-                          disabled={isGenerating || candidates.length === 0}
-                          variant="outline"
-                          size="sm"
-                          className="text-xs"
-                        >
-                          {copiedReport ? 'Copied!' : 'Copy Report'}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Copy generation details and all candidates to clipboard.</TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-              </div>
-            )}
-
           </TabsContent>
 
           <TabsContent value="manual" className="space-y-3 mt-0">
-            <div className="flex items-center gap-2 mb-2">
-              <select
-                value={promptType}
-                onChange={(e) => setPromptType(e.target.value as PromptType)}
-                className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary"
-                style={{
-                  border: '1px solid var(--border-default)',
-                }}
-              >
-                <option value="long_answer">Long Answer</option>
-                <option value="short_answer">Short Answer</option>
-                <option value="multiple_choice">Multiple Choice</option>
-              </select>
-            </div>
-
-            <textarea
-              value={promptInput}
-              onChange={(e) => {
-                setPromptInput(e.target.value);
-                setTranscriptText(e.target.value);
-              }}
-              placeholder="Type your question here manually..."
-              className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[80px] transition-all duration-150 bg-surface-raised text-content-primary"
-              style={{
-                border: '1px solid var(--border-default)',
-              }}
-              rows={3}
+            <ManualCreationPanel
+              promptType={state.promptType} setPromptType={state.setPromptType}
+              promptInput={state.promptInput} setPromptInput={state.setPromptInput}
+              setTranscriptText={state.setTranscriptText}
+              overrideCorrectOption={overrideCorrectOption} setOverrideCorrectOption={setOverrideCorrectOption}
+              feedbackEnabled={feedbackEnabled} setFeedbackEnabled={setFeedbackEnabled}
+              manualOptions={manualOptions} setManualOptions={setManualOptions}
             />
-
-            {promptType === 'multiple_choice' && (
-              <MultipleChoiceEditor
-                nameGroup="manual-correct-option"
-                options={['A', 'B', 'C', 'D'].map((label) => ({
-                  label,
-                  text: manualOptions[label] || ''
-                }))}
-                correctOption={overrideCorrectOption}
-                onCorrectOptionChange={setOverrideCorrectOption}
-                onOptionTextChange={(label, text) => setManualOptions({ ...manualOptions, [label]: text })}
-                feedbackEnabled={feedbackEnabled}
-                onFeedbackChange={setFeedbackEnabled}
-              />
-            )}
-
             {/* Start Discussion — manual tab only */}
-            {!activeDiscussionId && (
+            {!state.activeDiscussionId && (
               <div className="pt-3 flex justify-end border-t border-line-subtle">
                 <button
                   onClick={() => setShowTimerDialog(true)}
-                  disabled={!promptInput.trim() || !isConnected}
+                  disabled={!state.promptInput.trim() || !state.isConnected}
                   data-testid="start-discussion-button"
                   className="px-4 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
-                  style={{
-                    background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-                  }}
+                  style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))' }}
                 >
                   Start Discussion
                 </button>
@@ -510,24 +158,378 @@ export function ActiveCenter(props: Partial<{
         </Tabs>
 
         {publishError && (
-          <p
-            className="text-xs rounded-lg px-3 py-2"
-            style={{
-              background: 'rgba(239,68,68,0.08)',
-              border: '1px solid rgba(239,68,68,0.25)',
-              color: '#dc2626',
-            }}
-          >
+          <p className="text-xs rounded-lg px-3 py-2" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#dc2626' }}>
             {publishError}
           </p>
         )}
 
         <StartDiscussionDialog
           open={showTimerDialog}
-          onConfirm={handleTimerConfirm}
-          onCancel={() => { setShowTimerDialog(false); setPendingPublishArgs(null); }}
+          onConfirm={handlers.handleTimerConfirm}
+          onCancel={() => { setShowTimerDialog(false); setPendingCandidate(null); }}
         />
       </div>
+    </div>
+  );
+}
+
+// ─── Internal Hooks ──────────────────────────────────────────────────────────
+
+function useActiveCenterStateMapping(props: Partial<ActiveCenterProps>) {
+  const context = React.useContext(SessionContext);
+  const recorder = useAudioRecorder();
+
+  if (!context) {
+    return {
+      lessonId: props.lessonId!,
+      recorder,
+      promptInput: props.promptInput!,
+      setPromptInput: props.setPromptInput!,
+      isConnected: props.isConnected!,
+      onPublish: (timerSeconds: number | null) => props.onPublish!(timerSeconds),
+      transcriptText: props.transcriptText!,
+      setTranscriptText: props.setTranscriptText!,
+      promptType: props.promptType!,
+      setPromptType: props.setPromptType!,
+      candidates: props.candidates!,
+      isGenerating: props.isGenerating!,
+      generationWarning: props.generationWarning!,
+      generationTimeMs: props.generationTimeMs ?? null,
+      lastTokenUsage: props.lastTokenUsage ?? null,
+      lastModel: props.lastModel ?? null,
+      onGenerate: props.onGenerate!,
+      onSelectCandidate: props.onSelectCandidate!,
+      onRegenerate: props.onRegenerate!,
+      onPublishAiCandidate: props.onPublishAiCandidate,
+      onClose: props.onClose!,
+      activeDiscussionId: props.activeDiscussionId!,
+    };
+  }
+
+  return {
+    lessonId: context.lesson.id,
+    recorder,
+    promptInput: context.promptInput,
+    setPromptInput: context.setPromptInput,
+    isConnected: context.isConnected,
+    onPublish: (timerSeconds: number | null) => context.handlePublishDiscussion(timerSeconds),
+    transcriptText: context.transcriptText,
+    setTranscriptText: context.setTranscriptText,
+    promptType: context.promptType,
+    setPromptType: context.setPromptType,
+    candidates: context.candidates,
+    isGenerating: context.isGenerating,
+    generationWarning: context.generationWarning,
+    generationTimeMs: context.generationTimeMs,
+    lastTokenUsage: context.lastTokenUsage,
+    lastModel: context.lastModel,
+    onGenerate: context.generateCandidates,
+    onSelectCandidate: context.selectCandidate,
+    onRegenerate: context.regenerateCandidates,
+    onPublishAiCandidate: context.handlePublishAiCandidate,
+    onClose: context.handleCloseDiscussion,
+    activeDiscussionId: context.activeDiscussion?.id ?? null,
+  };
+}
+
+function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
+  recorder: ReturnType<typeof useAudioRecorder>;
+  selectedIndex: number | null;
+  setSelectedIndex: (v: number | null) => void;
+  sttStatus: SttStatus;
+  setSttStatus: (v: SttStatus) => void;
+  setSttError: (v: string | null) => void;
+  overrideCorrectOption: string | null;
+  setOverrideCorrectOption: (v: string | null) => void;
+  feedbackEnabled: boolean;
+  setFeedbackEnabled: (v: boolean) => void;
+  editingOptions: Record<string, string>;
+  setEditingOptions: (v: Record<string, string>) => void;
+  manualOptions: Record<string, string>;
+  setManualOptions: (v: Record<string, string>) => void;
+  creationMode: CreationMode;
+  setCreationMode: (v: CreationMode) => void;
+  showTimerDialog: boolean;
+  setShowTimerDialog: (v: boolean) => void;
+  pendingCandidate: GeneratedPrompt | null;
+  setPendingCandidate: (v: GeneratedPrompt | null) => void;
+  setPublishError: (v: string | null) => void;
+}>) {
+  const {
+    lessonId, recorder, onGenerate, setTranscriptText, setPromptInput,
+    onSelectCandidate, setSelectedIndex, setOverrideCorrectOption, setEditingOptions,
+    promptInput, editingOptions, onPublishAiCandidate, overrideCorrectOption, feedbackEnabled,
+    setPublishError, setShowTimerDialog, pendingCandidate, setPendingCandidate,
+    creationMode, promptType, manualOptions, onPublish, candidates, selectedIndex,
+    setManualOptions, setFeedbackEnabled, setSttError, setSttStatus
+  } = allProps;
+
+  const handleStopAndTranscribe = React.useCallback(async () => {
+    setSttError(null); setSttStatus('transcribing');
+    const audioBlob = await recorder.stop();
+    if (!audioBlob.size) { setSttError('No audio captured. Try again.'); setSttStatus('error'); return; }
+    try {
+      const transcript = await transcribeAudioApi(lessonId, audioBlob);
+      setTranscriptText(transcript ?? ''); setPromptInput(transcript ?? ''); setSttStatus('idle');
+      await onGenerate(transcript ?? '');
+    } catch (err) {
+      setSttError(err instanceof Error ? err.message : 'Transcription failed — type manually.'); setSttStatus('error');
+    }
+  }, [lessonId, recorder, setTranscriptText, setPromptInput, onGenerate, setSttError, setSttStatus]);
+
+  const handleSelectCandidate = (p: GeneratedPrompt, index: number) => {
+    setSelectedIndex(index); onSelectCandidate(p);
+    setPromptInput(p.promptText); setTranscriptText(p.promptText);
+    if (p.promptType === 'multiple_choice' && p.mcOptions) {
+      const correctOpt = p.mcOptions.find(o => o.is_correct);
+      setOverrideCorrectOption(correctOpt ? correctOpt.label : null);
+      setEditingOptions(p.mcOptions.reduce((acc: Record<string, string>, opt: { label: string; text: string }) => ({ ...acc, [opt.label]: opt.text }), {}));
+    } else {
+      setOverrideCorrectOption(null); setEditingOptions({});
+    }
+  };
+
+  const handlePublishSelected = (p: GeneratedPrompt, timerSeconds: number | null = null) => {
+    const publishedCandidate = (p.promptType === 'multiple_choice' && p.mcOptions)
+      ? { ...p, promptText: promptInput, mcOptions: p.mcOptions.map(opt => ({ ...opt, text: editingOptions[opt.label] ?? opt.text })) }
+      : { ...p, promptText: promptInput };
+
+    if (onPublishAiCandidate) {
+      onPublishAiCandidate(publishedCandidate, overrideCorrectOption, feedbackEnabled, timerSeconds);
+      setSelectedIndex(null); setPublishError(null);
+    }
+  };
+
+  const handleTimerConfirm = (timerSeconds: number | null) => {
+    setShowTimerDialog(false);
+    if (pendingCandidate) {
+      const candidate = pendingCandidate; setPendingCandidate(null);
+      handlePublishSelected(candidate, timerSeconds); return;
+    }
+    if (creationMode === 'manual') {
+      if (promptType === 'multiple_choice') {
+        if (!overrideCorrectOption) { setPublishError('Please select a correct answer for your multiple-choice question.'); return; }
+        setPublishError(null);
+        if (onPublishAiCandidate) {
+          const mcOptions = (['A', 'B', 'C', 'D'] as const).map(label => ({ label, text: manualOptions[label] || `Option ${label}` }));
+          onPublishAiCandidate({ promptText: promptInput, promptType: 'multiple_choice', mcOptions }, overrideCorrectOption, feedbackEnabled, timerSeconds);
+          setManualOptions({ A: '', B: '', C: '', D: '' }); setOverrideCorrectOption(null); setFeedbackEnabled(false); setPromptInput('');
+        }
+        return;
+      }
+      onPublish(timerSeconds); return;
+    }
+    if (selectedIndex !== null && candidates[selectedIndex]) {
+      setPublishError(null); handlePublishSelected(candidates[selectedIndex], timerSeconds); return;
+    }
+    if (promptType === 'multiple_choice') { setPublishError(candidates.length > 0 ? 'Please select a generated AI prompt to publish.' : 'Please generate AI prompts and select one to publish, or switch to Manual Creation mode.'); return; }
+    setPublishError(null); onPublish(timerSeconds);
+  };
+
+  return { handleStopAndTranscribe, handleSelectCandidate, handlePublishSelected, handleTimerConfirm };
+}
+
+// ─── Sub-components and Helper Views ───────────────────────────────────────────
+
+function AIGenerationPanel({
+  lessonId, recorder, isGenerating, sttStatus, sttError, handleStopAndTranscribe,
+  promptInput, setPromptInput, setTranscriptText, transcriptRef,
+  promptType, setPromptType, onGenerate, handleRunAllCombinations, sweepProgress,
+  generationWarning, candidates, selectedIndex, handleSelectCandidate,
+  editingOptions, setEditingOptions, overrideCorrectOption, setOverrideCorrectOption,
+  feedbackEnabled, setFeedbackEnabled, setPendingCandidate, setShowTimerDialog,
+  isConnected, onRegenerate, handleCopyReport, copiedReport
+}: Readonly<ActiveCenterProps & {
+  recorder: ReturnType<typeof useAudioRecorder>;
+  sttStatus: SttStatus;
+  sttError: string | null;
+  handleStopAndTranscribe: () => void;
+  handleRunAllCombinations: () => void;
+  sweepProgress: { current: number; total: number; label: string } | null;
+  selectedIndex: number | null;
+  handleSelectCandidate: (p: GeneratedPrompt, i: number) => void;
+  editingOptions: Record<string, string>;
+  setEditingOptions: (v: Record<string, string>) => void;
+  overrideCorrectOption: string | null;
+  setOverrideCorrectOption: (v: string | null) => void;
+  feedbackEnabled: boolean;
+  setFeedbackEnabled: (v: boolean) => void;
+  setPendingCandidate: (v: GeneratedPrompt | null) => void;
+  setShowTimerDialog: (v: boolean) => void;
+  copiedReport: boolean;
+  handleCopyReport: () => void;
+  transcriptRef: React.RefObject<HTMLTextAreaElement | null>;
+}>) {
+  return (
+    <>
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold text-content-primary">Generate with AI</span>
+        <div className="flex items-center gap-2">
+          {recorder.isRecording && (
+            <span className="flex items-center gap-1 text-xs font-medium" style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}>
+              <span className="w-2 h-2 rounded-full animate-pulse inline-block" style={{ background: 'currentColor' }} />
+              {recorder.fmt(recorder.elapsed)}
+            </span>
+          )}
+          {recorder.isRecording ? (
+            <button onClick={handleStopAndTranscribe} className="text-xs h-7 px-3 rounded-[8px] font-medium text-white transition-all duration-150 flex items-center gap-1.5" style={{ background: 'var(--color-primary-600)' }}>
+              <StopIcon /> Stop & Transcribe
+            </button>
+          ) : (
+            <button onClick={recorder.start} disabled={isGenerating || sttStatus === 'transcribing'} className="text-xs h-7 px-3 rounded-[8px] font-medium transition-all duration-150 disabled:opacity-50 flex items-center gap-1.5" style={{ background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.30)', color: 'var(--recording-text, oklch(0.55 0.22 27))' }}>
+              <MicIcon /> Record
+            </button>
+          )}
+        </div>
+      </div>
+      {sttStatus === 'transcribing' && <p className="text-xs animate-pulse text-content-muted">Transcribing audio…</p>}
+      {sttStatus === 'error' && sttError && <p className="text-xs" style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}>{sttError}</p>}
+      <textarea ref={transcriptRef} value={promptInput} onChange={(e) => { setPromptInput(e.target.value); setTranscriptText(e.target.value); }} placeholder="Spoken content will appear here after recording, or type a topic manually" className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[50px] transition-all duration-150 bg-surface-raised text-content-primary" style={{ border: '1px solid var(--border-default)' }} rows={2} />
+      <div className="flex items-center gap-2">
+        <AITipsButton lessonId={lessonId} />
+        <PromptTypeSelect value={promptType} onChange={(v) => setPromptType(v as PromptType)} />
+        <AIPreferencesDialog />
+        <div className={`rotating-glow-wrap${isGenerating ? ' generating' : ''}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button onClick={() => onGenerate()} disabled={isGenerating || recorder.isRecording} size="sm" className="px-4 py-1.5 rounded-full font-semibold" style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))', color: 'white', opacity: 1 }}>
+                {isGenerating ? <GeneratingIndicator /> : 'Generate Prompts'}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Use AI to generate 5 discussion prompt candidates from your transcript and uploaded files. Takes 5 to 15 seconds.</TooltipContent>
+          </Tooltip>
+        </div>
+        {DEBUG_TOOLS && <SweepButton onRun={handleRunAllCombinations} disabled={isGenerating || !!sweepProgress || recorder.isRecording} progress={sweepProgress} />}
+      </div>
+      {generationWarning && <WarningMessage message={generationWarning} />}
+      {DEBUG_TOOLS && sweepProgress && <SweepProgressMessage progress={sweepProgress} />}
+      {candidates.length > 0 && (
+        <div className="space-y-2">
+          {candidates.map((c: GeneratedPrompt, i: number) => (
+            <div key={`candidate-${c.promptType}-${i}`}>
+              {selectedIndex === i ? (
+                <SelectedCandidateEditor promptInput={promptInput} setPromptInput={setPromptInput} setTranscriptText={setTranscriptText} type={c.promptType} />
+              ) : (
+                <CandidateCard
+                  candidate={c}
+                  index={i}
+                  isSelected={false}
+                  onSelect={() => handleSelectCandidate(c, i)}
+                  isConnected={isConnected}
+                  onRequestPublish={() => {}}
+                />
+              )}
+              {selectedIndex === i && c.promptType === 'multiple_choice' && (
+                <MultipleChoiceEditor
+                  nameGroup={`correct-option-${i}`} options={c.mcOptions?.map((opt: { label: string; text: string }) => ({ label: opt.label, text: editingOptions[opt.label] ?? opt.text })) || []}
+                  correctOption={overrideCorrectOption} onCorrectOptionChange={setOverrideCorrectOption}
+                  onOptionTextChange={(label: string, text: string) => setEditingOptions({ ...editingOptions, [label]: text })}
+                  feedbackEnabled={feedbackEnabled} onFeedbackChange={setFeedbackEnabled}
+                />
+              )}
+              {selectedIndex === i && <PublishButton onPublish={() => { setPendingCandidate(c); setShowTimerDialog(true); }} disabled={!promptInput.trim() || !isConnected} />}
+            </div>
+          ))}
+          <CandidateActions onRegenerate={onRegenerate} onCopyReport={handleCopyReport} isGenerating={isGenerating} hasCandidates={candidates.length > 0} copiedReport={copiedReport} />
+        </div>
+      )}
+    </>
+  );
+}
+
+function ManualCreationPanel({
+  promptType, setPromptType, promptInput, setPromptInput, setTranscriptText,
+  manualOptions, setManualOptions, overrideCorrectOption, setOverrideCorrectOption,
+  feedbackEnabled, setFeedbackEnabled
+}: Readonly<{
+  promptType: PromptType;
+  setPromptType: (v: PromptType) => void;
+  promptInput: string;
+  setPromptInput: (v: string) => void;
+  setTranscriptText: (v: string) => void;
+  manualOptions: Record<string, string>;
+  setManualOptions: (v: Record<string, string>) => void;
+  overrideCorrectOption: string | null;
+  setOverrideCorrectOption: (v: string | null) => void;
+  feedbackEnabled: boolean;
+  setFeedbackEnabled: (v: boolean) => void;
+}>) {
+  return (
+    <>
+      <div className="flex items-center gap-2 mb-2"><PromptTypeSelect value={promptType} onChange={(v) => setPromptType(v as PromptType)} /></div>
+      <textarea value={promptInput} onChange={(e) => { setPromptInput(e.target.value); setTranscriptText(e.target.value); }} placeholder="Type your question here manually..." className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden min-h-[80px] transition-all duration-150 bg-surface-raised text-content-primary" style={{ border: '1px solid var(--border-default)' }} rows={3} />
+      {promptType === 'multiple_choice' && (
+        <MultipleChoiceEditor
+          nameGroup="manual-correct-option" options={['A', 'B', 'C', 'D'].map((label) => ({ label, text: manualOptions[label] || '' }))}
+          correctOption={overrideCorrectOption} onCorrectOptionChange={setOverrideCorrectOption}
+          onOptionTextChange={(label, text) => setManualOptions({ ...manualOptions, [label]: text })}
+          feedbackEnabled={feedbackEnabled} onFeedbackChange={setFeedbackEnabled}
+        />
+      )}
+    </>
+  );
+}
+
+// ─── Minimal Atomic Sub-components ───
+
+const MicIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" x2="12" y1="19" y2="22" /></svg>;
+const StopIcon = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>;
+
+function PromptTypeSelect({ value, onChange }: Readonly<{ value: string, onChange: (v: string) => void }>) {
+  return (
+    <select value={value} onChange={(e) => onChange(e.target.value)} className="text-sm rounded-[8px] px-3 py-1.5 transition-all duration-150 bg-surface-raised text-content-primary" style={{ border: '1px solid var(--border-default)' }}>
+      <option value="long_answer">Long Answer</option><option value="short_answer">Short Answer</option><option value="multiple_choice">Multiple Choice</option>
+    </select>
+  );
+}
+
+function GeneratingIndicator() {
+  return (
+    <span aria-label="Generating…" style={{ display: 'inline-flex' }}>
+      {GENERATING_CHARS.map((ch: string, i: number) => (
+        <span key={`char-${i}-${ch}`} className={ch === '.' ? 'generating-char' : 'generating-shimmer'} style={{ animationDelay: `${i * 0.07}s` }}>{ch}</span>
+      ))}
+    </span>
+  );
+}
+
+function SweepButton({ onRun, disabled, progress }: Readonly<{ onRun: () => void; disabled: boolean; progress: { current: number; total: number } | null }>) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button onClick={onRun} disabled={disabled} variant="outline" size="sm" className="text-xs font-semibold" style={{ borderColor: 'rgba(239,68,68,0.4)', color: 'oklch(0.55 0.22 27)' }}>
+          {progress ? `${progress.current}/${progress.total}…` : 'Run All Combinations'}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Generate all 81 combinations sequentially.</TooltipContent>
+    </Tooltip>
+  );
+}
+
+const WarningMessage = ({ message }: { message: string }) => <p className="text-xs rounded-lg px-3 py-2" style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.25)', color: '#b45309' }}>{message}</p>;
+const SweepProgressMessage = ({ progress }: Readonly<{ progress: { current: number; total: number; label: string } }>) => <p className="text-xs rounded-lg px-3 py-2 animate-pulse" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', color: '#6366f1' }}>Generating {progress.current} / {progress.total} — {progress.label}</p>;
+
+function SelectedCandidateEditor({ promptInput, setPromptInput, setTranscriptText, type }: Readonly<{ promptInput: string; setPromptInput: (v: string) => void; setTranscriptText: (v: string) => void; type: string }>) {
+  return (
+    <div className="p-3 rounded-xl text-sm" style={{ background: 'rgba(45,158,45,0.06)', border: '2px solid var(--color-primary-400)' }}>
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-xs font-medium px-2 py-0.5 rounded-full capitalize" style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-600)' }}>{type.replaceAll('_', ' ')}</span>
+        <span className="text-xs font-medium text-brand-500">Selected (Editing)</span>
+      </div>
+      <textarea value={promptInput} onChange={(e) => { setPromptInput(e.target.value); setTranscriptText(e.target.value); }} className="w-full px-3 py-2.5 text-sm rounded-[10px] min-h-[80px] resize-y leading-snug transition-all duration-150 bg-surface-raised text-content-primary" style={{ border: '1px solid var(--border-default)' }} placeholder="Edit this prompt..." />
+    </div>
+  );
+}
+
+function PublishButton({ onPublish, disabled }: Readonly<{ onPublish: () => void; disabled: boolean }>) {
+  return <button data-testid="publish-ai-question-button" onClick={onPublish} disabled={disabled} className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow" style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))' }}>Publish This Question →</button>;
+}
+
+function CandidateActions({ onRegenerate, onCopyReport, isGenerating, hasCandidates, copiedReport }: Readonly<{ onRegenerate: () => void; onCopyReport: () => void; isGenerating: boolean; hasCandidates: boolean; copiedReport: boolean }>) {
+  return (
+    <div className="flex gap-2 pt-1">
+      <Button onClick={onRegenerate} disabled={isGenerating} variant="outline" size="sm" className="text-xs">{isGenerating ? 'Regenerating…' : 'Regenerate'}</Button>
+      {DEBUG_TOOLS && hasCandidates && <Button onClick={onCopyReport} disabled={isGenerating} variant="outline" size="sm" className="text-xs">{copiedReport ? 'Copied!' : 'Copy Report'}</Button>}
     </div>
   );
 }

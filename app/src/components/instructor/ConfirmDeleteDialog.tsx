@@ -21,7 +21,7 @@ export function ConfirmDeleteDialog({
   deleting,
   onCancel,
   onConfirm,
-}: {
+}: Readonly<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
@@ -30,7 +30,7 @@ export function ConfirmDeleteDialog({
   deleting: boolean;
   onCancel: () => void;
   onConfirm: () => void;
-}) {
+}>) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent aria-describedby={undefined}>

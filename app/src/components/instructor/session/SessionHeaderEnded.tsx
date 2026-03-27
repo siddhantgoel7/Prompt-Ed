@@ -17,7 +17,7 @@ import { SessionContext } from './SessionContext';
  * Ended-session header with lesson title and Export Txt / Activate / Split View buttons.
  * Reads from SessionContext when available, falling back to explicit props for testing.
  */
-export function SessionHeaderEnded(props: {
+export function SessionHeaderEnded(props: Readonly<{
   title?: string;
   courseId?: string;
   exporting?: boolean;
@@ -28,7 +28,7 @@ export function SessionHeaderEnded(props: {
   onActivate?: () => void;
   onBackToLessons?: () => void;
   onSplitView: () => void;
-}) {
+}>) {
   const router = useRouter();
   const context = React.useContext(SessionContext);
   const exporting = context ? context.exportingData : props.exporting!;

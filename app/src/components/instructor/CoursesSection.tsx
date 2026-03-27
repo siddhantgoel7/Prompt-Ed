@@ -12,13 +12,13 @@ export function CoursesSection({
   onAccess,
   onEdit,
   onDelete,
-}: {
+}: Readonly<{
   courses: Course[];
   onAdd: () => void;
   onAccess: (courseId: string) => void;
   onEdit: (course: Course) => void;
   onDelete: (courseId: string) => void;
-}) {
+}>) {
   return (
     <section className="mx-auto w-full max-w-6xl px-2 md:px-6">
       <div className="mb-8 flex items-center justify-between gap-4">
@@ -29,9 +29,11 @@ export function CoursesSection({
             Your Courses
           </h2>
           <p className="text-sm mt-1 text-content-muted">
-            {courses.length === 0
-              ? 'Get started by adding your first course'
-              : `${courses.length} course${courses.length === 1 ? '' : 's'}`}
+            {(() => {
+              if (courses.length === 0) return 'Get started by adding your first course';
+              const s = courses.length === 1 ? '' : 's';
+              return `${courses.length} course${s}`;
+            })()}
           </p>
         </div>
 
@@ -61,8 +63,8 @@ export function CoursesSection({
             style={{ background: 'rgba(45,158,45,0.12)' }}
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
             </svg>
           </div>
           <p className="font-semibold mb-1 text-content-primary">No courses yet</p>

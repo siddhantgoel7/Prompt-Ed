@@ -26,7 +26,7 @@ export function MultipleChoiceEditor({
     feedbackEnabled,
     onFeedbackChange,
     nameGroup,
-}: MultipleChoiceEditorProps) {
+}: Readonly<MultipleChoiceEditorProps>) {
     return (
         <div
             className="mt-2 p-4 rounded-xl bg-surface-raised"
@@ -98,7 +98,7 @@ export function MultipleChoiceEditor({
                             onChange={(e) => onFeedbackChange(e.target.checked)}
                             className="accent-[var(--color-primary-500)]"
                         />
-                        Show correctness feedback to students
+                        {' '}Show correctness feedback to students
                     </label>
                     <Tooltip>
                         <TooltipTrigger asChild>
