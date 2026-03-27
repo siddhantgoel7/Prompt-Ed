@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { signOut } from '@/lib/supabase/auth';
 
+import { User } from '@supabase/supabase-js';
+
 export function useAccount() {
   const router = useRouter();
-  const [user, setUser] = React.useState<any>(null);
+  const [user, setUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [loggingOut, setLoggingOut] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
@@ -60,9 +62,10 @@ export function useAccount() {
       // Deletion successful, redirect (user will be logged out by API route too but better safe)
       router.push('/');
       router.refresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Delete account error:', err);
-      setError(err.message || 'Failed to delete account');
+      const message = err instanceof Error ? err.message : 'Failed to delete account';
+      setError(message);
       setDeleting(false);
     }
   };
