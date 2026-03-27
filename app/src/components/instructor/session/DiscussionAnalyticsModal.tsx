@@ -136,7 +136,7 @@ export function DiscussionAnalyticsContent({
       count: dist[opt.label] ?? 0,
       percentage: totalVotes > 0 ? Math.round(((dist[opt.label] ?? 0) / totalVotes) * 100) : 0,
       isCorrect: discussion.correct_option === opt.label,
-      fill: discussion.correct_option === opt.label ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length],
+      fill: PIE_COLORS[i % PIE_COLORS.length],
     }));
   }, [isMC, discussion.mc_options, discussion.correct_option, responses]);
 
