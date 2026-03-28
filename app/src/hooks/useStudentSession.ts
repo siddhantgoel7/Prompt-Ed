@@ -73,6 +73,7 @@ export function useStudentSession(lessonId: string) {
   const [submitting, setSubmitting] = useState(false);
   const [endedMessage, setEndedMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [responseCount, setResponseCount] = useState(0);
 
   const [view, setView] = useState<ViewState>('loading');
 
@@ -188,6 +189,7 @@ export function useStudentSession(lessonId: string) {
       setActiveDiscussion(discussion);
       setResponseText('');
       setSubmitting(false);
+      setResponseCount(0);
       setView(
         hasSubmittedDiscussionInStorage(submittedDiscussionsKey, discussion.id)
           ? 'submitted'
@@ -337,9 +339,28 @@ export function useStudentSession(lessonId: string) {
 
     setSubmitting(false);
     setResponseText('');
+    setResponseCount((c) => c + 1);
     markDiscussionSubmittedInStorage(submittedDiscussionsKey, activeDiscussion.id);
     setView('submitted');
   };
+
+  // Allow the student to go back to the active view to submit another response
+  const submitAnotherResponse = () => {
+    if (!activeDiscussion) return;
+    if (!activeDiscussion.allow_multiple_responses) return;
+    if (activeDiscussion.prompt_type === 'multiple_choice') return;
+    // Check response limit
+    if (activeDiscussion.response_limit && responseCount >= activeDiscussion.response_limit) return;
+    setResponseText('');
+    setView('active');
+  };
+
+  const canSubmitAnother = Boolean(
+    activeDiscussion?.allow_multiple_responses &&
+    activeDiscussion?.prompt_type !== 'multiple_choice' &&
+    activeDiscussion?.status === 'active' &&
+    (!activeDiscussion?.response_limit || responseCount < activeDiscussion.response_limit)
+  );
 
   useEffect(() => {
     if (view !== 'submitted') return;
@@ -377,5 +398,8 @@ export function useStudentSession(lessonId: string) {
 
     canSubmit,
     submitResponse,
+    submitAnotherResponse,
+    canSubmitAnother,
+    responseCount,
   };
 }

@@ -14,18 +14,28 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 
+export interface MultipleResponseSettings {
+  allowMultipleResponses: boolean;
+  responseLimit: number | null;
+}
+
 interface StartDiscussionDialogProps {
   open: boolean;
-  onConfirm: (timerSeconds: number | null) => void;
+  onConfirm: (timerSeconds: number | null, multipleResponseSettings?: MultipleResponseSettings) => void;
   onCancel: () => void;
   confirmLabel?: string;
+  /** When true (MC questions), the multiple-responses toggle is hidden. */
+  isMultipleChoice?: boolean;
 }
 
 /** Modal for setting a time limit before starting a discussion. */
-export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel = 'Start Discussion' }: Readonly<StartDiscussionDialogProps>) {
+export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel = 'Start Discussion', isMultipleChoice = false }: Readonly<StartDiscussionDialogProps>) {
   const [noLimit, setNoLimit] = React.useState(false);
   const [minutes, setMinutes] = React.useState(1);
   const [seconds, setSeconds] = React.useState(0);
+  const [allowMultiple, setAllowMultiple] = React.useState(false);
+  const [hasResponseLimit, setHasResponseLimit] = React.useState(false);
+  const [responseLimit, setResponseLimit] = React.useState(3);
 
   // Reset defaults whenever dialog opens
   React.useEffect(() => {
@@ -33,16 +43,19 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
       setNoLimit(false);
       setMinutes(1);
       setSeconds(0);
+      setAllowMultiple(false);
+      setHasResponseLimit(false);
+      setResponseLimit(3);
     }
   }, [open]);
 
   function handleConfirm() {
-    if (noLimit) {
-      onConfirm(null);
-    } else {
-      const total = minutes * 60 + seconds;
-      onConfirm(total > 0 ? total : 60);
-    }
+    const timerSecs = noLimit ? null : (() => { const total = minutes * 60 + seconds; return total > 0 ? total : 60; })();
+    const multipleResponseSettings: MultipleResponseSettings = {
+      allowMultipleResponses: allowMultiple,
+      responseLimit: allowMultiple && hasResponseLimit ? responseLimit : null,
+    };
+    onConfirm(timerSecs, multipleResponseSettings);
   }
 
   const totalSeconds = minutes * 60 + seconds;
@@ -121,6 +134,75 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
               <p className="text-xs text-destructive">Timer must be at least 1 second, or choose No Time Limit.</p>
             )}
           </div>
+
+          {/* Allow Multiple Responses toggle — hidden for MC questions */}
+          {!isMultipleChoice && (
+            <div className="space-y-3 pt-1 border-t border-border">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={allowMultiple}
+                  onChange={() => setAllowMultiple((v) => !v)}
+                  className="sr-only"
+                  data-testid="allow-multiple-responses-checkbox"
+                />
+                <div
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${allowMultiple ? 'bg-primary border-primary' : 'border-border bg-transparent'}`}
+                >
+                  {allowMultiple && (
+                    <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
+                    </svg>
+                  )}
+                </div>
+                <span className="text-sm font-medium">Allow Multiple Responses</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About multiple responses" />
+                  </TooltipTrigger>
+                  <TooltipContent>Students can submit more than one response to this question.</TooltipContent>
+                </Tooltip>
+              </label>
+
+              {/* Response limit sub-option */}
+              <div className={`space-y-2 pl-8 transition-opacity ${allowMultiple ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={hasResponseLimit}
+                    onChange={() => setHasResponseLimit((v) => !v)}
+                    className="sr-only"
+                    data-testid="response-limit-checkbox"
+                  />
+                  <div
+                    className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${hasResponseLimit ? 'bg-primary border-primary' : 'border-border bg-transparent'}`}
+                  >
+                    {hasResponseLimit && (
+                      <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground">Limit responses per student</span>
+                </label>
+                {hasResponseLimit && (
+                  <div className="flex items-center gap-2 pl-7">
+                    <span className="text-xs text-muted-foreground">Max:</span>
+                    <input
+                      type="number"
+                      min={2}
+                      max={20}
+                      value={responseLimit}
+                      onChange={(e) => setResponseLimit(Math.max(2, Math.min(20, Number.parseInt(e.target.value, 10) || 2)))}
+                      className="w-14 text-center rounded-lg border border-border bg-background text-foreground px-2 py-1 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
+                      data-testid="response-limit-input"
+                    />
+                    <span className="text-xs text-muted-foreground">responses</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <DialogFooter className="gap-2">
