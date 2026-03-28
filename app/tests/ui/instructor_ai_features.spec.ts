@@ -77,7 +77,9 @@ test.describe('Instructor AI Features & Tools', () => {
         });
 
         await page.goto('/session/ai-lesson-id');
-        await expect(page.getByText('AI Lesson Room')).toBeVisible({ timeout: 15000 });
+        const titleLocator = page.getByTestId('session-title');
+        await expect(titleLocator).toBeVisible({ timeout: 15000 });
+        await expect(titleLocator).toContainText('AI Lesson Room');
     });
 
     // 43.1

@@ -55,8 +55,11 @@ export function SessionHeaderActive(props: Readonly<{
         <div className="flex items-center gap-3 min-w-0">
           <AppLogo size="sm" className="flex-shrink-0 hidden sm:block" />
           <div className="hidden sm:block w-px h-5 flex-shrink-0 bg-line-default" />
-          <h1 className="text-sm md:text-base font-semibold truncate text-content-primary">
-            {title}
+          <h1 
+            data-testid="session-title"
+            className="text-sm md:text-base font-semibold truncate text-content-primary"
+          >
+            {title || 'Untitled Lesson'}
           </h1>
         </div>
 

@@ -43,26 +43,9 @@ export function InstructorDashboardHeader({
             Account
           </button>
 
-          <button
-            onClick={onLogout}
-            disabled={loggingOut}
-            className="px-4 py-2 rounded-[10px] text-sm font-medium transition-all duration-150 disabled:opacity-60 bg-surface-raised text-content-secondary"
-            style={{
-              border: '1px solid var(--border-default)',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-400)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-default)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
-            }}
-          >
-            {loggingOut ? 'Logging out…' : 'Log Out'}
-          </button>
         </div>
       </div>
     </header>
+
   );
 }

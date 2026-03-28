@@ -64,7 +64,7 @@ function markDiscussionSubmittedInStorage(storageKey: string, discussionId: stri
 function getResponseCountFromStorage(storageKey: string, discussionId: string): number {
     try {
         const raw = localStorage.getItem(`${storageKey}:${discussionId}:count`);
-        return raw ? parseInt(raw, 10) : 0;
+        return raw ? Number.parseInt(raw, 10) : 0;
     } catch {
         return 0;
     }
