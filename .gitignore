@@ -33,5 +33,7 @@ site/
 *.log
 
 .claude
-*.txtreport-task.txt
-report-task.txt
+*.txt
+
+# SonarQube scanner output
+.scannerwork/

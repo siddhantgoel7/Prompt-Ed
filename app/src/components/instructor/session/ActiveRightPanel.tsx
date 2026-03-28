@@ -115,22 +115,42 @@ function useActiveRightPanelContext(props: Readonly<{
   studentCount?: number;
 }>) {
   const context = React.useContext(SessionContext);
-  const studentCount = context ? context.studentCount : (props.studentCount ?? 0);
 
+  if (context) {
+    return {
+      responses: context.responses,
+      activeDiscussion: context.activeDiscussion,
+      studentCount: context.studentCount,
+      removeResponse: context.removeResponse,
+      restoreResponse: context.restoreResponse,
+      flaggedResponses: context.flaggedResponses,
+      peakStudentCount: context.peakStudentCount,
+      activeDiscussionId: context.activeDiscussion?.id ?? null,
+      timerEndTime: context.discussionTimerEndTime,
+      timerTotalSeconds: context.discussionTimerSeconds,
+      handleCloseDiscussion: context.handleCloseDiscussion,
+      handleExtendTimer: context.handleExtendTimer,
+      handleEditTimer: context.handleEditTimer,
+      lessonId: context.lesson?.id,
+    };
+  }
+
+  const studentCount = props.studentCount ?? 0;
   return {
-    responses: context ? context.responses : props.responses!,
-    activeDiscussion: context ? context.activeDiscussion : props.activeDiscussion!,
+    responses: props.responses!,
+    activeDiscussion: props.activeDiscussion!,
     studentCount,
-    removeResponse: context ? context.removeResponse : undefined,
-    restoreResponse: context ? context.restoreResponse : undefined,
-    flaggedResponses: context ? context.flaggedResponses : [],
-    peakStudentCount: context ? context.peakStudentCount : studentCount,
-    activeDiscussionId: context ? (context.activeDiscussion?.id ?? null) : null,
-    timerEndTime: context ? context.discussionTimerEndTime : null,
-    timerTotalSeconds: context ? context.discussionTimerSeconds : null,
-    handleCloseDiscussion: context ? context.handleCloseDiscussion : () => { },
-    handleExtendTimer: context ? context.handleExtendTimer : undefined,
-    handleEditTimer: context ? context.handleEditTimer : undefined,
+    removeResponse: undefined,
+    restoreResponse: undefined,
+    flaggedResponses: [] as Response[],
+    peakStudentCount: studentCount,
+    activeDiscussionId: null,
+    timerEndTime: null,
+    timerTotalSeconds: null,
+    handleCloseDiscussion: () => { },
+    handleExtendTimer: undefined,
+    handleEditTimer: undefined,
+    lessonId: undefined,
   };
 }
 
@@ -235,7 +255,7 @@ function ExpandedSidebarContent(props: Readonly<ReturnType<typeof useActiveRight
             <ResponseListTab {...props} isMC={isMC} distribution={distribution} />
           </TabsContent>
           <TabsContent value="analytics" className="mt-0 pt-2 focus-visible:outline-none focus-visible:ring-0">
-            {activeDiscussion ? <DiscussionAnalyticsContent discussion={activeDiscussion} responses={responses} studentCount={peakStudentCount} /> : <p className="text-sm py-8 text-center text-content-muted">No active discussion</p>}
+            {activeDiscussion ? <DiscussionAnalyticsContent discussion={activeDiscussion} responses={responses} studentCount={peakStudentCount} lessonId={props.lessonId} /> : <p className="text-sm py-8 text-center text-content-muted">No active discussion</p>}
           </TabsContent>
           <TabsContent value="timer" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <TimerTab activeDiscussionId={activeDiscussionId} timerEndTime={timerEndTime} timerTotalSeconds={timerTotalSeconds} onClose={handleCloseDiscussion} onExtendTimer={handleExtendTimer} onEditTimer={handleEditTimer} />

@@ -47,12 +47,28 @@ describe('courseApi', () => {
         expect(mockSupabase.eq).toHaveBeenCalledWith('id', 'c1');
     });
 
-    it('deleteCourseCascade: deletes from lessons then courses', async () => {
-        mockSupabase.delete.mockReturnValue({ eq: () => Promise.resolve({ data: null, error: null }) });
+    it('deleteCourseCascade: handles storage and deletes the course', async () => {
+        const mockRemove = jest.fn().mockResolvedValue({ error: null });
+        mockSupabase.storage = {
+            from: jest.fn().mockReturnValue({
+                remove: mockRemove
+            })
+        };
+        
+        // Mock lesson_files select
+        mockSupabase.select.mockReturnValue({
+            eq: jest.fn().mockResolvedValue({ data: [{ storage_path: 'path/1' }], error: null })
+        });
         
         await deleteCourseCascade('c1');
         
-        expect(mockSupabase.from).toHaveBeenCalledWith('lessons');
+        // Verifies storage cleanup attempted
+        expect(mockSupabase.from).toHaveBeenCalledWith('lesson_files');
+        expect(mockSupabase.storage.from).toHaveBeenCalledWith('lesson-files');
+        expect(mockRemove).toHaveBeenCalledWith(['path/1']);
+        
+        // Verifies course deletion
         expect(mockSupabase.from).toHaveBeenCalledWith('courses');
+        expect(mockSupabase.delete).toHaveBeenCalled();
     });
 });

@@ -16,6 +16,7 @@ import { AIPreferencesDialog } from './AIPreferencesDialog';
 import { AITipsButton } from './AITipsButton';
 import { transcribeAudioApi } from '@/lib/api/aiApi';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
+import { GeneralQuestionsTab } from './GeneralQuestionsTab';
 import { DEBUG_TOOLS } from '@/lib/debug';
 import { useDebugSweep } from '@/hooks/useDebugSweep';
 
@@ -40,7 +41,7 @@ interface ActiveCenterProps {
 }
 
 type SttStatus = 'idle' | 'transcribing' | 'error';
-type CreationMode = 'ai' | 'manual';
+type CreationMode = 'ai' | 'manual' | 'general';
 
 export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
   const state = useActiveCenterStateMapping(props);
@@ -51,7 +52,7 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
   const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
   const [editingOptions, setEditingOptions] = React.useState<Record<string, string>>({});
   const [manualOptions, setManualOptions] = React.useState<Record<string, string>>({ A: '', B: '', C: '', D: '' });
-  const [creationMode, setCreationMode] = React.useState<'ai' | 'manual'>('ai');
+  const [creationMode, setCreationMode] = React.useState<'ai' | 'manual' | 'general'>('ai');
   const [showTimerDialog, setShowTimerDialog] = React.useState(false);
   const [pendingCandidate, setPendingCandidate] = React.useState<GeneratedPrompt | null>(null);
   const [publishError, setPublishError] = React.useState<string | null>(null);
@@ -100,10 +101,11 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
           border: '1px solid var(--border-default)',
         }}
       >
-        <Tabs value={creationMode} onValueChange={(v) => setCreationMode(v as 'ai' | 'manual')} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+        <Tabs value={creationMode} onValueChange={(v) => setCreationMode(v as 'ai' | 'manual' | 'general')} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="ai">AI Generation</TabsTrigger>
             <TabsTrigger value="manual">Manual Creation</TabsTrigger>
+            <TabsTrigger value="general">General Questions</TabsTrigger>
           </TabsList>
 
           <TabsContent value="ai" className="space-y-3 mt-0">
@@ -129,6 +131,10 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
               copiedReport={copiedReport}
               transcriptRef={transcriptRef}
             />
+          </TabsContent>
+
+          <TabsContent value="general" className="mt-0">
+            <GeneralQuestionsTab />
           </TabsContent>
 
           <TabsContent value="manual" className="space-y-3 mt-0">
