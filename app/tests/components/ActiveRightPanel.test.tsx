@@ -45,6 +45,8 @@ const MC_DISCUSSION: Discussion = {
   source: 'manual',
   feedback_enabled: false,
   ai_generated_correct_option: null,
+  allow_multiple_responses: false,
+  response_limit: 1,
 };
 
 const FREE_TEXT_DISCUSSION: Discussion = {

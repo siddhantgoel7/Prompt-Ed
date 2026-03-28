@@ -55,7 +55,7 @@ describe('StartDiscussionDialog', () => {
         expect(secInput).toHaveValue(30);
 
         fireEvent.click(screen.getByText('Start Discussion'));
-        expect(onConfirm).toHaveBeenCalledWith(5 * 60 + 30);
+        expect(onConfirm).toHaveBeenCalledWith(5 * 60 + 30, { allowMultipleResponses: false, responseLimit: null });
     });
 
     it('enforces min/max bounds (0-59)', () => {
@@ -78,7 +78,7 @@ describe('StartDiscussionDialog', () => {
         expect(screen.getByTestId('timer-minutes')).toBeDisabled();
 
         fireEvent.click(screen.getByText('Start Discussion'));
-        expect(onConfirm).toHaveBeenCalledWith(null);
+        expect(onConfirm).toHaveBeenCalledWith(null, { allowMultipleResponses: false, responseLimit: null });
     });
 
     it('handles interaction with checkbox', () => {

@@ -142,7 +142,7 @@ export function useLessonDiscussions(
     return () => sub.unsubscribe();
   }, [channel, setResponses]);
 
-  const handlePublishDiscussion = useCallback(async (timerSecs: number | null = null) => {
+  const handlePublishDiscussion = useCallback(async (timerSecs: number | null = null, multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }) => {
     if (!promptInput.trim() || publishing) return;
     setPublishing(true);
     if (activeDiscussion) await handleCloseDiscussion(activeDiscussion.id);
@@ -155,6 +155,8 @@ export function useLessonDiscussions(
       display_order: discussions.length, source: 'manual',
       participant_snapshot: studentCount > 0 ? studentCount : null,
       time_limit_seconds: timerSecs,
+      allow_multiple_responses: multipleResponseSettings?.allowMultipleResponses ?? false,
+      response_limit: multipleResponseSettings ? multipleResponseSettings.responseLimit : 1,
     };
 
     const newDiscussion = await insertDiscussionApi(payload);
@@ -177,7 +179,7 @@ export function useLessonDiscussions(
     setPublishing(false);
   }, [promptInput, publishing, promptType, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, setPromptInput, setTimerState, setResponses]);
 
-  const handlePublishAiCandidate = useCallback(async (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled: boolean = false, timerSecs: number | null = null) => {
+  const handlePublishAiCandidate = useCallback(async (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled: boolean = false, timerSecs: number | null = null, multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }) => {
     if (publishing) return;
     setPublishing(true);
     if (activeDiscussion) await handleCloseDiscussion(activeDiscussion.id);
@@ -196,6 +198,8 @@ export function useLessonDiscussions(
       feedback_enabled: feedbackEnabled, ai_generated_correct_option: aiSuggestedCorrectOption,
       participant_snapshot: studentCount > 0 ? studentCount : null,
       time_limit_seconds: timerSecs,
+      allow_multiple_responses: multipleResponseSettings?.allowMultipleResponses ?? false,
+      response_limit: multipleResponseSettings ? multipleResponseSettings.responseLimit : 1,
     };
 
     const newDiscussion = await insertDiscussionApi(payload);

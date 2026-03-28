@@ -35,14 +35,14 @@ describe('StartDiscussionDialog [US 1.29]', () => {
     // 66.3
     it('[US 1.29][UNIT3] success: "No Time Limit" checkbox is unchecked by default', () => {
         renderDialog();
-        const checkbox = screen.getByRole('checkbox');
+        const checkbox = screen.getByTestId('no-time-limit-checkbox');
         expect(checkbox).not.toBeChecked();
     });
 
     // 66.4
     it('[US 1.29][UNIT4] success: clicking No Time Limit toggles the checkbox on', () => {
         renderDialog();
-        const checkbox = screen.getByRole('checkbox');
+        const checkbox = screen.getByTestId('no-time-limit-checkbox');
         fireEvent.click(checkbox);
         expect(checkbox).toBeChecked();
     });
@@ -52,16 +52,16 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         const onConfirm = jest.fn();
         renderDialog(onConfirm);
         fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
-        expect(onConfirm).toHaveBeenCalledWith(60);
+        expect(onConfirm).toHaveBeenCalledWith(60, { allowMultipleResponses: false, responseLimit: null });
     });
 
     // 66.6
     it('[US 1.29][UNIT6] success: confirming with No Time Limit calls onConfirm(null)', () => {
         const onConfirm = jest.fn();
         renderDialog(onConfirm);
-        fireEvent.click(screen.getByRole('checkbox'));
+        fireEvent.click(screen.getByTestId('no-time-limit-checkbox'));
         fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
-        expect(onConfirm).toHaveBeenCalledWith(null);
+        expect(onConfirm).toHaveBeenCalledWith(null, { allowMultipleResponses: false, responseLimit: null });
     });
 
     // 66.7
@@ -71,7 +71,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         fireEvent.change(screen.getByTestId('timer-minutes'), { target: { value: '2' } });
         fireEvent.change(screen.getByTestId('timer-seconds'), { target: { value: '30' } });
         fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
-        expect(onConfirm).toHaveBeenCalledWith(150);
+        expect(onConfirm).toHaveBeenCalledWith(150, { allowMultipleResponses: false, responseLimit: null });
     });
 
     // 66.8
@@ -96,7 +96,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         renderDialog();
         fireEvent.change(screen.getByTestId('timer-minutes'), { target: { value: '0' } });
         fireEvent.change(screen.getByTestId('timer-seconds'), { target: { value: '0' } });
-        fireEvent.click(screen.getByRole('checkbox'));
+        fireEvent.click(screen.getByTestId('no-time-limit-checkbox'));
         const startBtn = screen.getByRole('button', { name: /Start Discussion/i });
         expect(startBtn).not.toBeDisabled();
     });
@@ -139,6 +139,6 @@ describe('StartDiscussionDialog [US 1.29]', () => {
             />
         );
         fireEvent.click(screen.getByRole('button', { name: /Update Timer/i }));
-        expect(onConfirm).toHaveBeenCalledWith(60); // default 1 minute
+        expect(onConfirm).toHaveBeenCalledWith(60, { allowMultipleResponses: false, responseLimit: null }); // default 1 minute
     });
 });

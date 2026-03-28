@@ -254,6 +254,7 @@ export function GeneralQuestionsTab() {
                 open={showTimerDialog}
                 onConfirm={handleTimerConfirm}
                 onCancel={() => { setShowTimerDialog(false); setPendingQuestion(null); }}
+                isMultipleChoice
             />
         </div>
     );

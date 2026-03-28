@@ -15,7 +15,7 @@ import { MultipleChoiceEditor } from './MultipleChoiceEditor';
 import { AIPreferencesDialog } from './AIPreferencesDialog';
 import { AITipsButton } from './AITipsButton';
 import { transcribeAudioApi } from '@/lib/api/aiApi';
-import { StartDiscussionDialog } from './StartDiscussionDialog';
+import { StartDiscussionDialog, type MultipleResponseSettings } from './StartDiscussionDialog';
 import { GeneralQuestionsTab } from './GeneralQuestionsTab';
 import { DEBUG_TOOLS } from '@/lib/debug';
 import { useDebugSweep } from '@/hooks/useDebugSweep';
@@ -31,13 +31,13 @@ const GENERATING_CHARS = 'Generating...'.split('');
 
 interface ActiveCenterProps {
   lessonId: string; promptInput: string; setPromptInput: (v: string) => void; isConnected: boolean;
-  activeDiscussionId: string | null; onPublish: (timerSeconds: number | null) => void;
+  activeDiscussionId: string | null; onPublish: (timerSeconds: number | null, multipleResponseSettings?: MultipleResponseSettings) => void;
   onClose: (discussionId: string) => void; transcriptText: string; setTranscriptText: (v: string) => void;
   promptType: PromptType; setPromptType: (v: PromptType) => void; candidates: GeneratedPrompt[];
   isGenerating: boolean; generationWarning: string | null; generationTimeMs: number | null;
   lastTokenUsage: TokenUsage | null; lastModel: string | null;
   onGenerate: (transcriptOverride?: string) => void | Promise<void>; onSelectCandidate: (p: GeneratedPrompt) => void;
-  onRegenerate: () => void; onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => void;
+  onRegenerate: () => void; onPublishAiCandidate?: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null, multipleResponseSettings?: MultipleResponseSettings) => void;
 }
 
 type SttStatus = 'idle' | 'transcribing' | 'error';
@@ -173,6 +173,11 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
           open={showTimerDialog}
           onConfirm={handlers.handleTimerConfirm}
           onCancel={() => { setShowTimerDialog(false); setPendingCandidate(null); }}
+          isMultipleChoice={
+            pendingCandidate?.promptType === 'multiple_choice' ||
+            (!pendingCandidate && creationMode === 'manual' && state.promptType === 'multiple_choice') ||
+            (!pendingCandidate && creationMode === 'ai' && state.promptType === 'multiple_choice')
+          }
         />
       </div>
     </div>
@@ -192,7 +197,7 @@ function useActiveCenterStateMapping(props: Partial<ActiveCenterProps>) {
       promptInput: props.promptInput!,
       setPromptInput: props.setPromptInput!,
       isConnected: props.isConnected!,
-      onPublish: (timerSeconds: number | null) => props.onPublish!(timerSeconds),
+      onPublish: (timerSeconds: number | null, mrs?: MultipleResponseSettings) => props.onPublish!(timerSeconds, mrs),
       transcriptText: props.transcriptText!,
       setTranscriptText: props.setTranscriptText!,
       promptType: props.promptType!,
@@ -218,7 +223,7 @@ function useActiveCenterStateMapping(props: Partial<ActiveCenterProps>) {
     promptInput: context.promptInput,
     setPromptInput: context.setPromptInput,
     isConnected: context.isConnected,
-    onPublish: (timerSeconds: number | null) => context.handlePublishDiscussion(timerSeconds),
+    onPublish: (timerSeconds: number | null, mrs?: MultipleResponseSettings) => context.handlePublishDiscussion(timerSeconds, mrs),
     transcriptText: context.transcriptText,
     setTranscriptText: context.setTranscriptText,
     promptType: context.promptType,
@@ -295,22 +300,22 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
     }
   };
 
-  const handlePublishSelected = (p: GeneratedPrompt, timerSeconds: number | null = null) => {
+  const handlePublishSelected = (p: GeneratedPrompt, timerSeconds: number | null = null, mrs?: MultipleResponseSettings) => {
     const publishedCandidate = (p.promptType === 'multiple_choice' && p.mcOptions)
       ? { ...p, promptText: promptInput, mcOptions: p.mcOptions.map(opt => ({ ...opt, text: editingOptions[opt.label] ?? opt.text })) }
       : { ...p, promptText: promptInput };
 
     if (onPublishAiCandidate) {
-      onPublishAiCandidate(publishedCandidate, overrideCorrectOption, feedbackEnabled, timerSeconds);
+      onPublishAiCandidate(publishedCandidate, overrideCorrectOption, feedbackEnabled, timerSeconds, mrs);
       setSelectedIndex(null); setPublishError(null);
     }
   };
 
-  const handleTimerConfirm = (timerSeconds: number | null) => {
+  const handleTimerConfirm = (timerSeconds: number | null, mrs?: MultipleResponseSettings) => {
     setShowTimerDialog(false);
     if (pendingCandidate) {
       const candidate = pendingCandidate; setPendingCandidate(null);
-      handlePublishSelected(candidate, timerSeconds); return;
+      handlePublishSelected(candidate, timerSeconds, mrs); return;
     }
     if (creationMode === 'manual') {
       if (promptType === 'multiple_choice') {
@@ -318,18 +323,18 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
         setPublishError(null);
         if (onPublishAiCandidate) {
           const mcOptions = (['A', 'B', 'C', 'D'] as const).map(label => ({ label, text: manualOptions[label] || `Option ${label}` }));
-          onPublishAiCandidate({ promptText: promptInput, promptType: 'multiple_choice', mcOptions }, overrideCorrectOption, feedbackEnabled, timerSeconds);
+          onPublishAiCandidate({ promptText: promptInput, promptType: 'multiple_choice', mcOptions }, overrideCorrectOption, feedbackEnabled, timerSeconds, mrs);
           setManualOptions({ A: '', B: '', C: '', D: '' }); setOverrideCorrectOption(null); setFeedbackEnabled(false); setPromptInput('');
         }
         return;
       }
-      onPublish(timerSeconds); return;
+      onPublish(timerSeconds, mrs); return;
     }
     if (selectedIndex !== null && candidates[selectedIndex]) {
-      setPublishError(null); handlePublishSelected(candidates[selectedIndex], timerSeconds); return;
+      setPublishError(null); handlePublishSelected(candidates[selectedIndex], timerSeconds, mrs); return;
     }
     if (promptType === 'multiple_choice') { setPublishError(candidates.length > 0 ? 'Please select a generated AI prompt to publish.' : 'Please generate AI prompts and select one to publish, or switch to Manual Creation mode.'); return; }
-    setPublishError(null); onPublish(timerSeconds);
+    setPublishError(null); onPublish(timerSeconds, mrs);
   };
 
   return { handleStopAndTranscribe, handleSelectCandidate, handlePublishSelected, handleTimerConfirm };

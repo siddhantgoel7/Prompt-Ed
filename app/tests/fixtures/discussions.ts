@@ -26,6 +26,8 @@ export const mockDiscussion: Discussion = {
   ai_generated_correct_option: null,
   participant_snapshot: 0,
   time_limit_seconds: null,
+  allow_multiple_responses: false,
+  response_limit: 1,
 };
 
 // 18.2
@@ -46,6 +48,8 @@ export const mockClosedDiscussion: Discussion = {
   ai_generated_correct_option: null,
   participant_snapshot: 0,
   time_limit_seconds: null,
+  allow_multiple_responses: false,
+  response_limit: 1,
 };
 
 // 18.3
@@ -66,6 +70,8 @@ export const mockMultipleChoiceDiscussion: Discussion = {
   ai_generated_correct_option: null,
   participant_snapshot: 0,
   time_limit_seconds: null,
+  allow_multiple_responses: false,
+  response_limit: 1,
 };
 
 // 18.4
@@ -155,6 +161,8 @@ export function createMockDiscussions(count: number): Discussion[] {
     feedback_enabled: false,
     ai_generated_correct_option: null,
     participant_snapshot: 0,
+    allow_multiple_responses: false,
+    response_limit: 1,
   }));
 }
 

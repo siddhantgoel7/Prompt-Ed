@@ -47,6 +47,9 @@ const baseHookReturn = {
   timerEndTime: null,
   timerTotalSeconds: null,
   timerExpired: false,
+  submitAnotherResponse: jest.fn(),
+  canSubmitAnother: false,
+  responseCount: 0,
 };
 
 describe('StudentSessionPage Lesson Ended Notification Tests [US 2.12]', () => {

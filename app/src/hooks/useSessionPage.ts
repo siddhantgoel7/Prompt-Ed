@@ -76,7 +76,7 @@ export type SessionVM = {
   transcriptsLoading: boolean;
   transcriptsError: string | null;
   openFile: (fileId: string) => Promise<void>;
-  handlePublishDiscussion: (timerSeconds?: number | null) => Promise<void> | void;
+  handlePublishDiscussion: (timerSeconds?: number | null, multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }) => Promise<void> | void;
   handleCloseDiscussion: (discussionId: string) => Promise<void> | void;
   historyLoading: boolean;
   historyError: string | null;
@@ -104,7 +104,7 @@ export type SessionVM = {
   generateCandidates: (transcriptOverride?: string) => Promise<void>;
   selectCandidate: (p: GeneratedPrompt) => void;
   regenerateCandidates: () => Promise<void>;
-  handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null) => Promise<void>;
+  handlePublishAiCandidate: (candidate: GeneratedPrompt, overrideCorrectOption?: string | null, feedbackEnabled?: boolean, timerSeconds?: number | null, multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }) => Promise<void>;
   discussionTimerEndTime: number | null;
   discussionTimerSeconds: number | null;
   handleExtendTimer: (extraSeconds: number) => Promise<void>;

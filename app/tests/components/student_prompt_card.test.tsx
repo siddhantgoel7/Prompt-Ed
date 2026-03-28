@@ -40,6 +40,8 @@ const mcDiscussion: Discussion = {
     feedback_enabled: true,
     ai_generated_correct_option: null,
     participant_snapshot: 0,
+    allow_multiple_responses: false,
+    response_limit: 1,
 };
 
 const shortAnswerDiscussion: Discussion = {
