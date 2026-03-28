@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+const ACCEPTED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
 /** Renders an add/edit course dialog with a title field and image upload. */
@@ -68,7 +68,7 @@ export function CourseDialog({
     e.target.value = '';
 
     // Validate type
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+    if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
       setImageError('Please select a PNG, JPEG, WebP, or GIF image.');
       return;
     }
