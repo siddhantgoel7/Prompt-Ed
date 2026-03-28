@@ -139,7 +139,8 @@ describe('ActiveCenter', () => {
             expect.objectContaining({ id: 'c1' }),
             'B',
             false,
-            30
+            30,
+            undefined
         );
     });
 
