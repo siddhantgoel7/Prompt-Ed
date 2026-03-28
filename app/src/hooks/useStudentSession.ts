@@ -58,7 +58,24 @@ function markDiscussionSubmittedInStorage(storageKey: string, discussionId: stri
     localStorage.setItem(storageKey, JSON.stringify([...ids]));
   } catch {
     // Non-fatal: if storage fails, we still keep the current in-memory submitted state.
-  }
+    }
+}
+
+function getResponseCountFromStorage(storageKey: string, discussionId: string): number {
+    try {
+        const raw = localStorage.getItem(`${storageKey}:${discussionId}:count`);
+        return raw ? parseInt(raw, 10) : 0;
+    } catch {
+        return 0;
+    }
+}
+
+function setResponseCountInStorage(storageKey: string, discussionId: string, count: number): void {
+    try {
+        localStorage.setItem(`${storageKey}:${discussionId}:count`, count.toString());
+    } catch {
+        // Non-fatal
+    }
 }
 
 export function useStudentSession(lessonId: string) {
@@ -139,6 +156,7 @@ export function useStudentSession(lessonId: string) {
             ? 'submitted'
             : 'active'
         );
+        setResponseCount(getResponseCountFromStorage(submittedDiscussionsKey, nextDiscussion.id));
 
         // Restore timer for late-joining students using published_at from DB
         if (nextDiscussion.time_limit_seconds && nextDiscussion.time_limit_seconds > 0 && nextDiscussion.published_at) {
@@ -195,6 +213,7 @@ export function useStudentSession(lessonId: string) {
           ? 'submitted'
           : 'active'
       );
+      setResponseCount(getResponseCountFromStorage(submittedDiscussionsKey, discussion.id));
 
       setTimerExpired(false);
       timerExpiredRef.current = false;
@@ -339,7 +358,9 @@ export function useStudentSession(lessonId: string) {
 
     setSubmitting(false);
     setResponseText('');
-    setResponseCount((c) => c + 1);
+    const newCount = responseCount + 1;
+    setResponseCount(newCount);
+    setResponseCountInStorage(submittedDiscussionsKey, activeDiscussion.id, newCount);
     markDiscussionSubmittedInStorage(submittedDiscussionsKey, activeDiscussion.id);
     setView('submitted');
   };

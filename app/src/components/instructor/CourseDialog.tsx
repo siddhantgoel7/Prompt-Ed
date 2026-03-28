@@ -135,18 +135,6 @@ export function CourseDialog({
 
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
-            <Label className="block text-sm font-medium mb-2">Course Title</Label>
-            <Input
-              type="text"
-              name="title"
-              value={value.title}
-              onChange={onChange}
-              placeholder="e.g., PMCOL 400 Lec A1"
-              required
-            />
-          </div>
-
-          <div>
             <Label className="block text-sm font-medium mb-2">Course Image</Label>
             <input
               ref={fileInputRef}
@@ -187,7 +175,7 @@ export function CourseDialog({
                 type="button"
                 onClick={handleImageClick}
                 disabled={uploading}
-                className="w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
+                className="w-full px-4 py-8 border-2 border-dashed border-primary/30 rounded-lg hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all duration-200 bg-primary/5 hover:bg-primary/10 disabled:opacity-50"
                 data-testid="course-image-upload-button"
               >
                 {uploading ? (
@@ -199,14 +187,16 @@ export function CourseDialog({
                     Uploading...
                   </span>
                 ) : (
-                  <span className="flex flex-col items-center gap-1">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="17 8 12 3 7 8" />
-                      <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    <span className="text-sm">{mode === 'add' ? 'Click to add image' : 'Click to change image'}</span>
-                    <span className="text-xs text-gray-400">PNG, JPEG, WebP, or GIF (max 5 MB)</span>
+                  <span className="flex flex-col items-center gap-2">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium">{mode === 'add' ? 'Click to upload image' : 'Click to change image'}</span>
+                    <span className="text-xs opacity-70">PNG, JPEG, WebP, or GIF (max 5 MB)</span>
                   </span>
                 )}
               </button>
@@ -216,6 +206,19 @@ export function CourseDialog({
               <p className="text-xs text-red-500 mt-1">{imageError}</p>
             )}
           </div>
+
+          <div>
+            <Label className="block text-sm font-medium mb-2">Course Title</Label>
+            <Input
+              type="text"
+              name="title"
+              value={value.title}
+              onChange={onChange}
+              placeholder="e.g., PMCOL 400 Lec A1"
+              required
+            />
+          </div>
+
 
           {error && (
             <Alert className="border-red-200 bg-red-50">
