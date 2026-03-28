@@ -33,4 +33,5 @@ site/
 *.log
 
 .claude
-*.txt
+*.txtreport-task.txt
+report-task.txt
