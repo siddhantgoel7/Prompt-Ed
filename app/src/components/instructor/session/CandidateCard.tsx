@@ -59,16 +59,11 @@ function CardHeader({ promptType, bloomsLevel, topicArea, rationale, isSelected 
           {!bloomsLevel && !topicArea && !rationale && <p>No metadata</p>}
         </TooltipContent>
       </Tooltip>
-      <span
-        className="text-xs font-medium text-brand-500"
-        style={{
-          opacity: isSelected ? 1 : 0,
-          transition: `opacity ${SWAP_MS}ms ease`,
-          pointerEvents: 'none',
-        }}
-      >
-        Selected (Editing)
-      </span>
+      {isSelected && (
+        <span className="text-xs font-medium text-brand-500" style={{ pointerEvents: 'none' }}>
+          Selected (Editing)
+        </span>
+      )}
     </div>
   );
 }
@@ -225,6 +220,7 @@ export function CandidateCard({
         transition: `background ${CARD_BG_MS}ms${!isSelected ? ', border-color 120ms ease' : ''}`,
       }}
       role="button"
+      aria-label={candidate.promptText}
       tabIndex={isSelected ? -1 : 0}
       aria-pressed={isSelected}
       onClick={isSelected ? undefined : onSelect}
@@ -313,6 +309,7 @@ export function CandidateCard({
 
       {/* ── Publish button: same outer-clip / inner-animate pattern ── */}
       <div
+        aria-hidden={!isSelected || undefined}
         style={{
           overflow:   'hidden',
           maxHeight:  isSelected ? '52px' : '0px',
