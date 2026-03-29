@@ -45,6 +45,7 @@ function makeResponse(id: string, overrides: Partial<Response> = {}): Response {
     response_text: 'A function that captures its lexical scope.',
     selected_option: null,
     created_at: '2024-01-01T10:00:09Z',
+    student_session_id: id,
     ...overrides,
   } as unknown as Response;
 }

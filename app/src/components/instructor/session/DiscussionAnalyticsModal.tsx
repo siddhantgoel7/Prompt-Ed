@@ -47,11 +47,16 @@ export function DiscussionAnalyticsContent({
       .replaceAll("'", '&#39;');
 
   const total = responses.length;
+  const uniqueRespondents = new Set(responses.map(r => r.student_session_id).filter(Boolean)).size;
   const isActive = discussion.status === 'active';
-  const snapshot = isActive
+  const presenceSnapshot = isActive
     ? Math.max(discussion.participant_snapshot ?? 0, studentCount)
     : (discussion.participant_snapshot ?? studentCount);
-  const responseRate = snapshot > 0 ? Math.round((total / snapshot) * 100) : null;
+  // Use the larger of presence peak and unique respondents as the denominator,
+  // but only when we actually have presence data. When presenceSnapshot is 0
+  // (no student count info at all), show "—" instead of a misleading 100%.
+  const snapshot = presenceSnapshot > 0 ? Math.max(presenceSnapshot, uniqueRespondents) : 0;
+  const responseRate = snapshot > 0 ? Math.round((uniqueRespondents / snapshot) * 100) : null;
 
   // MC distribution
   const isMC = discussion.prompt_type === 'multiple_choice';
@@ -176,8 +181,8 @@ export function DiscussionAnalyticsContent({
         <StatCard
           label="Response Rate"
           value={responseRate === null ? '—' : `${responseRate}%`}
-          sub={snapshot > 0 ? `${total} / ${snapshot} students` : undefined}
-          infoText="Responses received divided by the number of students who joined during this discussion."
+          sub={snapshot > 0 ? `${uniqueRespondents} / ${snapshot} students` : undefined}
+          infoText="Unique respondents divided by the number of students who joined during this discussion."
         />
       </div>
 

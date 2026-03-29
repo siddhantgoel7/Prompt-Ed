@@ -74,7 +74,7 @@ export async function fetchEndedDiscussionsApi(lessonId: string) {
         .from('discussions')
         .select(`
             *,
-            responses ( id, discussion_id, response_text, created_at, flagged_at )
+            responses ( id, discussion_id, response_text, created_at, flagged_at, student_session_id )
         `)
         .eq('lesson_id', lessonId)
         .order('display_order', { ascending: true });
@@ -121,7 +121,7 @@ export async function fetchExportDiscussionsApi(lessonId: string) {
         created_at,
         closed_at,
         participant_snapshot,
-        responses ( response_text, created_at, selected_option, is_correct )
+        responses ( response_text, created_at, selected_option, is_correct, student_session_id )
         `)
         .eq('lesson_id', lessonId)
         .order('display_order', { ascending: true });
@@ -192,7 +192,7 @@ export async function fetchFlaggedResponsesApi(discussionId: string | null): Pro
     return data as Response[];
 }
 
-export async function submitStudentResponseApi(discussionId: string, text: string, selectedOption: string | null = null, isCorrect: boolean | null = null) {
+export async function submitStudentResponseApi(discussionId: string, text: string, selectedOption: string | null = null, isCorrect: boolean | null = null, studentSessionId: string | null = null) {
     const supabase = createClient();
     return supabase
         .from('responses')
@@ -202,6 +202,7 @@ export async function submitStudentResponseApi(discussionId: string, text: strin
                 response_text: text,
                 selected_option: selectedOption,
                 is_correct: isCorrect,
+                student_session_id: studentSessionId,
             },
         ])
         .select()

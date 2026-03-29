@@ -40,6 +40,7 @@ export function ActiveRightPanel(props: Readonly<{
 
   React.useEffect(() => { resetSelection(); }, [activeDiscussion?.id, resetSelection]);
 
+  const uniqueRespondentCount = new Set(responses.map(r => r.student_session_id).filter(Boolean)).size;
   const distribution = calculateMCDistribution(activeDiscussion, responses);
   const hasActiveDiscussion = !!activeDiscussionId;
   const hasTimer = timerEndTime !== null && timerTotalSeconds !== null;
@@ -54,8 +55,8 @@ export function ActiveRightPanel(props: Readonly<{
           <div className="flex items-center justify-between flex-1">
             <span className="text-xs font-semibold text-content-primary">Live Responses</span>
             <div className="flex items-center gap-1 text-xs text-content-muted mr-2">
-              <span className="font-semibold text-content-secondary">{responses.length}</span>
-              {contextProps.peakStudentCount > 0 && <span>/ {contextProps.peakStudentCount}</span>}
+              <span className="font-semibold text-content-secondary">{uniqueRespondentCount}</span>
+              {contextProps.peakStudentCount > 0 && <span>/ {Math.max(contextProps.peakStudentCount, uniqueRespondentCount)}</span>}
             </div>
           </div>
         )}

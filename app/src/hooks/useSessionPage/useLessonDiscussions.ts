@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Discussion, DiscussionWithResponseCount, PromptType } from '@/types/discussion';
 import type { Response } from '@/types/response';
 import type { GeneratedPrompt } from '@/types/ai';
+import { useParticipantPeak } from '@/hooks/useParticipantPeak';
 
 import {
     fetchDiscussionsApi,
@@ -44,16 +45,20 @@ export function useLessonDiscussions(
   const [activeDiscussion, setActiveDiscussion] = useState<Discussion | null>(null);
   const [publishing, setPublishing] = useState(false);
 
-  // Peak student count tracking
-  const peakStudentCountRef = useRef<number>(0);
-  const [peakStudentCount, setPeakStudentCount] = useState<number>(0);
+  // Peak student count tracking — shared hook handles seeding, tracking, and DB persistence
+  const peakStudentCount = useParticipantPeak(
+    activeDiscussion?.id ?? null,
+    activeDiscussion?.participant_snapshot ?? 0,
+    studentCount,
+  );
 
+  // Keep in-memory discussion objects in sync when peak updates
   useEffect(() => {
-    if (activeDiscussion && studentCount > peakStudentCountRef.current) {
-      peakStudentCountRef.current = studentCount;
-      queueMicrotask(() => setPeakStudentCount(prev => Math.max(prev, studentCount)));
+    if (activeDiscussion && peakStudentCount > (activeDiscussion.participant_snapshot ?? 0)) {
+      setActiveDiscussion(prev => prev?.id === activeDiscussion.id ? { ...prev, participant_snapshot: peakStudentCount } : prev);
+      setDiscussions(prev => prev.map(d => d.id === activeDiscussion.id ? { ...d, participant_snapshot: peakStudentCount } : d));
     }
-  }, [studentCount, activeDiscussion]);
+  }, [peakStudentCount, activeDiscussion]);
 
   const fetchDiscussions = useCallback(async () => {
     const data = await fetchDiscussionsApi(lessonId);
@@ -73,10 +78,7 @@ export function useLessonDiscussions(
   } = useDiscussionTimerInternal(activeDiscussion, channel);
 
   const handleCloseDiscussion = useCallback(async (discussionId: string) => {
-    const peak = peakStudentCountRef.current;
-    if (peak > 0) await updateParticipantSnapshotApi(discussionId, peak);
-    peakStudentCountRef.current = 0;
-    setPeakStudentCount(0);
+    // Peak is already persisted to DB by useParticipantPeak — no need to persist again here
     clearTimerState();
     await closeDiscussionApi(discussionId);
     if (channel) {
@@ -146,8 +148,7 @@ export function useLessonDiscussions(
     if (!promptInput.trim() || publishing) return;
     setPublishing(true);
     if (activeDiscussion) await handleCloseDiscussion(activeDiscussion.id);
-    peakStudentCountRef.current = studentCount;
-    setPeakStudentCount(studentCount);
+    // Peak tracking is handled by useParticipantPeak; just set the initial snapshot in the payload
 
     const payload = {
       lesson_id: lessonId, prompt_text: promptInput, prompt_type: promptType,
@@ -183,8 +184,7 @@ export function useLessonDiscussions(
     if (publishing) return;
     setPublishing(true);
     if (activeDiscussion) await handleCloseDiscussion(activeDiscussion.id);
-    peakStudentCountRef.current = studentCount;
-    setPeakStudentCount(studentCount);
+    // Peak tracking is handled by useParticipantPeak; just set the initial snapshot in the payload
 
     const aiSuggestedCorrectOption = candidate.mcOptions?.find(o => o.is_correct)?.label || null;
     const finalCorrectOption = overrideCorrectOption || aiSuggestedCorrectOption;

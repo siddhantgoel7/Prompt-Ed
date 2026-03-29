@@ -63,6 +63,7 @@ const RESPONSES: Response[] = [
     created_at: '2024-01-01T10:05:00Z',
     is_correct: null,
     flagged_at: null,
+    student_session_id: 'student-1',
   },
   {
     id: 'r2',
@@ -72,6 +73,7 @@ const RESPONSES: Response[] = [
     created_at: '2024-01-01T10:06:00Z',
     is_correct: null,
     flagged_at: null,
+    student_session_id: 'student-2',
   },
   {
     id: 'r3',
@@ -81,6 +83,7 @@ const RESPONSES: Response[] = [
     created_at: '2024-01-01T10:07:00Z',
     is_correct: null,
     flagged_at: null,
+    student_session_id: 'student-3',
   },
 ];
 
@@ -411,6 +414,7 @@ describe('DiscussionPage — flagged response restore feature', () => {
       created_at: '2024-01-01T10:08:00Z',
       is_correct: null,
       flagged_at: '2024-01-01T10:09:00Z',
+      student_session_id: 'student-4',
     },
   ];
 
