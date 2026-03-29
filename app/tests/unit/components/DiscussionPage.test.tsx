@@ -66,6 +66,8 @@ describe('DiscussionPage', () => {
             source: 'manual' as const,
             feedback_enabled: false,
             ai_generated_correct_option: null,
+            allow_multiple_responses: false,
+            response_limit: 1,
         },
         initialResponses: [
             { id: 'r1', discussion_id: 'd1', response_text: 'Resp 1', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null }

@@ -59,7 +59,7 @@ export function GeneralQuestionsTab() {
     const handleTimerConfirm = (timerSeconds: number | null, feedbackEnabled: boolean) => {
         setShowTimerDialog(false);
         if (pendingPublish) {
-            handlePublishAiCandidate(pendingPublish.candidate, pendingPublish.correctOption, feedbackEnabled, timerSeconds);
+            handlePublishAiCandidate(pendingPublish.candidate, pendingPublish.correctOption, feedbackEnabled, timerSeconds, undefined);
             setPendingPublish(null);
         }
     };
@@ -143,7 +143,7 @@ export function GeneralQuestionsTab() {
                 open={showTimerDialog}
                 onConfirm={handleTimerConfirm}
                 onCancel={() => { setShowTimerDialog(false); setPendingPublish(null); }}
-                isMC={true}
+                isMultipleChoice
             />
         </div>
     );

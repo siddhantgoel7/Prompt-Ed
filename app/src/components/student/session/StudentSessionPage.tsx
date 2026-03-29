@@ -33,6 +33,9 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
     timerExpired: timerExpiredRaw,
     canSubmit,
     submitResponse,
+    submitAnotherResponse,
+    canSubmitAnother,
+    responseCount,
   } = useStudentSession(lessonId);
 
   // Normalize timerExpired: treat undefined (from older test mocks) as false
@@ -177,6 +180,9 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
             timerEndTime={timerEndTime}
             timerTotalSeconds={timerTotalSeconds}
             submittedAnswerText={submittedAnswerText}
+            canSubmitAnother={canSubmitAnother}
+            onSubmitAnother={submitAnotherResponse}
+            responseCount={responseCount}
           />
         );
       default:
@@ -315,6 +321,9 @@ interface SharedSubmittedProps {
   timerEndTime: number | null;
   timerTotalSeconds: number | null;
   submittedAnswerText: string | null;
+  canSubmitAnother: boolean;
+  onSubmitAnother: () => void;
+  responseCount: number;
 }
 
 function SubmittedView(props: Readonly<SharedSubmittedProps>) {
@@ -385,7 +394,7 @@ function SubmittedDefaultView({ hasTimer, isTimerExpired, timerEndTime, timerTot
   );
 }
 
-function SubmittedOpenView({ hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds, activeDiscussion, submittedAnswerText }: Readonly<SharedSubmittedProps>) {
+function SubmittedOpenView({ hasTimer, isTimerExpired, timerEndTime, timerTotalSeconds, activeDiscussion, submittedAnswerText, canSubmitAnother, onSubmitAnother, responseCount }: Readonly<SharedSubmittedProps>) {
   if (hasTimer && !isTimerExpired && timerEndTime && timerTotalSeconds) {
     return (
       <>
@@ -393,6 +402,9 @@ function SubmittedOpenView({ hasTimer, isTimerExpired, timerEndTime, timerTotalS
           <DiscussionTimer timerEndTime={timerEndTime} timerTotalSeconds={timerTotalSeconds} />
         </div>
         <StudentStatusAlert title="Response submitted" description="You're all set. Results will be shown when time's up." />
+        {canSubmitAnother && (
+          <SubmitAnotherButton onClick={onSubmitAnother} responseCount={responseCount} responseLimit={activeDiscussion?.response_limit ?? null} />
+        )}
       </>
     );
   }
@@ -414,6 +426,27 @@ function SubmittedOpenView({ hasTimer, isTimerExpired, timerEndTime, timerTotalS
           <p className="text-sm whitespace-pre-wrap text-content-secondary">{submittedAnswerText}</p>
         </div>
       )}
+      {canSubmitAnother && (
+        <SubmitAnotherButton onClick={onSubmitAnother} responseCount={responseCount} responseLimit={activeDiscussion.response_limit} />
+      )}
     </>
+  );
+}
+
+function SubmitAnotherButton({ onClick, responseCount, responseLimit }: Readonly<{ onClick: () => void; responseCount: number; responseLimit: number | null }>) {
+  const limitText = responseLimit ? ` (${responseCount}/${responseLimit})` : '';
+  return (
+    <button
+      data-testid="submit-another-response-button"
+      onClick={onClick}
+      className="w-full rounded-xl text-sm py-2.5 font-semibold transition-all duration-150"
+      style={{
+        background: 'var(--color-primary-alpha-10)',
+        border: '1px solid var(--color-primary-alpha-25)',
+        color: 'var(--color-primary-600)',
+      }}
+    >
+      Submit Another Response{limitText}
+    </button>
   );
 }

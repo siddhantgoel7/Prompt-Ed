@@ -77,19 +77,30 @@ export function CourseCard({
         className="h-36 flex items-center justify-center relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, var(--color-primary-alpha-15), var(--color-primary-400-alpha-08))' }}
       >
-        <div
-          className="w-14 h-14 rounded-2xl flex items-center justify-center"
-          style={{ background: 'var(--color-primary-alpha-18)' }}
-        >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-          </svg>
-        </div>
-        <div
-          className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full opacity-20"
-          style={{ background: 'var(--color-primary-300)' }}
-        />
+        {course.image_url ? (
+          <img
+            src={course.image_url}
+            alt={`${course.title} thumbnail`}
+            className="absolute inset-0 w-full h-full object-cover"
+            data-testid="course-card-image"
+          />
+        ) : (
+          <>
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center"
+              style={{ background: 'var(--color-primary-alpha-18)' }}
+            >
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg>
+            </div>
+            <div
+              className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full opacity-20"
+              style={{ background: 'var(--color-primary-300)' }}
+            />
+          </>
+        )}
       </div>
 
       {/* Content */}

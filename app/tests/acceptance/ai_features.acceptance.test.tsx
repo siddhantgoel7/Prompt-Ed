@@ -245,7 +245,7 @@ describe('AI Features (Acceptance)', () => {
             // Timer dialog appears — confirm with default (1 min)
             fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
 
-            expect(defaultCenterProps.onPublishAiCandidate).toHaveBeenCalledWith(expect.objectContaining({ promptText: 'Option A' }), null, false, 60);
+            expect(defaultCenterProps.onPublishAiCandidate).toHaveBeenCalledWith(expect.objectContaining({ promptText: 'Option A' }), null, false, 60, { allowMultipleResponses: false, responseLimit: null });
         });
     });
 
@@ -329,7 +329,8 @@ describe('AI Features (Acceptance)', () => {
                 expect.objectContaining({ promptText: 'Edited text completely' }),
                 null,
                 false,
-                60
+                60,
+                { allowMultipleResponses: false, responseLimit: null }
             );
         });
 

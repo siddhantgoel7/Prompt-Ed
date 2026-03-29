@@ -39,8 +39,32 @@ describe('courseApi (extra branches)', () => {
   });
 
   it('updateCourse: passes trimmed image_url when non-empty string is provided', async () => {
+    // updateCourse now fetches existing course first, then updates
+    let fromCallCount = 0;
+    mockSupabase.from.mockImplementation(() => {
+      fromCallCount++;
+      if (fromCallCount === 1) {
+        return {
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({ data: { image_url: null }, error: null })
+            })
+          })
+        };
+      }
+      return {
+        update: jest.fn((payload: any) => {
+          mockSupabase._updatePayload = payload;
+          return {
+            eq: jest.fn().mockReturnValue({
+              select: jest.fn().mockResolvedValue({ data: [], error: null })
+            })
+          };
+        })
+      };
+    });
     await updateCourse('c1', { title: 'Course', image_url: '  https://img.example.com  ' });
-    expect(mockSupabase.update).toHaveBeenCalledWith({
+    expect(mockSupabase._updatePayload).toEqual({
       title: 'Course',
       image_url: 'https://img.example.com',
     });

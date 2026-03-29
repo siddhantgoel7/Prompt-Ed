@@ -136,7 +136,7 @@ describe('DiscussionTimerSection — Edit Timer Button [US 1.29]', () => {
         const onEditTimer = jest.fn().mockResolvedValue(undefined);
         renderSection({ onEditTimer });
         fireEvent.click(screen.getByTestId('edit-timer-button'));
-        fireEvent.click(screen.getByRole('checkbox'));
+        fireEvent.click(screen.getByTestId('no-time-limit-checkbox'));
         fireEvent.click(screen.getByRole('button', { name: /Update Timer/i }));
         expect(onEditTimer).toHaveBeenCalledWith(null);
     });
