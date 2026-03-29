@@ -10,12 +10,12 @@ import { MultipleChoiceEditor } from './MultipleChoiceEditor';
 export const CANDIDATE_COLLAPSE_MS = 250;
 
 // ─── Timing constants ────────────────────────────────────────────────────────
-const CARD_BG_MS       = 100;
-const DRIFT_MS         = 600;  // <p> slow drift-away duration (enter only)
-const EXPANDED_HOLD_MS = 40;   // how long isExpanded stays true after deselect
-const SWAP_MS          = 60;
-const SWAP_STAGGER_MS  = 80;
-const SLIDE_MS         = 220;
+const CARD_BG_MS       = 100;  // background color transition
+const DRIFT_MS         = 600;  // prompt text slow drift-away (select enter only)
+const EXPANDED_HOLD_MS = 40;   // isExpanded stays true briefly after deselect
+const SWAP_MS          = 60;   // MC options swap animation
+const SWAP_STAGGER_MS  = 80;   // stagger between swapping option rows
+const SLIDE_MS         = 220;  // editor slide-in/out
 
 interface Props {
   candidate: GeneratedPrompt;
@@ -224,8 +224,9 @@ export function CandidateCard({
         cursor:        isSelected ? 'default' : 'pointer',
         transition: `background ${CARD_BG_MS}ms${!isSelected ? ', border-color 120ms ease' : ''}`,
       }}
-      role={isSelected ? undefined : 'button'}
-      tabIndex={isSelected ? undefined : 0}
+      role="button"
+      tabIndex={isSelected ? -1 : 0}
+      aria-pressed={isSelected}
       onClick={isSelected ? undefined : onSelect}
       onKeyDown={isSelected ? undefined : (e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(); }}
       onMouseEnter={isSelected ? undefined : () => setIsHovered(true)}

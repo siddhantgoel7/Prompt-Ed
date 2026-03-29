@@ -34,6 +34,10 @@ export function ActiveSidebar(props: Readonly<{
   const [collapsed, setCollapsed] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('discussions');
 
+  React.useEffect(() => {
+    if (window.matchMedia('(max-width: 767px)').matches) setCollapsed(true);
+  }, []);
+
   function openTab(tab: string) {
     setActiveTab(tab);
     setCollapsed(false);
@@ -151,8 +155,8 @@ function ExpandedSidebarView({
           <TabsTrigger value="files" className="text-xs">Files</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="discussions" className="mt-0 flex-1">
-          <ScrollArea className="h-[calc(100vh-130px)] pr-1">
+        <TabsContent value="discussions" className="mt-0 flex-1 min-h-0">
+          <ScrollArea className="h-full pr-1">
             <DiscussionHistory
               discussions={discussions}
               activeDiscussionId={activeDiscussionId}

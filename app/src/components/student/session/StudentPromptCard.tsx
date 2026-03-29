@@ -67,7 +67,7 @@ export function StudentPromptCard({
 
       {/* MC options */}
       {isMC && discussion.mc_options ? (
-        <div className="p-4 space-y-2.5">
+        <div className="p-4 space-y-2.5" role="radiogroup" aria-label="Answer options">
           {discussion.mc_options.map((opt: MCOptionSafe) => (
             <MCOptionButton
               key={opt.label}
@@ -149,6 +149,8 @@ function MCOptionButton({
     <button
       data-testid={`mc-option-${label}`}
       data-state={state}
+      role="radio"
+      aria-checked={selectedOption === label}
       onClick={() => { if (!submittedOption && !disabled) onSelect?.(label); }}
       style={baseStyle}
     >

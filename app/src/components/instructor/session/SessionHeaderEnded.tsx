@@ -45,7 +45,7 @@ export function SessionHeaderEnded(props: Readonly<{
 
   return (
     <header
-      className="glass sticky top-0 z-50 px-6 py-4 flex items-center justify-between"
+      className="glass sticky top-0 z-50 px-4 md:px-6 py-3 flex items-center justify-between"
     >
       <h1 className="text-xl font-semibold text-content-primary">{title}</h1>
 

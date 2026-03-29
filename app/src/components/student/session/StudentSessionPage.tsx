@@ -14,6 +14,8 @@ import { TimerExpiredMessage } from './TimerExpiredMessage';
 import { useStudentSession } from '@/hooks/useStudentSession';
 import type { Discussion } from '@/types/discussion';
 
+const FEEDBACK_DISPLAY_MS = 7_000;
+
 /** Renders the student session UI, routing between waiting/active/submitted/ended states. */
 export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>) {
   const {
@@ -83,7 +85,7 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
       isSubmitCorrect !== null
     ) {
       setFeedbackPeriodActive(true);
-      const id = setTimeout(() => setFeedbackPeriodActive(false), 7000);
+      const id = setTimeout(() => setFeedbackPeriodActive(false), FEEDBACK_DISPLAY_MS);
       feedbackTimerRef.current = id;
       return () => clearTimeout(id);
     }
@@ -116,7 +118,7 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
       // Scenario 1 (no timer, feedback enabled): start the 7-second feedback window immediately
       if (activeDiscussion?.feedback_enabled && !hasTimer) {
         setFeedbackPeriodActive(true);
-        const id = setTimeout(() => setFeedbackPeriodActive(false), 7000);
+        const id = setTimeout(() => setFeedbackPeriodActive(false), FEEDBACK_DISPLAY_MS);
         feedbackTimerRef.current = id;
       }
       return;

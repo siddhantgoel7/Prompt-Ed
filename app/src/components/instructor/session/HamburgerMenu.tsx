@@ -72,7 +72,7 @@ export function HamburgerMenu({
       {open && (
         <div
           className="absolute right-0 mt-2 rounded-2xl overflow-hidden bg-surface-overlay backdrop-blur-lg border border-line-default shadow-[0_8px_32px_rgba(0,0,0,0.24)]"
-          style={{ minWidth: '160px', zIndex: 100 }}
+          style={{ minWidth: '160px', zIndex: 100 /* above sticky header (z-50) */ }}
         >
           {menuItems.map((item) => (
             <button

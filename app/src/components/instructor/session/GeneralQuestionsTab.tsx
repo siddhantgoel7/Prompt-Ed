@@ -3,7 +3,6 @@
 
 import * as React from 'react';
 const GENERATING_CHARS = 'Generating...'.split('').map((ch, i) => ({ id: `gc-${i}`, ch }));
-import { ScrollArea } from '@/components/ui/scroll-area';
 import type { GeneralQuestion, GeneratedPrompt } from '@/types/ai';
 import { SessionContext } from './SessionContext';
 import { StartDiscussionDialog } from './StartDiscussionDialog';
@@ -125,21 +124,19 @@ export function GeneralQuestionsTab() {
 
             {/* Question list */}
             {generalQuestions.length > 0 && (
-                <ScrollArea className="h-[calc(100vh-280px)] pr-1">
-                    <div className="space-y-2">
-                        {generalQuestions.map((q, i) => (
-                            <CandidateCard
-                                key={q.id}
-                                candidate={toGeneratedPrompt(q)}
-                                index={i}
-                                isSelected={selectedIndex === i}
-                                onSelect={() => setSelectedIndex(selectedIndex === i ? null : i)}
-                                isConnected={isConnected}
-                                onRequestPublish={handleRequestPublish}
-                            />
-                        ))}
-                    </div>
-                </ScrollArea>
+                <div className="space-y-2">
+                    {generalQuestions.map((q, i) => (
+                        <CandidateCard
+                            key={q.id}
+                            candidate={toGeneratedPrompt(q)}
+                            index={i}
+                            isSelected={selectedIndex === i}
+                            onSelect={() => setSelectedIndex(selectedIndex === i ? null : i)}
+                            isConnected={isConnected}
+                            onRequestPublish={handleRequestPublish}
+                        />
+                    ))}
+                </div>
             )}
 
             <StartDiscussionDialog

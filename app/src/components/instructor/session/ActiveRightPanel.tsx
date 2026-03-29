@@ -44,6 +44,10 @@ export function ActiveRightPanel(props: {
   const [collapsed, setCollapsed] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('list');
 
+  React.useEffect(() => {
+    if (window.matchMedia('(max-width: 767px)').matches) setCollapsed(true);
+  }, []);
+
   function openTab(tab: string) {
     setActiveTab(tab);
     setCollapsed(false);
@@ -112,7 +116,7 @@ export function ActiveRightPanel(props: {
         )}
       </div>
 
-      <div className="flex-1 flex flex-col h-[calc(100vh-56px)]">
+      <div className="flex-1 flex flex-col h-full">
         {collapsed ? (
           <CollapsedSidebarIcons
             responses={responses}
@@ -330,7 +334,8 @@ function ActiveDiscussionStrip({
 
   React.useEffect(() => {
     if (!timerEndTime) return;
-    function tick() { setRemaining(Math.max(0, Math.ceil((timerEndTime - Date.now()) / 1000))); }
+    const endTime = timerEndTime;
+    function tick() { setRemaining(Math.max(0, Math.ceil((endTime - Date.now()) / 1000))); }
     tick();
     const id = setInterval(tick, 500);
     return () => clearInterval(id);

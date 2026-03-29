@@ -35,7 +35,7 @@ export function SessionActiveView(props: { vm?: SessionVM }) {
 
   const content = (
     <div
-      className="min-h-screen flex flex-col bg-surface-base"
+      className="h-screen flex flex-col bg-surface-base"
     >
       <SessionHeaderActive onSplitView={() => setSplitView(true)} />
 
