@@ -55,7 +55,7 @@ export function FilterToggle({
       >
         <Filter className={s.icon} />
         {showHighlightedOnly
-          ? `Showing ${selectedCount} highlighted`
+          ? `Show all`
           : `Show highlighted only (${selectedCount})`}
       </button>
       <Tooltip>
