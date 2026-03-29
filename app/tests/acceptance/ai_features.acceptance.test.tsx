@@ -346,8 +346,9 @@ describe('AI Features (Acceptance)', () => {
             const publishBtn = screen.getByRole('button', { name: /Publish This Question/i });
             expect(publishBtn).toBeEnabled();
 
-            // Re-render with empty string
-            rerender(<ActiveCenter {...defaultCenterProps} candidates={candidates} promptInput="" />);
+            // Clear the edit textarea to make the publish button disabled
+            const textArea = screen.getByPlaceholderText('Edit this prompt...');
+            fireEvent.change(textArea, { target: { value: '' } });
 
             // It should now be disabled
             expect(publishBtn).toBeDisabled();
