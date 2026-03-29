@@ -137,7 +137,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
                     onSelectOption={jest.fn()}
                 />
             );
-            const optionButtons = screen.getAllByRole('button');
+            const optionButtons = screen.getAllByRole('radio');
             const selectedBtn = optionButtons.find(btn =>
                 btn.textContent?.includes('A.')
             );
@@ -155,7 +155,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
                     onSelectOption={jest.fn()}
                 />
             );
-            const optionButtons = screen.getAllByRole('button');
+            const optionButtons = screen.getAllByRole('radio');
             const unselectedBtn = optionButtons.find(btn => btn.textContent?.includes('B.'));
             // Non-selected button should not have the dark green selection background
             expect(unselectedBtn?.getAttribute('style')).not.toMatch(/0\.18/); // 0.18 is the opacity of the selected style
@@ -170,7 +170,7 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
                     onSelectOption={jest.fn()}
                 />
             );
-            const optionButtons = screen.getAllByRole('button');
+            const optionButtons = screen.getAllByRole('radio');
             optionButtons.forEach(btn => {
                 // No option should have selected styling (0.18 opacity is only for selected)
                 expect(btn.getAttribute('style')).not.toMatch(/0\.18/);

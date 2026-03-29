@@ -108,7 +108,7 @@ describe('DiscussionTimerSection — Edit Timer Button [US 1.29]', () => {
     it('[US 1.29][TS-UNIT10] success: clicking Edit button opens the timer dialog', () => {
         renderSection();
         fireEvent.click(screen.getByTestId('edit-timer-button'));
-        expect(screen.getByText('Set Time Limit')).toBeInTheDocument();
+        expect(screen.getByText('Discussion Settings')).toBeInTheDocument();
     });
 
     // 67.11
@@ -146,9 +146,9 @@ describe('DiscussionTimerSection — Edit Timer Button [US 1.29]', () => {
         const onEditTimer = jest.fn();
         renderSection({ onEditTimer });
         fireEvent.click(screen.getByTestId('edit-timer-button'));
-        expect(screen.getByText('Set Time Limit')).toBeInTheDocument();
+        expect(screen.getByText('Discussion Settings')).toBeInTheDocument();
         fireEvent.click(screen.getByRole('button', { name: /Cancel/i }));
-        expect(screen.queryByText('Set Time Limit')).not.toBeInTheDocument();
+        expect(screen.queryByText('Discussion Settings')).not.toBeInTheDocument();
         expect(onEditTimer).not.toHaveBeenCalled();
     });
 
@@ -161,14 +161,14 @@ describe('DiscussionTimerSection — Edit Timer Button [US 1.29]', () => {
 
         // Open the dialog
         fireEvent.click(screen.getByTestId('edit-timer-button'));
-        expect(screen.getByText('Set Time Limit')).toBeInTheDocument();
+        expect(screen.getByText('Discussion Settings')).toBeInTheDocument();
 
         // Advance past expiry — the component's useEffect should close the dialog
         act(() => {
             jest.advanceTimersByTime(3_000);
         });
 
-        expect(screen.queryByText('Set Time Limit')).not.toBeInTheDocument();
+        expect(screen.queryByText('Discussion Settings')).not.toBeInTheDocument();
         jest.useRealTimers();
     });
 });
@@ -202,7 +202,7 @@ describe('DiscussionTimerSection — Extend Timer Button [US 1.29]', () => {
     it('[US 1.29][TS-UNIT19] success: +10s button does not open any dialog', () => {
         renderSection();
         fireEvent.click(screen.getByTestId('extend-timer-button'));
-        expect(screen.queryByText('Set Time Limit')).not.toBeInTheDocument();
+        expect(screen.queryByText('Discussion Settings')).not.toBeInTheDocument();
     });
 });
 

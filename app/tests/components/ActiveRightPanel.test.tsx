@@ -152,10 +152,9 @@ describe('[US 1.40] MC response distribution counts', () => {
     ];
     renderPanel({ activeDiscussion: MC_DISCUSSION, responses });
 
-    // Filter to only <span> elements — the distribution rows use spans,
-    // while response card text uses <p> elements
+    // Filter to only the distribution label spans (class="text-content-muted")
     const rows = screen.getAllByText(/Option [ABC]/).filter(
-      el => el.tagName.toLowerCase() === 'span'
+      el => el.classList.contains('text-content-muted')
     );
     expect(rows).toHaveLength(3);
   });

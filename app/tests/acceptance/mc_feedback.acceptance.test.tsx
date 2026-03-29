@@ -243,7 +243,7 @@ describe('[US 2.10] MC Feedback — Feedback Disabled (Acceptance)', () => {
     it('[US 2.10][AC3-AT4] success: selected option is highlighted when feedback is disabled', () => {
         renderAndSubmit('B', MC_DISCUSSION_FEEDBACK_OFF);
         // The selected option button should have distinct styling (no correctness revealed)
-        const optionButtons = screen.getAllByRole('button');
+        const optionButtons = screen.getAllByRole('radio');
         const selectedBtn = optionButtons.find(btn => btn.textContent?.includes('B.'));
         expect(selectedBtn).toBeInTheDocument();
         // Selected option has a distinct background (green tint without correctness indicator)

@@ -228,7 +228,7 @@ describe('MC Submitted View — Scenario 2: timed + feedback enabled', () => {
         expect(screen.queryByText(/Great job/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/Not quite/i)).not.toBeInTheDocument();
         // Option button should exist (submitted state shown)
-        const optionButtons = screen.getAllByRole('button');
+        const optionButtons = screen.getAllByRole('radio');
         const submittedBtn = optionButtons.find(btn => btn.textContent?.includes('A.'));
         expect(submittedBtn).toBeInTheDocument();
     });

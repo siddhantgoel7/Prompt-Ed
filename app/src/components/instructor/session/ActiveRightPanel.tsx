@@ -44,10 +44,6 @@ export function ActiveRightPanel(props: {
   const [collapsed, setCollapsed] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('list');
 
-  React.useEffect(() => {
-    if (window.matchMedia('(max-width: 767px)').matches) setCollapsed(true);
-  }, []);
-
   function openTab(tab: string) {
     setActiveTab(tab);
     setCollapsed(false);
