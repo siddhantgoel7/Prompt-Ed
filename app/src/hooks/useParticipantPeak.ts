@@ -29,14 +29,14 @@ export function useParticipantPeak(
   useEffect(() => {
     discussionIdRef.current = discussionId;
     peakRef.current = 0;
-    setPeak(0);
+    setPeak(0); // eslint-disable-line react-hooks/set-state-in-effect -- syncing with discussion identity change
   }, [discussionId]);
 
   // Seed peak from DB snapshot when discussion loads or snapshot updates
   useEffect(() => {
     if (initialSnapshot > peakRef.current) {
       peakRef.current = initialSnapshot;
-      setPeak(initialSnapshot);
+      setPeak(initialSnapshot); // eslint-disable-line react-hooks/set-state-in-effect -- syncing from external DB value
     }
   }, [initialSnapshot]);
 
@@ -44,7 +44,7 @@ export function useParticipantPeak(
   useEffect(() => {
     if (liveStudentCount > peakRef.current) {
       peakRef.current = liveStudentCount;
-      setPeak(liveStudentCount);
+      setPeak(liveStudentCount); // eslint-disable-line react-hooks/set-state-in-effect -- syncing from external presence count
       if (discussionIdRef.current) {
         updateParticipantSnapshotApi(discussionIdRef.current, liveStudentCount);
       }

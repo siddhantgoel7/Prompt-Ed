@@ -10,7 +10,6 @@ import {
     closeDiscussionApi,
     fetchResponsesApi,
     fetchFlaggedResponsesApi,
-    updateParticipantSnapshotApi,
     updateDiscussionTimerApi,
     flagResponseApi,
     unflagResponseApi,
