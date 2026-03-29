@@ -26,7 +26,6 @@ interface Props {
   onRequestPublish: (
     candidate: GeneratedPrompt,
     correctOption: string | null,
-    feedbackEnabled: boolean,
   ) => void;
 }
 
@@ -146,7 +145,6 @@ export function CandidateCard({
   const [editText, setEditText]                           = React.useState(candidate.promptText);
   const [editingOptions, setEditingOptions]               = React.useState<Record<string, string>>({});
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
-  const [feedbackEnabled, setFeedbackEnabled]             = React.useState(false);
   const [isHovered, setIsHovered]                         = React.useState(false);
 
   const pRef          = React.useRef<HTMLParagraphElement>(null);
@@ -179,7 +177,6 @@ export function CandidateCard({
         ) ?? {},
       );
       setOverrideCorrectOption(candidate.mcOptions?.find((o) => o.is_correct)?.label ?? null);
-      setFeedbackEnabled(false);
     } else {
       expandedTimerRef.current = setTimeout(() => {
         isExpandedRef.current = false;
@@ -201,7 +198,7 @@ export function CandidateCard({
             })),
           }
         : { ...candidate, promptText: editText };
-    onRequestPublish(published, overrideCorrectOption, feedbackEnabled);
+    onRequestPublish(published, overrideCorrectOption);
   };
 
   const hasMc      = (candidate.mcOptions?.length ?? 0) > 0;
@@ -308,8 +305,6 @@ export function CandidateCard({
               onOptionTextChange={(label, text) =>
                 setEditingOptions((prev) => ({ ...prev, [label]: text }))
               }
-              feedbackEnabled={feedbackEnabled}
-              onFeedbackChange={setFeedbackEnabled}
             />
           </div>
         </div>

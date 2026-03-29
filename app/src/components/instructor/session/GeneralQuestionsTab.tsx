@@ -27,7 +27,6 @@ export function GeneralQuestionsTab() {
     const [pendingPublish, setPendingPublish] = React.useState<{
         candidate: GeneratedPrompt;
         correctOption: string | null;
-        feedbackEnabled: boolean;
     } | null>(null);
     const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
 
@@ -53,15 +52,15 @@ export function GeneralQuestionsTab() {
 
     const hasReadyFiles = files.some(f => f.status === 'ready');
 
-    const handleRequestPublish = (candidate: GeneratedPrompt, correctOption: string | null, feedbackEnabled: boolean) => {
-        setPendingPublish({ candidate, correctOption, feedbackEnabled });
+    const handleRequestPublish = (candidate: GeneratedPrompt, correctOption: string | null) => {
+        setPendingPublish({ candidate, correctOption });
         setShowTimerDialog(true);
     };
 
-    const handleTimerConfirm = (timerSeconds: number | null) => {
+    const handleTimerConfirm = (timerSeconds: number | null, feedbackEnabled: boolean) => {
         setShowTimerDialog(false);
         if (pendingPublish) {
-            handlePublishAiCandidate(pendingPublish.candidate, pendingPublish.correctOption, pendingPublish.feedbackEnabled, timerSeconds);
+            handlePublishAiCandidate(pendingPublish.candidate, pendingPublish.correctOption, feedbackEnabled, timerSeconds);
             setPendingPublish(null);
         }
     };
@@ -147,6 +146,7 @@ export function GeneralQuestionsTab() {
                 open={showTimerDialog}
                 onConfirm={handleTimerConfirm}
                 onCancel={() => { setShowTimerDialog(false); setPendingPublish(null); }}
+                isMC={true}
             />
         </div>
     );

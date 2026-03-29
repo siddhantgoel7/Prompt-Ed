@@ -1,6 +1,6 @@
 /**
  * Tests for MultipleChoiceEditor component.
- * Covers rendering options, selecting correct answer, editing option text, and feedback toggle.
+ * Covers rendering options, selecting correct answer, and editing option text.
  */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -25,8 +25,6 @@ function renderEditor(overrides: Partial<React.ComponentProps<typeof MultipleCho
     correctOption: 'A',
     onCorrectOptionChange: jest.fn(),
     onOptionTextChange: jest.fn(),
-    feedbackEnabled: false,
-    onFeedbackChange: jest.fn(),
     nameGroup: 'test-group',
     ...overrides,
   };
@@ -70,26 +68,6 @@ describe('MultipleChoiceEditor', () => {
     const input = screen.getByDisplayValue('Option B text');
     fireEvent.change(input, { target: { value: 'New B text' } });
     expect(onOptionTextChange).toHaveBeenCalledWith('B', 'New B text');
-  });
-
-  it('renders the feedback checkbox unchecked when feedbackEnabled=false', () => {
-    renderEditor({ feedbackEnabled: false });
-    const checkbox = screen.getByRole('checkbox');
-    expect(checkbox).not.toBeChecked();
-  });
-
-  it('renders the feedback checkbox checked when feedbackEnabled=true', () => {
-    renderEditor({ feedbackEnabled: true });
-    const checkbox = screen.getByRole('checkbox');
-    expect(checkbox).toBeChecked();
-  });
-
-  it('calls onFeedbackChange when feedback checkbox is toggled', () => {
-    const onFeedbackChange = jest.fn();
-    renderEditor({ feedbackEnabled: false, onFeedbackChange });
-    const checkbox = screen.getByRole('checkbox');
-    fireEvent.click(checkbox);
-    expect(onFeedbackChange).toHaveBeenCalledWith(true);
   });
 
   it('renders the section header text', () => {

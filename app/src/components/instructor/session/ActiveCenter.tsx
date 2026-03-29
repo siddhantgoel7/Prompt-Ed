@@ -49,7 +49,6 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
   const [sttStatus, setSttStatus] = React.useState<SttStatus>('idle');
   const [sttError, setSttError] = React.useState<string | null>(null);
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
-  const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
   const [manualOptions, setManualOptions] = React.useState<Record<string, string>>({ A: '', B: '', C: '', D: '' });
   const [creationMode, setCreationMode] = React.useState<'ai' | 'manual' | 'general'>('ai');
   const [showTimerDialog, setShowTimerDialog] = React.useState(false);
@@ -70,7 +69,7 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
   }, [state.transcriptText]);
 
   React.useEffect(() => {
-    setSelectedIndex(null); setOverrideCorrectOption(null); setFeedbackEnabled(false);
+    setSelectedIndex(null); setOverrideCorrectOption(null);
     setManualOptions({ A: '', B: '', C: '', D: '' }); setPublishError(null);
   }, [state.candidates]);
 
@@ -80,7 +79,6 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
     sttStatus, setSttStatus,
     setSttError,
     overrideCorrectOption, setOverrideCorrectOption,
-    feedbackEnabled, setFeedbackEnabled,
     manualOptions, setManualOptions,
     creationMode, setCreationMode,
     showTimerDialog, setShowTimerDialog,
@@ -117,8 +115,6 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
               selectedIndex={selectedIndex}
               overrideCorrectOption={overrideCorrectOption}
               setOverrideCorrectOption={setOverrideCorrectOption}
-              feedbackEnabled={feedbackEnabled}
-              setFeedbackEnabled={setFeedbackEnabled}
               setPendingCandidate={setPendingCandidate}
               setShowTimerDialog={setShowTimerDialog}
               sttStatus={sttStatus}
@@ -139,7 +135,6 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
               promptInput={state.promptInput} setPromptInput={state.setPromptInput}
               setTranscriptText={state.setTranscriptText}
               overrideCorrectOption={overrideCorrectOption} setOverrideCorrectOption={setOverrideCorrectOption}
-              feedbackEnabled={feedbackEnabled} setFeedbackEnabled={setFeedbackEnabled}
               manualOptions={manualOptions} setManualOptions={setManualOptions}
             />
             {/* Start Discussion — manual tab only */}
@@ -169,6 +164,11 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
           open={showTimerDialog}
           onConfirm={handlers.handleTimerConfirm}
           onCancel={() => { setShowTimerDialog(false); setPendingCandidate(null); }}
+          isMC={
+            pendingCandidate?.promptType === 'multiple_choice' ||
+            (creationMode === 'manual' && state.promptType === 'multiple_choice') ||
+            (creationMode === 'ai' && selectedIndex !== null && state.candidates[selectedIndex]?.promptType === 'multiple_choice')
+          }
         />
       </div>
     </div>
@@ -243,8 +243,6 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
   setSttError: (v: string | null) => void;
   overrideCorrectOption: string | null;
   setOverrideCorrectOption: (v: string | null) => void;
-  feedbackEnabled: boolean;
-  setFeedbackEnabled: (v: boolean) => void;
   manualOptions: Record<string, string>;
   setManualOptions: (v: Record<string, string>) => void;
   creationMode: CreationMode;
@@ -258,10 +256,10 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
   const {
     lessonId, recorder, onGenerate, setTranscriptText, setPromptInput,
     onSelectCandidate, setSelectedIndex,
-    onPublishAiCandidate, overrideCorrectOption, setOverrideCorrectOption, feedbackEnabled,
+    onPublishAiCandidate, overrideCorrectOption, setOverrideCorrectOption,
     setPublishError, setShowTimerDialog, pendingCandidate, setPendingCandidate,
     creationMode, promptType, promptInput, manualOptions, onPublish, candidates, selectedIndex,
-    setManualOptions, setFeedbackEnabled, setSttError, setSttStatus
+    setManualOptions, setSttError, setSttStatus
   } = allProps;
 
   const handleStopAndTranscribe = React.useCallback(async () => {
@@ -281,18 +279,18 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
     setSelectedIndex(index); onSelectCandidate(p);
   };
 
-  const handlePublishSelected = (p: GeneratedPrompt, timerSeconds: number | null = null) => {
+  const handlePublishSelected = (p: GeneratedPrompt, timerSeconds: number | null = null, feedbackEnabled = false) => {
     if (onPublishAiCandidate) {
       onPublishAiCandidate(p, overrideCorrectOption, feedbackEnabled, timerSeconds);
       setSelectedIndex(null); setPublishError(null);
     }
   };
 
-  const handleTimerConfirm = (timerSeconds: number | null) => {
+  const handleTimerConfirm = (timerSeconds: number | null, feedbackEnabled = false) => {
     setShowTimerDialog(false);
     if (pendingCandidate) {
       const candidate = pendingCandidate; setPendingCandidate(null);
-      handlePublishSelected(candidate, timerSeconds); return;
+      handlePublishSelected(candidate, timerSeconds, feedbackEnabled); return;
     }
     if (creationMode === 'manual') {
       if (promptType === 'multiple_choice') {
@@ -301,14 +299,14 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
         if (onPublishAiCandidate) {
           const mcOptions = (['A', 'B', 'C', 'D'] as const).map(label => ({ label, text: manualOptions[label] || `Option ${label}` }));
           onPublishAiCandidate({ promptText: promptInput, promptType: 'multiple_choice', mcOptions }, overrideCorrectOption, feedbackEnabled, timerSeconds);
-          setManualOptions({ A: '', B: '', C: '', D: '' }); setOverrideCorrectOption(null); setFeedbackEnabled(false); setPromptInput('');
+          setManualOptions({ A: '', B: '', C: '', D: '' }); setOverrideCorrectOption(null); setPromptInput('');
         }
         return;
       }
       onPublish(timerSeconds); return;
     }
     if (selectedIndex !== null && candidates[selectedIndex]) {
-      setPublishError(null); handlePublishSelected(candidates[selectedIndex], timerSeconds); return;
+      setPublishError(null); handlePublishSelected(candidates[selectedIndex], timerSeconds, feedbackEnabled); return;
     }
     if (promptType === 'multiple_choice') { setPublishError(candidates.length > 0 ? 'Please select a generated AI prompt to publish.' : 'Please generate AI prompts and select one to publish, or switch to Manual Creation mode.'); return; }
     setPublishError(null); onPublish(timerSeconds);
@@ -325,7 +323,7 @@ function AIGenerationPanel({
   promptType, setPromptType, onGenerate, handleRunAllCombinations, sweepProgress,
   generationWarning, candidates, selectedIndex, handleSelectCandidate,
   overrideCorrectOption, setOverrideCorrectOption,
-  feedbackEnabled, setFeedbackEnabled, setPendingCandidate, setShowTimerDialog,
+  setPendingCandidate, setShowTimerDialog,
   isConnected, onRegenerate, handleCopyReport, copiedReport
 }: Readonly<ActiveCenterProps & {
   recorder: ReturnType<typeof useAudioRecorder>;
@@ -338,8 +336,6 @@ function AIGenerationPanel({
   handleSelectCandidate: (p: GeneratedPrompt, i: number) => void;
   overrideCorrectOption: string | null;
   setOverrideCorrectOption: (v: string | null) => void;
-  feedbackEnabled: boolean;
-  setFeedbackEnabled: (v: boolean) => void;
   setPendingCandidate: (v: GeneratedPrompt | null) => void;
   setShowTimerDialog: (v: boolean) => void;
   copiedReport: boolean;
@@ -399,9 +395,8 @@ function AIGenerationPanel({
               isSelected={selectedIndex === i}
               onSelect={() => handleSelectCandidate(c, i)}
               isConnected={isConnected}
-              onRequestPublish={(editedCandidate, correctOption, fe) => {
+              onRequestPublish={(editedCandidate, correctOption) => {
                 setOverrideCorrectOption(correctOption);
-                setFeedbackEnabled(fe);
                 setPendingCandidate(editedCandidate);
                 setShowTimerDialog(true);
               }}
@@ -417,7 +412,6 @@ function AIGenerationPanel({
 function ManualCreationPanel({
   promptType, setPromptType, promptInput, setPromptInput, setTranscriptText,
   manualOptions, setManualOptions, overrideCorrectOption, setOverrideCorrectOption,
-  feedbackEnabled, setFeedbackEnabled
 }: Readonly<{
   promptType: PromptType;
   setPromptType: (v: PromptType) => void;
@@ -428,8 +422,6 @@ function ManualCreationPanel({
   setManualOptions: (v: Record<string, string>) => void;
   overrideCorrectOption: string | null;
   setOverrideCorrectOption: (v: string | null) => void;
-  feedbackEnabled: boolean;
-  setFeedbackEnabled: (v: boolean) => void;
 }>) {
   return (
     <>
@@ -440,7 +432,6 @@ function ManualCreationPanel({
           nameGroup="manual-correct-option" options={['A', 'B', 'C', 'D'].map((label) => ({ label, text: manualOptions[label] || '' }))}
           correctOption={overrideCorrectOption} onCorrectOptionChange={setOverrideCorrectOption}
           onOptionTextChange={(label, text) => setManualOptions({ ...manualOptions, [label]: text })}
-          feedbackEnabled={feedbackEnabled} onFeedbackChange={setFeedbackEnabled}
         />
       )}
     </>

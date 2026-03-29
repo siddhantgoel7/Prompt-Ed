@@ -13,8 +13,6 @@ export interface MultipleChoiceEditorProps {
     correctOption: string | null;
     onCorrectOptionChange: (label: string) => void;
     onOptionTextChange: (label: string, text: string) => void;
-    feedbackEnabled: boolean;
-    onFeedbackChange: (enabled: boolean) => void;
     nameGroup: string;
 }
 
@@ -23,8 +21,6 @@ export function MultipleChoiceEditor({
     correctOption,
     onCorrectOptionChange,
     onOptionTextChange,
-    feedbackEnabled,
-    onFeedbackChange,
     nameGroup,
 }: Readonly<MultipleChoiceEditorProps>) {
     return (
@@ -85,29 +81,6 @@ export function MultipleChoiceEditor({
                 })}
             </div>
 
-            <div
-                className="mt-3 pt-3 border-t border-line-subtle"
-            >
-                <div className="flex items-center gap-1.5">
-                    <label
-                        className="flex items-center gap-2 text-xs font-medium cursor-pointer text-content-secondary"
-                    >
-                        <input
-                            type="checkbox"
-                            checked={feedbackEnabled}
-                            onChange={(e) => onFeedbackChange(e.target.checked)}
-                            className="accent-[var(--color-primary-500)]"
-                        />
-                        {' '}Show correctness feedback to students
-                    </label>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About correctness feedback" />
-                        </TooltipTrigger>
-                        <TooltipContent>When enabled, students see correct or incorrect feedback immediately after submitting.</TooltipContent>
-                    </Tooltip>
-                </div>
-            </div>
         </div>
     );
 }
