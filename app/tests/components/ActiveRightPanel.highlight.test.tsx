@@ -321,8 +321,8 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     await user.click(screen.getByRole('button', { name: /Show highlighted only/i }));
     expect(screen.queryByText(/Second student response/)).not.toBeInTheDocument();
 
-    // Click the same toggle button again (now reads "Showing N highlighted") to show all
-    await user.click(screen.getByRole('button', { name: /Showing.*highlighted/i }));
+    // Click "Show all" to restore full list
+    await user.click(screen.getByRole('button', { name: /Show all/i }));
 
     // All responses visible again
     expect(screen.getByText(/First student response/)).toBeInTheDocument();
