@@ -19,8 +19,8 @@ jest.mock('@/hooks/useResponseSelection', () => ({
     useResponseSelection: jest.fn(),
 }));
 
-jest.mock('@/components/instructor/session/TimerTab', () => ({
-    TimerTab: () => <div data-testid="timer-tab" />,
+jest.mock('@/components/instructor/session/StartDiscussionDialog', () => ({
+    StartDiscussionDialog: () => null,
 }));
 
 jest.mock('@/components/instructor/session/ResponseListTab', () => ({
@@ -78,15 +78,29 @@ describe('ActiveRightPanel', () => {
 
     it('success: switches tabs', () => {
         renderWithContext();
-        
+
         fireEvent.click(screen.getByText('Metrics'));
         expect(screen.getByTestId('analytics-content')).toBeInTheDocument();
 
-        fireEvent.click(screen.getByText('Timer'));
-        expect(screen.getByTestId('timer-tab')).toBeInTheDocument();
-
         fireEvent.click(screen.getByText('Responses'));
         expect(screen.getByTestId('response-list-tab')).toBeInTheDocument();
+    });
+
+    it('success: shows active discussion strip with close button when discussion is active', () => {
+        renderWithContext();
+        expect(screen.getByTestId('discussion-strip')).toBeInTheDocument();
+        expect(screen.getByTestId('close-discussion-button')).toBeInTheDocument();
+    });
+
+    it('success: close button in strip calls handleCloseDiscussion', () => {
+        renderWithContext();
+        fireEvent.click(screen.getByTestId('close-discussion-button'));
+        expect(defaultContext.handleCloseDiscussion).toHaveBeenCalledWith('d1');
+    });
+
+    it('success: strip shows no-time-limit label when timer is null', () => {
+        renderWithContext();
+        expect(screen.getByTestId('no-time-limit-label')).toBeInTheDocument();
     });
 
     it('success: opens tabs from collapsed icons', () => {
