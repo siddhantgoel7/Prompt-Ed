@@ -32,7 +32,11 @@ jest.mock('@/components/instructor/session/AIPreferencesDialog', () => ({
 }));
 
 jest.mock('@/components/instructor/session/CandidateCard', () => ({
-  CandidateCard: ({ onSelect }: any) => <button onClick={onSelect} data-testid="candidate-card">Select Candidate</button>,
+  CandidateCard: ({ candidate, onRequestPublish }: any) => (
+    <div data-testid="candidate-card">
+      <button onClick={() => onRequestPublish(candidate, 'B')}>Publish This Question →</button>
+    </div>
+  ),
 }));
 
 jest.mock('@/components/ui/tooltip', () => ({
@@ -54,18 +58,11 @@ jest.mock('@/components/ui/tabs', () => ({
 jest.mock('@/components/instructor/session/StartDiscussionDialog', () => ({
   StartDiscussionDialog: ({ open, onConfirm }: any) => open ? (
     <div data-testid="start-dialog">
-      <button onClick={() => onConfirm(30)}>Confirm 30s</button>
+      <button onClick={() => onConfirm(30, false)}>Confirm 30s</button>
     </div>
   ) : null,
 }));
 
-jest.mock('@/components/instructor/session/MultipleChoiceEditor', () => ({
-    MultipleChoiceEditor: ({ onCorrectOptionChange }: any) => (
-        <div data-testid="mc-editor">
-            <button onClick={() => onCorrectOptionChange('B')}>Set Correct B</button>
-        </div>
-    )
-}));
 
 describe('ActiveCenter', () => {
     const defaultProps = {
@@ -126,12 +123,8 @@ describe('ActiveCenter', () => {
     it('success: handles candidate selection and MC publishing', async () => {
         const candidates = [{ id: 'c1', promptText: 'Q1', promptType: 'multiple_choice', mcOptions: [{ label: 'A', text: '1', is_correct: true }] }];
         render(<TestWrapper candidates={candidates} />);
-        
-        fireEvent.click(screen.getByText('Select Candidate'));
-        
-        // Manual change of correct option
-        fireEvent.click(screen.getByText('Set Correct B'));
-        
+
+        // CandidateCard mock calls onRequestPublish(candidate, 'B') directly
         fireEvent.click(screen.getByText('Publish This Question →'));
         fireEvent.click(screen.getByText('Confirm 30s'));
 
