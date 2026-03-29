@@ -55,7 +55,7 @@ describe('CandidateCard', () => {
   it('calls onSelect when the card is clicked', () => {
     const onSelect = jest.fn();
     renderCard({ onSelect });
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('button', { pressed: false }));
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
@@ -63,14 +63,14 @@ describe('CandidateCard', () => {
 
   it('changes border color on mouseEnter', () => {
     renderCard({});
-    const btn = screen.getByRole('button');
+    const btn = screen.getByRole('button', { pressed: false });
     fireEvent.mouseEnter(btn);
     expect(btn.style.border).toContain('var(--color-primary-300)');
   });
 
   it('resets border color on mouseLeave', () => {
     renderCard({});
-    const btn = screen.getByRole('button');
+    const btn = screen.getByRole('button', { pressed: false });
     fireEvent.mouseEnter(btn);
     fireEvent.mouseLeave(btn);
     expect(btn.style.border).toContain('var(--border-default)');
