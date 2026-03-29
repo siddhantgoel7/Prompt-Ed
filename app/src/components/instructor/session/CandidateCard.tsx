@@ -10,18 +10,15 @@ import { MultipleChoiceEditor } from './MultipleChoiceEditor';
 export const CANDIDATE_COLLAPSE_MS = 250;
 
 // ─── Timing constants ────────────────────────────────────────────────────────
-const CARD_BG_MS = 100;
-const DRIFT_MS = 600;        // <p> slow drift-away duration (enter only)
-const EXPANDED_HOLD_MS = 40; // how long isExpanded stays true after deselect — just covers the <p> exit transition
-const SWAP_MS = 100;
-const SWAP_STAGGER_MS = 50;
-const FADE_CHOICES_MS =140;
-const SLIDE_MS = 220;
-const PUBLISH_STAGGER_MS = 60;
+const CARD_BG_MS       = 100;
+const DRIFT_MS         = 600;  // <p> slow drift-away duration (enter only)
+const EXPANDED_HOLD_MS = 40;   // how long isExpanded stays true after deselect
+const SWAP_MS          = 60;
+const SWAP_STAGGER_MS  = 80;
+const SLIDE_MS         = 220;
 
 interface Props {
   candidate: GeneratedPrompt;
-  /** Index within the candidates list — used to namespace MC radio inputs. */
   index: number;
   isSelected: boolean;
   onSelect: () => void;
@@ -58,8 +55,8 @@ function CardHeader({ promptType, bloomsLevel, topicArea, rationale, isSelected 
         </TooltipTrigger>
         <TooltipContent align="start">
           {bloomsLevel && <p><span className="font-semibold">Bloom&apos;s:</span> {bloomsLevel}</p>}
-          {topicArea && <p><span className="font-semibold">Topic:</span> {topicArea}</p>}
-          {rationale && <p><span className="font-semibold">Rationale:</span> {rationale}</p>}
+          {topicArea  && <p><span className="font-semibold">Topic:</span> {topicArea}</p>}
+          {rationale  && <p><span className="font-semibold">Rationale:</span> {rationale}</p>}
           {!bloomsLevel && !topicArea && !rationale && <p>No metadata</p>}
         </TooltipContent>
       </Tooltip>
@@ -146,21 +143,16 @@ function PromptCrossfade({
 export function CandidateCard({
   candidate, index, isSelected, onSelect, isConnected, onRequestPublish,
 }: Readonly<Props>) {
-  const [editText, setEditText] = React.useState(candidate.promptText);
-  const [editingOptions, setEditingOptions] = React.useState<Record<string, string>>({});
+  const [editText, setEditText]                           = React.useState(candidate.promptText);
+  const [editingOptions, setEditingOptions]               = React.useState<Record<string, string>>({});
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
-  const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
-  const [isHovered, setIsHovered] = React.useState(false);
+  const [feedbackEnabled, setFeedbackEnabled]             = React.useState(false);
+  const [isHovered, setIsHovered]                         = React.useState(false);
 
-  // Increments on each selection — changing key on animated inner divs replays fadeSlideUp.
-  const [animKey, setAnimKey] = React.useState(0);
-
-  // ResizeObserver measures <p> natural height for explicit CSS height transition.
-  // Skips measurement while isExpanded so the absolute-positioned <p> doesn't
-  // report wrapper height instead of text height.
-  const pRef = React.useRef<HTMLParagraphElement>(null);
+  const pRef          = React.useRef<HTMLParagraphElement>(null);
   const isExpandedRef = React.useRef(false);
   const [naturalHeight, setNaturalHeight] = React.useState(24);
+
   React.useLayoutEffect(() => {
     const el = pRef.current;
     if (!el) return;
@@ -171,16 +163,14 @@ export function CandidateCard({
     return () => ro.disconnect();
   }, []);
 
-  // Trails isSelected by EXPANDED_HOLD_MS so <p> doesn't snap position before its exit transition completes.
-  const [isExpanded, setIsExpanded] = React.useState(false);
-  const expandedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isExpanded, setIsExpanded]   = React.useState(false);
+  const expandedTimerRef              = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   React.useEffect(() => {
     if (expandedTimerRef.current) clearTimeout(expandedTimerRef.current);
     if (isSelected) {
       isExpandedRef.current = true;
       setIsExpanded(true);
-      setAnimKey((k) => k + 1);
       setEditText(candidate.promptText);
       setEditingOptions(
         candidate.mcOptions?.reduce(
@@ -214,22 +204,28 @@ export function CandidateCard({
     onRequestPublish(published, overrideCorrectOption, feedbackEnabled);
   };
 
-  const hasMc = (candidate.mcOptions?.length ?? 0) > 0;
-  const wrapTransition = `max-height ${SLIDE_MS}ms cubic-bezier(0.16,1,0.3,1), opacity 140ms ease`;
-  const slideAnimation = `fadeSlideUp ${SLIDE_MS}ms cubic-bezier(0.16,1,0.3,1) both`;
+  const hasMc      = (candidate.mcOptions?.length ?? 0) > 0;
+  const slideEase  = `cubic-bezier(0.16,1,0.3,1)`;
+  // Shared styles for any "inner animated div" — owns transform + opacity,
+  // is the sole source of the visible animation (no double-fade from a parent).
+  const innerSlide = (visible: boolean): React.CSSProperties => ({
+    transform:  visible ? 'translateY(0px)' : 'translateY(-8px)',
+    opacity:    visible ? 1 : 0,
+    transition: `transform ${SLIDE_MS}ms ${slideEase}, opacity ${SLIDE_MS}ms ease`,
+  });
 
   return (
     <div
       className="p-3 rounded-xl text-sm"
       style={{
-        background: isSelected ? 'rgba(45,158,45,0.06)' : 'var(--surface-raised)',
-        border: `1px solid ${!isSelected && isHovered ? 'var(--color-primary-300)' : 'var(--border-default)'}`,
-        outline: '2px solid',
-        outlineColor: isSelected ? 'var(--color-primary-400)' : 'transparent',
+        background:    isSelected ? 'rgba(45,158,45,0.06)' : 'var(--surface-raised)',
+        border:        `1px solid ${!isSelected && isHovered ? 'var(--color-primary-300)' : 'var(--border-default)'}`,
+        outline:       '2px solid',
+        outlineColor:  isSelected ? 'var(--color-primary-400)' : 'transparent',
         outlineOffset: '-1px',
-        boxSizing: 'border-box',
-        cursor: isSelected ? 'default' : 'pointer',
-        transition: `background ${CARD_BG_MS}ms, outline-color 1000ms, border-color 120ms ease`,
+        boxSizing:     'border-box',
+        cursor:        isSelected ? 'default' : 'pointer',
+        transition: `background ${CARD_BG_MS}ms${!isSelected ? ', border-color 120ms ease' : ''}`,
       }}
       role={isSelected ? undefined : 'button'}
       tabIndex={isSelected ? undefined : 0}
@@ -256,15 +252,24 @@ export function CandidateCard({
         naturalHeight={naturalHeight}
       />
 
-      {/* MC choices — visible when unselected */}
+      {/* ── MC choices: slide up + fade simultaneously as editor slides down ──
+          Both are driven by isSelected at the same time, so they animate
+          in parallel with no waiting. translateY reverses cleanly on exit. */}
       {hasMc && (
         <ul
           className="mt-2 space-y-1"
           style={{
-            overflow: 'hidden',
-            maxHeight: isSelected ? '0px' : '300px',
-            opacity: isSelected ? 0 : 1,
-            transition: `max-height ${FADE_CHOICES_MS}ms ease, opacity ${FADE_CHOICES_MS}ms ease`,
+            overflow:   'hidden',
+            maxHeight:  isSelected ? '0px' : '300px',
+            // transform + opacity live here (not in a child) so they
+            // animate at the same moment maxHeight collapses
+            transform:  isSelected ? 'translateY(-8px)' : 'translateY(0px)',
+            opacity:    isSelected ? 0 : 1,
+            transition: [
+              `max-height ${SLIDE_MS}ms ${slideEase}`,
+              `transform  ${SLIDE_MS}ms ${slideEase}`,
+              `opacity    ${SLIDE_MS}ms ease`,
+            ].join(', '),
           }}
         >
           {candidate.mcOptions?.map((opt) => (
@@ -276,16 +281,33 @@ export function CandidateCard({
         </ul>
       )}
 
-      {/* MC editor — visible when selected */}
+      {/* ── MC editor ──
+          Outer div: only clips overflow + collapses height. No opacity here
+          so there's no double-fade fighting the inner div's animation.
+          Inner div: owns transform + opacity — identical easing each way,
+          so exit is the exact reverse of entrance. */}
       {candidate.promptType === 'multiple_choice' && (
-        <div style={{ overflow: 'hidden', maxHeight: isSelected ? '600px' : '0px', opacity: isSelected ? 1 : 0, transition: wrapTransition }}>
-          <div key={animKey} style={{ animation: isSelected ? slideAnimation : undefined }}>
+        <div
+          style={{
+            overflow:   'hidden',
+            maxHeight:  isSelected ? '600px' : '0px',
+            transition: `max-height ${SLIDE_MS}ms ${slideEase}`,
+          }}
+        >
+          <div style={innerSlide(isSelected)}>
             <MultipleChoiceEditor
               nameGroup={`correct-option-${index}`}
-              options={candidate.mcOptions?.map((opt) => ({ label: opt.label, text: editingOptions[opt.label] ?? opt.text })) ?? []}
+              options={
+                candidate.mcOptions?.map((opt) => ({
+                  label: opt.label,
+                  text:  editingOptions[opt.label] ?? opt.text,
+                })) ?? []
+              }
               correctOption={overrideCorrectOption}
               onCorrectOptionChange={setOverrideCorrectOption}
-              onOptionTextChange={(label, text) => setEditingOptions((prev) => ({ ...prev, [label]: text }))}
+              onOptionTextChange={(label, text) =>
+                setEditingOptions((prev) => ({ ...prev, [label]: text }))
+              }
               feedbackEnabled={feedbackEnabled}
               onFeedbackChange={setFeedbackEnabled}
             />
@@ -293,20 +315,26 @@ export function CandidateCard({
         </div>
       )}
 
-      {/* Publish button */}
-      <div style={{ overflow: 'hidden', maxHeight: isSelected ? '52px' : '0px', opacity: isSelected ? 1 : 0, transition: wrapTransition }}>
-        <button
-          key={animKey}
-          onClick={handlePublish}
-          disabled={!editText.trim() || !isConnected}
-          className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
-          style={{
-            background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-            animation: isSelected ? `fadeSlideUp ${SLIDE_MS}ms cubic-bezier(0.16,1,0.3,1) ${PUBLISH_STAGGER_MS}ms both` : undefined,
-          }}
-        >
-          Publish This Question →
-        </button>
+      {/* ── Publish button: same outer-clip / inner-animate pattern ── */}
+      <div
+        style={{
+          overflow:   'hidden',
+          maxHeight:  isSelected ? '52px' : '0px',
+          transition: `max-height ${SLIDE_MS}ms ${slideEase}`,
+        }}
+      >
+        <div style={innerSlide(isSelected)}>
+          <button
+            onClick={handlePublish}
+            disabled={!editText.trim() || !isConnected}
+            className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
+            style={{
+              background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+            }}
+          >
+            Publish This Question →
+          </button>
+        </div>
       </div>
     </div>
   );
