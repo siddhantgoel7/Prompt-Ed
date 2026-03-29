@@ -21,6 +21,7 @@ export function ActiveSidebar(props: Readonly<{
   isUploading?: boolean;
   onUploadFile?: (file: File) => Promise<void>;
   onDeleteFile?: (fileId: string) => Promise<void>;
+  onDownloadFile?: (fileId: string) => Promise<void>;
   studentCount?: number;
 }>) {
   const context = React.useContext(SessionContext);
@@ -30,6 +31,7 @@ export function ActiveSidebar(props: Readonly<{
   const isUploading = context ? context.isUploading : props.isUploading!;
   const onUploadFile = context ? context.uploadFile : props.onUploadFile!;
   const onDeleteFile = context ? context.deleteFile : props.onDeleteFile!;
+  const onDownloadFile = context ? context.openFile : props.onDownloadFile!;
 
   const [collapsed, setCollapsed] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('discussions');
@@ -95,6 +97,7 @@ export function ActiveSidebar(props: Readonly<{
           isUploading={isUploading}
           onUploadFile={onUploadFile}
           onDeleteFile={onDeleteFile}
+          onDownloadFile={onDownloadFile}
         />
       )}
     </aside>
@@ -132,7 +135,7 @@ function CollapsedSidebarView({ activeTab, openTab }: Readonly<{ activeTab: stri
 }
 
 function ExpandedSidebarView({
-  activeTab, setActiveTab, discussions, activeDiscussionId, files, isUploading, onUploadFile, onDeleteFile
+  activeTab, setActiveTab, discussions, activeDiscussionId, files, isUploading, onUploadFile, onDeleteFile, onDownloadFile
 }: Readonly<{
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -142,6 +145,7 @@ function ExpandedSidebarView({
   isUploading: boolean;
   onUploadFile: (file: File) => Promise<void>;
   onDeleteFile: (fileId: string) => Promise<void>;
+  onDownloadFile: (fileId: string) => Promise<void>;
 }>) {
   return (
     <div className="flex-1 overflow-hidden p-3">
@@ -166,6 +170,7 @@ function ExpandedSidebarView({
             isUploading={isUploading}
             onUploadFile={onUploadFile}
             onDeleteFile={onDeleteFile}
+            onDownloadFile={onDownloadFile}
           />
         </TabsContent>
       </Tabs>
