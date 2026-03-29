@@ -6,7 +6,7 @@
 // [US 1.35] Hide inappropriate responses
 //   AC1: Hidden from view but remains in data
 
-import { render, screen, waitFor } from '../utils/renderWithProviders';
+import { render, screen, waitFor, within } from '../utils/renderWithProviders';
 import userEvent from '@testing-library/user-event';
 import { DiscussionPage } from '@/components/instructor/DiscussionPage';
 import type { Discussion } from '@/types/discussion';
@@ -114,8 +114,8 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.getByText(/Phase I reactions/)).toBeInTheDocument();
     expect(screen.getByText(/The liver is the primary site/)).toBeInTheDocument();
     expect(screen.getByText(/CYP450 enzymes/)).toBeInTheDocument();
-    // No flag button visible initially
-    expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
+    // No card should be highlighted by default
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
   });
 
   // 59.2
@@ -125,7 +125,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
 
     await user.click(screen.getByText(/Phase I reactions/));
 
-    expect(screen.getByRole('button', { name: /Flag as Inappropriate/i })).toBeInTheDocument();
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(1);
   });
 
   // 59.3
@@ -137,11 +137,11 @@ describe('DiscussionPage — response highlight & flag feature', () => {
 
     // Expand
     await user.click(response);
-    expect(screen.getByRole('button', { name: /Flag as Inappropriate/i })).toBeInTheDocument();
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(1);
 
     // Collapse
     await user.click(response);
-    expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
   });
 
   // 59.4
@@ -150,11 +150,11 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     renderPage();
 
     await user.click(screen.getByText(/Phase I reactions/));
-    expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(1);
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(1);
 
     await user.click(screen.getByText(/CYP450 enzymes/));
     // Both should now be highlighted
-    expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(2);
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(2);
   });
 
   // 59.5
@@ -165,11 +165,11 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     // Select two responses
     await user.click(screen.getByText(/Phase I reactions/));
     await user.click(screen.getByText(/CYP450 enzymes/));
-    expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(2);
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(2);
 
     // Deselect the first one
     await user.click(screen.getByText(/Phase I reactions/));
-    expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(1);
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(1);
   });
 
   // 59.6
@@ -180,7 +180,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     await user.click(screen.getByText(/Phase I reactions/));
     await user.click(screen.getByText(/The liver is the primary site/));
     await user.click(screen.getByText(/CYP450 enzymes/));
-    expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(3);
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(3);
   });
 
   // 59.7
@@ -191,9 +191,11 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     // Select the second response
     await user.click(screen.getByText(/The liver is the primary site/));
 
-    // Click flag
-    const flagBtn = screen.getByRole('button', { name: /Flag as Inappropriate/i });
-    await user.click(flagBtn);
+    // Click flag (two clicks: first expands badge label, second fires action)
+    const highlightedCard = document.querySelector('[data-highlighted="true"]')!;
+    const flagBtn = within(highlightedCard as HTMLElement).getByRole('button', { name: /Flag as Inappropriate/i });
+    await user.click(flagBtn); // expand
+    await user.click(flagBtn); // fire
 
     await waitFor(() => {
       expect(mockFlagResponseApi).toHaveBeenCalledWith('r2');
@@ -216,7 +218,10 @@ describe('DiscussionPage — response highlight & flag feature', () => {
 
     // Select and flag the only response
     await user.click(screen.getByText(/Phase I reactions/));
-    await user.click(screen.getByRole('button', { name: /Flag as Inappropriate/i }));
+    const highlightedCard59_8 = document.querySelector('[data-highlighted="true"]')!;
+    const flagBtn59_8 = within(highlightedCard59_8 as HTMLElement).getByRole('button', { name: /Flag as Inappropriate/i });
+    await user.click(flagBtn59_8); // expand
+    await user.click(flagBtn59_8); // fire
 
     // Since the response moved to flagged, the flagged toggle should appear
     await waitFor(() => {
@@ -228,7 +233,7 @@ describe('DiscussionPage — response highlight & flag feature', () => {
   it('[US 1.35][AC1-AT3] flag button is not visible when no response is selected', () => {
     renderPage();
 
-    expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
   });
 
   // 59.10
@@ -296,7 +301,10 @@ describe('DiscussionPage — response highlight & flag feature', () => {
     expect(screen.queryByText(/The liver is the primary site/)).not.toBeInTheDocument();
 
     // Flag the only highlighted response — this removes it from selectedIds
-    await user.click(screen.getByRole('button', { name: /Flag as Inappropriate/i }));
+    const highlightedCard59_14 = document.querySelector('[data-highlighted="true"]')!;
+    const flagBtn59_14 = within(highlightedCard59_14 as HTMLElement).getByRole('button', { name: /Flag as Inappropriate/i });
+    await user.click(flagBtn59_14); // expand
+    await user.click(flagBtn59_14); // fire
 
     // The view should auto-switch back to show all remaining responses
     await waitFor(() => {
@@ -379,7 +387,10 @@ describe('DiscussionPage — highlight visual emphasis', () => {
 
     // Flag a response
     await user.click(screen.getByText(/The liver is the primary site/));
-    await user.click(screen.getByRole('button', { name: /Flag as Inappropriate/i }));
+    const highlightedCard59_18 = document.querySelector('[data-highlighted="true"]')!;
+    const flagBtn59_18 = within(highlightedCard59_18 as HTMLElement).getByRole('button', { name: /Flag as Inappropriate/i });
+    await user.click(flagBtn59_18); // expand
+    await user.click(flagBtn59_18); // fire
 
     // Removed from the active list
     await waitFor(() => {
@@ -476,8 +487,10 @@ describe('DiscussionPage — flagged response restore feature', () => {
     // Select the flagged response
     await user.click(screen.getByText(/Flagged response about incorrect enzyme/));
 
-    // Click Unflag
-    await user.click(screen.getByRole('button', { name: /Unflag/i }));
+    // Click Unflag (two clicks: first expands badge label, second fires action)
+    const unflagBtn = screen.getByRole('button', { name: /Unflag/i });
+    await user.click(unflagBtn); // expand
+    await user.click(unflagBtn); // fire
 
     await waitFor(() => {
       expect(mockUnflagResponseApi).toHaveBeenCalledWith('f1');
@@ -508,7 +521,10 @@ describe('DiscussionPage — flagged response restore feature', () => {
 
     // Flag a response
     await user.click(screen.getByText(/The liver is the primary site/));
-    await user.click(screen.getByRole('button', { name: /Flag as Inappropriate/i }));
+    const highlightedCard59_25 = document.querySelector('[data-highlighted="true"]')!;
+    const flagBtn59_25 = within(highlightedCard59_25 as HTMLElement).getByRole('button', { name: /Flag as Inappropriate/i });
+    await user.click(flagBtn59_25); // expand
+    await user.click(flagBtn59_25); // fire
 
     await waitFor(() => {
       expect(mockFlagResponseApi).toHaveBeenCalledWith('r2');
@@ -539,9 +555,11 @@ describe('DiscussionPage — flagged response restore feature', () => {
     expect(screen.getByText(/Flagged response about incorrect enzyme/)).toBeInTheDocument();
     expect(screen.queryByText(/Phase I reactions/)).not.toBeInTheDocument();
 
-    // Select and unflag the only flagged response
+    // Select and unflag the only flagged response (two clicks: expand then fire)
     await user.click(screen.getByText(/Flagged response about incorrect enzyme/));
-    await user.click(screen.getByRole('button', { name: /Unflag/i }));
+    const unflagBtn59_26 = screen.getByRole('button', { name: /Unflag/i });
+    await user.click(unflagBtn59_26); // expand
+    await user.click(unflagBtn59_26); // fire
 
     // After unflagging the last flagged response, the view should auto-switch
     // back to showing active responses (no empty flagged page)
