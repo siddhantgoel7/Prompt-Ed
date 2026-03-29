@@ -35,6 +35,7 @@ const CHART_TOOLTIP_STYLE = {
 } as const;
 
 const CHART_TOOLTIP_WRAPPER = { zIndex: 50 } as const;
+const CHART_TOOLTIP_TEXT_STYLE = { color: 'var(--text-primary)' } as const;
 
 const fmtCount = (n: number) => `Count: ${n} ${n === 1 ? 'response' : 'responses'}`;
 
@@ -159,6 +160,8 @@ function DistributionSection({
                 <Tooltip
                   contentStyle={CHART_TOOLTIP_STYLE}
                   wrapperStyle={CHART_TOOLTIP_WRAPPER}
+                  labelStyle={CHART_TOOLTIP_TEXT_STYLE}
+                  itemStyle={CHART_TOOLTIP_TEXT_STYLE}
                   separator=""
                   formatter={(value) => [fmtCount(Number(value ?? 0)), '']}
                 />
@@ -459,6 +462,8 @@ export function DiscussionAnalyticsContent({
               <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={CHART_TOOLTIP_STYLE}
+                labelStyle={CHART_TOOLTIP_TEXT_STYLE}
+                itemStyle={CHART_TOOLTIP_TEXT_STYLE}
                 separator=""
                 formatter={(v) => [fmtCount(Number(v ?? 0)), '']}
               />
