@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -56,12 +55,9 @@ export function AIPreferencesDialog() {
                     Settings
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-md bg-card text-card-foreground border border-border">
                 <DialogHeader>
-                    <DialogTitle>AI Generation Preferences</DialogTitle>
-                    <DialogDescription>
-                        Tailor how the AI generates discussion prompts. These settings apply to all future generations.
-                    </DialogDescription>
+                    <DialogTitle className="text-lg font-semibold">AI Generation Preferences</DialogTitle>
                 </DialogHeader>
 
                 {isLoading ? (
@@ -81,122 +77,114 @@ export function AIPreferencesDialog() {
                       </div>
                     </div>
                 ) : (
-                    <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <div className="flex items-center justify-end gap-1">
-                                    <label htmlFor="difficulty" className="text-sm font-medium">
-                                        Difficulty
-                                    </label>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About difficulty levels" />
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Basic tests recall and definitions. Intermediate applies concepts to scenarios. Advanced requires analysis and critical comparison.
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </div>
-                                <select
-                                    id="difficulty"
-                                    value={localPrefs.difficulty}
-                                    onChange={(e) => setLocalPrefs({ ...localPrefs, difficulty: e.target.value as AIPromptPreferences['difficulty'] })}
-                                    className="col-span-3 flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                >
-                                    <option value="basic">Basic (Foundational Concepts)</option>
-                                    <option value="intermediate">Intermediate (Application)</option>
-                                    <option value="advanced">Advanced (Critical Analysis)</option>
-                                </select>
-                            </div>
+                    <div className="space-y-5 py-2">
+                        <p className="text-sm text-muted-foreground">
+                            Tailor how the AI generates discussion prompts. These settings apply to all future generations.
+                        </p>
 
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <div className="flex items-center justify-end gap-1">
-                                    <label htmlFor="style" className="text-sm font-medium">
-                                        Style
-                                    </label>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About question styles" />
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Socratic encourages open reasoning. Factual tests direct recall. Clinical frames questions as patient scenarios.
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </div>
-                                <select
-                                    id="style"
-                                    value={localPrefs.style}
-                                    onChange={(e) => setLocalPrefs({ ...localPrefs, style: e.target.value as AIPromptPreferences['style'] })}
-                                    className="col-span-3 flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                >
-                                    <option value="socratic">Socratic (Questioning)</option>
-                                    <option value="factual">Factual (Direct Recall)</option>
-                                    <option value="clinical_scenario">Clinical Scenario (Case-based)</option>
-                                </select>
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-1.5">
+                                <label htmlFor="difficulty" className="text-sm font-medium">Difficulty</label>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About difficulty levels" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        Basic tests recall and definitions. Intermediate applies concepts to scenarios. Advanced requires analysis and critical comparison.
+                                    </TooltipContent>
+                                </Tooltip>
                             </div>
+                            <select
+                                id="difficulty"
+                                value={localPrefs.difficulty}
+                                onChange={(e) => setLocalPrefs({ ...localPrefs, difficulty: e.target.value as AIPromptPreferences['difficulty'] })}
+                                className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                            >
+                                <option value="basic">Basic (Foundational Concepts)</option>
+                                <option value="intermediate">Intermediate (Application)</option>
+                                <option value="advanced">Advanced (Critical Analysis)</option>
+                            </select>
+                        </div>
 
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <div className="flex items-center justify-end gap-1">
-                                    <label htmlFor="length" className="text-sm font-medium">
-                                        Length
-                                    </label>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About question length" />
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Controls how much context and setup the question includes — not the expected answer length.
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </div>
-                                <select
-                                    id="length"
-                                    value={localPrefs.length}
-                                    onChange={(e) => setLocalPrefs({ ...localPrefs, length: e.target.value as AIPromptPreferences['length'] })}
-                                    className="col-span-3 flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                >
-                                    <option value="brief">Brief</option>
-                                    <option value="standard">Standard</option>
-                                    <option value="detailed">Detailed</option>
-                                </select>
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-1.5">
+                                <label htmlFor="style" className="text-sm font-medium">Style</label>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About question styles" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        Socratic encourages open reasoning. Factual tests direct recall. Clinical frames questions as patient scenarios.
+                                    </TooltipContent>
+                                </Tooltip>
                             </div>
+                            <select
+                                id="style"
+                                value={localPrefs.style}
+                                onChange={(e) => setLocalPrefs({ ...localPrefs, style: e.target.value as AIPromptPreferences['style'] })}
+                                className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                            >
+                                <option value="socratic">Socratic (Questioning)</option>
+                                <option value="factual">Factual (Direct Recall)</option>
+                                <option value="clinical_scenario">Clinical Scenario (Case-based)</option>
+                            </select>
+                        </div>
 
-                            <div className="grid grid-cols-4 items-start gap-4">
-                                <div className="flex items-start justify-end gap-1 pt-2">
-                                    <label htmlFor="focusAreas" className="text-sm font-medium text-right">
-                                        Focus Areas
-                                    </label>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About focus areas" />
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Topics the AI will prioritize when selecting content and generating questions. Comma-separated.
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </div>
-                                <div className="col-span-3 flex flex-col gap-1">
-                                    <textarea
-                                        id="focusAreas"
-                                        value={localPrefs.focusAreas ?? ''}
-                                        onChange={(e) => setLocalPrefs({ ...localPrefs, focusAreas: e.target.value })}
-                                        placeholder="e.g., beta-blocker mechanisms, RAAS pathway, adverse effects..."
-                                        className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none leading-snug min-h-[80px] bg-surface-raised text-content-primary"
-                                        style={{ border: '1px solid var(--border-default)' }}
-                                    />
-                                    <p className={`text-xs text-right ${focusLen > 400 ? 'text-amber-500' : 'text-gray-400'}`}>
-                                        {focusLen}/500
-                                    </p>
-                                </div>
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-1.5">
+                                <label htmlFor="length" className="text-sm font-medium">Length</label>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About question length" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        Controls how much context and setup the question includes — not the expected answer length.
+                                    </TooltipContent>
+                                </Tooltip>
                             </div>
+                            <select
+                                id="length"
+                                value={localPrefs.length}
+                                onChange={(e) => setLocalPrefs({ ...localPrefs, length: e.target.value as AIPromptPreferences['length'] })}
+                                className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                            >
+                                <option value="brief">Brief</option>
+                                <option value="standard">Standard</option>
+                                <option value="detailed">Detailed</option>
+                            </select>
+                        </div>
 
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-1.5">
+                                <label htmlFor="focusAreas" className="text-sm font-medium">Focus Areas</label>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-label="About focus areas" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        Topics the AI will prioritize when selecting content and generating questions. Comma-separated.
+                                    </TooltipContent>
+                                </Tooltip>
+                            </div>
+                            <textarea
+                                id="focusAreas"
+                                value={localPrefs.focusAreas ?? ''}
+                                onChange={(e) => setLocalPrefs({ ...localPrefs, focusAreas: e.target.value })}
+                                placeholder="e.g., beta-blocker mechanisms, RAAS pathway, adverse effects..."
+                                className="w-full px-3 py-2.5 text-sm rounded-lg resize-none leading-snug min-h-[80px] bg-background text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <p className={`text-xs text-right ${focusLen > 400 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                                {focusLen}/500
+                            </p>
+                        </div>
                     </div>
                 )}
 
-                <DialogFooter>
+                <DialogFooter className="gap-2">
                     <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isSaving}>
                         Cancel
                     </Button>
-                    <Button type="button" onClick={handleSave} disabled={isSaving || isLoading} className="bg-black text-white hover:bg-gray-800">
+                    <Button type="button" onClick={handleSave} disabled={isSaving || isLoading} className="bg-primary text-primary-foreground hover:bg-primary/90">
                         {isSaving ? 'Saving...' : 'Save Settings'}
                     </Button>
                 </DialogFooter>
