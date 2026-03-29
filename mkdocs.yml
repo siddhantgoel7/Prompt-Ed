@@ -5,6 +5,7 @@ theme:
 
 nav:
   - Project Requirements: index.md
+  - User Manual: user-manual.md
   - Software Design: design.md
   - Project Management: project-management.md
   - Teamwork: teamwork.md

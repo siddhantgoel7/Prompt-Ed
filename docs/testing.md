@@ -12,7 +12,9 @@ This document describes the comprehensive testing strategy for the PMCOL Teachin
 4. [Test Types](#test-types)
 5. [Running Tests](#running-tests)
 6. [Test Coverage](#test-coverage)
-7. [Writing New Tests](#writing-new-tests)
+7. [Static Code Analysis](#static-code-analysis)
+8. [Stress Testing](#stress-testing)
+9. [Writing New Tests](#writing-new-tests)
 
 ---
 
@@ -811,6 +813,276 @@ npm run test:coverage
 ```
 
 Then open `app/coverage/lcov-report/index.html` in your browser.
+
+---
+
+## Static Code Analysis
+
+### Tool: SonarQube
+
+[SonarQube](https://www.sonarsource.com/products/sonarqube/) is an open-source static code analysis platform that continuously inspects a codebase for bugs, vulnerabilities, security hotspots, code smells, duplications, and test coverage gaps — without executing the code. It parses source files, applies rule sets for the relevant languages, and produces a dashboard summarising quality across five dimensions: **Security**, **Reliability**, **Maintainability**, **Coverage**, and **Duplications**.
+
+For this project, SonarQube Community Edition was used to analyse the TypeScript/React (Next.js) front-end and server-side API routes that make up the PMCOL Teaching Tool.
+
+---
+
+### Configuration
+
+The scan is configured in [`sonar-project.properties`](../sonar-project.properties) at the repository root:
+
+| Parameter | Value | Purpose |
+|-----------|-------|---------|
+| `sonar.projectKey` | `W26-DeptOfPharmocology` | Unique identifier in the SonarQube server |
+| `sonar.sources` | `app/src` | Application source code only |
+| `sonar.tests` | `app/tests` | Test directory (excluded from production metrics) |
+| `sonar.test.inclusions` | `**/*.test.tsx`, `**/*.test.ts`, `**/*.spec.ts` | Files treated as test code |
+| `sonar.exclusions` | `node_modules`, `.next`, `coverage`, `public`, `dist`, etc. | Dependencies and build artefacts are excluded |
+| `sonar.javascript.lcov.reportPaths` | `app/coverage/lcov.info` | Coverage data from `npm run test:coverage` fed into SonarQube |
+| `sonar.typescript.tsconfigPath` | `app/tsconfig.json` | TypeScript compiler settings used for accurate type-aware analysis |
+
+The scan is triggered automatically by the GitHub Actions workflow defined in `.github/workflows/sonarqube.yml`, which runs on every push to `main` and on pull requests targeting `main` or any `sprint-*` branch. Before calling the scanner, the workflow runs `npm run test:coverage` so that SonarQube receives an up-to-date LCOV coverage report.
+
+---
+
+### What Was Analysed
+
+SonarQube inspected all TypeScript and TSX files under `app/src/`, including:
+
+- **API routes** — Next.js App Router server-side handlers (`/api/auth/callback`, `/api/lessons/[lessonId]/*`, `/api/user/ai-preferences`, etc.)
+- **React components** — instructor dashboard, student session, prompt management, file upload, and shared UI components
+- **Custom hooks** — real-time session management (`useRealtime`, `useSessionPage`), auth, and data-fetching hooks
+- **Service layer** — `courseService`, `lessonService`, `discussionService`, `responseService`
+- **AI pipeline** — file parsers (PDF/PPTX), embedding, RAG-based prompt generation, Whisper transcription handler
+- **Utility and type files** — TypeScript interfaces, Supabase client factories, helper utilities
+
+Test files themselves were excluded from the production quality metrics but their coverage data was fed into the coverage dimension.
+
+---
+
+### Results (Overall Code)
+
+The analysis was run against the `sprint-5-proper-documentation` branch. Results reflect the state of the codebase as of that scan.
+
+| Dimension | Grade | Finding |
+|-----------|-------|---------|
+| **Security** | A | 0 open issues |
+| **Reliability** | A | 0 open issues |
+| **Maintainability** | A | 0 open issues |
+| **Coverage** | — | **80.8%** on ~4 000 lines to cover |
+| **Duplications** | — | **1.1%** on ~16 000 lines |
+| **Security Hotspots** | E | **1** hotspot requiring review |
+| **Accepted Issues** | — | 0 |
+
+---
+
+### Analysis of Findings
+
+#### Security — Grade A (0 issues)
+No security vulnerabilities were detected in the codebase. This reflects deliberate security practices throughout the project:
+- All API routes verify session via the server-side Supabase client before processing requests.
+- The OAuth callback (`/api/auth/callback`) enforces a strict `@ualberta.ca` domain check and immediately deletes and signs out any account that does not meet this requirement.
+- Environment variables containing secrets (`SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`) are accessed only in server-side code and are never exposed to the client bundle.
+- The `is_correct` flag for multiple-choice answers is stripped server-side before being broadcast to student clients.
+
+#### Reliability — Grade A (0 issues)
+No bugs were flagged. The codebase consistently handles error states returned from Supabase and OpenAI, returning appropriate HTTP status codes (`401`, `403`, `404`, `500`) rather than allowing unhandled exceptions to crash routes.
+
+#### Maintainability — Grade A (0 issues)
+No code smells were reported. The codebase is well-structured with a clear separation between UI components, service functions, API routes, and the AI pipeline. TypeScript strict typing throughout eliminates an entire class of runtime issues that SonarQube would otherwise flag as smells.
+
+#### Coverage — 80.8%
+SonarQube consumed the LCOV report produced by `npm run test:coverage`. **80.8% of the ~4 000 coverable lines are exercised by the Jest test suite.** The remaining uncovered lines are primarily:
+- Background fire-and-forget processing paths inside the file upload and transcript routes (these are hard to test synchronously).
+- Edge-case error branches in the AI pipeline that require mocking specific OpenAI failure modes.
+- Some UI-only render paths covered by Playwright end-to-end tests, which produce separate coverage data not merged into the Jest LCOV report.
+
+#### Duplications — 1.1%
+Only 1.1% of the ~16 000 analysed lines are duplicated. The small amount of duplication that exists is deliberate: the ownership verification pattern (checking lesson → course → instructor chain) is intentionally repeated inline across API routes rather than extracted into a shared helper, because each route has slightly different error-handling requirements and premature abstraction was avoided per the project's coding principles.
+
+#### Security Hotspot — 1 (Grade E)
+SonarQube flagged **one security hotspot** for manual review. A hotspot is not a confirmed vulnerability — it is a pattern that requires a human to decide whether the context makes it safe.
+
+**Location:** `app/src/lib/ai/parsers/pptxParser.ts`, line 44
+
+**Flagged pattern:** `JSZip.loadAsync(buffer)`
+
+**SonarQube message:** *"Make sure that expanding this archive file is safe here."*
+
+SonarQube raises this because expanding a ZIP archive from an untrusted source can be exploited via a **zip bomb** (a maliciously crafted archive with an extreme compression ratio that expands to gigabytes of data, exhausting server memory) or **path traversal** (file entries with `../` paths that escape the intended directory).
+
+**Assessment: Safe — mitigations are already in place.** Immediately after `JSZip.loadAsync(buffer)`, the code calls `validateZipIntegrity(zip)`, which enforces three hard limits before any entry is read:
+
+| Guard | Limit | Protects Against |
+|-------|-------|-----------------|
+| `MAX_ENTRIES` | 10 000 entries | Zip files with excessive file count |
+| `MAX_TOTAL_SIZE` | 150 MB uncompressed | Zip bomb memory exhaustion |
+| `MAX_COMPRESSION_RATIO` | 100× | High-ratio decompression attacks |
+
+If any limit is exceeded the function throws immediately, aborting extraction before any data is processed. Additionally, uploaded files are validated by magic-byte detection in the upload route before they ever reach the parser, so only legitimate PPTX files (which are ZIP-based by the OOXML standard) are passed to `parsePptx`. The hotspot was reviewed and marked as **acknowledged/safe**.
+
+---
+
+### How to Re-run the Scan Locally
+
+```bash
+# Step 1: Generate coverage data
+cd app
+npm run test:coverage
+cd ..
+
+# Step 2: Run the scanner (requires sonar-scanner CLI or npm package)
+sonar-scanner \
+  -Dsonar.host.url=http://localhost:9000 \
+  -Dsonar.token=<your-token>
+```
+
+The `sonar-project.properties` file at the repo root provides all other settings automatically. See [`docs/run-local.md`](run-local.md) for environment setup prerequisites.
+
+---
+
+## Stress Testing
+
+### Tool: Apache JMeter
+
+[Apache JMeter](https://jmeter.apache.org/) is an open-source load testing tool used to simulate concurrent users making HTTP requests against a running application. It measures response times, throughput, error rates, and produces an APDEX (Application Performance Index) score — a standardized measure of user satisfaction with response times based on two thresholds:
+
+- **Satisfied** (T): response time ≤ 500 ms
+- **Tolerating** (F): response time > 500 ms and ≤ 1,500 ms
+- **Frustrated**: response time > 1,500 ms or an error
+
+An APDEX of 1.0 is perfect. Scores below 0.5 indicate a majority of users experienced frustrating response times.
+
+All stress tests target the **student response screen** — the highest-traffic surface of the application, where all students are simultaneously active during a live session. The instructor dashboard was not stress tested as it is accessed by a single user per session and is not subject to concurrent load.
+
+---
+
+### Test Environments
+
+| Environment | Description |
+|-------------|-------------|
+| **Localhost** | Next.js production build running on `localhost:3000` on a single local machine |
+| **Vercel** | Production serverless deployment (no screenshot captured; results described below) |
+
+All localhost tests were run on the same machine in the same session. Three JMeter runs were conducted on localhost; one was conducted against Vercel.
+
+---
+
+### Localhost Test Results
+
+#### Run 1 — Baseline: 200 Users
+
+| Parameter | Value |
+|-----------|-------|
+| Virtual users | 200 |
+| Requests per user | 5 |
+| Total samples | 1,000 |
+| Test window | 1:25 AM – 1:26 AM (~1 min) |
+
+| Metric | Value |
+|--------|-------|
+| **APDEX** | **1.000** |
+| Pass rate | **100%** (0 failures) |
+| Average response time | 41.20 ms |
+| Median | 31 ms |
+| Min / Max | 24 ms / 294 ms |
+| 90th percentile | 63 ms |
+| 95th percentile | 83 ms |
+| 99th percentile | 222.92 ms |
+| Throughput | 25.01 req/s |
+
+**Result: PASS.** Under a realistic classroom load of 200 simultaneous students, the application responded perfectly. Every single request completed well within the 500 ms satisfaction threshold with no failures. This is the primary production use case — a typical lecture session — and performance is well within comfortable operating range.
+
+---
+
+#### Run 2 — High Load: 2,000 Users (40-second ramp)
+
+| Parameter | Value |
+|-----------|-------|
+| Virtual users | 2,000 |
+| Requests per user | 5 |
+| Total samples | 10,000 |
+| Ramp-up | 40 seconds |
+| Test window | 1:17 AM – 1:21 AM (~4 min) |
+
+| Metric | Value |
+|--------|-------|
+| **APDEX** | **0.112** |
+| Pass rate | 92.13% (787 failures / **7.87% error rate**) |
+| Average response time | 27,253.56 ms |
+| Median | 2,282 ms |
+| Min / Max | 420 ms / 141,825 ms |
+| 90th percentile | 88,625.90 ms |
+| 95th percentile | 133,922.55 ms |
+| 99th percentile | 135,080.99 ms |
+| Throughput | 37.04 req/s |
+
+**Result: FAIL.** The server was saturated. Average response times exceeded 27 seconds and the 90th percentile surpassed 88 seconds, indicating severe request queuing. The APDEX of 0.112 reflects that the overwhelming majority of simulated users experienced frustrated response times.
+
+---
+
+#### Run 3 — High Load: 2,000 Users (30-second ramp)
+
+| Parameter | Value |
+|-----------|-------|
+| Virtual users | 2,000 |
+| Requests per user | 5 |
+| Total samples | 10,000 |
+| Ramp-up | 30 seconds |
+| Test window | 1:43 AM – 1:47 AM (~4 min) |
+
+| Metric | Value |
+|--------|-------|
+| **APDEX** | **0.090** |
+| Pass rate | 89.71% (1,029 failures / **10.29% error rate**) |
+| Average response time | 30,312.32 ms |
+| Median | 2,403 ms |
+| Min / Max | 476 ms / 143,725 ms |
+| 90th percentile | 98,467.50 ms |
+| 95th percentile | 134,138.00 ms |
+| 99th percentile | 135,168.98 ms |
+| Throughput | 34.97 req/s |
+
+**Result: FAIL.** At 2,000 concurrent users the local Next.js server reached its failure threshold. Performance was consistent with Run 2 — the APDEX of 0.090 reflects near-total saturation. The response time distribution chart confirmed this: of 10,000 requests, the vast majority exceeded 1,500 ms, fewer than 1,750 fell in the 500–1,500 ms toleration band, and only a negligible number completed within 500 ms. Approximately 1,000 requests resulted in outright errors.
+
+---
+
+### Vercel (Production) Test Result
+
+| Parameter | Value |
+|-----------|-------|
+| Virtual users | 10,000 |
+| Requests per user | 4 |
+| Duration | ~40 seconds |
+| Total requests intended | 40,000 |
+| Requests served before shutdown | **~19,160** |
+
+**Result: FAIL.** Under a simulated load of 10,000 concurrent users, Vercel's serverless infrastructure began throttling and shut down the deployment after serving approximately 19,160 requests — less than half of the intended 40,000. Beyond this point, requests received HTTP 5xx responses from the platform. This is consistent with Vercel's serverless function concurrency limits being exceeded under a sustained extreme burst, causing the platform's circuit breaker to terminate execution to protect shared infrastructure.
+
+---
+
+### Summary
+
+| Environment | Users | Total Samples | Error Rate | APDEX | Outcome |
+|-------------|-------|--------------|------------|-------|---------|
+| Localhost | 200 (30s ramp, 5 req) | 1,000 | 0.00% | 1.000 | **Pass** |
+| Localhost | 2,000 (40s ramp, 5 req) | 10,000 | 7.87% | 0.112 | **Fail** |
+| Localhost | 2,000 (30s ramp, 5 req) | 10,000 | 10.29% | 0.090 | **Fail** |
+| Vercel (Production) | 10,000 | ~19,160 served | N/A | N/A | **Fail (platform shutdown)** |
+
+---
+
+### Analysis and Conclusions
+
+The stress tests reveal a clear and expected scalability boundary. **Under realistic classroom conditions of up to 200 concurrent students, the system performs flawlessly** — perfect APDEX, zero errors, all responses under 300 ms. This covers the primary intended use case: a single instructor running one live session with an entire class active simultaneously.
+
+**Failure begins at approximately 2,000 concurrent users on a single local Next.js process.** This is a hardware and single-process Node.js concurrency constraint — a single machine cannot efficiently serve thousands of simultaneous long-lived connections without a load balancer or multiple workers. On Vercel, the serverless platform's own concurrency ceiling becomes the limiting factor, cutting off execution at approximately 19,160 requests under a 10,000-user burst.
+
+**These limits are not a concern for the intended deployment context.** The PMCOL Teaching Tool is designed for a single instructor running one session at a time with a typical university class of 20–200 students. The 200-user baseline test confirms the system handles this load perfectly. Scaling to thousands of simultaneous students in a single session is outside the intended scope.
+
+Should future requirements call for larger deployments, appropriate approaches would include:
+- Upgrading to a Vercel plan with higher serverless concurrency limits
+- Moving to a dedicated server with horizontal scaling (containerized behind a load balancer)
+- Further offloading session state to Supabase Realtime, which is already used for live synchronization and scales independently of the Next.js server
 
 ---
 
