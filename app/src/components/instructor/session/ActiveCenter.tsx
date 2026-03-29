@@ -50,7 +50,6 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
   const [sttError, setSttError] = React.useState<string | null>(null);
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
   const [feedbackEnabled, setFeedbackEnabled] = React.useState(false);
-  const [editingOptions, setEditingOptions] = React.useState<Record<string, string>>({});
   const [manualOptions, setManualOptions] = React.useState<Record<string, string>>({ A: '', B: '', C: '', D: '' });
   const [creationMode, setCreationMode] = React.useState<'ai' | 'manual' | 'general'>('ai');
   const [showTimerDialog, setShowTimerDialog] = React.useState(false);
@@ -72,7 +71,7 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
 
   React.useEffect(() => {
     setSelectedIndex(null); setOverrideCorrectOption(null); setFeedbackEnabled(false);
-    setEditingOptions({}); setManualOptions({ A: '', B: '', C: '', D: '' }); setPublishError(null);
+    setManualOptions({ A: '', B: '', C: '', D: '' }); setPublishError(null);
   }, [state.candidates]);
 
   const handlers = useActiveCenterHandlers({
@@ -82,7 +81,6 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
     setSttError,
     overrideCorrectOption, setOverrideCorrectOption,
     feedbackEnabled, setFeedbackEnabled,
-    editingOptions, setEditingOptions,
     manualOptions, setManualOptions,
     creationMode, setCreationMode,
     showTimerDialog, setShowTimerDialog,
@@ -117,8 +115,6 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
               handleRunAllCombinations={handleRunAllCombinations}
               sweepProgress={sweepProgress}
               selectedIndex={selectedIndex}
-              editingOptions={editingOptions}
-              setEditingOptions={setEditingOptions}
               overrideCorrectOption={overrideCorrectOption}
               setOverrideCorrectOption={setOverrideCorrectOption}
               feedbackEnabled={feedbackEnabled}
@@ -249,8 +245,6 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
   setOverrideCorrectOption: (v: string | null) => void;
   feedbackEnabled: boolean;
   setFeedbackEnabled: (v: boolean) => void;
-  editingOptions: Record<string, string>;
-  setEditingOptions: (v: Record<string, string>) => void;
   manualOptions: Record<string, string>;
   setManualOptions: (v: Record<string, string>) => void;
   creationMode: CreationMode;
@@ -263,10 +257,10 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
 }>) {
   const {
     lessonId, recorder, onGenerate, setTranscriptText, setPromptInput,
-    onSelectCandidate, setSelectedIndex, setOverrideCorrectOption, setEditingOptions,
-    promptInput, editingOptions, onPublishAiCandidate, overrideCorrectOption, feedbackEnabled,
+    onSelectCandidate, setSelectedIndex,
+    onPublishAiCandidate, overrideCorrectOption, setOverrideCorrectOption, feedbackEnabled,
     setPublishError, setShowTimerDialog, pendingCandidate, setPendingCandidate,
-    creationMode, promptType, manualOptions, onPublish, candidates, selectedIndex,
+    creationMode, promptType, promptInput, manualOptions, onPublish, candidates, selectedIndex,
     setManualOptions, setFeedbackEnabled, setSttError, setSttStatus
   } = allProps;
 
@@ -285,23 +279,11 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
 
   const handleSelectCandidate = (p: GeneratedPrompt, index: number) => {
     setSelectedIndex(index); onSelectCandidate(p);
-    setPromptInput(p.promptText);
-    if (p.promptType === 'multiple_choice' && p.mcOptions) {
-      const correctOpt = p.mcOptions.find(o => o.is_correct);
-      setOverrideCorrectOption(correctOpt ? correctOpt.label : null);
-      setEditingOptions(p.mcOptions.reduce((acc: Record<string, string>, opt: { label: string; text: string }) => ({ ...acc, [opt.label]: opt.text }), {}));
-    } else {
-      setOverrideCorrectOption(null); setEditingOptions({});
-    }
   };
 
   const handlePublishSelected = (p: GeneratedPrompt, timerSeconds: number | null = null) => {
-    const publishedCandidate = (p.promptType === 'multiple_choice' && p.mcOptions)
-      ? { ...p, promptText: promptInput, mcOptions: p.mcOptions.map(opt => ({ ...opt, text: editingOptions[opt.label] ?? opt.text })) }
-      : { ...p, promptText: promptInput };
-
     if (onPublishAiCandidate) {
-      onPublishAiCandidate(publishedCandidate, overrideCorrectOption, feedbackEnabled, timerSeconds);
+      onPublishAiCandidate(p, overrideCorrectOption, feedbackEnabled, timerSeconds);
       setSelectedIndex(null); setPublishError(null);
     }
   };
@@ -342,7 +324,7 @@ function AIGenerationPanel({
   transcriptText, promptInput, setPromptInput, setTranscriptText, transcriptRef,
   promptType, setPromptType, onGenerate, handleRunAllCombinations, sweepProgress,
   generationWarning, candidates, selectedIndex, handleSelectCandidate,
-  editingOptions, setEditingOptions, overrideCorrectOption, setOverrideCorrectOption,
+  overrideCorrectOption, setOverrideCorrectOption,
   feedbackEnabled, setFeedbackEnabled, setPendingCandidate, setShowTimerDialog,
   isConnected, onRegenerate, handleCopyReport, copiedReport
 }: Readonly<ActiveCenterProps & {
@@ -354,8 +336,6 @@ function AIGenerationPanel({
   sweepProgress: { current: number; total: number; label: string } | null;
   selectedIndex: number | null;
   handleSelectCandidate: (p: GeneratedPrompt, i: number) => void;
-  editingOptions: Record<string, string>;
-  setEditingOptions: (v: Record<string, string>) => void;
   overrideCorrectOption: string | null;
   setOverrideCorrectOption: (v: string | null) => void;
   feedbackEnabled: boolean;
@@ -412,29 +392,20 @@ function AIGenerationPanel({
       {candidates.length > 0 && (
         <div className="space-y-2">
           {candidates.map((c: GeneratedPrompt, i: number) => (
-            <div key={`candidate-${c.promptType}-${i}`}>
-              {selectedIndex === i ? (
-                <SelectedCandidateEditor promptInput={promptInput} setPromptInput={setPromptInput} setTranscriptText={setTranscriptText} type={c.promptType} />
-              ) : (
-                <CandidateCard
-                  candidate={c}
-                  index={i}
-                  isSelected={false}
-                  onSelect={() => handleSelectCandidate(c, i)}
-                  isConnected={isConnected}
-                  onRequestPublish={() => {}}
-                />
-              )}
-              {selectedIndex === i && c.promptType === 'multiple_choice' && (
-                <MultipleChoiceEditor
-                  nameGroup={`correct-option-${i}`} options={c.mcOptions?.map((opt: { label: string; text: string }) => ({ label: opt.label, text: editingOptions[opt.label] ?? opt.text })) || []}
-                  correctOption={overrideCorrectOption} onCorrectOptionChange={setOverrideCorrectOption}
-                  onOptionTextChange={(label: string, text: string) => setEditingOptions({ ...editingOptions, [label]: text })}
-                  feedbackEnabled={feedbackEnabled} onFeedbackChange={setFeedbackEnabled}
-                />
-              )}
-              {selectedIndex === i && <PublishButton onPublish={() => { setPendingCandidate(c); setShowTimerDialog(true); }} disabled={!promptInput.trim() || !isConnected} />}
-            </div>
+            <CandidateCard
+              key={`candidate-${c.promptType}-${i}`}
+              candidate={c}
+              index={i}
+              isSelected={selectedIndex === i}
+              onSelect={() => handleSelectCandidate(c, i)}
+              isConnected={isConnected}
+              onRequestPublish={(editedCandidate, correctOption, fe) => {
+                setOverrideCorrectOption(correctOption);
+                setFeedbackEnabled(fe);
+                setPendingCandidate(editedCandidate);
+                setShowTimerDialog(true);
+              }}
+            />
           ))}
           <CandidateActions onRegenerate={onRegenerate} onCopyReport={handleCopyReport} isGenerating={isGenerating} hasCandidates={candidates.length > 0} copiedReport={copiedReport} />
         </div>
@@ -515,21 +486,7 @@ function SweepButton({ onRun, disabled, progress }: Readonly<{ onRun: () => void
 const WarningMessage = ({ message }: { message: string }) => <p className="text-xs rounded-lg px-3 py-2" style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.25)', color: '#b45309' }}>{message}</p>;
 const SweepProgressMessage = ({ progress }: Readonly<{ progress: { current: number; total: number; label: string } }>) => <p className="text-xs rounded-lg px-3 py-2 animate-pulse" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', color: '#6366f1' }}>Generating {progress.current} / {progress.total} — {progress.label}</p>;
 
-function SelectedCandidateEditor({ promptInput, setPromptInput, setTranscriptText, type }: Readonly<{ promptInput: string; setPromptInput: (v: string) => void; setTranscriptText: (v: string) => void; type: string }>) {
-  return (
-    <div className="p-3 rounded-xl text-sm" style={{ background: 'rgba(45,158,45,0.06)', border: '2px solid var(--color-primary-400)' }}>
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-xs font-medium px-2 py-0.5 rounded-full capitalize" style={{ background: 'rgba(45,158,45,0.12)', color: 'var(--color-primary-600)' }}>{type.replaceAll('_', ' ')}</span>
-        <span className="text-xs font-medium text-brand-500">Selected (Editing)</span>
-      </div>
-      <textarea value={promptInput} onChange={(e) => setPromptInput(e.target.value)} className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none leading-snug min-h-[80px] transition-all duration-150 bg-surface-raised text-content-primary" style={{ border: '1px solid var(--border-default)' }} placeholder="Edit this prompt..." />
-    </div>
-  );
-}
 
-function PublishButton({ onPublish, disabled }: Readonly<{ onPublish: () => void; disabled: boolean }>) {
-  return <button data-testid="publish-ai-question-button" onClick={onPublish} disabled={disabled} className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow" style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))' }}>Publish This Question →</button>;
-}
 
 function CandidateActions({ onRegenerate, onCopyReport, isGenerating, hasCandidates, copiedReport }: Readonly<{ onRegenerate: () => void; onCopyReport: () => void; isGenerating: boolean; hasCandidates: boolean; copiedReport: boolean }>) {
   return (
