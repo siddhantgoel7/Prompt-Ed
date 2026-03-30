@@ -40,6 +40,7 @@ export function DiscussionHistory({
                         key={d.id}
                         href={`/session/${lessonId}/discussion/${d.id}`}
                         className="block"
+                        aria-current={isActive ? 'page' : undefined}
                     >
                         <div
                             className="rounded-xl p-3 cursor-pointer transition-all duration-150"

@@ -34,7 +34,7 @@ async function joinAndWaitForMC(page: Page) {
 // Helper: returns true when an active MC discussion is visible
 async function hasMCDiscussion(page: Page): Promise<boolean> {
     const waiting = page.getByText('Waiting for the instructor to publish a discussion');
-    const optionA = page.locator('button').filter({ hasText: /^A\./ });
+    const optionA = page.getByTestId('mc-option-A');
 
     try {
         await Promise.race([
@@ -64,7 +64,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         }
 
         // Select option A (correct in seeded data)
-        await page.locator('button').filter({ hasText: /^A\./ }).click();
+        await page.getByTestId('mc-option-A').click();
 
         // Submit
         await page.getByRole('button', { name: 'Submit response' }).click();
@@ -81,7 +81,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
             return;
         }
 
-        await page.locator('button').filter({ hasText: /^A\./ }).click();
+        await page.getByTestId('mc-option-A').click();
         await page.getByRole('button', { name: 'Submit response' }).click();
         await expect(page.getByText('Great job!')).toBeVisible({ timeout: 8_000 });
 
@@ -97,7 +97,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
             return;
         }
 
-        await page.locator('button').filter({ hasText: /^A\./ }).click();
+        await page.getByTestId('mc-option-A').click();
         await page.getByRole('button', { name: 'Submit response' }).click();
         await expect(page.getByText('Great job!')).toBeVisible({ timeout: 8_000 });
 
@@ -116,7 +116,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         }
 
         // Select option B (incorrect in seeded data where correct_option='A')
-        await page.locator('button').filter({ hasText: /^B\./ }).click();
+        await page.getByTestId('mc-option-B').click();
         await page.getByRole('button', { name: 'Submit response' }).click();
         await expect(page.getByText('Not quite!')).toBeVisible({ timeout: 8_000 });
     });
@@ -129,7 +129,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
             return;
         }
 
-        await page.locator('button').filter({ hasText: /^B\./ }).click();
+        await page.getByTestId('mc-option-B').click();
         await page.getByRole('button', { name: 'Submit response' }).click();
         await expect(page.getByText('Not quite!')).toBeVisible({ timeout: 8_000 });
 
@@ -145,7 +145,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
             return;
         }
 
-        await page.locator('button').filter({ hasText: /^B\./ }).click();
+        await page.getByTestId('mc-option-B').click();
         await page.getByRole('button', { name: 'Submit response' }).click();
         await expect(page.getByText('Not quite!')).toBeVisible({ timeout: 8_000 });
 
@@ -161,7 +161,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
             return;
         }
 
-        await page.locator('button').filter({ hasText: /^B\./ }).click();
+        await page.getByTestId('mc-option-B').click();
         await page.getByRole('button', { name: 'Submit response' }).click();
         await expect(page.getByText('Not quite!')).toBeVisible({ timeout: 8_000 });
 
@@ -198,7 +198,7 @@ test.describe('[US 2.10] Student sees MC feedback after submission', () => {
         await expect(page.getByText('Please select an answer')).toBeVisible({ timeout: 5_000 });
 
         // Now select an option
-        await page.locator('button').filter({ hasText: /^A\./ }).click();
+        await page.getByTestId('mc-option-A').click();
 
         // Validation should be gone
         await expect(page.getByText('Please select an answer')).not.toBeVisible();

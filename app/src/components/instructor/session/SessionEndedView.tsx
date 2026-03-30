@@ -40,14 +40,14 @@ function SummaryBar({
 
   return (
     <div
-      className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-line-default bg-surface-raised"
+      className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-6 py-4 border-b border-line-default bg-surface-raised"
     >
       <div className="flex flex-col items-center justify-center py-2">
         <span className="text-2xl font-bold text-content-primary">{totalDiscussions}</span>
         <span className="text-xs mt-0.5 text-content-muted">Discussions Created</span>
       </div>
       <div
-        className="flex flex-col items-center justify-center py-2 border-x border-line-default"
+        className="flex flex-col items-center justify-center py-2 border-y sm:border-y-0 sm:border-x border-line-default"
       >
         <span className="text-2xl font-bold text-content-primary">{totalResponses}</span>
         <span className="text-xs mt-0.5 text-content-muted">Total Responses</span>
@@ -107,7 +107,7 @@ export function SessionEndedView(props: Readonly<{ vm?: SessionVM }>) {
   }
 
   const content = (
-    <div className="min-h-screen flex flex-col bg-surface-base">
+    <div className="h-screen flex flex-col bg-surface-base">
       <SessionHeaderEnded onSplitView={() => setSplitView(true)} />
 
       {vm.endError && (
@@ -142,7 +142,7 @@ export function SessionEndedView(props: Readonly<{ vm?: SessionVM }>) {
             <span className="text-xs text-content-muted">{vm.lessonDiscussions.length} prompts</span>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1 min-h-0">
             {vm.historyLoading && (
               <p className="text-sm text-content-muted">Loading lesson history...</p>
             )}
@@ -179,7 +179,7 @@ export function SessionEndedView(props: Readonly<{ vm?: SessionVM }>) {
             }}
           >
             <h2 className="text-base font-semibold mb-3 shrink-0 text-content-primary">Transcript</h2>
-            <div className="flex-1 overflow-y-auto space-y-2">
+            <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
               {transcriptsLoading && (
                 <p className="text-sm text-content-muted">Loading transcripts...</p>
               )}
@@ -215,7 +215,7 @@ export function SessionEndedView(props: Readonly<{ vm?: SessionVM }>) {
             }}
           >
             <h2 className="text-base font-semibold mb-3 shrink-0 text-content-primary">Lecture Material</h2>
-            <div className="flex-1 overflow-y-auto space-y-2">
+            <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
               {files.length === 0 ? (
                 <p className="text-sm text-content-muted">No lecture material uploaded.</p>
               ) : (

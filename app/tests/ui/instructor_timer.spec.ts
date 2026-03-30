@@ -98,6 +98,9 @@ async function setupInstructorSession(page: Page) {
 
     await page.goto(`/session/${LESSON_ID}`);
     await expect(page.getByText('Timer Test Lesson')).toBeVisible({ timeout: 15_000 });
+ 
+    // Switch to Manual tab by default for timer tests
+    await page.getByRole('tab', { name: /Manual/i }).click();
 }
 
 test.describe('[US 1.29] Instructor Timer Controls', () => {
@@ -106,6 +109,9 @@ test.describe('[US 1.29] Instructor Timer Controls', () => {
     // 1
     test('[US 1.29][UI-AT1] success: timer dialog appears when instructor clicks Start Discussion', async ({ page }) => {
         await setupInstructorSession(page);
+
+        // Switch to Manual tab
+        await page.getByRole('tab', { name: /Manual/i }).click();
 
         // Type a prompt
         const promptArea = page.locator('textarea').first();

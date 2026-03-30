@@ -3,6 +3,7 @@
 // Reusable analytics content and modal for a single discussion.
 // Used by ActiveRightPanel (live view inline) and SessionEndedView (modal).
 
+import { useMemo, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,15 +11,34 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tooltip as UITooltip, TooltipContent as UITooltipContent, TooltipTrigger as UITooltipTrigger } from '@/components/ui/tooltip';
-import { Info, ExternalLink } from 'lucide-react';
+import { Info, ExternalLink, PieChart as PieChartIcon, BarChart2 } from 'lucide-react';
 import {
   ResponsiveContainer, PieChart, Pie, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 
-const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-const CORRECT_COLOR = '#22c55e';
+const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444'];
+const DONUT_HEIGHT = 150;
+const DONUT_INNER_RADIUS = 52;
+const DONUT_OUTER_RADIUS = 68;
+const MS_PER_MINUTE = 60_000;
+const MAX_WORD_CLOUD_WORDS = 30;
+
+const CHART_TOOLTIP_STYLE = {
+  background: 'var(--surface-raised)',
+  border: '1px solid var(--border-default)',
+  borderRadius: '8px',
+  color: 'var(--text-primary)',
+  fontSize: '12px',
+  boxShadow: '0 4px 16px var(--color-black-alpha-10)',
+} as const;
+
+const CHART_TOOLTIP_WRAPPER = { zIndex: 50 } as const;
+const CHART_TOOLTIP_TEXT_STYLE = { color: 'var(--text-primary)' } as const;
+
+const fmtCount = (n: number) => `Count: ${n} ${n === 1 ? 'response' : 'responses'}`;
+
 const WORD_CLOUD_STOP_WORDS = new Set([
   'the', 'and', 'for', 'that', 'with', 'this', 'from', 'have', 'are', 'was', 'were', 'your',
   'you', 'their', 'they', 'them', 'but', 'not', 'can', 'all', 'any', 'too', 'very', 'into',
@@ -26,6 +46,132 @@ const WORD_CLOUD_STOP_WORDS = new Set([
   'has', 'had', 'been', 'being', 'our', 'out', 'how', 'why', 'its', 'it', 'is', 'to', 'of',
   'in', 'on', 'at', 'as', 'an', 'a', 'or', 'by', 'we',
 ]);
+
+type DonutEntry = { label: string; fill: string; count: number };
+
+function DonutChart({
+  data,
+  centerLabel,
+  centerSub,
+  tooltipFormatter,
+}: Readonly<{
+  data: DonutEntry[];
+  centerLabel: string;
+  centerSub: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tooltipFormatter: (value: any, name: any) => [string, string];
+}>) {
+  return (
+    <div className="relative w-1/2 shrink-0 select-none [&_*]:select-none outline-none">
+      <ResponsiveContainer width="100%" height={DONUT_HEIGHT}>
+        <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+          <Pie
+            data={data}
+            dataKey="count"
+            nameKey="label"
+            cx="50%"
+            cy="50%"
+            innerRadius={DONUT_INNER_RADIUS}
+            outerRadius={DONUT_OUTER_RADIUS}
+            startAngle={90}
+            endAngle={-270}
+            minAngle={1}
+            paddingAngle={0}
+            label={false}
+            labelLine={false}
+            stroke="none"
+          >
+          </Pie>
+          <Tooltip
+            formatter={tooltipFormatter}
+            wrapperStyle={CHART_TOOLTIP_WRAPPER}
+            contentStyle={CHART_TOOLTIP_STYLE}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ zIndex: 1 }}>
+        <span className="text-xl font-bold text-content-primary leading-none">{centerLabel}</span>
+        <span className="text-[10px] text-content-muted mt-0.5">{centerSub}</span>
+      </div>
+    </div>
+  );
+}
+
+/** Shared donut-or-bar chart section with toggle header and right-side legend. */
+function DistributionSection({
+  title,
+  chartType,
+  onSetChartType,
+  data,
+  centerLabel,
+  centerSub,
+  children,
+}: Readonly<{
+  title: string;
+  chartType: 'donut' | 'bar';
+  onSetChartType: (type: 'donut' | 'bar') => void;
+  data: Array<{ label: string; count: number; fill: string }>;
+  centerLabel: string;
+  centerSub: string;
+  children: React.ReactNode;
+}>) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-content-muted">{title}</p>
+        <div className="flex items-center gap-1">
+          {([['donut', PieChartIcon], ['bar', BarChart2]] as const).map(([type, Icon]) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => onSetChartType(type)}
+              aria-label={`${type} chart`}
+              className="p-1 rounded transition-colors"
+              style={chartType === type ? {
+                background: 'var(--surface-overlay)',
+                color: 'var(--text-primary)',
+              } : {
+                color: 'var(--text-muted)',
+              }}
+            >
+              <Icon className="w-3.5 h-3.5" />
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-row gap-4 items-center">
+        {chartType === 'donut' ? (
+          <DonutChart
+            data={data}
+            centerLabel={centerLabel}
+            centerSub={centerSub}
+            tooltipFormatter={(value, name) => [fmtCount(value), name]}
+          />
+        ) : (
+          <div className="w-1/2 shrink-0">
+            <ResponsiveContainer width="100%" height={DONUT_HEIGHT}>
+              <BarChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+                <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  wrapperStyle={CHART_TOOLTIP_WRAPPER}
+                  labelStyle={CHART_TOOLTIP_TEXT_STYLE}
+                  itemStyle={CHART_TOOLTIP_TEXT_STYLE}
+                  separator=""
+                  formatter={(value) => [fmtCount(Number(value ?? 0)), '']}
+                />
+                <Bar dataKey="count" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+        <div className="w-1/2 space-y-2">{children}</div>
+      </div>
+    </div>
+  );
+}
 
 export function DiscussionAnalyticsContent({
   discussion,
@@ -38,27 +184,19 @@ export function DiscussionAnalyticsContent({
   studentCount: number;
   lessonId?: string;
 }>) {
-  const escapeHtml = (value: string) =>
-    value
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-
   const total = responses.length;
   const isActive = discussion.status === 'active';
+  const isMC = discussion.prompt_type === 'multiple_choice';
+  // isFreeText covers both short_answer and long_answer — both produce word clouds
+  // since they are open-text responses (as opposed to multiple_choice selections).
+  const isFreeText = discussion.prompt_type === 'short_answer' || discussion.prompt_type === 'long_answer';
+
   const snapshot = isActive
     ? Math.max(discussion.participant_snapshot ?? 0, studentCount)
     : (discussion.participant_snapshot ?? studentCount);
   const responseRate = snapshot > 0 ? Math.round((total / snapshot) * 100) : null;
 
-  // MC distribution
-  const isMC = discussion.prompt_type === 'multiple_choice';
-  // isFreeText covers both short_answer and long_answer — both produce word clouds
-  // since they are open-text responses (as opposed to multiple_choice selections).
-  const isFreeText = discussion.prompt_type === 'short_answer' || discussion.prompt_type === 'long_answer';
-  const mcChartData = (() => {
+  const mcChartData = useMemo(() => {
     if (!isMC || !discussion.mc_options) return [];
     const dist: Record<string, number> = {};
     discussion.mc_options.forEach((opt) => { dist[opt.label] = 0; });
@@ -74,49 +212,82 @@ export function DiscussionAnalyticsContent({
       count: dist[opt.label] ?? 0,
       percentage: totalVotes > 0 ? Math.round(((dist[opt.label] ?? 0) / totalVotes) * 100) : 0,
       isCorrect: discussion.correct_option === opt.label,
-      // Pass fill directly to avoid using deprecated Cell component in some recharts versions
-      fill: discussion.correct_option === opt.label ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length]
+      fill: PIE_COLORS[i % PIE_COLORS.length],
     }));
-  })();
+  }, [isMC, discussion.mc_options, discussion.correct_option, responses]);
 
-  const wordCloudData = (() => {
+  const ciStats = useMemo(() => {
+    if (!isMC || !discussion.correct_option) return null;
+    const answered = responses.filter(r => r.is_correct !== null);
+    if (answered.length === 0) return null;
+    const correctCount = answered.filter(r => r.is_correct === true).length;
+    const incorrectCount = answered.filter(r => r.is_correct === false).length;
+    return {
+      answered,
+      pct: Math.round((correctCount / answered.length) * 100),
+      data: [
+        { label: 'Correct', count: correctCount, fill: '#22c55e' },
+        { label: 'Incorrect', count: incorrectCount, fill: '#ef4444' },
+      ],
+    };
+  }, [isMC, discussion.correct_option, responses]);
+
+  const wordCloudData = useMemo(() => {
     if (!isFreeText) return [];
     const counts = new Map<string, number>();
     responses.forEach((r) => {
-      const words = r.response_text
+      r.response_text
         .toLowerCase()
         .replaceAll(/[^a-z0-9\s]/g, ' ')
         .split(/\s+/)
         .map((w) => w.trim())
-        .filter((w) => w.length > 2 && !WORD_CLOUD_STOP_WORDS.has(w));
-      words.forEach((word) => {
-        counts.set(word, (counts.get(word) ?? 0) + 1);
-      });
+        .filter((w) => w.length > 2 && !WORD_CLOUD_STOP_WORDS.has(w))
+        .forEach((word) => counts.set(word, (counts.get(word) ?? 0) + 1));
     });
     return Array.from(counts.entries())
       .map(([word, count]) => ({ word, count }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 30);
-  })();
+      .slice(0, MAX_WORD_CLOUD_WORDS);
+  }, [isFreeText, responses]);
+
   const maxWordCount = wordCloudData[0]?.count ?? 1;
+
+  const timelineData = useMemo(() => {
+    if (responses.length === 0 || !discussion.published_at) return [];
+    const base = new Date(discussion.published_at).getTime();
+    const buckets: Record<number, number> = {};
+    responses.forEach((r) => {
+      const bucket = Math.floor((new Date(r.created_at).getTime() - base) / MS_PER_MINUTE);
+      buckets[bucket] = (buckets[bucket] ?? 0) + 1;
+    });
+    const maxBucket = Math.max(...Object.keys(buckets).map(Number));
+    return Array.from({ length: maxBucket + 1 }, (_, i) => ({
+      name: `+${i}m`,
+      Responses: buckets[i] ?? 0,
+    }));
+  }, [responses, discussion.published_at]);
 
   /**
    * Opens the word cloud in a new browser tab.
    * Primary path: navigate to the dedicated interactive word cloud page
    *   (/session/[lessonId]/word-cloud/[discussionId]) when lessonId is available.
-   *   That page has real-time updates, clickable words, and the spotlight overlay.
-   * Fallback path: write a minimal static HTML popup when lessonId is not provided
-   *   (e.g. when this component is rendered without a lesson context).
+   * Fallback path: write a minimal static HTML popup when lessonId is not provided.
    */
   const openWordCloudInNewTab = () => {
-    if (globalThis.window === undefined || wordCloudData.length === 0) return;
-    // Navigate to the dedicated interactive word cloud page when lessonId is available.
+    if (wordCloudData.length === 0) return;
     if (lessonId) {
-      globalThis.window.open(`/session/${lessonId}/word-cloud/${discussion.id}`, '_blank');
+      window.open(`/session/${lessonId}/word-cloud/${discussion.id}`, '_blank');
       return;
     }
-    // Fallback: static HTML popup via blob URL (no lessonId context, e.g. legacy/test usage).
-    const popup = globalThis.window.open('', '_blank');
+    const escapeHtml = (value: string) =>
+      value
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+
+    const popup = window.open('', '_blank');
     if (!popup) return;
     const wordsMarkup = wordCloudData
       .map((entry, i) => {
@@ -152,21 +323,9 @@ export function DiscussionAnalyticsContent({
     popup.focus();
   };
 
-  // Timestamp buckets — group responses into 1-minute windows
-  const timelineData = (() => {
-    if (responses.length === 0 || !discussion.published_at) return [];
-    const base = new Date(discussion.published_at).getTime();
-    const buckets: Record<number, number> = {};
-    responses.forEach((r) => {
-      const bucket = Math.floor((new Date(r.created_at).getTime() - base) / 60000);
-      buckets[bucket] = (buckets[bucket] ?? 0) + 1;
-    });
-    const maxBucket = Math.max(...Object.keys(buckets).map(Number));
-    return Array.from({ length: maxBucket + 1 }, (_, i) => ({
-      name: `+${i}m`,
-      Responses: buckets[i] ?? 0,
-    }));
-  })();
+  const totalMcVotes = mcChartData.reduce((s, e) => s + e.count, 0);
+  const [mcChartType, setMcChartType] = useState<'donut' | 'bar'>('donut');
+  const [ciChartType, setCiChartType] = useState<'donut' | 'bar'>('donut');
 
   return (
     <div className="flex flex-col gap-5 pb-4">
@@ -181,71 +340,66 @@ export function DiscussionAnalyticsContent({
         />
       </div>
 
-      {/* ── MC pie chart ── */}
-      {isMC && mcChartData.length > 0 && (
-        <div>
-          <p
-            className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted"
-          >
-            Answer Distribution
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={mcChartData}
-                  dataKey="count"
-                  nameKey="label"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={75}
-                  minAngle={2}
-                  paddingAngle={1}
-                  label={false}
-                  labelLine={false}
-                />
-                <Tooltip
-                  formatter={(value: any, name: any) => [`${value} votes`, `Option ${name}`]} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  contentStyle={{
-                    background: 'var(--surface-overlay)',
-                    border: '1px solid var(--border-default)',
-                    borderRadius: '8px',
-                    color: 'var(--text-primary)',
-                    fontSize: '12px',
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-
-            {/* Legend table */}
-            <div className="w-full sm:w-48 shrink-0 space-y-1.5">
-              {mcChartData.map((entry, i) => (
-                <div key={entry.label} className="flex items-start gap-2 text-xs">
-                  <span
-                    className="mt-0.5 h-2.5 w-2.5 rounded-full shrink-0"
-                    style={{ background: entry.isCorrect ? CORRECT_COLOR : PIE_COLORS[i % PIE_COLORS.length] }}
-                  />
-                  <span className="w-full" style={{ color: entry.isCorrect ? 'var(--color-primary-500)' : 'var(--text-secondary)' }}>
-                    <span className={entry.isCorrect ? 'font-semibold' : ''}>
-                      {entry.label}. {entry.text}
-                    </span>
-                    {entry.isCorrect && (
-                      <span
-                        className="ml-1 text-[10px] px-1 py-0.5 rounded font-medium"
-                        style={{ background: 'rgba(45,158,45,0.15)', color: 'var(--color-primary-500)' }}
-                      >
-                        Correct
-                      </span>
-                    )}
-                    <span className="ml-1.5 font-semibold text-content-primary">
-                      {entry.count} ({entry.percentage}%)
-                    </span>
-                  </span>
-                </div>
-              ))}
+      {/* ── Correct vs Incorrect chart ── */}
+      {ciStats && (
+        <DistributionSection
+          title="Correct vs Incorrect"
+          chartType={ciChartType}
+          onSetChartType={setCiChartType}
+          data={ciStats.data}
+          centerLabel={`${ciStats.pct}%`}
+          centerSub="correct"
+        >
+          {ciStats.data.map((entry) => (
+            <div key={entry.label} className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: entry.fill }} />
+              <span
+                className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold shrink-0"
+                style={{
+                  background: entry.label === 'Correct' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                  color: entry.fill,
+                }}
+              >
+                {entry.label}
+              </span>
+              <span className="text-xs text-content-primary flex-1">
+                {entry.count} ({ciStats.answered.length > 0 ? Math.round((entry.count / ciStats.answered.length) * 100) : 0}%)
+              </span>
             </div>
-          </div>
-        </div>
+          ))}
+        </DistributionSection>
+      )}
+
+      {/* ── MC answer distribution ── */}
+      {isMC && mcChartData.length > 0 && (
+        <DistributionSection
+          title="Answer Distribution"
+          chartType={mcChartType}
+          onSetChartType={setMcChartType}
+          data={mcChartData}
+          centerLabel={String(totalMcVotes)}
+          centerSub="responses"
+        >
+          {mcChartData.map((entry) => (
+            <div key={entry.label} className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: entry.fill }} />
+              <span className="text-xs font-bold shrink-0 w-4" style={{ color: entry.fill }}>
+                {entry.label}
+              </span>
+              <span className="text-xs text-content-primary flex-1">
+                {entry.count} ({entry.percentage}%)
+                {entry.isCorrect && (
+                  <span
+                    className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold ml-1.5"
+                    style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e' }}
+                  >
+                    correct
+                  </span>
+                )}
+              </span>
+            </div>
+          ))}
+        </DistributionSection>
       )}
 
       {isFreeText && wordCloudData.length > 0 && (
@@ -291,9 +445,7 @@ export function DiscussionAnalyticsContent({
       {/* ── Response timeline bar chart ── */}
       {timelineData.length > 0 && (
         <div>
-          <p
-            className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted"
-          >
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-content-muted">
             Response Timeline (per minute)
           </p>
           <ResponsiveContainer width="100%" height={160}>
@@ -302,14 +454,11 @@ export function DiscussionAnalyticsContent({
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
               <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{
-                  background: 'var(--surface-overlay)',
-                  border: '1px solid var(--border-default)',
-                  borderRadius: '8px',
-                  color: 'var(--text-primary)',
-                  fontSize: '12px',
-                }}
-                formatter={(v: any) => [`${v} responses`, 'Count']} // eslint-disable-line @typescript-eslint/no-explicit-any
+                contentStyle={CHART_TOOLTIP_STYLE}
+                labelStyle={CHART_TOOLTIP_TEXT_STYLE}
+                itemStyle={CHART_TOOLTIP_TEXT_STYLE}
+                separator=""
+                formatter={(v) => [fmtCount(Number(v ?? 0)), '']}
               />
               <Bar dataKey="Responses" fill="var(--color-primary-500)" radius={[3, 3, 0, 0]} />
             </BarChart>
@@ -319,9 +468,7 @@ export function DiscussionAnalyticsContent({
 
       {/* ── All responses ── */}
       <div>
-        <p
-          className="text-xs font-semibold uppercase tracking-wider mb-2 text-content-muted"
-        >
+        <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-content-muted">
           All Responses ({total})
         </p>
         {total === 0 ? (
@@ -389,9 +536,7 @@ export function DiscussionAnalyticsModal({
 /** Small stat display card used inside the analytics modal. */
 export function StatCard({ label, value, sub, infoText }: Readonly<{ label: string; value: string; sub?: string; infoText?: string }>) {
   return (
-    <div
-      className="rounded-xl p-3 bg-surface-raised border border-line-subtle"
-    >
+    <div className="rounded-xl p-3 bg-surface-raised border border-line-subtle">
       <p className="text-xs mb-1 text-content-muted flex items-center gap-1">
         {label}
         {infoText && (

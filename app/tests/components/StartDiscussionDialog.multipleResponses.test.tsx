@@ -102,7 +102,7 @@ describe('StartDiscussionDialog Multiple Responses [US 1.30]', () => {
             // Check No Time Limit to simplify assertion
             fireEvent.click(screen.getByTestId('no-time-limit-checkbox'));
             fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
-            expect(onConfirm).toHaveBeenCalledWith(null, {
+            expect(onConfirm).toHaveBeenCalledWith(null, false, {
                 allowMultipleResponses: false,
                 responseLimit: null,
             });
@@ -115,7 +115,7 @@ describe('StartDiscussionDialog Multiple Responses [US 1.30]', () => {
             fireEvent.click(screen.getByTestId('no-time-limit-checkbox'));
             fireEvent.click(screen.getByTestId('allow-multiple-responses-checkbox'));
             fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
-            expect(onConfirm).toHaveBeenCalledWith(null, {
+            expect(onConfirm).toHaveBeenCalledWith(null, false, {
                 allowMultipleResponses: true,
                 responseLimit: null,
             });
@@ -130,22 +130,19 @@ describe('StartDiscussionDialog Multiple Responses [US 1.30]', () => {
             fireEvent.click(screen.getByTestId('response-limit-checkbox'));
             fireEvent.change(screen.getByTestId('response-limit-input'), { target: { value: '5' } });
             fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
-            expect(onConfirm).toHaveBeenCalledWith(null, {
+            expect(onConfirm).toHaveBeenCalledWith(null, false, {
                 allowMultipleResponses: true,
                 responseLimit: 5,
             });
         });
 
         // 71.11
-        it('[US 1.30][CT11] success: MC dialog onConfirm does not include multiple response settings toggle', () => {
+        it('[US 1.30][CT11] success: MC dialog onConfirm does not pass multipleResponseSettings', () => {
             const onConfirm = jest.fn();
             renderDialog(onConfirm, jest.fn(), true);
             fireEvent.click(screen.getByTestId('no-time-limit-checkbox'));
             fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
-            expect(onConfirm).toHaveBeenCalledWith(null, {
-                allowMultipleResponses: false,
-                responseLimit: null,
-            });
+            expect(onConfirm).toHaveBeenCalledWith(null, false, undefined);
         });
     });
 

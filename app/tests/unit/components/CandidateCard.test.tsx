@@ -1,8 +1,8 @@
 /**
- * Tests for CandidateCard component.
- * Covers: selected vs unselected state, onSelect click, onMouseEnter/Leave
- * with isSelected=true and isSelected=false, tooltip metadata branches
- * (bloomsLevel, topicArea, rationale — each present/absent), mcOptions rendering.
+ * Tests for CandidateCard component (unselected preview card).
+ * Covers: prompt rendering, onSelect click, hover border change,
+ * tooltip metadata branches (bloomsLevel, topicArea, rationale),
+ * and mcOptions rendering.
  */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -28,16 +28,20 @@ function makeCandidate(overrides: Record<string, unknown> = {}) {
   } as any;
 }
 
-function renderCard(props: {
-  candidate?: any;
-  isSelected?: boolean;
-  onSelect?: () => void;
-}) {
+function renderCard(props: { candidate?: any; onSelect?: () => void; isSelected?: boolean }) {
   const onSelect = props.onSelect ?? jest.fn();
   const candidate = props.candidate ?? makeCandidate();
-  const isSelected = props.isSelected ?? false;
-  render(<CandidateCard candidate={candidate} isSelected={isSelected} onSelect={onSelect} />);
-  return { onSelect };
+  const result = render(
+    <CandidateCard
+      candidate={candidate}
+      index={0}
+      isSelected={props.isSelected ?? false}
+      onSelect={onSelect}
+      isConnected={true}
+      onRequestPublish={jest.fn()}
+    />
+  );
+  return { ...result, onSelect };
 }
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -51,54 +55,26 @@ describe('CandidateCard', () => {
   it('calls onSelect when the card is clicked', () => {
     const onSelect = jest.fn();
     renderCard({ onSelect });
-    fireEvent.click(screen.getByRole('button'));
+    // Card is the large button with selection label
+    fireEvent.click(screen.getByRole('button', { name: /Select:/i }));
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
-  it('shows "Selected" badge when isSelected=true', () => {
-    renderCard({ isSelected: true });
-    expect(screen.getByText('Selected')).toBeInTheDocument();
+  // ── Mouse hover ──────────────────────────────────────────────────────────
+
+  it('changes border color on mouseEnter', () => {
+    const { container } = renderCard({});
+    const cardDiv = container.firstChild as HTMLElement;
+    fireEvent.mouseEnter(cardDiv);
+    expect(cardDiv.style.border).toContain('var(--color-primary-300)');
   });
 
-  it('does not show "Selected" badge when isSelected=false', () => {
-    renderCard({ isSelected: false });
-    expect(screen.queryByText('Selected')).not.toBeInTheDocument();
-  });
-
-  // ── Mouse hover — unselected (border changes) ────────────────────────────
-
-  it('changes border color on mouseEnter when NOT selected', () => {
-    renderCard({ isSelected: false });
-    const btn = screen.getByRole('button');
-    fireEvent.mouseEnter(btn);
-    expect(btn.style.borderColor).toBe('var(--color-primary-300)');
-  });
-
-  it('resets border color on mouseLeave when NOT selected', () => {
-    renderCard({ isSelected: false });
-    const btn = screen.getByRole('button');
-    fireEvent.mouseEnter(btn);
-    fireEvent.mouseLeave(btn);
-    expect(btn.style.borderColor).toBe('var(--border-default)');
-  });
-
-  // ── Mouse hover — selected (no border change) ────────────────────────────
-
-  it('does NOT change border color on mouseEnter when selected', () => {
-    renderCard({ isSelected: true });
-    const btn = screen.getByRole('button');
-    const before = btn.style.borderColor;
-    fireEvent.mouseEnter(btn);
-    // borderColor must remain unchanged (guard: if (!isSelected) skips the assignment)
-    expect(btn.style.borderColor).toBe(before);
-  });
-
-  it('does NOT change border color on mouseLeave when selected', () => {
-    renderCard({ isSelected: true });
-    const btn = screen.getByRole('button');
-    const before = btn.style.borderColor;
-    fireEvent.mouseLeave(btn);
-    expect(btn.style.borderColor).toBe(before);
+  it('resets border color on mouseLeave', () => {
+    const { container } = renderCard({});
+    const cardDiv = container.firstChild as HTMLElement;
+    fireEvent.mouseEnter(cardDiv);
+    fireEvent.mouseLeave(cardDiv);
+    expect(cardDiv.style.border).toContain('var(--border-default)');
   });
 
   // ── Tooltip metadata branches ─────────────────────────────────────────────
