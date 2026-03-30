@@ -94,9 +94,10 @@ test.describe('Instructor AI Features & Tools', () => {
 
     // 43.2
     test('[US 1.17] success: toggle STT transcript capture', async ({ page }) => {
-        const startRecord = page.locator('button:has-text("Record")').or(page.locator('button', { hasText: /^Record$/i }));
+        const desktop = page.getByTestId('desktop-layout');
+        const startRecord = desktop.getByRole('button', { name: /Record/i });
         await expect(startRecord).toBeVisible({ timeout: 15000 });
-        await expect(page.locator('textarea[placeholder*="Spoken content"]')).toBeVisible({ timeout: 15000 });
+        await expect(desktop.locator('textarea[placeholder*="Spoken content"]')).toBeVisible({ timeout: 15000 });
     });
 
     // 43.3
@@ -130,25 +131,26 @@ test.describe('Instructor AI Features & Tools', () => {
             }
         });
 
-        const contextBox = page.locator('textarea[placeholder*="Spoken content"]');
+        const desktop = page.getByTestId('desktop-layout');
+        const contextBox = desktop.locator('textarea[placeholder*="Spoken content"]');
         await expect(contextBox).toBeVisible({ timeout: 15000 });
         await contextBox.fill('This is my lecture context for the AI generator.');
 
-        await page.getByRole('button', { name: /Generate Prompt/i }).click();
+        await desktop.getByTestId('generate-prompts-button').first().click();
 
-        await expect(page.getByText('AI MOCKED: Short Answer Question?')).toBeVisible({ timeout: 15000 });
+        await expect(desktop.getByText(/AI MOCKED/i).filter({ visible: true }).first()).toBeVisible({ timeout: 15000 });
 
-        const producedPromptCard = page.locator('button').filter({ hasText: 'AI MOCKED: Short Answer Question?' }).first();
+        const producedPromptCard = desktop.getByTestId('ai-candidate-card').filter({ visible: true }).first();
         await producedPromptCard.click();
 
-        const selectDropdown = page.locator('select');
+        const selectDropdown = desktop.locator('select').first();
         await selectDropdown.selectOption('multiple_choice');
 
-        await page.getByRole('button', { name: /Regenerate Options/i }).or(page.getByRole('button', { name: /Generate Prompt/i })).click();
+        await desktop.getByRole('button', { name: /Regenerate Options/i }).or(desktop.getByRole('button', { name: /Generate Prompt/i })).first().click();
 
-        await expect(page.getByText('AI MOCKED: Multiple Choice Question?').first()).toBeVisible({ timeout: 15000 });
-        await expect(page.getByText('Option A')).toBeVisible();
-        await expect(page.getByText('Option B')).toBeVisible();
+        await expect(desktop.getByText('AI MOCKED: Multiple Choice Question?').filter({ visible: true }).first()).toBeVisible({ timeout: 15000 });
+        await expect(desktop.getByText('Option A').filter({ visible: true }).first()).toBeVisible();
+        await expect(desktop.getByText('Option B').filter({ visible: true }).first()).toBeVisible();
     });
 
     // 43.4
@@ -168,20 +170,21 @@ test.describe('Instructor AI Features & Tools', () => {
         });
 
         // Generate a prompt
-        const contextBox = page.locator('textarea[placeholder*="Spoken content"]');
+        const desktop = page.getByTestId('desktop-layout');
+        const contextBox = desktop.locator('textarea[placeholder*="Spoken content"]');
         await expect(contextBox).toBeVisible({ timeout: 15000 });
         await contextBox.fill('Generate me a short answer question.');
-        await page.getByRole('button', { name: /Generate Prompt/i }).click();
+        await desktop.getByTestId('generate-prompts-button').first().click();
 
         // Ensure candidate visible
-        await expect(page.getByText('AI MOCKED: Short Answer Question?')).toBeVisible({ timeout: 15000 });
+        await expect(desktop.getByText(/AI MOCKED/i).filter({ visible: true }).first()).toBeVisible({ timeout: 15000 });
 
         // Select the candidate
-        const producedPromptCard = page.locator('button').filter({ hasText: 'AI MOCKED: Short Answer Question?' }).first();
+        const producedPromptCard = desktop.getByTestId('ai-candidate-card').filter({ visible: true }).first();
         await producedPromptCard.click();
 
         // When selected, it becomes an editable textarea. The value should be the prompt text.
-        const editableTextarea = page.locator('textarea[placeholder="Edit this prompt..."]');
+        const editableTextarea = desktop.getByTestId('prompt-editor').filter({ visible: true }).first();
         await expect(editableTextarea).toBeVisible({ timeout: 5000 });
         await expect(editableTextarea).toHaveValue('AI MOCKED: Short Answer Question?');
 
@@ -237,16 +240,17 @@ test.describe('Instructor AI Features & Tools', () => {
             });
         });
 
-        const contextBox = page.locator('textarea[placeholder*="Spoken content"]');
+        const desktop = page.getByTestId('desktop-layout');
+        const contextBox = desktop.locator('textarea[placeholder*="Spoken content"]');
         await expect(contextBox).toBeVisible({ timeout: 15000 });
         await contextBox.fill('Generate me a short answer question.');
-        await page.getByRole('button', { name: /Generate Prompt/i }).click();
+        await desktop.getByTestId('generate-prompts-button').first().click();
 
-        const producedPromptCard = page.locator('button').filter({ hasText: 'AI MOCKED: Question?' }).first();
+        const producedPromptCard = desktop.getByTestId('ai-candidate-card').filter({ visible: true }).first();
         await expect(producedPromptCard).toBeVisible({ timeout: 15000 });
         await producedPromptCard.click();
 
-        const editableTextarea = page.locator('textarea[placeholder="Edit this prompt..."]');
+        const editableTextarea = desktop.getByTestId('prompt-editor').filter({ visible: true }).first();
         await expect(editableTextarea).toBeVisible({ timeout: 5000 });
 
         // Clear the text

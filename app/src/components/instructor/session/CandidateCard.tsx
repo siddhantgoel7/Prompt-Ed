@@ -348,6 +348,7 @@ export function CandidateCard({
       tabIndex={isSelected ? -1 : 0}
       onClick={!isSelected ? onSelect : undefined}
       onKeyDown={!isSelected ? (e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(); } : undefined}
+      data-testid="ai-candidate-card"
       className={`p-3 rounded-xl text-sm w-full min-w-0 overflow-hidden ${!isSelected ? 'cursor-pointer hover:shadow-sm' : ''}`}
       style={{
         background: isSelected ? 'var(--color-primary-alpha-08)' : 'var(--surface-raised)',

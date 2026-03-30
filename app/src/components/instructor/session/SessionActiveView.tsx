@@ -46,7 +46,7 @@ export function SessionActiveView(props: { vm?: SessionVM }) {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Desktop View: all sidebar columns row-wise */}
-        <div className="hidden lg:flex flex-1 overflow-hidden">
+        <div data-testid="desktop-layout" className="hidden lg:flex flex-1 overflow-hidden">
           <ActiveSidebar />
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
             <div className="flex-1 overflow-y-auto">
@@ -57,7 +57,7 @@ export function SessionActiveView(props: { vm?: SessionVM }) {
         </div>
 
         {/* Mobile View: single column switched by mobileTab */}
-        <div className="flex-1 flex flex-col lg:hidden overflow-hidden">
+        <div data-testid="mobile-layout" className="flex-1 flex flex-col lg:hidden overflow-hidden">
           <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
             {mobileTab === 'capture' && (
               <div className="flex-1 overflow-hidden flex flex-col enter">

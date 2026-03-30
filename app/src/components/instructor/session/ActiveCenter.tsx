@@ -373,7 +373,7 @@ function AIGenerationPanel({
         <div className={`rotating-glow-wrap w-full sm:w-auto mt-1 sm:mt-0 flex-shrink-0 ${isGenerating ? ' generating' : ''}`}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button onClick={() => onGenerate()} disabled={isGenerating || recorder.isRecording} size="sm" className="w-full px-4 py-1.5 rounded-full font-semibold" style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))', color: 'white', opacity: 1 }}>
+              <Button data-testid="generate-prompts-button" onClick={() => onGenerate()} disabled={isGenerating || recorder.isRecording} size="sm" className="w-full px-4 py-1.5 rounded-full font-semibold" style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))', color: 'white', opacity: 1 }}>
                 {isGenerating ? <GeneratingIndicator /> : <span>Generate Prompts</span>}
               </Button>
             </TooltipTrigger>
@@ -388,6 +388,7 @@ function AIGenerationPanel({
         <div className="flex flex-col gap-3 min-w-0 w-full overflow-hidden">
           {candidates.map((c: GeneratedPrompt, i: number) => (
             <CandidateCard
+              data-testid="ai-candidate-card"
               key={`candidate-${c.promptType}-${i}`}
               candidate={c}
               index={i}
