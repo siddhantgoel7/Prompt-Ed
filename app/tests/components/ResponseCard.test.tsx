@@ -137,8 +137,8 @@ describe('ResponseCard — flagged mode visual styling', () => {
     const { container } = renderCard({ mode: 'flagged', isSelected: true });
 
     const card = container.firstChild as HTMLElement;
-    // Selected flagged state uses red styling — data-variant is on the ExpandableCard div[role=button]
-    expect(card.querySelector('[data-variant]')).toHaveAttribute('data-variant', 'flagged-selected');
+    // Selected flagged state uses red styling — data-variant is on the outer ExpandableCard div
+    expect(card).toHaveAttribute('data-variant', 'flagged-selected');
     // Should have z-10 for elevation
     expect(card.className).toMatch(/z-10/);
   });

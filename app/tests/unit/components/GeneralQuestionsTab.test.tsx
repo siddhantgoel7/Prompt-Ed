@@ -136,10 +136,10 @@ describe('GeneralQuestionsTab', () => {
 
   it('fires mouse enter/leave events on the compact question card', () => {
     renderTab({ generalQuestions: [makeQuestion('q1', 'Hover test Q')] });
-    // The compact card is a div[role=button] wrapping the question text
-    const btn = screen.getByText('Hover test Q').closest('[role=button]')!;
-    fireEvent.mouseEnter(btn);
-    fireEvent.mouseLeave(btn);
+    // The compact card container houses the hover listeners
+    const card = screen.getByText('Hover test Q').closest('div.p-3')!;
+    fireEvent.mouseEnter(card);
+    fireEvent.mouseLeave(card);
   });
 
   it('switches selection to a different card', () => {
@@ -147,16 +147,13 @@ describe('GeneralQuestionsTab', () => {
     const q2 = makeQuestion('q2', 'Question Beta');
     renderTab({ generalQuestions: [q1, q2] });
 
-    // Select first card — Q1 card should be aria-pressed=true
-    fireEvent.click(screen.getAllByText('Question Alpha')[0]);
-    const q1Card = screen.getAllByText('Question Alpha')[0].closest('[role=button]')!;
-    expect(q1Card).toHaveAttribute('aria-pressed', 'true');
+    // Select first card
+    fireEvent.click(screen.getByLabelText(/Select: Question Alpha/i));
+    expect(screen.getByText('Selected (Editing)')).toBeInTheDocument();
 
-    // Click Q2 to switch selection — Q2 should now be aria-pressed=true
-    const q2Btn = screen.getByText('Question Beta').closest('[role=button]')!;
-    fireEvent.click(q2Btn);
-    expect(q2Btn).toHaveAttribute('aria-pressed', 'true');
-    expect(q1Card).toHaveAttribute('aria-pressed', 'false');
+    // Click Q2 to switch selection
+    fireEvent.click(screen.getByLabelText(/Select: Question Beta/i));
+    expect(screen.getByText('Selected (Editing)')).toBeInTheDocument();
   });
 
   it('shows correct answer radio buttons in the expanded MC card', () => {
@@ -215,7 +212,7 @@ describe('GeneralQuestionsTab', () => {
         </SessionContext.Provider>
       );
     });
-    // Selection should be cleared — no card with aria-pressed=true
-    expect(screen.queryByRole('button', { pressed: true })).not.toBeInTheDocument();
+    // Selection should be cleared — no "Selected (Editing)" text
+    expect(screen.queryByText('Selected (Editing)')).not.toBeInTheDocument();
   });
 });

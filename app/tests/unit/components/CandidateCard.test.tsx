@@ -31,7 +31,7 @@ function makeCandidate(overrides: Record<string, unknown> = {}) {
 function renderCard(props: { candidate?: any; onSelect?: () => void; isSelected?: boolean }) {
   const onSelect = props.onSelect ?? jest.fn();
   const candidate = props.candidate ?? makeCandidate();
-  render(
+  const result = render(
     <CandidateCard
       candidate={candidate}
       index={0}
@@ -41,7 +41,7 @@ function renderCard(props: { candidate?: any; onSelect?: () => void; isSelected?
       onRequestPublish={jest.fn()}
     />
   );
-  return { onSelect };
+  return { ...result, onSelect };
 }
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -55,25 +55,26 @@ describe('CandidateCard', () => {
   it('calls onSelect when the card is clicked', () => {
     const onSelect = jest.fn();
     renderCard({ onSelect });
-    fireEvent.click(screen.getByRole('button', { pressed: false }));
+    // Card is the large button with selection label
+    fireEvent.click(screen.getByRole('button', { name: /Select:/i }));
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
   // ── Mouse hover ──────────────────────────────────────────────────────────
 
   it('changes border color on mouseEnter', () => {
-    renderCard({});
-    const btn = screen.getByRole('button', { pressed: false });
-    fireEvent.mouseEnter(btn);
-    expect(btn.style.border).toContain('var(--color-primary-300)');
+    const { container } = renderCard({});
+    const cardDiv = container.firstChild as HTMLElement;
+    fireEvent.mouseEnter(cardDiv);
+    expect(cardDiv.style.border).toContain('var(--color-primary-300)');
   });
 
   it('resets border color on mouseLeave', () => {
-    renderCard({});
-    const btn = screen.getByRole('button', { pressed: false });
-    fireEvent.mouseEnter(btn);
-    fireEvent.mouseLeave(btn);
-    expect(btn.style.border).toContain('var(--border-default)');
+    const { container } = renderCard({});
+    const cardDiv = container.firstChild as HTMLElement;
+    fireEvent.mouseEnter(cardDiv);
+    fireEvent.mouseLeave(cardDiv);
+    expect(cardDiv.style.border).toContain('var(--border-default)');
   });
 
   // ── Tooltip metadata branches ─────────────────────────────────────────────
