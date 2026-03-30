@@ -23,6 +23,12 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
     activeDiscussion,
     responseText,
     setResponseText,
+    selectedOption,
+    setSelectedOption,
+    isSubmitCorrect,
+    setIsSubmitCorrect,
+    submittedAnswerText,
+    setSubmittedAnswerText,
     submitting,
     isConnected,
     view,
@@ -41,22 +47,16 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
   // Normalize timerExpired: treat undefined (from older test mocks) as false
   const isTimerExpired = timerExpiredRaw ?? false;
 
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [prevDiscussionId, setPrevDiscussionId] = useState<string | undefined>(undefined);
   const [submitAttempted, setSubmitAttempted] = useState(false);
-  const [isSubmitCorrect, setIsSubmitCorrect] = useState<boolean | null>(null);
   const [feedbackPeriodActive, setFeedbackPeriodActive] = useState(false);
-  const [submittedAnswerText, setSubmittedAnswerText] = useState<string | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Reset selected option and validation state when active discussion changes
+  // Reset validation and feedback states when active discussion changes
   if (activeDiscussion?.id !== prevDiscussionId) {
     setPrevDiscussionId(activeDiscussion?.id);
-    setSelectedOption(null);
     setSubmitAttempted(false);
-    setIsSubmitCorrect(null);
     setFeedbackPeriodActive(false);
-    setSubmittedAnswerText(null);
     if (feedbackTimerRef.current) {
       clearTimeout(feedbackTimerRef.current);
       feedbackTimerRef.current = null;
