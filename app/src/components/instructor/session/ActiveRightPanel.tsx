@@ -64,8 +64,7 @@ export function ActiveRightPanel(props: Readonly<{
 
   return (
     <aside
-      className="flex flex-col flex-shrink-0 transition-all duration-200 bg-surface-raised border-l border-line-default"
-      style={{ width: collapsed ? '52px' : '380px' }}
+      className={`flex flex-col flex-shrink-0 transition-all duration-300 bg-surface-raised border-l border-line-default w-full ${collapsed ? 'lg:w-[52px]' : 'lg:w-[380px]'}`}
     >
       {/* ── Collapse toggle header ── */}
       <div className="flex items-center px-3 py-2.5 flex-shrink-0 border-b border-line-subtle">

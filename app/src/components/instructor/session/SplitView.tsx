@@ -351,66 +351,83 @@ function Pane({
 // SplitView
 // ---------------------------------------------------------------------------
 
-/** Full-screen overlay rendering two Panes side by side for simultaneous discussion monitoring. */
 export function SplitView({
   discussions,
   onBack,
   liveActiveDiscussionId,
   liveActiveResponses = [],
 }: Readonly<SplitViewProps>) {
+  const [mobileActivePane, setMobileActivePane] = React.useState<'left' | 'right'>('left');
+
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col bg-surface-base"
     >
       {/* Top bar */}
       <header
-        className="glass flex-shrink-0 px-4 py-2.5 flex items-center justify-between"
+        className="glass flex-shrink-0 px-4 py-2.5 flex items-center justify-between border-b border-line-subtle"
       >
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-medium transition-all duration-150 bg-surface-raised text-content-secondary"
-          style={{
-            border: '1px solid var(--border-default)',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-400)';
-            (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-default)';
-            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
-          }}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-          Back to Session
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 hover:scale-105 active:scale-95 bg-surface-raised text-content-secondary border border-line-default hover:border-brand-400 hover:text-brand-600"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Back <span className="hidden sm:inline">to Session</span>
+          </button>
+        </div>
 
-        <AppLogo size="sm" />
+        <div className="flex items-center gap-2">
+          <AppLogo size="sm" className="hidden xs:block" />
+          <div className="hidden xs:block w-px h-4 bg-line-default mx-1" />
+          <span
+            className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest text-brand-600"
+            style={{ background: 'rgba(45,158,45,0.12)' }}
+          >
+            Split View
+          </span>
+        </div>
 
-        <span
-          className="text-xs font-semibold px-3 py-1.5 rounded-full text-brand-600"
-          style={{ background: 'rgba(45,158,45,0.12)' }}
-        >
-          Split View
-        </span>
+        {/* Mobile Pane Switcher */}
+        <div className="lg:hidden flex items-center bg-muted/30 p-1 rounded-xl border border-line-subtle">
+           <button 
+             onClick={() => setMobileActivePane('left')}
+             className={`px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all duration-300 ${mobileActivePane === 'left' ? 'bg-surface-base text-brand-600 shadow-sm' : 'text-content-muted'}`}
+           >
+             Left
+           </button>
+           <button 
+             onClick={() => setMobileActivePane('right')}
+             className={`px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all duration-300 ${mobileActivePane === 'right' ? 'bg-surface-base text-brand-600 shadow-sm' : 'text-content-muted'}`}
+           >
+             Right
+           </button>
+        </div>
+        <div className="hidden lg:block w-[120px]" /> {/* Spacer for desktop symmetry */}
       </header>
 
-      {/* Two panes */}
-      <div className="flex-1 flex min-h-0">
-        <Pane
-          label="Left Pane"
-          discussions={discussions}
-          liveActiveDiscussionId={liveActiveDiscussionId}
-          liveActiveResponses={liveActiveResponses}
-        />
-        <Pane
-          label="Right Pane"
-          discussions={discussions}
-          liveActiveDiscussionId={liveActiveDiscussionId}
-          liveActiveResponses={liveActiveResponses}
-        />
+      {/* Pane Layout */}
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        {/* Desktop: both visible | Mobile: only active visible */}
+        <div className={`flex-1 flex min-w-0 ${mobileActivePane !== 'left' ? 'hidden lg:flex' : 'flex'}`}>
+          <Pane
+            label="Left Pane"
+            discussions={discussions}
+            liveActiveDiscussionId={liveActiveDiscussionId}
+            liveActiveResponses={liveActiveResponses}
+          />
+        </div>
+        
+        <div className={`flex-1 flex min-w-0 ${mobileActivePane !== 'right' ? 'hidden lg:flex' : 'flex'}`}>
+          <Pane
+            label="Right Pane"
+            discussions={discussions}
+            liveActiveDiscussionId={liveActiveDiscussionId}
+            liveActiveResponses={liveActiveResponses}
+          />
+        </div>
       </div>
     </div>
   );
