@@ -96,6 +96,31 @@ function setSavedResponseInStorage(storageKey: string, discussionId: string, dat
   }
 }
 
+function getDraftFromStorage(storageKey: string, discussionId: string): { responseText?: string; selectedOption?: string } | null {
+  try {
+    const raw = localStorage.getItem(`${storageKey}:${discussionId}:draft`);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setDraftInStorage(storageKey: string, discussionId: string, data: { responseText?: string; selectedOption?: string }): void {
+  try {
+    localStorage.setItem(`${storageKey}:${discussionId}:draft`, JSON.stringify(data));
+  } catch {
+    // Non-fatal
+  }
+}
+
+function clearDraftFromStorage(storageKey: string, discussionId: string): void {
+  try {
+    localStorage.removeItem(`${storageKey}:${discussionId}:draft`);
+  } catch {
+    // Non-fatal
+  }
+}
+
 export function useStudentSession(lessonId: string) {
   const router = useRouter();
   const { channel, isConnected } = useRealtime(lessonId, 'student');
@@ -131,6 +156,16 @@ export function useStudentSession(lessonId: string) {
   useEffect(() => { viewRef.current = view; }, [view]);
   useEffect(() => { activeDiscussionRef.current = activeDiscussion; }, [activeDiscussion]);
   useEffect(() => { timerEndTimeRef.current = timerEndTime; }, [timerEndTime]);
+
+  // Persist draft on every change
+  useEffect(() => {
+    if (activeDiscussion?.id && view === 'active') {
+      setDraftInStorage(submittedDiscussionsKey, activeDiscussion.id, {
+        responseText,
+        selectedOption: selectedOption ?? undefined
+      });
+    }
+  }, [submittedDiscussionsKey, activeDiscussion?.id, view, responseText, selectedOption]);
 
   const canSubmit = useMemo(() => {
     return (
@@ -189,12 +224,13 @@ export function useStudentSession(lessonId: string) {
     setResponseCountInStorage(submittedDiscussionsKey, currentDiscussion.id, newCount);
     markDiscussionSubmittedInStorage(submittedDiscussionsKey, currentDiscussion.id);
 
-    // Persist specifically what was submitted
+    // Persist specifically what was submitted and clear draft
     setSavedResponseInStorage(submittedDiscussionsKey, currentDiscussion.id, {
       responseText: text,
       selectedOption: opt ?? undefined,
       isCorrect: corr ?? undefined
     });
+    clearDraftFromStorage(submittedDiscussionsKey, currentDiscussion.id);
 
     setSubmittedAnswerText(text);
     if (isMC) {
@@ -229,7 +265,6 @@ export function useStudentSession(lessonId: string) {
       if (discussionData) {
         const disc = discussionData as Discussion;
         setActiveDiscussion(disc);
-        setResponseText('');
 
         const isSubmitted = hasSubmittedDiscussionInStorage(submittedDiscussionsKey, disc.id);
         const count = getResponseCountFromStorage(submittedDiscussionsKey, disc.id);
@@ -244,6 +279,15 @@ export function useStudentSession(lessonId: string) {
           }
           setView('submitted');
         } else {
+          // Hydrate draft if available
+          const draft = getDraftFromStorage(submittedDiscussionsKey, disc.id);
+          if (draft) {
+             if (draft.responseText) setResponseText(draft.responseText);
+             if (draft.selectedOption) setSelectedOption(draft.selectedOption);
+          } else {
+             setResponseText('');
+             setSelectedOption(null);
+          }
           setView('active');
         }
 
@@ -301,6 +345,7 @@ export function useStudentSession(lessonId: string) {
         }
         setView('submitted');
       } else {
+        // Discussion changed: draft reset is handled by setActiveDiscussion trigger
         setView('active');
       }
       setResponseCount(getResponseCountFromStorage(submittedDiscussionsKey, disc.id));
