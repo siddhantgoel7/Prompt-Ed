@@ -204,13 +204,16 @@ function PromptCrossfade({
     : `opacity ${SWAP_MS}ms ease, transform ${SWAP_MS}ms ease`;
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        height: `${isSelected || isExpanded ? Math.max(naturalHeight, 80) : naturalHeight}px`,
-        transition: 'height 180ms ease',
-      }}
-    >
+    <div style={{ position: 'relative', width: '100%', minHeight: isSelected || isExpanded ? '80px' : '24px' }}>
+      {/* Ghost element — defines the height of the parent naturally */}
+      <p 
+        className="leading-snug text-sm select-none invisible" 
+        style={{ margin: 0, paddingBottom: isSelected ? '8px' : 0 }}
+        aria-hidden="true"
+      >
+        {isSelected ? editText : promptText}
+      </p>
+
       <p
         ref={pRef}
         aria-hidden={isSelected || undefined}
@@ -221,8 +224,8 @@ function PromptCrossfade({
           transform:     isSelected ? 'translate(14px, 11px)' : 'translate(0, 0)',
           transition:    promptTransition,
           pointerEvents: 'none',
-          position:      isExpanded ? 'absolute' : 'relative',
-          inset:         isExpanded ? 0 : 'auto',
+          position:      'absolute',
+          inset:         0,
           zIndex:        2,
         }}
       >
@@ -234,7 +237,7 @@ function PromptCrossfade({
           data-testid={isSelected ? "prompt-editor" : undefined}
           aria-hidden={!isSelected || undefined}
           onChange={(e) => onEditTextChange(e.target.value)}
-          className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none leading-snug bg-surface-raised text-content-primary"
+          className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none leading-snug bg-surface-raised text-content-primary shadow-inner"
           style={{
             position:      'absolute',
             inset:         0,
@@ -342,12 +345,16 @@ export function CandidateCard({
 
   return (
     <div
-      className="p-3 rounded-xl text-sm"
+      role="button"
+      tabIndex={isSelected ? -1 : 0}
+      onClick={!isSelected ? onSelect : undefined}
+      onKeyDown={!isSelected ? (e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(); } : undefined}
+      className={`p-3 rounded-xl text-sm ${!isSelected ? 'cursor-pointer hover:shadow-sm' : ''}`}
       style={{
-        background: isSelected ? 'rgba(45,158,45,0.06)' : 'var(--surface-raised)',
+        background: isSelected ? 'var(--color-primary-alpha-08)' : 'var(--surface-raised)',
         border: `1px solid ${!isSelected && isHovered ? 'var(--color-primary-300)' : 'var(--border-default)'}`,
         outline: '2px solid',
-        outlineColor: isSelected ? 'var(--color-primary-400)' : 'transparent',
+        outlineColor: isSelected ? 'var(--color-primary-500)' : 'transparent',
         outlineOffset: '-1px',
         boxSizing: 'border-box',
         transition: `background ${CARD_BG_MS}ms${isSelected ? '' : ', border-color 120ms ease'}`,
@@ -364,7 +371,7 @@ export function CandidateCard({
       />
 
       {isSelected ? (
-        <div className="flex flex-col">
+        <div className="flex flex-col cursor-default">
           <PromptCrossfade
             promptText={candidate.promptText}
             editText={editText}
@@ -393,10 +400,8 @@ export function CandidateCard({
           />
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={onSelect}
-          className="w-full text-left appearance-none focus:outline-none"
+        <div
+          className="w-full text-left"
           aria-label={`Select: ${candidate.promptText}`}
         >
           <PromptCrossfade
@@ -409,7 +414,7 @@ export function CandidateCard({
             naturalHeight={naturalHeight}
           />
           <UnselectedMCList isSelected={isSelected} mcOptions={candidate.mcOptions} />
-        </button>
+        </div>
       )}
     </div>
   );
