@@ -16,6 +16,7 @@ const EXPANDED_HOLD_MS = 40;   // isExpanded stays true briefly after deselect
 const SWAP_MS          = 60;   // MC options swap animation
 const SWAP_STAGGER_MS  = 80;   // stagger between swapping option rows
 const SLIDE_MS         = 220;  // editor slide-in/out
+const SLIDE_EASE       = 'cubic-bezier(0.16,1,0.3,1)';
 
 interface Props {
   candidate: GeneratedPrompt;
@@ -132,32 +133,16 @@ function PromptCrossfade({
   );
 }
 
-// ─── CandidateCard ────────────────────────────────────────────────────────────
+// ─── useCardExpansion ─────────────────────────────────────────────────────────
 
-export function CandidateCard({
-  candidate, index, isSelected, onSelect, isConnected, onRequestPublish,
-}: Readonly<Props>) {
+function useCardExpansion(isSelected: boolean, candidate: GeneratedPrompt) {
   const [editText, setEditText]                           = React.useState(candidate.promptText);
   const [editingOptions, setEditingOptions]               = React.useState<Record<string, string>>({});
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
-  const [isHovered, setIsHovered]                         = React.useState(false);
 
-  const pRef          = React.useRef<HTMLParagraphElement>(null);
-  const isExpandedRef = React.useRef(false);
-  const [naturalHeight, setNaturalHeight] = React.useState(24);
-
-  React.useLayoutEffect(() => {
-    const el = pRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => {
-      if (!isExpandedRef.current) setNaturalHeight(el.scrollHeight);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
+  const isExpandedRef    = React.useRef(false);
   const [isExpanded, setIsExpanded]   = React.useState(false);
-  const expandedTimerRef              = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const expandedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   React.useEffect(() => {
     if (expandedTimerRef.current) clearTimeout(expandedTimerRef.current);
@@ -181,6 +166,47 @@ export function CandidateCard({
     return () => { if (expandedTimerRef.current) clearTimeout(expandedTimerRef.current); };
   }, [isSelected]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  return {
+    editText, setEditText,
+    editingOptions, setEditingOptions,
+    overrideCorrectOption, setOverrideCorrectOption,
+    isExpanded, isExpandedRef,
+  };
+}
+
+const innerSlide = (visible: boolean): React.CSSProperties => ({
+  transform:  visible ? 'translateY(0px)' : 'translateY(-8px)',
+  opacity:    visible ? 1 : 0,
+  transition: `transform ${SLIDE_MS}ms ${SLIDE_EASE}, opacity ${SLIDE_MS}ms ease`,
+});
+
+// ─── CandidateCard ────────────────────────────────────────────────────────────
+
+export function CandidateCard({
+  candidate, index, isSelected, onSelect, isConnected, onRequestPublish,
+}: Readonly<Props>) {
+  const {
+    editText, setEditText,
+    editingOptions, setEditingOptions,
+    overrideCorrectOption, setOverrideCorrectOption,
+    isExpanded, isExpandedRef,
+  } = useCardExpansion(isSelected, candidate);
+
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  const pRef          = React.useRef<HTMLParagraphElement>(null);
+  const [naturalHeight, setNaturalHeight] = React.useState(24);
+
+  React.useLayoutEffect(() => {
+    const el = pRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      if (!isExpandedRef.current) setNaturalHeight(el.scrollHeight);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isExpandedRef]);
+
   const handlePublish = () => {
     const published: GeneratedPrompt =
       candidate.promptType === 'multiple_choice' && candidate.mcOptions
@@ -196,15 +222,7 @@ export function CandidateCard({
     onRequestPublish(published, overrideCorrectOption);
   };
 
-  const hasMc      = (candidate.mcOptions?.length ?? 0) > 0;
-  const slideEase  = `cubic-bezier(0.16,1,0.3,1)`;
-  // Shared styles for any "inner animated div" — owns transform + opacity,
-  // is the sole source of the visible animation (no double-fade from a parent).
-  const innerSlide = (visible: boolean): React.CSSProperties => ({
-    transform:  visible ? 'translateY(0px)' : 'translateY(-8px)',
-    opacity:    visible ? 1 : 0,
-    transition: `transform ${SLIDE_MS}ms ${slideEase}, opacity ${SLIDE_MS}ms ease`,
-  });
+  const hasMc = (candidate.mcOptions?.length ?? 0) > 0;
 
   return (
     <div
@@ -217,9 +235,9 @@ export function CandidateCard({
         outlineOffset: '-1px',
         boxSizing:     'border-box',
         cursor:        isSelected ? 'default' : 'pointer',
-        transition: `background ${CARD_BG_MS}ms${!isSelected ? ', border-color 120ms ease' : ''}`,
+        transition: `background ${CARD_BG_MS}ms${isSelected ? '' : ', border-color 120ms ease'}`,
       }}
-      role="button"
+      role="button" // NOSONAR - nested interactive elements (MultipleChoiceEditor inputs, publish button) prevent using a native <button> element
       aria-label={candidate.promptText}
       tabIndex={isSelected ? -1 : 0}
       aria-pressed={isSelected}
@@ -260,8 +278,8 @@ export function CandidateCard({
             transform:  isSelected ? 'translateY(-8px)' : 'translateY(0px)',
             opacity:    isSelected ? 0 : 1,
             transition: [
-              `max-height ${SLIDE_MS}ms ${slideEase}`,
-              `transform  ${SLIDE_MS}ms ${slideEase}`,
+              `max-height ${SLIDE_MS}ms ${SLIDE_EASE}`,
+              `transform  ${SLIDE_MS}ms ${SLIDE_EASE}`,
               `opacity    ${SLIDE_MS}ms ease`,
             ].join(', '),
           }}
@@ -285,7 +303,7 @@ export function CandidateCard({
           style={{
             overflow:   'hidden',
             maxHeight:  isSelected ? '600px' : '0px',
-            transition: `max-height ${SLIDE_MS}ms ${slideEase}`,
+            transition: `max-height ${SLIDE_MS}ms ${SLIDE_EASE}`,
           }}
         >
           <div style={innerSlide(isSelected)}>
@@ -313,7 +331,7 @@ export function CandidateCard({
         style={{
           overflow:   'hidden',
           maxHeight:  isSelected ? '52px' : '0px',
-          transition: `max-height ${SLIDE_MS}ms ${slideEase}`,
+          transition: `max-height ${SLIDE_MS}ms ${SLIDE_EASE}`,
         }}
       >
         <div style={innerSlide(isSelected)}>

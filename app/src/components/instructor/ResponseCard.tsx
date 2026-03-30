@@ -60,9 +60,12 @@ function FlagBadge({
     ? <RotateCcw className={s.badgeIconSize} />
     : <Flag className={s.badgeIconSize} />;
 
-  const label = isFlagged
-    ? (isBeingFlagged ? 'Restoring...' : 'Unflag')
-    : (isBeingFlagged ? 'Removing...' : 'Flag as Inappropriate');
+  let label: string;
+  if (isFlagged) {
+    label = isBeingFlagged ? 'Restoring...' : 'Unflag';
+  } else {
+    label = isBeingFlagged ? 'Removing...' : 'Flag as Inappropriate';
+  }
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();

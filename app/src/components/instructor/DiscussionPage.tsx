@@ -3,7 +3,7 @@
 'use client';
 
 import { useRealtime } from '@/lib/realtime/useRealtime';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, type CSSProperties } from 'react';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 import { ArrowLeft } from 'lucide-react';
@@ -72,7 +72,7 @@ function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestore
       {/* Status bar: realtime connection + total count + inline highlight filter */}
       <ResponseStatusBar
         isConnected={isConnected}
-        selectedCount={!showFlagged ? selectedIds.length : 0}
+        selectedCount={showFlagged ? 0 : selectedIds.length}
         showHighlightedOnly={showHighlightedOnly}
         onToggleHighlight={() => setShowHighlightedOnly(prev => !prev)}
       />
@@ -357,19 +357,19 @@ export function DiscussionPage({
                     const isCorrect = initialDiscussion.correct_option === opt.label;
                     const isSelected = selectedMCOption === opt.label;
 
+                    let badgeStyle: CSSProperties;
+                    if (isCorrect) {
+                      badgeStyle = { background: 'var(--color-primary-500)', color: 'white' };
+                    } else if (isSelected) {
+                      badgeStyle = { background: 'var(--color-highlight-alpha-55)', color: 'var(--text-primary)' };
+                    } else {
+                      badgeStyle = { background: 'var(--surface-overlay)', color: 'var(--text-secondary)' };
+                    }
+
                     const badge = (
                       <span
                         className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0"
-                        style={isCorrect ? {
-                          background: 'var(--color-primary-500)',
-                          color: 'white',
-                        } : isSelected ? {
-                          background: 'var(--color-highlight-alpha-55)',
-                          color: 'var(--text-primary)',
-                        } : {
-                          background: 'var(--surface-overlay)',
-                          color: 'var(--text-secondary)',
-                        }}
+                        style={badgeStyle}
                       >
                         {opt.label}
                       </span>

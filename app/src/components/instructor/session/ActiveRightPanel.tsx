@@ -31,15 +31,13 @@ import { StartDiscussionDialog } from './StartDiscussionDialog';
 // ---------------------------------------------------------------------------
 
 /** Displays live student responses, analytics, and timer for the active discussion. Supports collapsing. */
-export function ActiveRightPanel(props: {
+export function ActiveRightPanel(props: Readonly<{
   responses?: Response[];
   activeDiscussion?: Discussion | null;
   studentCount?: number;
-}) {
+}>) {
   const contextProps = useActiveRightPanelContext(props);
-  const { responses, activeDiscussion, activeDiscussionId, timerEndTime, timerTotalSeconds,
-    handleCloseDiscussion, handleExtendTimer, handleEditTimer, peakStudentCount,
-    removeResponse, flaggedResponses } = contextProps;
+  const { responses, activeDiscussion, peakStudentCount, removeResponse } = contextProps;
 
   const [collapsed, setCollapsed] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('list');
@@ -350,7 +348,7 @@ function ActiveDiscussionStrip({
         {/* Active indicator */}
         <span className="flex items-center gap-1.5 text-xs font-semibold text-brand-600 shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
-          Active
+          {' '}Active
         </span>
 
         <div className="w-px h-4 bg-line-subtle shrink-0" />

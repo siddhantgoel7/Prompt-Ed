@@ -2,7 +2,8 @@
 
 // Shared card component used by ResponseCard (text responses) and MC option rows.
 // Layout: [badge] [text — grows on select] [rightLabel — fixed]
-// Uses div[role=button] so a nested interactive badge element (e.g. FlagBadge) is valid HTML.
+// Uses div[role=button] — a native <button> is not used here because the nested interactive
+// badge (FlagBadge) would be invalid HTML inside a <button>. // NOSONAR suppresses the Sonar rule.
 
 import { cn } from '@/lib/utils';
 import type { ReactNode, CSSProperties, KeyboardEvent } from 'react';
@@ -57,7 +58,7 @@ export function ExpandableCard({
   return (
     <div className={cn('transition-all duration-300 ease-in-out', isSelected ? cn(selectedMargin, 'z-10') : 'z-0')}>
       <div
-        role="button"
+        role="button" // NOSONAR - nested interactive badge (FlagBadge) prevents using a native <button> element
         tabIndex={0}
         aria-label={ariaLabel}
         data-highlighted={dataHighlighted}

@@ -137,13 +137,10 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
                     onSelectOption={jest.fn()}
                 />
             );
-            const optionButtons = screen.getAllByRole('radio');
-            const selectedBtn = optionButtons.find(btn =>
-                btn.textContent?.includes('A.')
-            );
+            const selectedBtn = screen.getByTestId('mc-option-A');
             expect(selectedBtn).toBeInTheDocument();
             // Selected option has a distinct background — check semantic state attribute, not color values
-            expect(screen.getByTestId('mc-option-A')).toHaveAttribute('data-state', 'selected');
+            expect(selectedBtn).toHaveAttribute('data-state', 'selected');
         });
 
         // 30.10
@@ -155,10 +152,9 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
                     onSelectOption={jest.fn()}
                 />
             );
-            const optionButtons = screen.getAllByRole('radio');
-            const unselectedBtn = optionButtons.find(btn => btn.textContent?.includes('B.'));
+            const unselectedBtn = screen.getByTestId('mc-option-B');
             // Non-selected button should not have the dark green selection background
-            expect(unselectedBtn?.getAttribute('style')).not.toMatch(/0\.18/); // 0.18 is the opacity of the selected style
+            expect(unselectedBtn.getAttribute('style')).not.toMatch(/0\.18/); // 0.18 is the opacity of the selected style
         });
 
         // 30.11
@@ -170,10 +166,9 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
                     onSelectOption={jest.fn()}
                 />
             );
-            const optionButtons = screen.getAllByRole('radio');
-            optionButtons.forEach(btn => {
+            screen.getAllByTestId(/^mc-option-/).forEach(label => {
                 // No option should have selected styling (0.18 opacity is only for selected)
-                expect(btn.getAttribute('style')).not.toMatch(/0\.18/);
+                expect(label.getAttribute('style')).not.toMatch(/0\.18/);
             });
         });
     });
@@ -199,9 +194,9 @@ describe('StudentPromptCard Component Tests [US 2.10]', () => {
             // All option buttons should have the same base className structure (no is_correct in HTML)
             expect(container.innerHTML).not.toMatch(/is_correct/i);
             expect(container.innerHTML).not.toMatch(/Correct Option/i);
-            // All buttons should have identical class names (no class-based answer hint)
-            const buttons = container.querySelectorAll('button');
-            const classNames = Array.from(buttons).map(b => b.className);
+            // All option labels should have identical class names (no class-based answer hint)
+            const optionLabels = container.querySelectorAll('label[data-testid^="mc-option-"]');
+            const classNames = Array.from(optionLabels).map(b => b.className);
             const uniqueClasses = new Set(classNames);
             expect(uniqueClasses.size).toBe(1); // All options have identical class names
         });

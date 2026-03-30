@@ -146,14 +146,20 @@ function MCOptionButton({
   const radioBorder = radioBg === 'transparent' ? '2px solid var(--border-default)' : `2px solid ${radioBg}`;
 
   return (
-    <button
+    <label
       data-testid={`mc-option-${label}`}
       data-state={state}
-      role="radio"
-      aria-checked={selectedOption === label}
-      onClick={() => { if (!submittedOption && !disabled) onSelect?.(label); }}
       style={baseStyle}
     >
+      <input
+        type="radio"
+        className="sr-only"
+        name="mc-option-group"
+        value={label}
+        checked={selectedOption === label}
+        disabled={!!submittedOption || !!disabled}
+        onChange={() => { if (!submittedOption && !disabled) onSelect?.(label); }}
+      />
       <div
         style={{
           width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0,
@@ -169,6 +175,6 @@ function MCOptionButton({
         <span className="font-semibold mr-1.5" style={{ color: 'inherit' }}>{label}.</span>
         {opt.text}
       </span>
-    </button>
+    </label>
   );
 }

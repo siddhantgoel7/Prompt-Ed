@@ -13,7 +13,7 @@ import {
 import { Tooltip as UITooltip, TooltipContent as UITooltipContent, TooltipTrigger as UITooltipTrigger } from '@/components/ui/tooltip';
 import { Info, ExternalLink, PieChart as PieChartIcon, BarChart2 } from 'lucide-react';
 import {
-  ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid
+  ResponsiveContainer, PieChart, Pie, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
@@ -81,9 +81,6 @@ function DonutChart({
             labelLine={false}
             stroke="none"
           >
-            {data.map((entry) => (
-              <Cell key={entry.label} fill={entry.fill} />
-            ))}
           </Pie>
           <Tooltip
             formatter={tooltipFormatter}
@@ -165,11 +162,7 @@ function DistributionSection({
                   separator=""
                   formatter={(value) => [fmtCount(Number(value ?? 0)), '']}
                 />
-                <Bar dataKey="count" radius={[3, 3, 0, 0]}>
-                  {data.map((entry) => (
-                    <Cell key={entry.label} fill={entry.fill} />
-                  ))}
-                </Bar>
+                <Bar dataKey="count" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
