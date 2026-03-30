@@ -61,11 +61,11 @@ export function ExpandableCard({
       <div
         className="w-full flex items-start justify-between rounded-xl transition-all duration-300 ease-in-out"
         style={{ padding, ...(isSelected ? selectedStyle : unselectedStyle) }}
+        aria-label={ariaLabel}
+        role="group"
       >
         {/*
           Left section: contains both the Badge and the Main Button.
-          We keep them siblings so the Badge (which can contain a <button>)
-          is not nested inside the main Card <button>.
         */}
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <div className="shrink-0 z-20 relative">
@@ -75,7 +75,6 @@ export function ExpandableCard({
           <button
             type="button"
             onClick={onClick}
-            aria-label={ariaLabel}
             className={cn(
               'flex-1 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] cursor-pointer rounded-lg -m-1 p-1',
               isSelected ? 'cursor-default' : 'cursor-pointer'

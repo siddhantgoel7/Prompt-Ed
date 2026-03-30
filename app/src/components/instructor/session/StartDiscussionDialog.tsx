@@ -66,7 +66,7 @@ export function StartDiscussionDialog({ open, onConfirm, onCancel, confirmLabel 
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onCancel(); }}>
       <DialogContent className="sm:max-w-md bg-card text-card-foreground border border-border" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">Discussion Settings</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Set Time Limit</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5 py-2">

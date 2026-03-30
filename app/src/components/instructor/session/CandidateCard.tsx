@@ -23,6 +23,7 @@ interface Props {
   index: number;
   isSelected: boolean;
   onSelect: () => void;
+  onPromptTextChange?: (text: string) => void;
   isConnected: boolean;
   onRequestPublish: (
     candidate: GeneratedPrompt,
@@ -115,15 +116,19 @@ function MCEditorSection({
   setOverrideCorrectOption: (v: string | null) => void,
   setEditingOptions: React.Dispatch<React.SetStateAction<Record<string, string>>>
 }>) {
+  if (!isSelected) {
+    return <div style={{ maxHeight: '0px', overflow: 'hidden' }} />;
+  }
+
   return (
     <div
       style={{
         overflow: 'hidden',
-        maxHeight: isSelected ? '600px' : '0px',
+        maxHeight: '600px',
         transition: `max-height ${SLIDE_MS}ms ${SLIDE_EASE}`,
       }}
     >
-      <div style={innerSlide(isSelected)}>
+      <div style={innerSlide(true)}>
         <MultipleChoiceEditor
           nameGroup={`correct-option-${index}`}
           options={
@@ -151,18 +156,22 @@ function PublishSection({
   editText: string,
   handlePublish: () => void
 }>) {
+  if (!isSelected) {
+    return <div style={{ maxHeight: '0px', overflow: 'hidden' }} />;
+  }
+
   return (
     <div
-      aria-hidden={!isSelected || undefined}
       style={{
         overflow: 'hidden',
-        maxHeight: isSelected ? '52px' : '0px',
+        maxHeight: '52px',
         transition: `max-height ${SLIDE_MS}ms ${SLIDE_EASE}`,
       }}
     >
-      <div style={innerSlide(isSelected)}>
+      <div style={innerSlide(true)}>
         <button
           type="button"
+          data-testid="publish-ai-question-button"
           onClick={handlePublish}
           disabled={!editText.trim() || !isConnected}
           className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
@@ -204,6 +213,7 @@ function PromptCrossfade({
     >
       <p
         ref={pRef}
+        aria-hidden={isSelected || undefined}
         className="leading-snug text-sm text-content-primary"
         style={{
           margin:        0,
@@ -221,6 +231,8 @@ function PromptCrossfade({
       {isExpanded && (
         <textarea
           value={editText}
+          data-testid={isSelected ? "prompt-editor" : undefined}
+          aria-hidden={!isSelected || undefined}
           onChange={(e) => onEditTextChange(e.target.value)}
           className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none leading-snug bg-surface-raised text-content-primary"
           style={{
@@ -241,14 +253,19 @@ function PromptCrossfade({
 
 // ─── useCardExpansion ─────────────────────────────────────────────────────────
 
-function useCardExpansion(isSelected: boolean, candidate: GeneratedPrompt) {
-  const [editText, setEditText]                           = React.useState(candidate.promptText);
+function useCardExpansion(isSelected: boolean, candidate: GeneratedPrompt, onPromptTextChange?: (t: string) => void) {
+  const [editText, setEditTextInternal]                   = React.useState(candidate.promptText);
   const [editingOptions, setEditingOptions]               = React.useState<Record<string, string>>({});
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
 
   const isExpandedRef    = React.useRef(false);
   const [isExpanded, setIsExpanded]   = React.useState(false);
   const expandedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const setEditText = (t: string) => {
+    setEditTextInternal(t);
+    onPromptTextChange?.(t);
+  };
 
   React.useEffect(() => {
     if (expandedTimerRef.current) clearTimeout(expandedTimerRef.current);
@@ -283,14 +300,14 @@ function useCardExpansion(isSelected: boolean, candidate: GeneratedPrompt) {
 // ─── CandidateCard ────────────────────────────────────────────────────────────
 
 export function CandidateCard({
-  candidate, index, isSelected, onSelect, isConnected, onRequestPublish,
+  candidate, index, isSelected, onSelect, onPromptTextChange, isConnected, onRequestPublish,
 }: Readonly<Props>) {
   const {
     editText, setEditText,
     editingOptions, setEditingOptions,
     overrideCorrectOption, setOverrideCorrectOption,
     isExpanded, isExpandedRef,
-  } = useCardExpansion(isSelected, candidate);
+  } = useCardExpansion(isSelected, candidate, onPromptTextChange);
 
   const [isHovered, setIsHovered] = React.useState(false);
   const pRef = React.useRef<HTMLParagraphElement>(null);
