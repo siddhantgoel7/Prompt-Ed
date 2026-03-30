@@ -2,11 +2,12 @@
 
 // Shared card component used by ResponseCard (text responses) and MC option rows.
 // Layout: [badge] [text — grows on select] [rightLabel — fixed]
-// Uses div[role=button] — a native <button> is not used here because the nested interactive
-// badge (FlagBadge) would be invalid HTML inside a <button>. // NOSONAR suppresses the Sonar rule.
+//
+// Accessibility: Uses a combination of div and native <button> to ensure the card
+// remains keyboard-accessible while allowing nested interactive badges (e.g. FlagBadge).
 
 import { cn } from '@/lib/utils';
-import type { ReactNode, CSSProperties, KeyboardEvent } from 'react';
+import type { ReactNode, CSSProperties } from 'react';
 
 export interface ExpandableCardProps {
   /** Left slot — badge or icon, always top-anchored. */
@@ -48,36 +49,47 @@ export function ExpandableCard({
   'data-variant': dataVariant,
   ariaLabel,
 }: Readonly<ExpandableCardProps>) {
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onClick();
-    }
-  };
-
   return (
-    <div className={cn('transition-all duration-300 ease-in-out', isSelected ? cn(selectedMargin, 'z-10') : 'z-0')}>
+    <div
+      className={cn(
+        'transition-all duration-300 ease-in-out relative group',
+        isSelected ? cn(selectedMargin, 'z-10') : 'z-0'
+      )}
+      data-highlighted={dataHighlighted}
+      data-variant={dataVariant}
+    >
       <div
-        role="button" // NOSONAR - nested interactive badge (FlagBadge) prevents using a native <button> element
-        tabIndex={0}
-        aria-label={ariaLabel}
-        data-highlighted={dataHighlighted}
-        data-variant={dataVariant}
-        onClick={onClick}
-        onKeyDown={handleKeyDown}
-        className="w-full text-left flex items-start justify-between rounded-xl transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] cursor-pointer"
+        className="w-full flex items-start justify-between rounded-xl transition-all duration-300 ease-in-out"
         style={{ padding, ...(isSelected ? selectedStyle : unselectedStyle) }}
       >
-        {/* Left badge — top-anchored */}
+        {/*
+          Left section: contains both the Badge and the Main Button.
+          We keep them siblings so the Badge (which can contain a <button>)
+          is not nested inside the main Card <button>.
+        */}
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          {badge}
-          <span className={cn(
-            'transition-all duration-300 whitespace-pre-wrap break-words text-content-primary',
-            isSelected ? selectedTextClassName : unselectedTextClassName,
-          )}>
-            {text}
-          </span>
+          <div className="shrink-0 z-20 relative">
+            {badge}
+          </div>
+
+          <button
+            type="button"
+            onClick={onClick}
+            aria-label={ariaLabel}
+            className={cn(
+              'flex-1 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] cursor-pointer rounded-lg -m-1 p-1',
+              isSelected ? 'cursor-default' : 'cursor-pointer'
+            )}
+          >
+            <span className={cn(
+              'transition-all duration-300 whitespace-pre-wrap break-words text-content-primary block',
+              isSelected ? selectedTextClassName : unselectedTextClassName,
+            )}>
+              {text}
+            </span>
+          </button>
         </div>
+
         {/* Right label — fixed size, top-anchored */}
         <div className="shrink-0 ml-3">
           {rightLabel}

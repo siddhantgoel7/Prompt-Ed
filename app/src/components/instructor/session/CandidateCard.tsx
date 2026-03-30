@@ -30,7 +30,7 @@ interface Props {
   ) => void;
 }
 
-// ─── CardHeader ───────────────────────────────────────────────────────────────
+// ─── Sub-components and Helpers ──────────────────────────────────────────────
 
 interface CardHeaderProps {
   promptType: string;
@@ -51,7 +51,9 @@ function CardHeader({ promptType, bloomsLevel, topicArea, rationale, isSelected 
       </span>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Info className="w-3 h-3 text-muted-foreground shrink-0" aria-label="About this question type" />
+          <button type="button" className="p-0 border-none bg-transparent focus:outline-none">
+            <Info className="w-3 h-3 text-muted-foreground shrink-0" aria-label="About this question type" />
+          </button>
         </TooltipTrigger>
         <TooltipContent align="start">
           {bloomsLevel && <p><span className="font-semibold">Bloom&apos;s:</span> {bloomsLevel}</p>}
@@ -69,7 +71,111 @@ function CardHeader({ promptType, bloomsLevel, topicArea, rationale, isSelected 
   );
 }
 
-// ─── PromptCrossfade ──────────────────────────────────────────────────────────
+const innerSlide = (visible: boolean): React.CSSProperties => ({
+  transform:  visible ? 'translateY(0px)' : 'translateY(-8px)',
+  opacity:    visible ? 1 : 0,
+  transition: `transform ${SLIDE_MS}ms ${SLIDE_EASE}, opacity ${SLIDE_MS}ms ease`,
+});
+
+function UnselectedMCList({ isSelected, mcOptions }: Readonly<{ isSelected: boolean, mcOptions?: { label: string, text: string }[] }>) {
+  if (!mcOptions?.length) return null;
+  return (
+    <ul
+      className="mt-2 space-y-1 text-left"
+      style={{
+        overflow: 'hidden',
+        maxHeight: isSelected ? '0px' : '300px',
+        transform: isSelected ? 'translateY(-8px)' : 'translateY(0px)',
+        opacity: isSelected ? 0 : 1,
+        transition: [
+          `max-height ${SLIDE_MS}ms ${SLIDE_EASE}`,
+          `transform  ${SLIDE_MS}ms ${SLIDE_EASE}`,
+          `opacity    ${SLIDE_MS}ms ease`,
+        ].join(', '),
+      }}
+    >
+      {mcOptions.map((opt) => (
+        <li key={opt.label} className="text-xs text-content-muted">
+          <span className="font-semibold mr-1 text-content-secondary">{opt.label}.</span>
+          {opt.text}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function MCEditorSection({
+  isSelected, index, mcOptions, editingOptions, overrideCorrectOption, setOverrideCorrectOption, setEditingOptions
+}: Readonly<{
+  isSelected: boolean,
+  index: number,
+  mcOptions?: { label: string, text: string }[],
+  editingOptions: Record<string, string>,
+  overrideCorrectOption: string | null,
+  setOverrideCorrectOption: (v: string | null) => void,
+  setEditingOptions: React.Dispatch<React.SetStateAction<Record<string, string>>>
+}>) {
+  return (
+    <div
+      style={{
+        overflow: 'hidden',
+        maxHeight: isSelected ? '600px' : '0px',
+        transition: `max-height ${SLIDE_MS}ms ${SLIDE_EASE}`,
+      }}
+    >
+      <div style={innerSlide(isSelected)}>
+        <MultipleChoiceEditor
+          nameGroup={`correct-option-${index}`}
+          options={
+            mcOptions?.map((opt) => ({
+              label: opt.label,
+              text: editingOptions[opt.label] ?? opt.text,
+            })) ?? []
+          }
+          correctOption={overrideCorrectOption}
+          onCorrectOptionChange={setOverrideCorrectOption}
+          onOptionTextChange={(label, text) =>
+            setEditingOptions((prev) => ({ ...prev, [label]: text }))
+          }
+        />
+      </div>
+    </div>
+  );
+}
+
+function PublishSection({
+  isSelected, isConnected, editText, handlePublish
+}: Readonly<{
+  isSelected: boolean,
+  isConnected: boolean,
+  editText: string,
+  handlePublish: () => void
+}>) {
+  return (
+    <div
+      aria-hidden={!isSelected || undefined}
+      style={{
+        overflow: 'hidden',
+        maxHeight: isSelected ? '52px' : '0px',
+        transition: `max-height ${SLIDE_MS}ms ${SLIDE_EASE}`,
+      }}
+    >
+      <div style={innerSlide(isSelected)}>
+        <button
+          type="button"
+          onClick={handlePublish}
+          disabled={!editText.trim() || !isConnected}
+          className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
+          style={{
+            background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
+          }}
+        >
+          Publish This Question →
+        </button>
+      </div>
+    </div>
+  );
+}
 
 interface PromptCrossfadeProps {
   promptText: string;
@@ -164,7 +270,7 @@ function useCardExpansion(isSelected: boolean, candidate: GeneratedPrompt) {
       }, EXPANDED_HOLD_MS);
     }
     return () => { if (expandedTimerRef.current) clearTimeout(expandedTimerRef.current); };
-  }, [isSelected]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isSelected, candidate.promptText, candidate.mcOptions]);
 
   return {
     editText, setEditText,
@@ -173,12 +279,6 @@ function useCardExpansion(isSelected: boolean, candidate: GeneratedPrompt) {
     isExpanded, isExpandedRef,
   };
 }
-
-const innerSlide = (visible: boolean): React.CSSProperties => ({
-  transform:  visible ? 'translateY(0px)' : 'translateY(-8px)',
-  opacity:    visible ? 1 : 0,
-  transition: `transform ${SLIDE_MS}ms ${SLIDE_EASE}, opacity ${SLIDE_MS}ms ease`,
-});
 
 // ─── CandidateCard ────────────────────────────────────────────────────────────
 
@@ -193,8 +293,7 @@ export function CandidateCard({
   } = useCardExpansion(isSelected, candidate);
 
   const [isHovered, setIsHovered] = React.useState(false);
-
-  const pRef          = React.useRef<HTMLParagraphElement>(null);
+  const pRef = React.useRef<HTMLParagraphElement>(null);
   const [naturalHeight, setNaturalHeight] = React.useState(24);
 
   React.useLayoutEffect(() => {
@@ -211,13 +310,13 @@ export function CandidateCard({
     const published: GeneratedPrompt =
       candidate.promptType === 'multiple_choice' && candidate.mcOptions
         ? {
-            ...candidate,
-            promptText: editText,
-            mcOptions: candidate.mcOptions.map((opt) => ({
-              ...opt,
-              text: editingOptions[opt.label] ?? opt.text,
-            })),
-          }
+          ...candidate,
+          promptText: editText,
+          mcOptions: candidate.mcOptions.map((opt) => ({
+            ...opt,
+            text: editingOptions[opt.label] ?? opt.text,
+          })),
+        }
         : { ...candidate, promptText: editText };
     onRequestPublish(published, overrideCorrectOption);
   };
@@ -228,21 +327,14 @@ export function CandidateCard({
     <div
       className="p-3 rounded-xl text-sm"
       style={{
-        background:    isSelected ? 'rgba(45,158,45,0.06)' : 'var(--surface-raised)',
-        border:        `1px solid ${!isSelected && isHovered ? 'var(--color-primary-300)' : 'var(--border-default)'}`,
-        outline:       '2px solid',
-        outlineColor:  isSelected ? 'var(--color-primary-400)' : 'transparent',
+        background: isSelected ? 'rgba(45,158,45,0.06)' : 'var(--surface-raised)',
+        border: `1px solid ${!isSelected && isHovered ? 'var(--color-primary-300)' : 'var(--border-default)'}`,
+        outline: '2px solid',
+        outlineColor: isSelected ? 'var(--color-primary-400)' : 'transparent',
         outlineOffset: '-1px',
-        boxSizing:     'border-box',
-        cursor:        isSelected ? 'default' : 'pointer',
+        boxSizing: 'border-box',
         transition: `background ${CARD_BG_MS}ms${isSelected ? '' : ', border-color 120ms ease'}`,
       }}
-      role="button" // NOSONAR - nested interactive elements (MultipleChoiceEditor inputs, publish button) prevent using a native <button> element
-      aria-label={candidate.promptText}
-      tabIndex={isSelected ? -1 : 0}
-      aria-pressed={isSelected}
-      onClick={isSelected ? undefined : onSelect}
-      onKeyDown={isSelected ? undefined : (e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(); }}
       onMouseEnter={isSelected ? undefined : () => setIsHovered(true)}
       onMouseLeave={isSelected ? undefined : () => setIsHovered(false)}
     >
@@ -254,99 +346,54 @@ export function CandidateCard({
         isSelected={isSelected}
       />
 
-      <PromptCrossfade
-        promptText={candidate.promptText}
-        editText={editText}
-        onEditTextChange={setEditText}
-        isSelected={isSelected}
-        isExpanded={isExpanded}
-        pRef={pRef}
-        naturalHeight={naturalHeight}
-      />
-
-      {/* ── MC choices: slide up + fade simultaneously as editor slides down ──
-          Both are driven by isSelected at the same time, so they animate
-          in parallel with no waiting. translateY reverses cleanly on exit. */}
-      {hasMc && (
-        <ul
-          className="mt-2 space-y-1"
-          style={{
-            overflow:   'hidden',
-            maxHeight:  isSelected ? '0px' : '300px',
-            // transform + opacity live here (not in a child) so they
-            // animate at the same moment maxHeight collapses
-            transform:  isSelected ? 'translateY(-8px)' : 'translateY(0px)',
-            opacity:    isSelected ? 0 : 1,
-            transition: [
-              `max-height ${SLIDE_MS}ms ${SLIDE_EASE}`,
-              `transform  ${SLIDE_MS}ms ${SLIDE_EASE}`,
-              `opacity    ${SLIDE_MS}ms ease`,
-            ].join(', '),
-          }}
-        >
-          {candidate.mcOptions?.map((opt) => (
-            <li key={opt.label} className="text-xs text-content-muted">
-              <span className="font-semibold mr-1 text-content-secondary">{opt.label}.</span>
-              {opt.text}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* ── MC editor ──
-          Outer div: only clips overflow + collapses height. No opacity here
-          so there's no double-fade fighting the inner div's animation.
-          Inner div: owns transform + opacity — identical easing each way,
-          so exit is the exact reverse of entrance. */}
-      {candidate.promptType === 'multiple_choice' && (
-        <div
-          style={{
-            overflow:   'hidden',
-            maxHeight:  isSelected ? '600px' : '0px',
-            transition: `max-height ${SLIDE_MS}ms ${SLIDE_EASE}`,
-          }}
-        >
-          <div style={innerSlide(isSelected)}>
-            <MultipleChoiceEditor
-              nameGroup={`correct-option-${index}`}
-              options={
-                candidate.mcOptions?.map((opt) => ({
-                  label: opt.label,
-                  text:  editingOptions[opt.label] ?? opt.text,
-                })) ?? []
-              }
-              correctOption={overrideCorrectOption}
-              onCorrectOptionChange={setOverrideCorrectOption}
-              onOptionTextChange={(label, text) =>
-                setEditingOptions((prev) => ({ ...prev, [label]: text }))
-              }
+      {isSelected ? (
+        <div className="flex flex-col">
+          <PromptCrossfade
+            promptText={candidate.promptText}
+            editText={editText}
+            onEditTextChange={setEditText}
+            isSelected={isSelected}
+            isExpanded={isExpanded}
+            pRef={pRef}
+            naturalHeight={naturalHeight}
+          />
+          {hasMc && (
+            <MCEditorSection
+              isSelected={isSelected}
+              index={index}
+              mcOptions={candidate.mcOptions}
+              editingOptions={editingOptions}
+              overrideCorrectOption={overrideCorrectOption}
+              setOverrideCorrectOption={setOverrideCorrectOption}
+              setEditingOptions={setEditingOptions}
             />
-          </div>
+          )}
+          <PublishSection
+            isSelected={isSelected}
+            isConnected={isConnected}
+            editText={editText}
+            handlePublish={handlePublish}
+          />
         </div>
+      ) : (
+        <button
+          type="button"
+          onClick={onSelect}
+          className="w-full text-left appearance-none focus:outline-none"
+          aria-label={`Select: ${candidate.promptText}`}
+        >
+          <PromptCrossfade
+            promptText={candidate.promptText}
+            editText={editText}
+            onEditTextChange={setEditText}
+            isSelected={isSelected}
+            isExpanded={isExpanded}
+            pRef={pRef}
+            naturalHeight={naturalHeight}
+          />
+          <UnselectedMCList isSelected={isSelected} mcOptions={candidate.mcOptions} />
+        </button>
       )}
-
-      {/* ── Publish button: same outer-clip / inner-animate pattern ── */}
-      <div
-        aria-hidden={!isSelected || undefined}
-        style={{
-          overflow:   'hidden',
-          maxHeight:  isSelected ? '52px' : '0px',
-          transition: `max-height ${SLIDE_MS}ms ${SLIDE_EASE}`,
-        }}
-      >
-        <div style={innerSlide(isSelected)}>
-          <button
-            onClick={handlePublish}
-            disabled={!editText.trim() || !isConnected}
-            className="mt-2 w-full rounded-[10px] text-xs py-2 font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
-            style={{
-              background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-            }}
-          >
-            Publish This Question →
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
