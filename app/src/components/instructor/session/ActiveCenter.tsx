@@ -318,10 +318,10 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
 
 function AIGenerationPanel({
   lessonId, recorder, isGenerating, sttStatus, sttError, handleStopAndTranscribe,
-  transcriptText, promptInput, setPromptInput, setTranscriptText, transcriptRef,
+  transcriptText, setPromptInput, setTranscriptText, transcriptRef,
   promptType, setPromptType, onGenerate, handleRunAllCombinations, sweepProgress,
   generationWarning, candidates, selectedIndex, handleSelectCandidate,
-  overrideCorrectOption, setOverrideCorrectOption,
+  setOverrideCorrectOption,
   setPendingCandidate, setShowTimerDialog,
   isConnected, onRegenerate, handleCopyReport, copiedReport
 }: Readonly<ActiveCenterProps & {

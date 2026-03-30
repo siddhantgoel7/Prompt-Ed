@@ -6,13 +6,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useRouter } from 'next/navigation';
 
 /** Renders the dashboard header bar with the PromptED logo and a Log-Out button. */
-export function InstructorDashboardHeader({
-  loggingOut,
-  onLogout,
-}: Readonly<{
-  loggingOut: boolean;
-  onLogout: () => void;
-}>) {
+export function InstructorDashboardHeader() {
   const router = useRouter();
 
   return (

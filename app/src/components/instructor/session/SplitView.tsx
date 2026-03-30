@@ -16,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppLogo } from '@/components/ui/AppLogo';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
-import { truncateText } from '@/lib/utils';
 import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 import { ResponseCard } from '@/components/instructor/ResponseCard';
 

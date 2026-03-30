@@ -2,7 +2,7 @@
 // (loading, waiting, active prompt, submitted, ended) and handles MC submission logic.
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { StudentSessionShell } from './StudentSessionShell';
 import { StudentStatusAlert } from './StudentStatusAlert';
 import { StudentPromptCard } from './StudentPromptCard';
@@ -15,7 +15,6 @@ import { useStudentSession } from '@/hooks/useStudentSession';
 import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
 import type { Discussion } from '@/types/discussion';
 
-const FEEDBACK_DISPLAY_MS = 7_000;
 
 /** Renders the student session UI, routing between waiting/active/submitted/ended states. */
 export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>) {

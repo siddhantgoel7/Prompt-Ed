@@ -193,11 +193,10 @@ interface PromptCrossfadeProps {
   isSelected: boolean;
   isExpanded: boolean;
   pRef: React.RefObject<HTMLParagraphElement | null>;
-  naturalHeight: number;
 }
 
 function PromptCrossfade({
-  promptText, editText, onEditTextChange, isSelected, isExpanded, pRef, naturalHeight,
+  promptText, editText, onEditTextChange, isSelected, isExpanded, pRef,
 }: Readonly<PromptCrossfadeProps>) {
   const promptTransition = isSelected
     ? `opacity ${DRIFT_MS}ms ease, transform ${SWAP_MS}ms ease`
@@ -264,10 +263,10 @@ function useCardExpansion(isSelected: boolean, candidate: GeneratedPrompt, onPro
   const [isExpanded, setIsExpanded]   = React.useState(false);
   const expandedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const setEditText = (t: string) => {
+  const setEditText = React.useCallback((t: string) => {
     setEditTextInternal(t);
     onPromptTextChange?.(t);
-  };
+  }, [onPromptTextChange]);
 
   React.useEffect(() => {
     if (expandedTimerRef.current) clearTimeout(expandedTimerRef.current);
@@ -289,13 +288,13 @@ function useCardExpansion(isSelected: boolean, candidate: GeneratedPrompt, onPro
       }, EXPANDED_HOLD_MS);
     }
     return () => { if (expandedTimerRef.current) clearTimeout(expandedTimerRef.current); };
-  }, [isSelected, candidate.promptText, candidate.mcOptions]);
+  }, [isSelected, candidate.promptText, candidate.mcOptions, setEditText]);
 
   return {
     editText, setEditText,
     editingOptions, setEditingOptions,
     overrideCorrectOption, setOverrideCorrectOption,
-    isExpanded, isExpandedRef,
+    isExpanded,
   };
 }
 
@@ -308,22 +307,12 @@ export function CandidateCard({
     editText, setEditText,
     editingOptions, setEditingOptions,
     overrideCorrectOption, setOverrideCorrectOption,
-    isExpanded, isExpandedRef,
+    isExpanded,
   } = useCardExpansion(isSelected, candidate, onPromptTextChange);
 
   const [isHovered, setIsHovered] = React.useState(false);
   const pRef = React.useRef<HTMLParagraphElement>(null);
-  const [naturalHeight, setNaturalHeight] = React.useState(24);
 
-  React.useLayoutEffect(() => {
-    const el = pRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => {
-      if (!isExpandedRef.current) setNaturalHeight(el.scrollHeight);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [isExpandedRef]);
 
   const handlePublish = () => {
     const published: GeneratedPrompt =
@@ -379,7 +368,6 @@ export function CandidateCard({
             isSelected={isSelected}
             isExpanded={isExpanded}
             pRef={pRef}
-            naturalHeight={naturalHeight}
           />
           {hasMc && (
             <MCEditorSection
@@ -411,7 +399,6 @@ export function CandidateCard({
             isSelected={isSelected}
             isExpanded={isExpanded}
             pRef={pRef}
-            naturalHeight={naturalHeight}
           />
           <UnselectedMCList isSelected={isSelected} mcOptions={candidate.mcOptions} />
         </div>

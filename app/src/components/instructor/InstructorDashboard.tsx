@@ -19,7 +19,7 @@ export function InstructorDashboard() {
 
   return (
     <div className="min-h-screen bg-surface-base">
-      <InstructorDashboardHeader loggingOut={dashboard.loggingOut} onLogout={dashboard.logout} />
+      <InstructorDashboardHeader />
 
       <main className="px-4 py-10 md:px-8 md:py-12">
         <CoursesSection

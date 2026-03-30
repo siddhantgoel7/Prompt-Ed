@@ -3,7 +3,6 @@
 import { FilterToggle } from '@/components/instructor/FilterToggle';
 
 interface ResponseStatusBarProps {
-  isConnected: boolean;
   /** When omitted, no total count is shown. */
   totalCount?: number;
   /** Label shown before the count. Defaults to "Total:". */
@@ -16,7 +15,6 @@ interface ResponseStatusBarProps {
 
 /** Single-row bar showing realtime connection status, optional response count, and optional highlight filter. */
 export function ResponseStatusBar({
-  isConnected,
   totalCount,
   totalLabel = 'Total:',
   selectedCount = 0,

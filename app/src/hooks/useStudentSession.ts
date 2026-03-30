@@ -459,18 +459,27 @@ export function useStudentSession(lessonId: string) {
   }, [timerEndTime, responseText, selectedOption, submitting, submitResponse]);
 
   // 4) Feedback display period for MC
+  const startedFeedbackForRef = useRef<string | null>(null);
   useEffect(() => {
     if (
       timerExpired &&
       view === 'submitted' &&
+      activeDiscussion?.id &&
       activeDiscussion?.prompt_type === 'multiple_choice' &&
       activeDiscussion?.feedback_enabled &&
-      isSubmitCorrect !== null
+      isSubmitCorrect !== null &&
+      startedFeedbackForRef.current !== activeDiscussion.id
     ) {
-      setFeedbackPeriodActive(true);
-      const id = setTimeout(() => setFeedbackPeriodActive(false), 7000);
-      feedbackTimerRef.current = id;
-      return () => clearTimeout(id);
+      startedFeedbackForRef.current = activeDiscussion.id;
+      // Wrap in setTimeout to avoid "setState in effect" warning if synchronous
+      const timeoutId = setTimeout(() => setFeedbackPeriodActive(true), 0);
+      
+      const hideId = setTimeout(() => setFeedbackPeriodActive(false), 7000);
+      feedbackTimerRef.current = hideId;
+      return () => {
+        clearTimeout(timeoutId);
+        clearTimeout(hideId);
+      };
     }
   }, [timerExpired, view, activeDiscussion, isSubmitCorrect]);
 

@@ -6,7 +6,7 @@ import * as React from 'react';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { formatTime, truncateText } from '@/lib/utils';
+import { formatTime } from '@/lib/utils';
 
 
 /** Renders a reverse-chronological list of discussion cards, highlighting the currently active one. */
