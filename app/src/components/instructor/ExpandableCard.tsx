@@ -76,12 +76,12 @@ export function ExpandableCard({
             type="button"
             onClick={onClick}
             className={cn(
-              'flex-1 min-w-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] cursor-pointer rounded-lg -m-1 p-1 whitespace-pre-wrap break-all break-words',
+              'flex-1 min-w-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] cursor-pointer rounded-lg -m-1 p-1 whitespace-pre-wrap break-words [overflow-wrap:anywhere] [word-break:break-word]',
               isSelected ? 'cursor-default' : 'cursor-pointer'
             )}
           >
             <span className={cn(
-              'transition-all duration-300 whitespace-pre-wrap break-all break-words text-content-primary block w-full',
+              'transition-all duration-300 break-words whitespace-pre-wrap text-content-primary block w-full [overflow-wrap:anywhere] [word-break:break-word]',
               isSelected ? selectedTextClassName : unselectedTextClassName,
             )}>
               {text}

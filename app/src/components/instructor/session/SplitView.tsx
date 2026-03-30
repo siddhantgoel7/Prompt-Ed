@@ -97,8 +97,8 @@ function DiscussionList({
                 </span>
               )}
             </div>
-            <p className="text-sm leading-relaxed mb-1.5 text-content-primary whitespace-pre-wrap break-all break-words line-clamp-3">
-              {truncateText(d.prompt_text)}
+            <p className="text-sm leading-relaxed mb-1.5 text-content-primary break-words whitespace-pre-wrap [overflow-wrap:anywhere] [word-break:break-word] line-clamp-3">
+              {d.prompt_text}
             </p>
             <div className="flex items-center gap-1.5 text-xs text-content-muted">
               <span className="font-semibold text-content-secondary">
@@ -183,7 +183,7 @@ function DiscussionDetail({
           Back
         </button>
 
-        <p className="text-sm font-medium leading-relaxed mb-2 text-content-primary whitespace-pre-wrap break-all break-words">
+        <p className="text-sm font-medium leading-relaxed mb-2 text-content-primary break-words whitespace-pre-wrap [overflow-wrap:anywhere] [word-break:break-word]">
           {discussion.prompt_text}
         </p>
 

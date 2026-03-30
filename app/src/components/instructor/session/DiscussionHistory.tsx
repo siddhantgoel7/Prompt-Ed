@@ -71,8 +71,8 @@ export function DiscussionHistory({
                                     )}
                                 </div>
 
-                                <p className="text-sm mb-2 leading-relaxed text-content-primary">
-                                    {truncateText(d.prompt_text)}
+                                <p className="text-sm mb-2 leading-relaxed text-content-primary line-clamp-3 break-words [overflow-wrap:anywhere] [word-break:break-word]">
+                                    {d.prompt_text}
                                 </p>
 
                                 <div className="flex items-center gap-2 text-xs text-content-muted">
