@@ -41,24 +41,24 @@ function SummaryBar({
 
   return (
     <div
-      className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-6 py-6 border-b border-line-default bg-surface-raised/50"
+      className="grid grid-cols-3 gap-2 sm:gap-4 px-3 sm:px-6 py-4 sm:py-6 border-b border-line-default bg-surface-raised/50"
     >
-      <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-brand-500/5 border border-brand-500/10 transition-all duration-300 hover:bg-brand-500/10">
-        <Trophy className="w-5 h-5 mb-2 text-brand-600 opacity-80" />
-        <span className="text-3xl font-black tracking-tight text-content-primary">{totalDiscussions}</span>
-        <span className="text-[10px] font-bold uppercase tracking-wider mt-1 text-content-muted">Discussions</span>
+      <div className="flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-brand-500/5 border border-brand-500/10 transition-all duration-300 hover:bg-brand-500/10">
+        <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 text-brand-600 opacity-80" />
+        <span className="text-xl sm:text-3xl font-black tracking-tight text-content-primary">{totalDiscussions}</span>
+        <span className="text-[9px] sm:text-[10px] text-center font-bold uppercase tracking-wider mt-0.5 sm:mt-1 text-content-muted">Discussions</span>
       </div>
       <div
-        className="flex flex-col items-center justify-center p-4 rounded-2xl bg-primary-500/5 border border-primary-500/10 transition-all duration-300 hover:bg-primary-500/10"
+        className="flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-primary-500/5 border border-primary-500/10 transition-all duration-300 hover:bg-primary-500/10"
       >
-        <MessageSquare className="w-5 h-5 mb-2 text-primary-600 opacity-80" />
-        <span className="text-3xl font-black tracking-tight text-content-primary">{totalResponses}</span>
-        <span className="text-[10px] font-bold uppercase tracking-wider mt-1 text-content-muted">Total Responses</span>
+        <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 text-primary-600 opacity-80" />
+        <span className="text-xl sm:text-3xl font-black tracking-tight text-content-primary">{totalResponses}</span>
+        <span className="text-[9px] sm:text-[10px] text-center font-bold uppercase tracking-wider mt-0.5 sm:mt-1 text-content-muted">Responses</span>
       </div>
-      <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 transition-all duration-300 hover:bg-amber-500/10">
-        <Clock className="w-5 h-5 mb-2 text-amber-600 opacity-80" />
-        <span className="text-3xl font-black tracking-tight text-content-primary">{duration ?? '—'}</span>
-        <span className="text-[10px] font-bold uppercase tracking-wider mt-1 text-content-muted">Duration</span>
+      <div className="flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-amber-500/5 border border-amber-500/10 transition-all duration-300 hover:bg-amber-500/10">
+        <Clock className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 text-amber-600 opacity-80" />
+        <span className="text-xl sm:text-3xl font-black tracking-tight text-content-primary">{duration ?? '—'}</span>
+        <span className="text-[9px] sm:text-[10px] text-center font-bold uppercase tracking-wider mt-0.5 sm:mt-1 text-content-muted">Duration</span>
       </div>
     </div>
   );
