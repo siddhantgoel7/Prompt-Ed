@@ -109,7 +109,7 @@ export function ActiveRightPanel(props: Readonly<{
         )}
       </div>
 
-      <div className="flex-1 flex flex-col h-full">
+      <div className="flex-1 flex flex-col h-full min-w-0 w-full overflow-hidden">
         {collapsed ? (
           <CollapsedSidebarIcons
             responses={responses}
@@ -264,7 +264,7 @@ function ExpandedSidebarContent(props: Readonly<ReturnType<typeof useActiveRight
 }>) {
   const { activeTab, setActiveTab, activeDiscussion, responses, distribution, activeDiscussionId, timerEndTime, timerTotalSeconds, handleCloseDiscussion, handleExtendTimer, handleEditTimer, peakStudentCount, isMC } = props;
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden min-w-0 w-full">
       {/* Active discussion strip — always visible above tabs when a discussion is running */}
       {activeDiscussionId && (
         <ActiveDiscussionStrip
@@ -282,12 +282,12 @@ function ExpandedSidebarContent(props: Readonly<ReturnType<typeof useActiveRight
           <TabsTrigger value="analytics" className="text-xs">Metrics</TabsTrigger>
         </TabsList>
       </div>
-      <ScrollArea className="flex-1 mt-3">
-        <div className="px-3 pb-4">
-          <TabsContent value="list" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+      <ScrollArea className="flex-1 mt-3 min-w-0 w-full">
+        <div className="px-3 pb-4 min-w-0 w-full">
+          <TabsContent value="list" className="mt-0 focus-visible:outline-none focus-visible:ring-0 min-w-0 w-full">
             <ResponseListTab {...props} isMC={isMC} distribution={distribution} />
           </TabsContent>
-          <TabsContent value="analytics" className="mt-0 pt-2 focus-visible:outline-none focus-visible:ring-0">
+          <TabsContent value="analytics" className="mt-0 pt-2 focus-visible:outline-none focus-visible:ring-0 min-w-0 w-full">
             {activeDiscussion ? <DiscussionAnalyticsContent discussion={activeDiscussion} responses={responses} studentCount={peakStudentCount} lessonId={props.lessonId} /> : <p className="text-sm py-8 text-center text-content-muted">No active discussion</p>}
           </TabsContent>
         </div>

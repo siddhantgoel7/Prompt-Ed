@@ -180,7 +180,7 @@ export function ResponseListTab({
           Waiting for student responses…
         </p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 min-w-0 w-full overflow-hidden">
           {!showFlagged && filterResponses(responses).map((r) => (
             <ResponseCard
               key={r.id}

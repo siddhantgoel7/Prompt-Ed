@@ -87,7 +87,7 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
   });
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 min-w-0 w-full">
       <div
         className="space-y-3 rounded-2xl p-4"
         style={{
@@ -104,7 +104,7 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
             <TabsTrigger value="general" className="flex-shrink-0 whitespace-nowrap px-4 py-2">General Questions</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="ai" className="space-y-3 mt-0">
+          <TabsContent value="ai" className="space-y-3 mt-0 min-w-0 w-full">
             <AIGenerationPanel
               {...state}
               {...handlers}
@@ -125,11 +125,11 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
             />
           </TabsContent>
 
-          <TabsContent value="general" className="mt-0">
+          <TabsContent value="general" className="mt-0 min-w-0 w-full">
             <GeneralQuestionsTab />
           </TabsContent>
 
-          <TabsContent value="manual" className="space-y-3 mt-0">
+          <TabsContent value="manual" className="space-y-3 mt-0 min-w-0 w-full">
             <ManualCreationPanel
               promptType={state.promptType} setPromptType={state.setPromptType}
               promptInput={state.promptInput} setPromptInput={state.setPromptInput}
@@ -385,7 +385,7 @@ function AIGenerationPanel({
       {generationWarning && <WarningMessage message={generationWarning} />}
       {DEBUG_TOOLS && sweepProgress && <SweepProgressMessage progress={sweepProgress} />}
       {candidates.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 min-w-0 w-full overflow-hidden">
           {candidates.map((c: GeneratedPrompt, i: number) => (
             <CandidateCard
               key={`candidate-${c.promptType}-${i}`}

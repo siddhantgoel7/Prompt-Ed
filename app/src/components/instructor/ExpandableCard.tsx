@@ -52,7 +52,7 @@ export function ExpandableCard({
   return (
     <div
       className={cn(
-        'transition-all duration-300 ease-in-out relative group',
+        'transition-all duration-300 ease-in-out relative group w-full min-w-0',
         isSelected ? cn(selectedMargin, 'z-10') : 'z-0'
       )}
       data-highlighted={dataHighlighted}
@@ -76,12 +76,12 @@ export function ExpandableCard({
             type="button"
             onClick={onClick}
             className={cn(
-              'flex-1 min-w-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] cursor-pointer rounded-lg -m-1 p-1',
+              'flex-1 min-w-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] cursor-pointer rounded-lg -m-1 p-1 whitespace-pre-wrap break-all break-words',
               isSelected ? 'cursor-default' : 'cursor-pointer'
             )}
           >
             <span className={cn(
-              'transition-all duration-300 whitespace-pre-wrap break-all break-words text-content-primary block',
+              'transition-all duration-300 whitespace-pre-wrap break-all break-words text-content-primary block w-full',
               isSelected ? selectedTextClassName : unselectedTextClassName,
             )}>
               {text}

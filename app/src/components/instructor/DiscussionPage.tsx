@@ -69,7 +69,7 @@ function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestore
   };
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 min-w-0 w-full">
       {/* Status bar: realtime connection + total count + inline highlight filter */}
       <ResponseStatusBar
         isConnected={isConnected}
@@ -280,15 +280,15 @@ export function DiscussionPage({
           </div>
 
           {/* RIGHT COLUMN: Question and Responses */}
-          <div className="flex-1 w-full min-w-0">
+          <div className="flex-1 w-full min-w-0 flex flex-col overflow-hidden">
             {/* Header */}
             <div
-              className="flex flex-col gap-4 mb-6 pb-6 border-b border-line-default"
+              className="flex flex-col gap-4 mb-6 pb-6 border-b border-line-default min-w-0 w-full"
             >
-              <div className="flex justify-between items-start gap-4">
-                <div className="space-y-1 flex-1">
+              <div className="flex justify-between items-start gap-4 min-w-0 w-full">
+                <div className="space-y-1 flex-1 min-w-0 w-full overflow-hidden">
                   <h1
-                    className="text-2xl font-bold leading-tight break-all break-words text-content-primary"
+                    className="text-2xl font-bold leading-tight break-all break-words text-content-primary max-w-full"
                   >
                     {initialDiscussion.prompt_text}
                   </h1>
@@ -417,7 +417,7 @@ export function DiscussionPage({
 
             {/* Responses List — hidden for MC since distribution is shown in the options section above */}
             {!isMC && (
-              <div className="space-y-4">
+              <div className="space-y-4 min-w-0 w-full overflow-hidden">
                 {responses.length === 0 && flaggedResponses.length === 0 ? (
                   <>
                     <ResponseStatusBar isConnected={isConnected} />

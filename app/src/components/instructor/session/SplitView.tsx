@@ -162,10 +162,10 @@ function DiscussionDetail({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0 w-full overflow-hidden">
       {/* Detail header */}
       <div
-        className="px-4 pt-3 pb-3 flex-shrink-0 border-b border-line-subtle"
+        className="px-4 pt-3 pb-3 flex-shrink-0 border-b border-line-subtle min-w-0 w-full"
       >
         <button
           onClick={onBack}
@@ -224,7 +224,7 @@ function DiscussionDetail({
       )}
 
       {/* Responses */}
-      <ScrollArea className="flex-1 px-4 py-3">
+      <ScrollArea className="flex-1 px-4 py-3 min-w-0 w-full">
         {(() => {
           if (loading) return (
             <div className="space-y-2">
@@ -238,7 +238,7 @@ function DiscussionDetail({
             </p>
           );
           return (
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0 w-full overflow-hidden">
               {responses.map((r) => (
                 <ResponseCard
                   key={r.id}
@@ -315,7 +315,7 @@ function Pane({
 
   return (
     <div
-      className="flex-1 flex flex-col min-w-0 border-r border-line-default"
+      className="flex-1 flex flex-col min-w-0 w-full overflow-hidden border-r border-line-default"
     >
       {/* Pane label */}
       <div

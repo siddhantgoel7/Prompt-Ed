@@ -348,7 +348,7 @@ export function CandidateCard({
       tabIndex={isSelected ? -1 : 0}
       onClick={!isSelected ? onSelect : undefined}
       onKeyDown={!isSelected ? (e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(); } : undefined}
-      className={`p-3 rounded-xl text-sm ${!isSelected ? 'cursor-pointer hover:shadow-sm' : ''}`}
+      className={`p-3 rounded-xl text-sm w-full min-w-0 overflow-hidden ${!isSelected ? 'cursor-pointer hover:shadow-sm' : ''}`}
       style={{
         background: isSelected ? 'var(--color-primary-alpha-08)' : 'var(--surface-raised)',
         border: `1px solid ${!isSelected && isHovered ? 'var(--color-primary-300)' : 'var(--border-default)'}`,
@@ -370,7 +370,7 @@ export function CandidateCard({
       />
 
       {isSelected ? (
-        <div className="flex flex-col cursor-default">
+        <div className="flex flex-col cursor-default min-w-0 w-full overflow-hidden">
           <PromptCrossfade
             promptText={candidate.promptText}
             editText={editText}
@@ -400,7 +400,7 @@ export function CandidateCard({
         </div>
       ) : (
         <div
-          className="w-full text-left"
+          className="w-full min-w-0 text-left overflow-hidden"
           aria-label={`Select: ${candidate.promptText}`}
         >
           <PromptCrossfade
