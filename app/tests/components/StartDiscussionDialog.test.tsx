@@ -20,7 +20,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
     // 66.1
     it('[US 1.29][UNIT1] success: dialog renders when open=true', () => {
         renderDialog();
-        expect(screen.getByText('Discussion Settings')).toBeInTheDocument();
+        expect(screen.getByText('Set Time Limit')).toBeInTheDocument();
     });
 
     // 66.2
@@ -104,7 +104,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
     // 66.11
     it('[US 1.29][UNIT11] success: dialog does not render when open=false', () => {
         render(<StartDiscussionDialog open={false} onConfirm={jest.fn()} onCancel={jest.fn()} />);
-        expect(screen.queryByText('Discussion Settings')).not.toBeInTheDocument();
+        expect(screen.queryByText('Set Time Limit')).not.toBeInTheDocument();
     });
 
     // 66.12

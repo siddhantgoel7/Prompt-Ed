@@ -19,6 +19,13 @@ jest.mock('@/components/ui/tooltip', () => ({
   TooltipContent: ({ children }: any) => <div>{children}</div>,
 }));
 
+// Mock ResizeObserver for JSDOM
+global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+};
+
 // Expose onCancel so we can test the cancel path
 jest.mock('@/components/instructor/session/StartDiscussionDialog', () => ({
   StartDiscussionDialog: ({ open, onConfirm, onCancel }: any) =>
@@ -51,6 +58,7 @@ function buildContext(overrides: Record<string, unknown> = {}) {
     generalWarning: undefined as string | undefined,
     generateGeneralQuestions: jest.fn(),
     handlePublishAiCandidate: jest.fn(),
+    setPromptInput: jest.fn(),
     isConnected: true,
     files: [] as { id: string; status: string }[],
     ...overrides,
@@ -129,7 +137,7 @@ describe('GeneralQuestionsTab', () => {
 
   it('expands a compact card to show Selected badge and Publish button', () => {
     renderTab({ generalQuestions: [makeQuestion('q1', 'What is pharmacology?')] });
-    fireEvent.click(screen.getByText('What is pharmacology?'));
+    fireEvent.click(screen.getByLabelText(/Select: What is pharmacology/i));
     expect(screen.getByText('Selected (Editing)')).toBeInTheDocument();
     expect(screen.getByText('Publish This Question →')).toBeInTheDocument();
   });
@@ -158,7 +166,7 @@ describe('GeneralQuestionsTab', () => {
 
   it('shows correct answer radio buttons in the expanded MC card', () => {
     renderTab({ generalQuestions: [makeQuestion('q1', 'Q?')] });
-    fireEvent.click(screen.getByText('Q?'));
+    fireEvent.click(screen.getByLabelText(/Select: Q?/i));
     // MC options editor shows radio buttons for correct answer selection
     const radios = screen.getAllByRole('radio');
     expect(radios.length).toBeGreaterThan(0);
@@ -166,14 +174,14 @@ describe('GeneralQuestionsTab', () => {
 
   it('opens the timer dialog when "Publish This Question" is clicked', () => {
     renderTab({ generalQuestions: [makeQuestion('q1', 'Q?')] });
-    fireEvent.click(screen.getByText('Q?'));
+    fireEvent.click(screen.getByLabelText(/Select: Q?/i));
     fireEvent.click(screen.getByText('Publish This Question →'));
     expect(screen.getByTestId('timer-dialog')).toBeInTheDocument();
   });
 
   it('calls handlePublishAiCandidate with the question when the timer is confirmed', () => {
     const { ctx } = renderTab({ generalQuestions: [makeQuestion('q1', 'Q?')] });
-    fireEvent.click(screen.getByText('Q?'));
+    fireEvent.click(screen.getByLabelText(/Select: Q?/i));
     fireEvent.click(screen.getByText('Publish This Question →'));
     fireEvent.click(screen.getByText('Confirm Timer'));
     expect(ctx.handlePublishAiCandidate).toHaveBeenCalled();
@@ -182,7 +190,7 @@ describe('GeneralQuestionsTab', () => {
 
   it('closes the timer dialog without publishing when cancelled', () => {
     const { ctx } = renderTab({ generalQuestions: [makeQuestion('q1', 'Q?')] });
-    fireEvent.click(screen.getByText('Q?'));
+    fireEvent.click(screen.getByLabelText(/Select: Q?/i));
     fireEvent.click(screen.getByText('Publish This Question →'));
     fireEvent.click(screen.getByText('Cancel Timer'));
     expect(ctx.handlePublishAiCandidate).not.toHaveBeenCalled();
@@ -198,7 +206,7 @@ describe('GeneralQuestionsTab', () => {
       </SessionContext.Provider>
     );
     // Select the question
-    fireEvent.click(screen.getByText('Original Question'));
+    fireEvent.click(screen.getByLabelText(/Select: Original Question/i));
     expect(screen.getByText('Selected (Editing)')).toBeInTheDocument();
 
     // Simulate regeneration: two new questions (length 1 → 2 triggers the reset ref)

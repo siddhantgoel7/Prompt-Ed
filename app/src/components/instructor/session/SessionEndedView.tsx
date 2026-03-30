@@ -40,14 +40,14 @@ function SummaryBar({
 
   return (
     <div
-      className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-line-default bg-surface-raised"
+      className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-6 py-4 border-b border-line-default bg-surface-raised"
     >
       <div className="flex flex-col items-center justify-center py-2">
         <span className="text-2xl font-bold text-content-primary">{totalDiscussions}</span>
         <span className="text-xs mt-0.5 text-content-muted">Discussions Created</span>
       </div>
       <div
-        className="flex flex-col items-center justify-center py-2 border-x border-line-default"
+        className="flex flex-col items-center justify-center py-2 border-y sm:border-y-0 sm:border-x border-line-default"
       >
         <span className="text-2xl font-bold text-content-primary">{totalResponses}</span>
         <span className="text-xs mt-0.5 text-content-muted">Total Responses</span>

@@ -96,7 +96,7 @@ describe('ResponseCard — visual emphasis (full variant)', () => {
     const onToggle = jest.fn();
     renderCard({ onToggle });
 
-    await user.click(screen.getByLabelText(/Select response/i));
+    await user.click(screen.getByRole('button', { name: /Sample student response/i }));
     expect(onToggle).toHaveBeenCalledTimes(1);
   });
 });

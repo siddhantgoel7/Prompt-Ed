@@ -132,6 +132,7 @@ export function GeneralQuestionsTab() {
                             index={i}
                             isSelected={selectedIndex === i}
                             onSelect={() => setSelectedIndex(selectedIndex === i ? null : i)}
+                            onPromptTextChange={(text) => context.setPromptInput(text)}
                             isConnected={isConnected}
                             onRequestPublish={handleRequestPublish}
                         />
