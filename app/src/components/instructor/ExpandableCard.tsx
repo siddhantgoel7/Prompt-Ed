@@ -58,11 +58,10 @@ export function ExpandableCard({
       data-highlighted={dataHighlighted}
       data-variant={dataVariant}
     >
-      <div
+      <fieldset
         className="w-full flex items-start justify-between rounded-xl transition-all duration-300 ease-in-out"
-        style={{ padding, ...(isSelected ? selectedStyle : unselectedStyle) }}
+        style={{ padding, border: 'none', margin: '0', minWidth: '0', ...(isSelected ? selectedStyle : unselectedStyle) }}
         aria-label={ariaLabel}
-        role="group"
       >
         {/*
           Left section: contains both the Badge and the Main Button.
@@ -93,7 +92,7 @@ export function ExpandableCard({
         <div className="shrink-0 ml-3">
           {rightLabel}
         </div>
-      </div>
+      </fieldset>
     </div>
   );
 }
