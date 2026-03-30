@@ -239,7 +239,7 @@ export function useStudentSession(lessonId: string) {
     }
 
     setView('submitted');
-  }, [channel, responseCount, responseText, selectedOption, submittedDiscussionsKey]);
+  }, [channel, responseCount, responseText, selectedOption, submittedDiscussionsKey, submitting]);
 
   // 1) Boot
   useEffect(() => {

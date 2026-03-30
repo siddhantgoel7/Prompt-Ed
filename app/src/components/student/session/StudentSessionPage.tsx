@@ -12,6 +12,7 @@ import { DiscussionTimer } from './DiscussionTimer';
 import { TimerExpiredMessage } from './TimerExpiredMessage';
 
 import { useStudentSession } from '@/hooks/useStudentSession';
+import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
 import type { Discussion } from '@/types/discussion';
 
 const FEEDBACK_DISPLAY_MS = 7_000;
@@ -192,8 +193,8 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
 
   return (
     <StudentSessionShell title={lesson?.title}>
-      {!isConnected && view !== 'loading' && (
-        <StudentStatusAlert title="Connecting\u2026" description="Trying to establish realtime updates." />
+      {view !== 'loading' && (
+        <ConnectionStatus isConnected={isConnected} />
       )}
       {errorMessage && (
         <StudentStatusAlert variant="destructive" title="Something went wrong" description={errorMessage} />

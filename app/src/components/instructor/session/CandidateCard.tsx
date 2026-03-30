@@ -205,9 +205,8 @@ function PromptCrossfade({
 
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: isSelected || isExpanded ? '80px' : '24px' }}>
-      {/* Ghost element — defines the height of the parent naturally */}
       <p 
-        className="leading-snug text-sm select-none invisible" 
+        className="leading-snug text-sm select-none invisible whitespace-pre-wrap break-all break-words" 
         style={{ margin: 0, paddingBottom: isSelected ? '8px' : 0 }}
         aria-hidden="true"
       >
@@ -217,7 +216,7 @@ function PromptCrossfade({
       <p
         ref={pRef}
         aria-hidden={isSelected || undefined}
-        className="leading-snug text-sm text-content-primary"
+        className="leading-snug text-sm text-content-primary whitespace-pre-wrap break-all break-words"
         style={{
           margin:        0,
           opacity:       isSelected ? 0 : 1,

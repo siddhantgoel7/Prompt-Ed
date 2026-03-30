@@ -19,6 +19,7 @@ export function SessionActiveView(props: { vm?: SessionVM }) {
   const vm = context || props.vm!;
   const lesson = vm.lesson;
   const [splitView, setSplitView] = React.useState(false);
+  const [mobileTab, setMobileTab] = React.useState<'capture' | 'history' | 'responses'>('capture');
 
   if (splitView) {
     const splitContent = (
@@ -32,8 +33,6 @@ export function SessionActiveView(props: { vm?: SessionVM }) {
     );
     return context ? splitContent : <SessionProvider vm={vm}>{splitContent}</SessionProvider>;
   }
-
-  const [mobileTab, setMobileTab] = React.useState<'capture' | 'history' | 'responses'>('capture');
 
   const content = (
     <div className="h-screen flex flex-col bg-surface-base">

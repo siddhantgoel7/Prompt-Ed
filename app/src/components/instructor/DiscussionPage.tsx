@@ -15,6 +15,7 @@ import { ResponseCard } from '@/components/instructor/ResponseCard';
 import { ExpandableCard } from '@/components/instructor/ExpandableCard';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
 import { ResponseStatusBar } from '@/components/instructor/ResponseStatusBar';
+import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
 
 /** Isolated response list — owns its own selection state so clicks don't re-render the whole page. */
 function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag, isConnected }: Readonly<{
@@ -287,7 +288,7 @@ export function DiscussionPage({
               <div className="flex justify-between items-start gap-4">
                 <div className="space-y-1 flex-1">
                   <h1
-                    className="text-2xl font-bold leading-tight text-content-primary"
+                    className="text-2xl font-bold leading-tight break-all break-words text-content-primary"
                   >
                     {initialDiscussion.prompt_text}
                   </h1>
@@ -447,6 +448,7 @@ export function DiscussionPage({
           </div>
         </div>
       </div>
+      <ConnectionStatus isConnected={isConnected} onReconnect={!isConnected ? () => window.location.reload() : undefined} />
     </div>
   );
 }

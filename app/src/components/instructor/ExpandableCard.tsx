@@ -58,7 +58,8 @@ export function ExpandableCard({
       data-highlighted={dataHighlighted}
       data-variant={dataVariant}
     >
-      <fieldset
+      <div
+        role="group"
         className="w-full flex items-start justify-between rounded-xl transition-all duration-300 ease-in-out"
         style={{ padding, border: 'none', margin: '0', minWidth: '0', ...(isSelected ? selectedStyle : unselectedStyle) }}
         aria-label={ariaLabel}
@@ -75,12 +76,12 @@ export function ExpandableCard({
             type="button"
             onClick={onClick}
             className={cn(
-              'flex-1 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] cursor-pointer rounded-lg -m-1 p-1',
+              'flex-1 min-w-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] cursor-pointer rounded-lg -m-1 p-1',
               isSelected ? 'cursor-default' : 'cursor-pointer'
             )}
           >
             <span className={cn(
-              'transition-all duration-300 whitespace-pre-wrap break-words text-content-primary block',
+              'transition-all duration-300 whitespace-pre-wrap break-all break-words text-content-primary block',
               isSelected ? selectedTextClassName : unselectedTextClassName,
             )}>
               {text}
@@ -92,7 +93,7 @@ export function ExpandableCard({
         <div className="shrink-0 ml-3">
           {rightLabel}
         </div>
-      </fieldset>
+      </div>
     </div>
   );
 }

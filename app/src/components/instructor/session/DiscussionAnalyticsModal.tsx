@@ -428,7 +428,7 @@ export function DiscussionAnalyticsContent({
                 <span
                   key={entry.word}
                   title={`${entry.word}: ${entry.count}`}
-                  className="leading-none"
+                  className="leading-none break-all max-w-full"
                   style={{
                     fontSize: `${sizePx}px`,
                     color: i % 2 === 0 ? 'var(--color-primary-500)' : 'var(--text-secondary)',
@@ -478,9 +478,9 @@ export function DiscussionAnalyticsContent({
             {responses.map((r) => (
               <div
                 key={r.id}
-                className="rounded-xl p-3 bg-surface-raised border border-line-subtle"
+                className="rounded-xl p-3 bg-surface-raised border border-line-subtle max-w-full"
               >
-                <p className="text-sm whitespace-pre-wrap break-words text-content-primary">
+                <p className="text-sm whitespace-pre-wrap break-all break-words text-content-primary">
                   {r.response_text}
                 </p>
                 <p className="text-xs mt-1 text-content-muted" suppressHydrationWarning>
