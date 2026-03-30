@@ -385,7 +385,7 @@ function AIGenerationPanel({
       {generationWarning && <WarningMessage message={generationWarning} />}
       {DEBUG_TOOLS && sweepProgress && <SweepProgressMessage progress={sweepProgress} />}
       {candidates.length > 0 && (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-3">
           {candidates.map((c: GeneratedPrompt, i: number) => (
             <CandidateCard
               key={`candidate-${c.promptType}-${i}`}
@@ -402,7 +402,9 @@ function AIGenerationPanel({
               }}
             />
           ))}
-          <CandidateActions onRegenerate={onRegenerate} onCopyReport={handleCopyReport} isGenerating={isGenerating} hasCandidates={candidates.length > 0} copiedReport={copiedReport} />
+          <div className="mt-2">
+            <CandidateActions onRegenerate={onRegenerate} onCopyReport={handleCopyReport} isGenerating={isGenerating} hasCandidates={candidates.length > 0} copiedReport={copiedReport} />
+          </div>
         </div>
       )}
     </>
