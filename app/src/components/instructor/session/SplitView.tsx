@@ -171,7 +171,7 @@ function DiscussionDetail({
           onClick={onBack}
           className="flex items-center gap-1.5 text-xs font-medium mb-3 transition-colors duration-150 text-content-muted"
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-600)';
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)';
@@ -370,7 +370,17 @@ export function SplitView({
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 hover:scale-105 active:scale-95 bg-surface-raised text-content-secondary border border-line-default hover:border-brand-400 hover:text-brand-600"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 hover:scale-105 active:scale-95 bg-surface-raised text-content-secondary border border-line-default"
+            onMouseEnter={(e) => {
+              const btn = e.currentTarget as HTMLButtonElement;
+              btn.style.borderColor = 'var(--color-primary-400)';
+              btn.style.color = 'var(--color-primary-600)';
+            }}
+            onMouseLeave={(e) => {
+              const btn = e.currentTarget as HTMLButtonElement;
+              btn.style.borderColor = 'var(--border-default)';
+              btn.style.color = 'var(--text-secondary)';
+            }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <polyline points="15 18 9 12 15 6"/>

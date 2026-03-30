@@ -153,7 +153,10 @@ describe('Multiple Discussions per Lesson (Acceptance) [US 1.25]', () => {
     render(<SessionActiveView vm={vm} />);
 
     // Publish button is available for a new discussion
-    const publishBtn = screen.getByRole('button', { name: /Publish/i });
+    // Responsive view may render two instances (desktop/mobile)
+    const publishBtns = screen.getAllByRole('button', { name: /Publish/i });
+    expect(publishBtns.length).toBeGreaterThanOrEqual(1);
+    const publishBtn = publishBtns[0];
     expect(publishBtn).toBeInTheDocument();
 
     fireEvent.click(publishBtn);

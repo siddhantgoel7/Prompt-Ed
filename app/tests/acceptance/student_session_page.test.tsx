@@ -9,22 +9,37 @@ jest.mock('@/hooks/useStudentSession', () => ({
 import { useStudentSession } from '@/hooks/useStudentSession';
 const useStudentSessionMock = useStudentSession as jest.Mock;
 
+function makeMockReturn(overrides = {}) {
+  return {
+    lesson: { title: 'Lesson' },
+    activeDiscussion: null,
+    responseText: '',
+    setResponseText: jest.fn(),
+    selectedOption: null,
+    setSelectedOption: jest.fn(),
+    submitAttempted: false,
+    setSubmitAttempted: jest.fn(),
+    isSubmitCorrect: null,
+    feedbackPeriodActive: false,
+    submitting: false,
+    isConnected: true,
+    view: 'active',
+    endedMessage: null,
+    errorMessage: null,
+    canSubmit: false,
+    submitResponse: jest.fn(),
+    canSubmitAnother: false,
+    submitAnotherResponse: jest.fn(),
+    ...overrides,
+  };
+}
+
 describe('Student Session Page (Acceptance)', () => {
   // 12.1
   it('[US 2.09][AT1] success: shows prompt when discussion active', () => {
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       activeDiscussion: { status: 'active', prompt_text: 'What is 2+2?' },
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
-      view: 'active',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+    }));
 
     render(<StudentSessionPage lessonId="lesson-1" />);
     expect(screen.getByText(/What is 2\+2\?/i)).toBeInTheDocument();
@@ -32,19 +47,9 @@ describe('Student Session Page (Acceptance)', () => {
 
   // 12.2
   it('[US 2.07][AT4] success: shows confirmation after submission', () => {
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: null,
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       view: 'submitted',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+    }));
 
     render(<StudentSessionPage lessonId="lesson-1" />);
     expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
@@ -52,19 +57,10 @@ describe('Student Session Page (Acceptance)', () => {
 
   // 12.3
   it('[US 1.09][AT3][US 2.03][AT4] failure: lesson ended shows ended message', () => {
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: null,
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       view: 'ended',
       endedMessage: 'Lesson has ended',
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+    }));
 
     render(<StudentSessionPage lessonId="lesson-1" />);
     expect(screen.getByText(/Lesson ended/i)).toBeInTheDocument();
@@ -73,19 +69,9 @@ describe('Student Session Page (Acceptance)', () => {
 
   // 12.5
   it('[US 2.15][AT1] success: shows green Active badge when discussion is open', () => {
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       activeDiscussion: { id: 'd1', status: 'active', prompt_text: 'What is 2+2?' },
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
-      view: 'active',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+    }));
 
     render(<StudentSessionPage lessonId="lesson-1" />);
     expect(screen.getByText('Active')).toBeInTheDocument();
@@ -93,19 +79,9 @@ describe('Student Session Page (Acceptance)', () => {
 
   // 12.6
   it('[US 2.15][AT1] success: shows green Active badge when waiting (no open discussion)', () => {
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: null,
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       view: 'waiting',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+    }));
 
     render(<StudentSessionPage lessonId="lesson-1" />);
     expect(screen.getByText('Active')).toBeInTheDocument();
@@ -114,19 +90,10 @@ describe('Student Session Page (Acceptance)', () => {
 
   // 12.7
   it('[US 2.15][AT1] success: shows green Active badge on submitted view', () => {
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: { id: 'd1', status: 'active', prompt_text: 'Question' },
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       view: 'submitted',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+      activeDiscussion: { id: 'd1', status: 'active', prompt_text: 'Question' },
+    }));
 
     render(<StudentSessionPage lessonId="lesson-1" />);
     expect(screen.getByText('Active')).toBeInTheDocument();
@@ -135,19 +102,10 @@ describe('Student Session Page (Acceptance)', () => {
 
   // 12.8
   it('[US 2.15][AT2] success: shows red Ended badge when lesson has ended', () => {
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: null,
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       view: 'ended',
       endedMessage: 'Lesson has ended',
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+    }));
 
     render(<StudentSessionPage lessonId="lesson-1" />);
     expect(screen.getByText('Ended')).toBeInTheDocument();
@@ -156,19 +114,11 @@ describe('Student Session Page (Acceptance)', () => {
 
   // 12.9
   it('[US 2.15][AT3] success: no status badge shown during loading', () => {
-    useStudentSessionMock.mockReturnValue({
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       lesson: null,
-      activeDiscussion: null,
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
       isConnected: false,
       view: 'loading',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+    }));
 
     render(<StudentSessionPage lessonId="lesson-1" />);
     expect(screen.queryByText('Active')).not.toBeInTheDocument();
@@ -177,19 +127,10 @@ describe('Student Session Page (Acceptance)', () => {
 
   // 12.4
   it('[US 2.06][AT1] failure: disconnected shows "Connecting…" hint', () => {
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: null,
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       isConnected: false,
       view: 'waiting',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+    }));
 
     render(<StudentSessionPage lessonId="lesson-1" />);
     expect(screen.getByText(/Connecting/i)).toBeInTheDocument();
@@ -197,30 +138,22 @@ describe('Student Session Page (Acceptance)', () => {
 
   // 12.10
   it('[US 2.10][AT1] success: shows correct feedback for multiple choice', () => {
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: {
-        id: 'd1',
-        status: 'active',
-        prompt_type: 'multiple_choice',
-        prompt_text: 'What is 2+2?',
-        mc_options: [
-          { label: 'A', text: '3' },
-          { label: 'B', text: '4' }
-        ],
-        correct_option: 'B',
-        feedback_enabled: true,
-      },
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
-      view: 'active', // initially active to allow selection
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+    const disc = {
+      id: 'd1',
+      status: 'active',
+      prompt_type: 'multiple_choice',
+      prompt_text: 'What is 2+2?',
+      mc_options: [
+        { label: 'A', text: '3' },
+        { label: 'B', text: '4' }
+      ],
+      correct_option: 'B',
+      feedback_enabled: true,
+    };
+
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
+      activeDiscussion: disc,
+    }));
 
     const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
 
@@ -231,30 +164,12 @@ describe('Student Session Page (Acceptance)', () => {
     fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
 
     // Now mock the hook returning 'submitted'
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: {
-        id: 'd1',
-        status: 'active',
-        prompt_type: 'multiple_choice',
-        prompt_text: 'What is 2+2?',
-        mc_options: [
-          { label: 'A', text: '3' },
-          { label: 'B', text: '4' }
-        ],
-        correct_option: 'B',
-        feedback_enabled: true,
-      },
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       view: 'submitted',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+      activeDiscussion: disc,
+      isSubmitCorrect: true, // Selected 'B'
+      feedbackPeriodActive: true,
+    }));
 
     rerender(<StudentSessionPage lessonId="lesson-1" />);
 
@@ -263,30 +178,22 @@ describe('Student Session Page (Acceptance)', () => {
 
   // 12.11
   it('[US 2.10][AT2] success: shows incorrect feedback and correct option when wrong', () => {
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: {
-        id: 'd1',
-        status: 'active',
-        prompt_type: 'multiple_choice',
-        prompt_text: 'What is 2+2?',
-        mc_options: [
-          { label: 'A', text: '3' },
-          { label: 'B', text: '4' }
-        ],
-        correct_option: 'B',
-        feedback_enabled: true,
-      },
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
-      view: 'active',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+    const disc = {
+      id: 'd1',
+      status: 'active',
+      prompt_type: 'multiple_choice',
+      prompt_text: 'What is 2+2?',
+      mc_options: [
+        { label: 'A', text: '3' },
+        { label: 'B', text: '4' }
+      ],
+      correct_option: 'B',
+      feedback_enabled: true,
+    };
+
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
+      activeDiscussion: disc,
+    }));
 
     const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
 
@@ -297,30 +204,12 @@ describe('Student Session Page (Acceptance)', () => {
     fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
 
     // Now mock the hook returning 'submitted'
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: {
-        id: 'd1',
-        status: 'active',
-        prompt_type: 'multiple_choice',
-        prompt_text: 'What is 2+2?',
-        mc_options: [
-          { label: 'A', text: '3' },
-          { label: 'B', text: '4' }
-        ],
-        correct_option: 'B',
-        feedback_enabled: true,
-      },
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       view: 'submitted',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+      activeDiscussion: disc,
+      isSubmitCorrect: false, // Selected 'A'
+      feedbackPeriodActive: true,
+    }));
 
     rerender(<StudentSessionPage lessonId="lesson-1" />);
 
@@ -329,60 +218,34 @@ describe('Student Session Page (Acceptance)', () => {
 
   // 12.12
   it('[US 2.10][AT3] success: does not show correctness feedback if feedback_enabled is false', () => {
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: {
-        id: 'd1',
-        status: 'active',
-        prompt_type: 'multiple_choice',
-        prompt_text: 'What is 2+2?',
-        mc_options: [
-          { label: 'A', text: '3' },
-          { label: 'B', text: '4' }
-        ],
-        correct_option: 'B',
-        feedback_enabled: false, // Feedback disabled
-      },
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
-      view: 'active',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+    const disc = {
+      id: 'd1',
+      status: 'active',
+      prompt_type: 'multiple_choice',
+      prompt_text: 'What is 2+2?',
+      mc_options: [
+        { label: 'A', text: '3' },
+        { label: 'B', text: '4' }
+      ],
+      correct_option: 'B',
+      feedback_enabled: false, // Feedback disabled
+    };
+
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
+      activeDiscussion: disc,
+    }));
 
     const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
 
     fireEvent.click(screen.getByText('B.'));
     fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
 
-    useStudentSessionMock.mockReturnValue({
-      lesson: { title: 'Lesson' },
-      activeDiscussion: {
-        id: 'd1',
-        status: 'active',
-        prompt_type: 'multiple_choice',
-        prompt_text: 'What is 2+2?',
-        mc_options: [
-          { label: 'A', text: '3' },
-          { label: 'B', text: '4' }
-        ],
-        correct_option: 'B',
-        feedback_enabled: false,
-      },
-      responseText: '',
-      setResponseText: jest.fn(),
-      submitting: false,
-      isConnected: true,
+    useStudentSessionMock.mockReturnValue(makeMockReturn({
       view: 'submitted',
-      endedMessage: null,
-      errorMessage: null,
-      canSubmit: false,
-      submitResponse: jest.fn(),
-    });
+      activeDiscussion: disc,
+      isSubmitCorrect: true,
+      feedbackPeriodActive: true, // even if active, it should be ignored by the component if feedback_enabled is false
+    }));
 
     rerender(<StudentSessionPage lessonId="lesson-1" />);
 

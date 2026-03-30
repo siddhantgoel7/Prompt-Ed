@@ -132,7 +132,7 @@ describe('GeneralQuestionsTab', () => {
 
   it('renders question list when questions are present', () => {
     renderTab({ generalQuestions: [makeQuestion('q1', 'What is pharmacology?')] });
-    expect(screen.getByText('What is pharmacology?')).toBeInTheDocument();
+    expect(screen.getAllByText('What is pharmacology?')[0]).toBeInTheDocument();
   });
 
   it('expands a compact card to show Selected badge and Publish button', () => {
@@ -145,7 +145,7 @@ describe('GeneralQuestionsTab', () => {
   it('fires mouse enter/leave events on the compact question card', () => {
     renderTab({ generalQuestions: [makeQuestion('q1', 'Hover test Q')] });
     // The compact card container houses the hover listeners
-    const card = screen.getByText('Hover test Q').closest('div.p-3')!;
+    const card = screen.getAllByText('Hover test Q')[0].closest('div.p-3')!;
     fireEvent.mouseEnter(card);
     fireEvent.mouseLeave(card);
   });

@@ -206,8 +206,8 @@ function PromptCrossfade({
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: isSelected || isExpanded ? '80px' : '24px' }}>
       <p 
-        className="leading-snug text-sm select-none invisible whitespace-pre-wrap break-all break-words" 
-        style={{ margin: 0, paddingBottom: isSelected ? '8px' : 0 }}
+        className="leading-snug text-sm select-none whitespace-pre-wrap break-all break-words" 
+        style={{ margin: 0, paddingBottom: isSelected ? '8px' : 0, visibility: 'hidden' }}
         aria-hidden="true"
       >
         {isSelected ? editText : promptText}
@@ -344,7 +344,7 @@ export function CandidateCard({
 
   return (
     <div
-      role="button"
+      role={isSelected ? undefined : "button"}
       tabIndex={isSelected ? -1 : 0}
       onClick={!isSelected ? onSelect : undefined}
       onKeyDown={!isSelected ? (e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(); } : undefined}

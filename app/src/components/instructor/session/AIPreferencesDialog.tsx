@@ -115,7 +115,7 @@ export function AIPreferencesDialog() {
 
                         <div className="space-y-1.5">
                             <div className="flex items-center gap-1.5">
-                                <label htmlFor="length" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Context Detail</label>
+                                <label htmlFor="length" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Length</label>
                                 <PrefInfo tooltip="Controls how much setup the prompt includes — not the expected response length." />
                             </div>
                             <select
@@ -161,7 +161,7 @@ export function AIPreferencesDialog() {
                         disabled={isSaving || isLoading}
                         className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-6"
                     >
-                        {isSaving ? 'Saving...' : 'Save Preferences'}
+                        {isSaving ? 'Saving...' : 'Save Settings'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

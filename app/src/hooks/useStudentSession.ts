@@ -139,6 +139,7 @@ export function useStudentSession(lessonId: string) {
   const [endedMessage, setEndedMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [responseCount, setResponseCount] = useState(0);
+  const [feedbackPeriodActive, setFeedbackPeriodActive] = useState(false);
 
   const [view, setView] = useState<ViewState>('loading');
 
@@ -147,6 +148,7 @@ export function useStudentSession(lessonId: string) {
   const [timerTotalSeconds, setTimerTotalSeconds] = useState<number | null>(null);
   const [timerExpired, setTimerExpired] = useState(false);
   const timerExpiredRef = useRef(false);
+  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Refs for callbacks
   const viewRef = useRef<ViewState>('loading');
@@ -456,6 +458,22 @@ export function useStudentSession(lessonId: string) {
     return () => clearInterval(id);
   }, [timerEndTime, responseText, selectedOption, submitting, submitResponse]);
 
+  // 4) Feedback display period for MC
+  useEffect(() => {
+    if (
+      timerExpired &&
+      view === 'submitted' &&
+      activeDiscussion?.prompt_type === 'multiple_choice' &&
+      activeDiscussion?.feedback_enabled &&
+      isSubmitCorrect !== null
+    ) {
+      setFeedbackPeriodActive(true);
+      const id = setTimeout(() => setFeedbackPeriodActive(false), 7000);
+      feedbackTimerRef.current = id;
+      return () => clearTimeout(id);
+    }
+  }, [timerExpired, view, activeDiscussion, isSubmitCorrect]);
+
   const submitAnotherResponse = () => {
     if (!activeDiscussion || !activeDiscussion.allow_multiple_responses) return;
     if (activeDiscussion.prompt_type === 'multiple_choice') return;
@@ -477,5 +495,6 @@ export function useStudentSession(lessonId: string) {
     submitting, isConnected, view, endedMessage, errorMessage,
     timerEndTime, timerTotalSeconds, timerExpired, canSubmit,
     submitResponse, submitAnotherResponse, canSubmitAnother, responseCount,
+    feedbackPeriodActive, setFeedbackPeriodActive,
   };
 }

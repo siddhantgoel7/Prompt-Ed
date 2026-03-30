@@ -46,14 +46,14 @@ function SummaryBar({
       <div className="flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-brand-500/5 border border-brand-500/10 transition-all duration-300 hover:bg-brand-500/10">
         <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 text-brand-600 opacity-80" />
         <span className="text-xl sm:text-3xl font-black tracking-tight text-content-primary">{totalDiscussions}</span>
-        <span className="text-[9px] sm:text-[10px] text-center font-bold uppercase tracking-wider mt-0.5 sm:mt-1 text-content-muted">Discussions</span>
+        <span className="text-[9px] sm:text-[10px] text-center font-bold uppercase tracking-wider mt-0.5 sm:mt-1 text-content-muted">Total Discussions</span>
       </div>
       <div
         className="flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-primary-500/5 border border-primary-500/10 transition-all duration-300 hover:bg-primary-500/10"
       >
         <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 text-primary-600 opacity-80" />
         <span className="text-xl sm:text-3xl font-black tracking-tight text-content-primary">{totalResponses}</span>
-        <span className="text-[9px] sm:text-[10px] text-center font-bold uppercase tracking-wider mt-0.5 sm:mt-1 text-content-muted">Responses</span>
+        <span className="text-[9px] sm:text-[10px] text-center font-bold uppercase tracking-wider mt-0.5 sm:mt-1 text-content-muted">Total Responses</span>
       </div>
       <div className="flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-amber-500/5 border border-amber-500/10 transition-all duration-300 hover:bg-amber-500/10">
         <Clock className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 text-amber-600 opacity-80" />

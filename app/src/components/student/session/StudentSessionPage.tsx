@@ -43,6 +43,8 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
     submitAnotherResponse,
     canSubmitAnother,
     responseCount,
+    feedbackPeriodActive,
+    setFeedbackPeriodActive,
   } = useStudentSession(lessonId);
 
   // Normalize timerExpired: treat undefined (from older test mocks) as false
@@ -50,18 +52,10 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
 
   const [prevDiscussionId, setPrevDiscussionId] = useState<string | undefined>(undefined);
   const [submitAttempted, setSubmitAttempted] = useState(false);
-  const [feedbackPeriodActive, setFeedbackPeriodActive] = useState(false);
-  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   // Reset validation and feedback states when active discussion changes
   if (activeDiscussion?.id !== prevDiscussionId) {
     setPrevDiscussionId(activeDiscussion?.id);
     setSubmitAttempted(false);
-    setFeedbackPeriodActive(false);
-    if (feedbackTimerRef.current) {
-      clearTimeout(feedbackTimerRef.current);
-      feedbackTimerRef.current = null;
-    }
   }
 
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
@@ -78,22 +72,6 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
     ? view === 'active' && !submitting && Boolean(activeDiscussion?.id) && !isTimerExpired
     : canSubmit && !isTimerExpired;
 
-  // Scenario 2 (timed MC + feedback): when timer expires while student is in 'submitted' view,
-  // trigger the 7-second feedback window.
-  useEffect(() => {
-    if (
-      isTimerExpired &&
-      view === 'submitted' &&
-      isMC &&
-      activeDiscussion?.feedback_enabled &&
-      isSubmitCorrect !== null
-    ) {
-      setFeedbackPeriodActive(true);
-      const id = setTimeout(() => setFeedbackPeriodActive(false), FEEDBACK_DISPLAY_MS);
-      feedbackTimerRef.current = id;
-      return () => clearTimeout(id);
-    }
-  }, [isTimerExpired, view, isMC, activeDiscussion?.feedback_enabled, isSubmitCorrect]);
 
   // Fire confetti when a correct MC answer feedback is shown
   useEffect(() => {
@@ -122,8 +100,6 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
       // Scenario 1 (no timer, feedback enabled): start the 7-second feedback window immediately
       if (activeDiscussion?.feedback_enabled && !hasTimer) {
         setFeedbackPeriodActive(true);
-        const id = setTimeout(() => setFeedbackPeriodActive(false), FEEDBACK_DISPLAY_MS);
-        feedbackTimerRef.current = id;
       }
       return;
     }
@@ -195,6 +171,13 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
     <StudentSessionShell title={lesson?.title}>
       {view !== 'loading' && (
         <ConnectionStatus isConnected={isConnected} />
+      )}
+      {!isConnected && view !== 'loading' && (
+        <StudentStatusAlert
+          variant="destructive"
+          title="Connecting…"
+          description="We're trying to establish realtime updates for this lesson."
+        />
       )}
       {errorMessage && (
         <StudentStatusAlert variant="destructive" title="Something went wrong" description={errorMessage} />
