@@ -66,7 +66,7 @@ export type ContentOrigin =
   | 'slide_notes'        // PPTX: text extracted from speaker notes
   | 'visual_description' // PDF or PPTX: AI-generated description of images/diagrams
   | 'page_text'          // PDF: text layer extracted by pdfjs
-  | 'transcript';        // STT: gpt-4o-transcribe output
+  | 'transcript';        // STT: whisper-1 output
 
 /** Structural role a chunk plays in the index.
  *  'text' is the only active value; 'page_summary' and 'relationship' are reserved

@@ -5,7 +5,7 @@
 1. System Overview
 2. File Upload & Parsing
 3. Embeddings
-4. Speech-to-Text (gpt-4o-transcribe)
+4. Speech-to-Text (whisper-1)
 5. RAG Generation
 6. Prompt Engineering
 7. AI Preferences System
@@ -21,7 +21,7 @@
 
 ## 1. System Overview
 
-The AI pipeline is a **pluggable, provider-agnostic Retrieval-Augmented Generation (RAG) system** built natively in Next.js (TypeScript). Instructors upload PDF or PPTX lecture slides; the system parses, chunks, embeds, and stores them in a pgvector store. During class, the instructor records a spoken segment which is transcribed by gpt-4o-transcribe. The transcript is embedded, blended with any focus area preferences, and used for semantic similarity search — retrieving the most relevant slide chunks before GPT-4o-mini generates discussion question candidates. The instructor selects one and publishes it to students via Supabase Realtime.
+The AI pipeline is a **pluggable, provider-agnostic Retrieval-Augmented Generation (RAG) system** built natively in Next.js (TypeScript). Instructors upload PDF or PPTX lecture slides; the system parses, chunks, embeds, and stores them in a pgvector store. During class, the instructor records a spoken segment which is transcribed by whisper-1. The transcript is embedded, blended with any focus area preferences, and used for semantic similarity search — retrieving the most relevant slide chunks before GPT-4o-mini generates discussion question candidates. The instructor selects one and publishes it to students via Supabase Realtime.
 
 ### 1.1 End-to-End Instructor Workflow
 
@@ -30,7 +30,7 @@ Before class:  Upload PDF/PPTX via Files tab in session sidebar
 System:        Detect file type → parse text + visual content → chunk → embed → store in lesson_chunks (status = ready)
 
 During class:  Click "Start Recording" while explaining a concept
-               Click "Stop & Transcribe" → audio POST → /api/lessons/[lessonId]/transcript → gpt-4o-transcribe returns text
+               Click "Stop & Transcribe" → audio POST → /api/lessons/[lessonId]/transcript → whisper-1 returns text
 System:        Embed transcript → (optionally blend with focusAreas embedding) → vector similarity search
                → retrieve top-8 chunks → GPT-4o-mini → 5 candidates
 
@@ -49,7 +49,7 @@ Realtime:      Discussion broadcast to all students (is_correct stripped before 
 | Chunking | Custom sentence-aware splitter with content-type-specific sizes |
 | Embeddings | OpenAI `text-embedding-3-small` — 1536 dimensions — batched 500/request |
 | Vector store | Supabase pgvector, `match_lesson_chunks` RPC with mandatory lesson-scope filter |
-| Speech-to-Text | OpenAI `gpt-4o-transcribe` — `audio/webm;codecs=opus` preferred |
+| Speech-to-Text | OpenAI `whisper-1` — `audio/webm;codecs=opus` preferred |
 | Generation | OpenAI `gpt-4o-mini` — `json_object` mode — per-type temperature |
 | Realtime | Supabase Broadcast Channel (`discussion:published` event) |
 | AI Provider Layer | `AIProvider` interface in `src/lib/ai/providers.ts` — `OpenAIProvider` and `GeminiProvider` implementations |
@@ -208,7 +208,7 @@ If a batch fails, `embedChunks` throws back to the upload background handler, wh
 
 ---
 
-## 4. Speech-to-Text — gpt-4o-transcribe
+## 4. Speech-to-Text — whisper-1
 
 **User Story:** US 1.17
 
@@ -227,7 +227,7 @@ POST accepts audio as `multipart/form-data` with field name `audio`. Max 25 MB. 
 ```typescript
 await openai.audio.transcriptions.create({
   file: audioFile,
-  model: 'gpt-4o-transcribe',
+  model: 'whisper-1',
   language: 'en',
 })
 ```
@@ -376,7 +376,7 @@ The system prompt has 13 explicit rules grouped into two tiers:
 - MC_DISTRACTORS: Each wrong option must use one of four named strategies; no strategy repeated within one question (see §6.5)
 - MC_ANSWER_POSITION: Distribute correct answers across A, B, C, D positions across the 5 candidates
 - META_LECTURE: Do not ask about class logistics, schedules, or assessment procedures
-- STT_NOISE: Skip transcription artifacts — gpt-4o-transcribe may produce filler words and false starts that should not become question fodder
+- STT_NOISE: Skip transcription artifacts — whisper-1 may produce filler words and false starts that should not become question fodder
 - OUTPUT: Valid JSON only, matching the defined schema
 
 ### 6.2 Difficulty & Bloom's Taxonomy
@@ -629,7 +629,7 @@ Uses `gemini-2.5-flash` for all tasks; `text-embedding-004` for embeddings.
 To add a new provider: implement `AIProvider` and swap at the construction site. Verify before switching:
 
 - **Embedding dimensions:** System assumes 1536. A different dimension requires a schema migration on `lesson_chunks.embedding` and a rebuild of the `match_lesson_chunks` RPC.
-- **STT availability:** Most providers do not expose `audio/transcriptions`. Keep gpt-4o-transcribe on OpenAI separately if switching chat provider.
+- **STT availability:** Most providers do not expose `audio/transcriptions`. Keep whisper-1 on OpenAI separately if switching chat provider.
 - **`json_object` mode:** Not universally supported. If unavailable, the system prompt must instruct JSON-only output and the parser must strip markdown fences.
 
 ---
@@ -672,7 +672,7 @@ Max 5 files per lesson, enforced by DB trigger.
 | `slide_notes` | PPTX speaker notes |
 | `page_text` | PDF text layer |
 | `visual_description` | Vision model description of diagrams/images |
-| `transcript` | STT output from gpt-4o-transcribe |
+| `transcript` | STT output from whisper-1 |
 
 **ChunkMetadata** (`src/types/ai.ts`):
 
@@ -736,7 +736,7 @@ $$;
 
 | Variable | Required | Notes |
 |---|---|---|
-| `OPENAI_API_KEY` | Yes | Chat completion (gpt-4o-mini), embeddings (text-embedding-3-small), STT (gpt-4o-transcribe), vision (gpt-4o) |
+| `OPENAI_API_KEY` | Yes | Chat completion (gpt-4o-mini), embeddings (text-embedding-3-small), STT (whisper-1), vision (gpt-4o) |
 | `GOOGLE_AI_API_KEY` | No | If set, Gemini is used for PDF and PPTX vision — ~90% cheaper than GPT-4o for vision |
 | `MOCK_AI` | No | `'true'` → hardcoded candidates, no API calls |
 | `VISION_DEBUG` | No | `'true'` → verbose per-slide/per-page vision logging |
@@ -769,7 +769,7 @@ The default `serverActions.bodySizeLimit` is 1MB. Without the override, uploads 
 
 | Package | Purpose |
 |---|---|
-| `openai` | OpenAI SDK — chat, embeddings, STT (gpt-4o-transcribe), vision |
+| `openai` | OpenAI SDK — chat, embeddings, STT (whisper-1), vision |
 | `@google/generative-ai` | Google Gemini SDK — vision, chat, embeddings |
 | `pdfjs-serverless` | PDF text extraction — serverless build for Next.js App Router |
 | `@napi-rs/canvas` | Canvas polyfill required by pdfjs-serverless |
@@ -1119,7 +1119,7 @@ A developer-only sweep tool that exhaustively tests all `3 × 3 × 3 × 3 = 81` 
 | `src/app/api/lessons/[lessonId]/files/route.ts` | List lesson files (GET) |
 | `src/app/api/lessons/[lessonId]/files/[fileId]/route.ts` | Get signed URL (GET), delete file (DELETE) |
 | `src/app/api/lessons/[lessonId]/generate/route.ts` | RAG generation endpoint |
-| `src/app/api/lessons/[lessonId]/transcript/route.ts` | STT endpoint (gpt-4o-transcribe) |
+| `src/app/api/lessons/[lessonId]/transcript/route.ts` | STT endpoint (whisper-1) |
 | `src/app/api/user/ai-preferences/route.ts` | Fetch/upsert instructor preferences |
 | `src/lib/ai/providers.ts` | `AIProvider` interface, `OpenAIProvider`, `GeminiProvider` |
 | `src/lib/ai/parsers/index.ts` | Parser dispatcher |
