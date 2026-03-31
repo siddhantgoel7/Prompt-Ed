@@ -180,6 +180,20 @@ export function useStudentSession(lessonId: string) {
     );
   }, [view, submitting, isConnected, activeDiscussion, responseText, selectedOption]);
 
+  // Extracted from submitResponse to keep its cognitive complexity within SonarQube limits.
+  // Activates the 7-second feedback window for MC questions when feedback is enabled and
+  // the timer has already expired (or there is no timer).
+  const tryActivateMCFeedback = useCallback((discussionId: string) => {
+    if (feedbackStartedForRef.current === discussionId) return;
+    const isTimed = timerEndTimeRef.current != null;
+    const shouldShowFeedback = !isTimed || timerExpiredRef.current;
+    if (!shouldShowFeedback) return;
+    feedbackStartedForRef.current = discussionId;
+    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    setFeedbackPeriodActive(true);
+    feedbackTimerRef.current = setTimeout(() => setFeedbackPeriodActive(false), 7000);
+  }, []);
+
   const submitResponse = useCallback(async (textOverride?: string, optionOverride?: string, isCorrectOverride?: boolean) => {
     const currentDiscussion = activeDiscussionRef.current;
     if (!currentDiscussion?.id || viewRef.current !== 'active' || submitting) return;
@@ -243,26 +257,11 @@ export function useStudentSession(lessonId: string) {
 
     setView('submitted');
 
-    // Activate feedback period for MC with feedback enabled.
-    // We do this here — synchronously after transitioning to 'submitted' — to avoid
-    // the race condition that arises from checking timerExpired + view in an effect.
-    // Both timed path (timerExpiredRef.current === true when auto-submitted) and
-    // no-timer path (timerEndTimeRef.current === null) trigger feedback immediately.
-    if (isMC && currentDiscussion.feedback_enabled && currentDiscussion.id !== feedbackStartedForRef.current) {
-      const isTimed = timerEndTimeRef.current != null;
-      const timerAlreadyExpired = timerExpiredRef.current;
-      const shouldShowFeedback = !isTimed || timerAlreadyExpired;
-      if (shouldShowFeedback) {
-        feedbackStartedForRef.current = currentDiscussion.id;
-        // Clear any previous feedback timer
-        if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-        setFeedbackPeriodActive(true);
-        feedbackTimerRef.current = setTimeout(() => {
-          setFeedbackPeriodActive(false);
-        }, 7000);
-      }
+    // Activate feedback period for MC with feedback enabled (extracted to keep complexity low).
+    if (isMC && currentDiscussion.feedback_enabled) {
+      tryActivateMCFeedback(currentDiscussion.id);
     }
-  }, [channel, responseCount, responseText, selectedOption, submittedDiscussionsKey, submitting]);
+  }, [channel, responseCount, responseText, selectedOption, submittedDiscussionsKey, submitting, tryActivateMCFeedback]);
 
   // 1) Boot
   useEffect(() => {
@@ -490,23 +489,14 @@ export function useStudentSession(lessonId: string) {
           // submitResponse ran while timerExpiredRef was still false, so it
           // skipped feedback activation. Trigger the feedback window now.
           const disc = activeDiscussionRef.current;
-          if (
-            disc?.prompt_type === 'multiple_choice' &&
-            disc?.feedback_enabled &&
-            disc.id !== feedbackStartedForRef.current
-          ) {
-            feedbackStartedForRef.current = disc.id;
-            if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-            setFeedbackPeriodActive(true);
-            feedbackTimerRef.current = setTimeout(() => {
-              setFeedbackPeriodActive(false);
-            }, 7000);
+          if (disc?.prompt_type === 'multiple_choice' && disc?.feedback_enabled) {
+            tryActivateMCFeedback(disc.id);
           }
         }
       }
     }, 500);
     return () => clearInterval(id);
-  }, [timerEndTime, responseText, selectedOption, submitting, submitResponse]);
+  }, [timerEndTime, responseText, selectedOption, submitting, submitResponse, tryActivateMCFeedback]);
 
 
   const submitAnotherResponse = () => {
