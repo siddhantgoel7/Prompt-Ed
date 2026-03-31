@@ -144,7 +144,7 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 |------------|-------------|------------------|-----------------------|----------------|----------|
 | **US 1.01** | Create instructor account | `auth.acceptance.test.tsx` (2.5) | `instructor_login.spec.ts` (20.1–20.5) | `auth.test.ts` (13.1, 13.2, 13.3)<br>`authHelpers.test.ts` (25.1, 25.2)<br>`validation.test.ts` (27.1–27.6) | **Complete**: Signup navigation, API auth, validation |
 | **US 1.02** | Login via UAlberta SSO | `auth.acceptance.test.tsx` (2.1, 2.2, 2.3, 2.4) | `instructor_login.spec.ts` (20.6, 20.7, 20.8, 20.9) | `authHelpers.test.ts` (25.3, 25.4) | **Complete**: Email/password + OAuth flows + signup page validation |
-| **US 1.03** | Logout securely | `instructor_dashboard.acceptance.test.tsx` (4.8) | `instructor_dashboard.spec.ts` (19.1) | `authHelpers.test.ts` (25.5) | **Complete**: Dashboard integration + API |
+| **US 1.03** | Logout securely | `instructor_dashboard.acceptance.test.tsx` (4.8) | `instructor_dashboard.spec.ts` (19.1) | `authHelpers.test.ts` (25.5)<br>`InstructorDashboardHeader.test.tsx` (71.1–71.6) | **Complete**: Dashboard integration + API |
 | **US 1.04** | Private lesson viewing | `instructor_dashboard.acceptance.test.tsx` (4.9)<br>`instructor_session_page.test.tsx` (7.1)<br>`lessons_page.acceptance.test.tsx` (8.9) | `instructor_dashboard.spec.ts` (19.2)<br>`lessons_page.test.tsx` (16.1, 16.2, 16.3, 16.4) | — | **Complete**: Authorization checks across all pages |
 | **US 1.05** | Create new lesson | `lessons_page.acceptance.test.tsx` (8.2, 8.3, 8.4, 8.8) | `instructor_dashboard.spec.ts` (19.2) | `lessons_page.test.tsx` (16.13–16.17) | **Complete**: Creation flow + validation + errors |
 | **US 1.06** | Start lesson (PIN/QR) | `instructor_session_page.test.tsx` (7.2)<br>`instructor_session_active_view.test.tsx` (5.1)<br>`instructor_session_ended_view.test.tsx` (6.6) | — | — | **Complete**: Active state + PIN display tested; QR code generation not explicitly tested |
@@ -153,10 +153,10 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | **US 1.10** | Auto-save lesson | `auto_save.acceptance.test.tsx` (3.1, 3.2, 3.3, 3.4) | — | — | **Complete**: Data persistence verification |
 | **US 1.25** | Multiple discussions | `multiple_discussions.acceptance.test.tsx` (9.1, 9.2, 9.3, 9.4) | — | — | **Complete**: Sequential discussion flow |
 | **US 1.27** | Display prompt | `instructor_session_active_view.test.tsx` (5.5)<br>`student_session_page.test.tsx` (12.1) | — | — | **Complete**: Prompt display covered implicitly via US 1.21/1.28 publish handler (test 5.5) and student prompt visibility (test 12.1); no explicit US 1.27 label in tests |
-| **US 1.28** | Start/close discussions | `instructor_session_active_view.test.tsx` (5.5, 5.6) | — | — | **Complete**: Start/close handler calls verified; student-side closed state tested via student_session_page |
+| **US 1.28** | Start/close discussions | `instructor_session_active_view.test.tsx` (5.5, 5.6) | — | `RestartDiscussionButton.test.tsx` (72.1–72.6) | **Complete**: Start/close handler calls verified; student-side closed state tested via student_session_page |
 | **US 1.31** | Display PIN code | `instructor_session_active_view.test.tsx` (5.1, 5.2, 5.3)<br>`instructor_session_page.test.tsx` (7.2, 7.4) | — | — | **Complete**: PIN visibility + overlay |
 | **US 1.34** | Real-time responses | `real_time_responses.acceptance.test.tsx` (10.1, 10.2, 10.3, 10.4)<br>`instructor_session_ended_view.test.tsx` (6.2) | — | `useRealtime.test.ts` (26.1–26.8) | **Complete**: Live updates + hook behavior |
-| **US 1.49** | Add course | `instructor_dashboard.acceptance.test.tsx` (4.2, 4.3, 4.4) | `instructor_dashboard.spec.ts` (19.1) | `dashboard.test.tsx` (15.6)<br>`courses.test.ts` (14.1, 14.3, 14.4)<br>`validation.test.ts` (27.7, 27.8) | **Complete**: Full CRUD + validation |
+| **US 1.49** | Add course | `instructor_dashboard.acceptance.test.tsx` (4.2, 4.3, 4.4) | `instructor_dashboard.spec.ts` (19.1) | `dashboard.test.tsx` (15.6)<br>`courses.test.ts` (14.1, 14.3, 14.4)<br>`validation.test.ts` (27.7, 27.8)<br>`CourseDialog.test.tsx` (73.1–73.8)<br>`CourseCard.test.tsx` (75.1–75.5) | **Complete**: Full CRUD + validation |
 | **US 1.50** | Delete course | `instructor_dashboard.acceptance.test.tsx` (4.5, 4.6, 4.7) | — | `dashboard.test.tsx` (15.7)<br>`courses.test.ts` (14.5, 14.6) | **Complete**: Delete flow + errors |
 | **US 2.01** | Desktop access | `lessons_page.acceptance.test.tsx` (8.1)<br>`instructor_dashboard.acceptance.test.tsx` (4.1) | `student_responsive.spec.ts` (23.1) | — | **Complete**: Desktop viewport validation |
 | **US 2.02** | Mobile access | — | `student_responsive.spec.ts` (23.2, 23.3) | — | **Complete**: Viewport rendering + no horizontal overflow validated; touch interactions not tested |
@@ -229,12 +229,12 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 
 - **Total User Stories Tested**: 52 (22 Sprint 2 + 15 Sprint 3 + 15 Sprint 4)
 - **Acceptance Tests**: 17 files, 148 test cases
-- **Component Tests**: 22 files, 193 test cases
+- **Component Tests**: 27 files, 219 test cases
 - **UI Tests (Playwright)**: 17 spec files, 104 test cases
 - **API Tests**: 9 files, 29 test cases
 - **Unit Tests**: 8 files, 92 test cases
 - **Smoke Tests**: 1 file, 1 test case
-- **Total Test Cases**: 567 (across 74 files)
+- **Total Test Cases**: 593 (across 79 files)
 
 ---
 
@@ -288,6 +288,11 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | `StudentSessionPage.ended.test.tsx` | US 2.12 | 6 |
 | `StudentSessionPage.rejoin.test.tsx` | US 2.14 | 7 |
 | `StudentSessionShellLeave.test.tsx` | US 2.13 | 4 |
+| `InstructorDashboardHeader.test.tsx` | US 1.03 | 6 |
+| `RestartDiscussionButton.test.tsx` | US 1.28 | 6 |
+| `CourseDialog.test.tsx` | US 1.49 | 8 |
+| `ThemeProvider.test.tsx` | Layout | 1 |
+| `CourseCard.test.tsx` | US 1.49 | 5 |
 
 #### UI Tests — Playwright (104 tests)
 
