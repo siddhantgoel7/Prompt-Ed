@@ -115,7 +115,7 @@ describe('useStudentSession Multiple Responses [US 1.30]', () => {
                 error: null,
             });
             (submitStudentResponseApi as jest.Mock).mockResolvedValue({
-                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null },
+                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null, student_session_id: 'student-1' },
                 error: null,
             });
 
@@ -152,7 +152,7 @@ describe('useStudentSession Multiple Responses [US 1.30]', () => {
                 error: null,
             });
             (submitStudentResponseApi as jest.Mock).mockResolvedValue({
-                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null },
+                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null, student_session_id: 'student-1' },
                 error: null,
             });
 
@@ -174,7 +174,7 @@ describe('useStudentSession Multiple Responses [US 1.30]', () => {
                 error: null,
             });
             (submitStudentResponseApi as jest.Mock).mockResolvedValue({
-                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null },
+                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null, student_session_id: 'student-1' },
                 error: null,
             });
 
@@ -201,7 +201,7 @@ describe('useStudentSession Multiple Responses [US 1.30]', () => {
                 error: null,
             });
             (submitStudentResponseApi as jest.Mock).mockResolvedValue({
-                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null },
+                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null, student_session_id: 'student-1' },
                 error: null,
             });
 
@@ -247,7 +247,7 @@ describe('useStudentSession Multiple Responses [US 1.30]', () => {
                 error: null,
             });
             (submitStudentResponseApi as jest.Mock).mockResolvedValue({
-                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null },
+                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null, student_session_id: 'student-1' },
                 error: null,
             });
 
@@ -290,7 +290,7 @@ describe('useStudentSession Multiple Responses [US 1.30]', () => {
                 error: null,
             });
             (submitStudentResponseApi as jest.Mock).mockResolvedValue({
-                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null },
+                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null, student_session_id: 'student-1' },
                 error: null,
             });
 
@@ -314,7 +314,7 @@ describe('useStudentSession Multiple Responses [US 1.30]', () => {
                 error: null,
             });
             (submitStudentResponseApi as jest.Mock).mockResolvedValue({
-                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null },
+                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null, student_session_id: 'student-1' },
                 error: null,
             });
 
@@ -349,7 +349,7 @@ describe('useStudentSession Multiple Responses [US 1.30]', () => {
                 error: null,
             });
             (submitStudentResponseApi as jest.Mock).mockResolvedValue({
-                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null },
+                data: { id: 'r1', discussion_id: 'd-multi-1', response_text: 'test', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null, student_session_id: 'student-1' },
                 error: null,
             });
 

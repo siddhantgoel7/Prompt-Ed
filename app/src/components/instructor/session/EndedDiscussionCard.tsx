@@ -42,9 +42,11 @@ export function EndedDiscussionCard({
 
   const responses = discussion.responses || [];
   const responseCount = responses.length;
-  const snapshot = discussion.participant_snapshot;
-  const responseRate = snapshot && snapshot > 0
-    ? Math.round((responseCount / snapshot) * 100)
+  const uniqueRespondents = new Set(responses.map(r => r.student_session_id).filter(Boolean)).size;
+  const presenceSnapshot = discussion.participant_snapshot ?? 0;
+  const snapshot = presenceSnapshot > 0 ? Math.max(presenceSnapshot, uniqueRespondents) : 0;
+  const responseRate = snapshot > 0
+    ? Math.round((uniqueRespondents / snapshot) * 100)
     : null;
 
   // Fetches the full response list (including flagged) before opening the analytics modal.
@@ -96,7 +98,7 @@ export function EndedDiscussionCard({
             <span className="font-semibold text-content-secondary">{responseRate}%</span> rate
           </span>
         )}
-        {snapshot && (
+        {snapshot > 0 && (
           <span className="flex items-center gap-1">
             <span className="font-semibold text-content-secondary">{snapshot}</span> students
           </span>

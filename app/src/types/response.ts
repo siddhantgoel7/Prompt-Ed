@@ -10,6 +10,8 @@ export interface Response {
   is_correct: boolean | null;
   /** Timestamp when the response was flagged as inappropriate (soft delete). NULL = active. */
   flagged_at: string | null;
+  /** Anonymous per-browser session identifier for tracking unique respondents. */
+  student_session_id: string | null;
 }
 
 /** Fields required to submit a new student response. */

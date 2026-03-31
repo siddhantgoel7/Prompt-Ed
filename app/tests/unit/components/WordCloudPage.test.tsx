@@ -67,6 +67,7 @@ function makeResponses(): Response[] {
       created_at: '2024-01-01T10:01:00Z',
       selected_option: null,
       flagged_at: null,
+      student_session_id: 'student-1',
     },
     {
       id: 'r2',
@@ -75,6 +76,7 @@ function makeResponses(): Response[] {
       created_at: '2024-01-01T10:02:00Z',
       selected_option: null,
       flagged_at: null,
+      student_session_id: 'student-2',
     },
     {
       id: 'r3',
@@ -83,6 +85,7 @@ function makeResponses(): Response[] {
       created_at: '2024-01-01T10:03:00Z',
       selected_option: null,
       flagged_at: null,
+      student_session_id: 'student-3',
     },
   ] as Response[];
 }

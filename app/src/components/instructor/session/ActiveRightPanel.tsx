@@ -59,6 +59,7 @@ export function ActiveRightPanel(props: Readonly<{
   // responses from the previous discussion don't bleed into the next one.
   React.useEffect(() => { resetSelection(); }, [activeDiscussion?.id, resetSelection]);
 
+  const uniqueRespondentCount = new Set(responses.map(r => r.student_session_id).filter(Boolean)).size;
   const isMC = activeDiscussion?.prompt_type === 'multiple_choice';
   const distribution = calculateMCDistribution(activeDiscussion, responses);
 
@@ -100,10 +101,10 @@ export function ActiveRightPanel(props: Readonly<{
             </span>
             <div className="flex items-center gap-1 text-xs text-content-muted">
               <span className="font-semibold text-content-secondary">
-                {responses.length}
+                {uniqueRespondentCount}
               </span>
               {peakStudentCount > 0 && (
-                <span>/ {peakStudentCount}</span>
+                <span>/ {Math.max(peakStudentCount, uniqueRespondentCount)}</span>
               )}
             </div>
           </div>

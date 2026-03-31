@@ -16,6 +16,11 @@ jest.mock('@/hooks/useResponseSelection', () => ({
 jest.mock('@/lib/api/discussionsApi', () => ({
     flagResponseApi: jest.fn(),
     unflagResponseApi: jest.fn(),
+    updateParticipantSnapshotApi: jest.fn(),
+}));
+
+jest.mock('@/hooks/useParticipantPeak', () => ({
+    useParticipantPeak: () => 0,
 }));
 
 jest.mock('@/components/instructor/session/DiscussionAnalyticsModal', () => ({
@@ -70,7 +75,7 @@ describe('DiscussionPage', () => {
             response_limit: 1,
         },
         initialResponses: [
-            { id: 'r1', discussion_id: 'd1', response_text: 'Resp 1', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null }
+            { id: 'r1', discussion_id: 'd1', response_text: 'Resp 1', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null, student_session_id: 'student-1' }
         ],
         initialFlaggedResponses: [],
         initialIsActive: true,
@@ -84,7 +89,7 @@ describe('DiscussionPage', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        (useRealtime as jest.Mock).mockReturnValue({ channel: mockChannel, isConnected: true });
+        (useRealtime as jest.Mock).mockReturnValue({ channel: mockChannel, isConnected: true, studentCount: 0 });
         (useResponseSelection as jest.Mock).mockReturnValue({
             selectedIds: [],
             flaggingId: null,
@@ -166,7 +171,7 @@ describe('DiscussionPage', () => {
                 correct_option: 'A' as const
             },
             initialResponses: [
-                { id: 'r1', discussion_id: 'd1', selected_option: 'A', response_text: 'A', created_at: new Date().toISOString(), is_correct: true, flagged_at: null }
+                { id: 'r1', discussion_id: 'd1', selected_option: 'A', response_text: 'A', created_at: new Date().toISOString(), is_correct: true, flagged_at: null, student_session_id: 'student-1' }
             ]
         };
 

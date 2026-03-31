@@ -49,6 +49,7 @@ type ExportDiscussionRow = {
     created_at: string;
     selected_option?: string | null;
     is_correct?: boolean | null;
+    student_session_id?: string | null;
   }>;
 };
 
@@ -634,8 +635,10 @@ export function useSessionPage(lessonId: string): SessionVM {
         );
 
         const responseCount = responses.length;
-        const snapshot = d.participant_snapshot ?? 0;
-        const participationRate = snapshot > 0 ? Math.round((responseCount / snapshot) * 100) : '';
+        const uniqueRespondents = new Set(responses.map(r => r.student_session_id).filter(Boolean)).size;
+        const presenceSnapshot = d.participant_snapshot ?? 0;
+        const snapshot = presenceSnapshot > 0 ? Math.max(presenceSnapshot, uniqueRespondents) : 0;
+        const participationRate = snapshot > 0 ? Math.round((uniqueRespondents / snapshot) * 100) : '';
         const firstResponseAt = formatExportTimestamp(responses.at(0)?.created_at);
         const lastResponseAt = formatExportTimestamp(responses.at(-1)?.created_at);
         const minutesToFirstResponse =

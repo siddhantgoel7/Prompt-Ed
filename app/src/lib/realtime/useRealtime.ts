@@ -32,7 +32,7 @@ import { RealtimeChannel } from '@supabase/supabase-js';
  *
  * Related User Stories: US 1.27, US 1.28, US 2.09, US 1.39, US 1.40
  */
-export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
+export function useRealtime(lessonId: string, role: 'instructor' | 'student', presenceKey?: string) {
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const supabaseRef = useRef(createClient());
@@ -46,22 +46,33 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
 
     const supabase = supabaseRef.current;
 
-    // Create a channel for this lesson with both broadcast and presence enabled
+    // Create a channel for this lesson with both broadcast and presence enabled.
+    // Students pass their student_session_id as presenceKey so that multiple tabs
+    // from the same student are grouped under one key (deduplicating reconnects).
     const channel = supabase.channel(`lesson:${lessonId}`, {
       config: {
         broadcast: { ack: true },
-        presence: { key: lessonId },
+        presence: { key: presenceKey ?? lessonId },
       },
     });
 
-    // Track presence sync — recount students whenever anyone joins or leaves
+    // Track presence sync — recount students whenever anyone joins or leaves.
+    // Deduplicate by student_session_id in the payload so the same student with
+    // multiple tabs or reconnects is only counted once. Entries without a
+    // student_session_id (legacy clients) are counted individually as before.
     channel.on('presence', { event: 'sync' }, () => {
-      const state = channel.presenceState<{ role: string }>();
-      const count = Object.values(state)
-        .flat()
-        .filter((p) => p.role === 'student')
-        .length;
-      setStudentCount(count);
+      const state = channel.presenceState<{ role: string; student_session_id?: string }>();
+      const allStudents = Object.values(state).flat().filter((p) => p.role === 'student');
+      const knownIds = new Set<string>();
+      let unknownCount = 0;
+      for (const entry of allStudents) {
+        if (entry.student_session_id) {
+          knownIds.add(entry.student_session_id);
+        } else {
+          unknownCount++;
+        }
+      }
+      setStudentCount(knownIds.size + unknownCount);
     });
 
     // Subscribe to the channel
@@ -71,8 +82,13 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
         setIsConnected(true);
         setChannel(channel);
 
-        // Announce presence so others can count this participant
-        await channel.track({ role, joined_at: new Date().toISOString() });
+        // Announce presence so others can count this participant.
+        // Students include their student_session_id for deduplication in counting.
+        await channel.track({
+          role,
+          joined_at: new Date().toISOString(),
+          ...(presenceKey && role === 'student' ? { student_session_id: presenceKey } : {}),
+        });
       } else if (status === 'CLOSED') {
         setIsConnected(false);
         setChannel(null);
@@ -84,7 +100,7 @@ export function useRealtime(lessonId: string, role: 'instructor' | 'student') {
       setIsConnected(false);
       setChannel(null);
     };
-  }, [lessonId, role, connectAttempt]);
+  }, [lessonId, role, connectAttempt, presenceKey]);
 
   // Detect browser online/offline to immediately update connection status
   useEffect(() => {

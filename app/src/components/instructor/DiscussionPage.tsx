@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DiscussionAnalyticsContent } from '@/components/instructor/session/DiscussionAnalyticsModal';
 import { flagResponseApi, unflagResponseApi, insertDiscussionApi, closeActiveDiscussionsApi } from '@/lib/api/discussionsApi';
+import { useParticipantPeak } from '@/hooks/useParticipantPeak';
 import { useResponseSelection } from '@/hooks/useResponseSelection';
 import { ResponseCard } from '@/components/instructor/ResponseCard';
 import { ExpandableCard } from '@/components/instructor/ExpandableCard';
@@ -184,7 +185,7 @@ export function DiscussionPage({
     }
   }, []);
 
-  const { channel, isConnected } = useRealtime(lessonId, 'instructor');
+  const { channel, isConnected, studentCount: liveStudentCount } = useRealtime(lessonId, 'instructor');
 
   const handleNewResponse = useCallback((payload: { payload?: { response?: Response } }) => {
     const newResponse = payload.payload?.response;
@@ -263,7 +264,11 @@ export function DiscussionPage({
     ? initialDiscussion.mc_options?.find((opt) => opt.label === correctOptionLabel)?.text ?? null
     : null;
 
-  const studentCount = initialDiscussion.participant_snapshot ?? 0;
+  const studentCount = useParticipantPeak(
+    discussionId,
+    initialDiscussion.participant_snapshot ?? 0,
+    liveStudentCount,
+  );
 
   return (
     <div className="min-h-screen bg-surface-base">

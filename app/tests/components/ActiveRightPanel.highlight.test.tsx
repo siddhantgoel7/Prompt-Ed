@@ -71,6 +71,7 @@ function makeResponse(id: string, text: string): Response {
     created_at: '2024-01-01T10:01:00Z',
     is_correct: null,
     flagged_at: null,
+    student_session_id: id,
   };
 }
 

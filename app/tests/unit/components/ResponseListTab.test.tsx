@@ -50,7 +50,7 @@ const makeDiscussion = (isMC = false) => ({
 }) as any;
 
 const makeResponse = (id: string, text: string) =>
-  ({ id, response_text: text, created_at: '2024-01-01T00:00:00Z', flagged_at: null }) as any;
+  ({ id, response_text: text, created_at: '2024-01-01T00:00:00Z', flagged_at: null, student_session_id: id }) as any;
 
 function buildProps(overrides: Partial<ResponseListTabProps> = {}): ResponseListTabProps {
   return {

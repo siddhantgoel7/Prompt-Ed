@@ -83,6 +83,7 @@ export const mockResponse: Response = {
   selected_option: null,
   is_correct: null,
   flagged_at: null,
+  student_session_id: 'student-1',
 };
 
 // 18.5
@@ -94,6 +95,7 @@ export const mockResponse2: Response = {
   selected_option: null,
   is_correct: null,
   flagged_at: null,
+  student_session_id: 'student-2',
 };
 
 // 18.6
@@ -105,6 +107,7 @@ export const mockResponse3: Response = {
   selected_option: null,
   is_correct: null,
   flagged_at: null,
+  student_session_id: 'student-3',
 };
 
 // 18.6b — Flagged response fixture for restore tests
@@ -116,6 +119,7 @@ export const mockFlaggedResponse: Response = {
   selected_option: null,
   is_correct: null,
   flagged_at: '2026-02-10T14:09:00Z',
+  student_session_id: 'student-4',
 };
 
 // 18.7
@@ -183,6 +187,7 @@ export function createMockResponses(discussionId: string, count: number): Respon
     selected_option: null,
     is_correct: null,
     flagged_at: null,
+    student_session_id: `student-${index + 1}`,
   }));
 }
 

@@ -15,9 +15,9 @@ const LESSON_ID = 'highlight-lesson';
 const DISCUSSION_ID = 'd-hl-1';
 
 const MOCK_RESPONSES = [
-  { id: 'r1', discussion_id: DISCUSSION_ID, response_text: 'First response about pharmacokinetics', selected_option: null, created_at: '2024-01-01T10:01:00Z', is_correct: null, flagged_at: null },
-  { id: 'r2', discussion_id: DISCUSSION_ID, response_text: 'Second response about drug absorption', selected_option: null, created_at: '2024-01-01T10:02:00Z', is_correct: null, flagged_at: null },
-  { id: 'r3', discussion_id: DISCUSSION_ID, response_text: 'Third response about bioavailability', selected_option: null, created_at: '2024-01-01T10:03:00Z', is_correct: null, flagged_at: null },
+  { id: 'r1', discussion_id: DISCUSSION_ID, response_text: 'First response about pharmacokinetics', selected_option: null, created_at: '2024-01-01T10:01:00Z', is_correct: null, flagged_at: null, student_session_id: 'student-1' },
+  { id: 'r2', discussion_id: DISCUSSION_ID, response_text: 'Second response about drug absorption', selected_option: null, created_at: '2024-01-01T10:02:00Z', is_correct: null, flagged_at: null, student_session_id: 'student-2' },
+  { id: 'r3', discussion_id: DISCUSSION_ID, response_text: 'Third response about bioavailability', selected_option: null, created_at: '2024-01-01T10:03:00Z', is_correct: null, flagged_at: null, student_session_id: 'student-3' },
 ];
 
 test.describe('Instructor Highlight & Hide Responses', () => {

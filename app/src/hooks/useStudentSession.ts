@@ -121,9 +121,30 @@ function clearDraftFromStorage(storageKey: string, discussionId: string): void {
   }
 }
 
+/** Returns a persistent anonymous session ID for the student, stored in localStorage.
+ *  The same ID is reused across page refreshes and tab reopens on the same browser,
+ *  allowing accurate unique-respondent counting via COUNT(DISTINCT student_session_id). */
+function getStudentSessionId(): string {
+  const key = 'student_session_id';
+  try {
+    const existing = localStorage.getItem(key);
+    if (existing) return existing;
+    const id = crypto.randomUUID();
+    localStorage.setItem(key, id);
+    return id;
+  } catch {
+    // Fallback if localStorage is unavailable (e.g. incognito on some browsers)
+    return crypto.randomUUID();
+  }
+}
+
 export function useStudentSession(lessonId: string) {
   const router = useRouter();
-  const { channel, isConnected } = useRealtime(lessonId, 'student');
+  // Stable student session ID — useState initializer runs once, so the same ID
+  // is reused across re-renders. Passed as the presence key so Supabase groups
+  // all connections from the same student under one key (deduplicating tabs/reconnects).
+  const [studentSessionId] = useState(() => getStudentSessionId());
+  const { channel, isConnected } = useRealtime(lessonId, 'student', studentSessionId);
   const submittedDiscussionsKey = `student:${lessonId}:submitted-discussions`;
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
@@ -214,6 +235,7 @@ export function useStudentSession(lessonId: string) {
       text,
       opt,
       corr,
+      studentSessionId,
     );
 
     const newResponse = data as Response | null;
@@ -261,7 +283,7 @@ export function useStudentSession(lessonId: string) {
     if (isMC && currentDiscussion.feedback_enabled) {
       tryActivateMCFeedback(currentDiscussion.id);
     }
-  }, [channel, responseCount, responseText, selectedOption, submittedDiscussionsKey, submitting, tryActivateMCFeedback]);
+  }, [channel, responseCount, responseText, selectedOption, studentSessionId, submittedDiscussionsKey, submitting, tryActivateMCFeedback]);
 
   // 1) Boot
   useEffect(() => {
