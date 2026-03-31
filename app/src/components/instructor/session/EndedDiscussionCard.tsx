@@ -98,7 +98,7 @@ export function EndedDiscussionCard({
             <span className="font-semibold text-content-secondary">{responseRate}%</span> rate
           </span>
         )}
-        {snapshot && (
+        {snapshot > 0 && (
           <span className="flex items-center gap-1">
             <span className="font-semibold text-content-secondary">{snapshot}</span> students
           </span>
