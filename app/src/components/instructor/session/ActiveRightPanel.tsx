@@ -265,7 +265,7 @@ function ExpandedSidebarContent(props: Readonly<ReturnType<typeof useActiveRight
   openTab: (tab: string) => void;
   isMC: boolean;
 }>) {
-  const { activeTab, setActiveTab, activeDiscussion, responses, distribution, activeDiscussionId, timerEndTime, timerTotalSeconds, handleCloseDiscussion, isClosingDiscussion, handleExtendTimer, handleEditTimer, peakStudentCount, isMC } = props;
+  const { activeTab, setActiveTab, activeDiscussion, responses, distribution, activeDiscussionId, timerEndTime, timerTotalSeconds, handleCloseDiscussion, handleExtendTimer, handleEditTimer, peakStudentCount, isMC } = props;
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden min-w-0 w-full">
       {/* Active discussion strip — always visible above tabs when a discussion is running */}

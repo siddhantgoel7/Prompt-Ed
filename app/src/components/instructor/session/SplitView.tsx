@@ -9,7 +9,6 @@ import type { Response } from '@/types/response';
 import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 import { ResponseCard } from '@/components/instructor/ResponseCard';
 import { RestartDiscussionButton } from './RestartDiscussionButton';
-import { RotateCcw } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Types

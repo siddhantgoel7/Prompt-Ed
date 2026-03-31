@@ -7,7 +7,6 @@ import type { DiscussionWithResponseCount } from '@/types/discussion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { formatTime } from '@/lib/utils';
-import { useSessionContext } from './SessionContext';
 import { RestartDiscussionButton } from './RestartDiscussionButton';
 
 

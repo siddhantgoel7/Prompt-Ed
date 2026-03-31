@@ -36,7 +36,14 @@ export function RestartDiscussionButton({
     return null;
   }
 
-  const iconSize = size === 'sm' ? 'w-3.5 h-3.5' : size === 'md' ? 'w-4 h-4' : 'w-5 h-5';
+  let iconSize: string;
+  if (size === 'sm') {
+    iconSize = 'w-3.5 h-3.5';
+  } else if (size === 'lg') {
+    iconSize = 'w-5 h-5';
+  } else {
+    iconSize = 'w-4 h-4';
+  }
   
   const handleRestart = async (e: React.MouseEvent) => {
     e.preventDefault();
