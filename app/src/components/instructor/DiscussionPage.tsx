@@ -119,7 +119,6 @@ function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestore
   );
 }
 
-
 interface DiscussionClientProps {
   lessonId: string;
   discussionId: string;
@@ -236,7 +235,7 @@ export function DiscussionPage({
     <div
       className="min-h-screen bg-surface-base"
     >
-      <div className="w-2/3 mx-auto p-4 md:p-8">
+      <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
         {/* Back navigation */}
         <div className="mb-6">
           <Link
@@ -445,7 +444,7 @@ export function DiscussionPage({
           </div>
         </div>
       </div>
-      <ConnectionStatus isConnected={isConnected} onReconnect={!isConnected ? () => window.location.reload() : undefined} />
+      <ConnectionStatus isConnected={isConnected} onReconnect={isConnected ? undefined : () => globalThis.location.reload()} />
     </div>
   );
 }

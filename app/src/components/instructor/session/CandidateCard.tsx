@@ -345,17 +345,62 @@ export function CandidateCard({
 
   const hasMc = (candidate.mcOptions?.length ?? 0) > 0;
 
+  const content = isSelected ? (
+    <div className="flex flex-col cursor-default min-w-0 w-full overflow-hidden">
+      <PromptCrossfade
+        promptText={candidate.promptText}
+        editText={editText}
+        onEditTextChange={setEditText}
+        isSelected={isSelected}
+        isExpanded={isExpanded}
+        pRef={pRef}
+      />
+      {hasMc && (
+        <MCEditorSection
+          isSelected={isSelected}
+          index={index}
+          mcOptions={candidate.mcOptions}
+          editingOptions={editingOptions}
+          overrideCorrectOption={overrideCorrectOption}
+          setOverrideCorrectOption={setOverrideCorrectOption}
+          setEditingOptions={setEditingOptions}
+        />
+      )}
+      <PublishSection
+        isSelected={isSelected}
+        isConnected={isConnected}
+        editText={editText}
+        handlePublish={handlePublish}
+      />
+    </div>
+  ) : (
+    <div
+      className="w-full min-w-0 text-left overflow-hidden"
+      aria-label={`Select: ${candidate.promptText}`}
+    >
+      <PromptCrossfade
+        promptText={candidate.promptText}
+        editText={editText}
+        onEditTextChange={setEditText}
+        isSelected={isSelected}
+        isExpanded={isExpanded}
+        pRef={pRef}
+      />
+      <UnselectedMCList isSelected={isSelected} mcOptions={candidate.mcOptions} />
+    </div>
+  );
+
   return (
     <div
       role={isSelected ? undefined : "button"}
       tabIndex={isSelected ? -1 : 0}
-      onClick={!isSelected ? onSelect : undefined}
-      onKeyDown={!isSelected ? (e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(); } : undefined}
+      onClick={isSelected ? undefined : onSelect}
+      onKeyDown={isSelected ? undefined : (e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(); }}
       data-testid="ai-candidate-card"
-      className={`p-3 rounded-xl text-sm w-full min-w-0 overflow-hidden ${!isSelected ? 'cursor-pointer hover:shadow-sm' : ''}`}
+      className={`p-3 rounded-xl text-sm w-full min-w-0 overflow-hidden ${isSelected ? '' : 'cursor-pointer hover:shadow-sm'}`}
       style={{
         background: isSelected ? 'var(--color-primary-alpha-08)' : 'var(--surface-raised)',
-        border: `1px solid ${!isSelected && isHovered ? 'var(--color-primary-300)' : 'var(--border-default)'}`,
+        border: `1px solid ${isSelected || !isHovered ? 'var(--border-default)' : 'var(--color-primary-300)'}`,
         outline: '2px solid',
         outlineColor: isSelected ? 'var(--color-primary-500)' : 'transparent',
         outlineOffset: '-1px',
@@ -373,50 +418,7 @@ export function CandidateCard({
         isSelected={isSelected}
       />
 
-      {isSelected ? (
-        <div className="flex flex-col cursor-default min-w-0 w-full overflow-hidden">
-          <PromptCrossfade
-            promptText={candidate.promptText}
-            editText={editText}
-            onEditTextChange={setEditText}
-            isSelected={isSelected}
-            isExpanded={isExpanded}
-            pRef={pRef}
-          />
-          {hasMc && (
-            <MCEditorSection
-              isSelected={isSelected}
-              index={index}
-              mcOptions={candidate.mcOptions}
-              editingOptions={editingOptions}
-              overrideCorrectOption={overrideCorrectOption}
-              setOverrideCorrectOption={setOverrideCorrectOption}
-              setEditingOptions={setEditingOptions}
-            />
-          )}
-          <PublishSection
-            isSelected={isSelected}
-            isConnected={isConnected}
-            editText={editText}
-            handlePublish={handlePublish}
-          />
-        </div>
-      ) : (
-        <div
-          className="w-full min-w-0 text-left overflow-hidden"
-          aria-label={`Select: ${candidate.promptText}`}
-        >
-          <PromptCrossfade
-            promptText={candidate.promptText}
-            editText={editText}
-            onEditTextChange={setEditText}
-            isSelected={isSelected}
-            isExpanded={isExpanded}
-            pRef={pRef}
-          />
-          <UnselectedMCList isSelected={isSelected} mcOptions={candidate.mcOptions} />
-        </div>
-      )}
+      {content}
     </div>
   );
 }

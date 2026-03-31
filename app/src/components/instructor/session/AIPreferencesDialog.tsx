@@ -169,7 +169,7 @@ export function AIPreferencesDialog() {
     );
 }
 
-function PrefInfo({ tooltip }: { tooltip: string }) {
+function PrefInfo({ tooltip }: Readonly<{ tooltip: string }>) {
     return (
         <Tooltip>
             <TooltipTrigger asChild>

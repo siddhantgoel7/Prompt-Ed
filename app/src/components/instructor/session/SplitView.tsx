@@ -420,7 +420,7 @@ export function SplitView({
       {/* Pane Layout */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Desktop: both visible | Mobile: only active visible */}
-        <div className={`flex-1 flex min-w-0 ${mobileActivePane !== 'left' ? 'hidden lg:flex' : 'flex'}`}>
+        <div className={`flex-1 flex min-w-0 ${mobileActivePane === 'left' ? 'flex' : 'hidden lg:flex'}`}>
           <Pane
             label="Left Pane"
             discussions={discussions}
@@ -429,7 +429,7 @@ export function SplitView({
           />
         </div>
         
-        <div className={`flex-1 flex min-w-0 ${mobileActivePane !== 'right' ? 'hidden lg:flex' : 'flex'}`}>
+        <div className={`flex-1 flex min-w-0 ${mobileActivePane === 'right' ? 'flex' : 'hidden lg:flex'}`}>
           <Pane
             label="Right Pane"
             discussions={discussions}

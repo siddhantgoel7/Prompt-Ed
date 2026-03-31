@@ -247,7 +247,38 @@ export function useStudentSession(lessonId: string) {
   useEffect(() => {
     let cancelled = false;
 
-    async function boot() {
+    const hydrateHistory = (disc: Discussion) => {
+      const isSubmitted = hasSubmittedDiscussionInStorage(submittedDiscussionsKey, disc.id);
+      const count = getResponseCountFromStorage(submittedDiscussionsKey, disc.id);
+      setResponseCount(count);
+
+      if (isSubmitted) {
+        const saved = getSavedResponseFromStorage(submittedDiscussionsKey, disc.id);
+        if (saved) {
+          setSubmittedAnswerText(saved.responseText ?? null);
+          setSelectedOption(saved.selectedOption ?? null);
+          setIsSubmitCorrect(saved.isCorrect ?? null);
+        }
+        setView('submitted');
+      } else {
+        const draft = getDraftFromStorage(submittedDiscussionsKey, disc.id);
+        setResponseText(draft?.responseText ?? '');
+        setSelectedOption(draft?.selectedOption ?? null);
+        setView('active');
+      }
+    };
+
+    const setupTimer = (disc: Discussion) => {
+      if (disc.time_limit_seconds && disc.time_limit_seconds > 0 && disc.published_at) {
+        const endTime = new Date(disc.published_at).getTime() + disc.time_limit_seconds * 1000;
+        if (endTime > Date.now()) {
+          setTimerEndTime(endTime);
+          setTimerTotalSeconds(disc.time_limit_seconds);
+        }
+      }
+    };
+
+    const boot = async () => {
       setView('loading');
       setErrorMessage(null);
 
@@ -261,51 +292,19 @@ export function useStudentSession(lessonId: string) {
 
       const { data: discussionData, error: discussionError } = await fetchStudentActiveDiscussionApi(lessonId);
       if (cancelled) return;
-
       if (discussionError) console.error('Error fetching active discussion:', discussionError);
 
       if (discussionData) {
         const disc = discussionData as Discussion;
         setActiveDiscussion(disc);
-
-        const isSubmitted = hasSubmittedDiscussionInStorage(submittedDiscussionsKey, disc.id);
-        const count = getResponseCountFromStorage(submittedDiscussionsKey, disc.id);
-        setResponseCount(count);
-
-        if (isSubmitted) {
-          const saved = getSavedResponseFromStorage(submittedDiscussionsKey, disc.id);
-          if (saved) {
-            setSubmittedAnswerText(saved.responseText ?? null);
-            setSelectedOption(saved.selectedOption ?? null);
-            setIsSubmitCorrect(saved.isCorrect ?? null);
-          }
-          setView('submitted');
-        } else {
-          // Hydrate draft if available
-          const draft = getDraftFromStorage(submittedDiscussionsKey, disc.id);
-          if (draft) {
-             if (draft.responseText) setResponseText(draft.responseText);
-             if (draft.selectedOption) setSelectedOption(draft.selectedOption);
-          } else {
-             setResponseText('');
-             setSelectedOption(null);
-          }
-          setView('active');
-        }
-
-        if (disc.time_limit_seconds && disc.time_limit_seconds > 0 && disc.published_at) {
-          const endTime = new Date(disc.published_at).getTime() + disc.time_limit_seconds * 1000;
-          if (endTime > Date.now()) {
-            setTimerEndTime(endTime);
-            setTimerTotalSeconds(disc.time_limit_seconds);
-          }
-        }
+        hydrateHistory(disc);
+        setupTimer(disc);
       } else {
         setView('waiting');
       }
-    }
+    };
 
-    if (lessonId) boot();
+    if (lessonId) void boot();
     return () => { cancelled = true; };
   }, [lessonId, router, submittedDiscussionsKey]);
 
@@ -428,31 +427,33 @@ export function useStudentSession(lessonId: string) {
   // 3) Auto-submit on timer expiry
   useEffect(() => {
     if (!timerEndTime) return;
+
+    const performAutoSubmit = () => {
+      if (viewRef.current !== 'active' || submitting) return;
+      const disc = activeDiscussionRef.current;
+      if (!disc) return;
+
+      const isMC = disc.prompt_type === 'multiple_choice';
+      const hasDraft = isMC ? Boolean(selectedOption) : responseText.trim().length > 0;
+      if (!hasDraft) return;
+
+      // We need to pass the values directly because closure captures old state
+      const text = responseText.trim();
+      const opt = selectedOption;
+      if (isMC && opt) {
+        const optionText = disc.mc_options?.find(o => o.label === opt)?.text ?? '';
+        const isCorrect = opt === disc.correct_option;
+        submitResponse(`Option ${opt}: ${optionText}`, opt, isCorrect);
+      } else if (!isMC && text) {
+        submitResponse(text);
+      }
+    };
+
     const id = setInterval(() => {
       if (Date.now() >= timerEndTime && !timerExpiredRef.current) {
         timerExpiredRef.current = true;
         setTimerExpired(true);
-
-        // Auto-submit if in active view and has some content (or is MC with selection)
-        if (viewRef.current === 'active' && !submitting) {
-          const disc = activeDiscussionRef.current;
-          if (disc) {
-            const isMC = disc.prompt_type === 'multiple_choice';
-            const hasDraft = isMC ? Boolean(selectedOption) : responseText.trim().length > 0;
-            if (hasDraft) {
-               // We need to pass the values directly because closure captures old state
-               const text = responseText.trim();
-               const opt = selectedOption;
-               if (isMC && opt) {
-                 const optionText = disc.mc_options?.find(o => o.label === opt)?.text ?? '';
-                 const isCorrect = opt === disc.correct_option;
-                 submitResponse(`Option ${opt}: ${optionText}`, opt, isCorrect);
-               } else if (!isMC && text) {
-                 submitResponse(text);
-               }
-            }
-          }
-        }
+        performAutoSubmit();
       }
     }, 500);
     return () => clearInterval(id);
@@ -484,7 +485,7 @@ export function useStudentSession(lessonId: string) {
   }, [timerExpired, view, activeDiscussion, isSubmitCorrect]);
 
   const submitAnotherResponse = () => {
-    if (!activeDiscussion || !activeDiscussion.allow_multiple_responses) return;
+    if (!activeDiscussion?.allow_multiple_responses) return;
     if (activeDiscussion.prompt_type === 'multiple_choice') return;
     if (activeDiscussion.response_limit && responseCount >= activeDiscussion.response_limit) return;
     setResponseText('');
