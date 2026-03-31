@@ -8,10 +8,10 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 export function LessonsPageHeader({
   title: _title,
   onBack,
-}: {
+}: Readonly<{
   title: string;
   onBack: () => void;
-}) {
+}>) {
   return (
     <header
       className="glass sticky top-0 z-50"

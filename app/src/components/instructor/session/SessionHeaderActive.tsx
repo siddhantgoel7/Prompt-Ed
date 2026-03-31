@@ -2,7 +2,7 @@
 // Contains three zones:
 //   Left   — PromptED logo + lesson title (truncated on small screens)
 //   Center — Live join PIN + mini QR thumbnail (links to the join URL in a new tab)
-//   Right  — ThemeToggle + HamburgerMenu (Display QR/Code, Split View, Settings, End Session)
+//   Right  — ThemeToggle + HamburgerMenu (Display QR/Code, Split View, End Session)
 //
 // The HamburgerMenu lives in HamburgerMenu.tsx — extracted because it has its own
 // state, refs, effects, and is self-contained and potentially reusable.
@@ -24,10 +24,10 @@ import { SessionContext } from './SessionContext';
 import { HamburgerMenu } from './HamburgerMenu';
 
 /**
- * Active-session header with logo, lesson title, join PIN code, Display/End/Split View/Settings buttons.
+ * Active-session header with logo, lesson title, join PIN code, Display/End/Split View buttons.
  * Reads values from SessionContext when available, falling back to explicit props for testing.
  */
-export function SessionHeaderActive(props: {
+export function SessionHeaderActive(props: Readonly<{
   title?: string;
   lessonId?: string;
   pinCode?: string | null;
@@ -35,7 +35,7 @@ export function SessionHeaderActive(props: {
   onDisplay?: () => void;
   onEnd?: () => void;
   onSplitView: () => void;
-}) {
+}>) {
   const context = React.useContext(SessionContext);
   const title = context ? context.lesson.title : props.title!;
   const lessonId = context ? context.lesson.id : props.lessonId;
@@ -55,8 +55,11 @@ export function SessionHeaderActive(props: {
         <div className="flex items-center gap-3 min-w-0">
           <AppLogo size="sm" className="flex-shrink-0 hidden sm:block" />
           <div className="hidden sm:block w-px h-5 flex-shrink-0 bg-line-default" />
-          <h1 className="text-sm md:text-base font-semibold truncate text-content-primary">
-            {title}
+          <h1 
+            data-testid="session-title"
+            className="text-sm md:text-base font-semibold truncate text-content-primary"
+          >
+            {title || 'Untitled Lesson'}
           </h1>
         </div>
 

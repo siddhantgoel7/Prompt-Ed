@@ -17,7 +17,7 @@ import { SessionContext } from './SessionContext';
  * Ended-session header with lesson title and Export Txt / Activate / Split View buttons.
  * Reads from SessionContext when available, falling back to explicit props for testing.
  */
-export function SessionHeaderEnded(props: {
+export function SessionHeaderEnded(props: Readonly<{
   title?: string;
   courseId?: string;
   exporting?: boolean;
@@ -28,7 +28,7 @@ export function SessionHeaderEnded(props: {
   onActivate?: () => void;
   onBackToLessons?: () => void;
   onSplitView: () => void;
-}) {
+}>) {
   const router = useRouter();
   const context = React.useContext(SessionContext);
   const exporting = context ? context.exportingData : props.exporting!;
@@ -45,26 +45,29 @@ export function SessionHeaderEnded(props: {
 
   return (
     <header
-      className="glass sticky top-0 z-50 px-6 py-4 flex items-center justify-between"
+      className="glass sticky top-0 z-50 px-4 md:px-6 py-2.5 md:py-3 flex items-center justify-between gap-3"
     >
-      <h1 className="text-xl font-semibold text-content-primary">{title}</h1>
+      <h1 className="text-base sm:text-xl font-semibold text-content-primary truncate flex-shrink min-w-[50px] max-w-[30%] sm:max-w-[40%]">
+        {title}
+      </h1>
 
-      <div className="flex items-center gap-3">
-        <Button onClick={onBackToLessons} disabled={!onBackToLessons} variant="outline" className="text-xs h-8">
-          Back to Lessons
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-nowrap flex-shrink-0">
+        <Button onClick={onBackToLessons} disabled={!onBackToLessons} variant="outline" className="text-xs h-8 px-2 sm:px-3">
+          <span className="hidden xs:inline">Back to Lessons</span>
+          <span className="xs:hidden">Back</span>
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button disabled={exporting} variant="default" className="text-xs h-8">
+            <Button disabled={exporting} variant="default" className="text-xs h-8 px-2 sm:px-3">
               {exporting ? 'Exporting...' : 'Export'}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-72">
+          <DropdownMenuContent align="end" className="w-64 sm:w-72">
             <DropdownMenuItem onClick={onExportOverviewTxt} className="items-start py-2">
               <div className="flex flex-col">
                 <span className="font-medium text-sm">Export overview TXT</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">
                   Full lesson summary, transcripts, and files
                 </span>
               </div>
@@ -72,7 +75,7 @@ export function SessionHeaderEnded(props: {
             <DropdownMenuItem onClick={onExportDiscussionsCsv} className="items-start py-2">
               <div className="flex flex-col">
                 <span className="font-medium text-sm">Export Discussions CSV</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">
                   Spreadsheet of prompts and responses
                 </span>
               </div>
@@ -80,19 +83,23 @@ export function SessionHeaderEnded(props: {
             <DropdownMenuItem onClick={onExportStatistics} className="items-start py-2">
               <div className="flex flex-col">
                 <span className="font-medium text-sm">Export Statistics</span>
-                <span className="text-xs text-muted-foreground">
-                  Engagement metrics, participation rates, and timestamps
+                <span className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">
+                  Engagement metrics, rates, and timestamps
                 </span>
               </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button onClick={onActivate} disabled={activating} variant="secondary" className="text-xs h-8">
-          {activating ? 'Activating...' : 'Activate'}
+        <Button onClick={onActivate} disabled={activating} variant="secondary" className="text-xs h-8 px-2 sm:px-3">
+          {activating ? '...' : <span className="hidden xs:inline">Activate</span>}
+          {!activating && <span className="xs:hidden">Restart</span>}
         </Button>
 
-        <Button onClick={onSplitView} variant="outline" className="text-xs h-8">Split View</Button>
+        <Button onClick={onSplitView} variant="outline" className="text-xs h-8 px-2 sm:px-3">
+          <span className="hidden xs:inline">Split View</span>
+          <span className="xs:hidden">Grid</span>
+        </Button>
       </div>
     </header>
   );

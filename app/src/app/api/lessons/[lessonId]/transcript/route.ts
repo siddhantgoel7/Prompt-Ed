@@ -1,4 +1,4 @@
-// API route for transcribing instructor audio using OpenAI Whisper.
+// API route for transcribing instructor audio using whisper-1.
 // Returns the transcript text immediately, then stores it as an embedded chunk in the background.
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
@@ -9,7 +9,7 @@ const MAX_AUDIO_SIZE = 25 * 1024 * 1024;
 
 /**
  * POST /api/lessons/[lessonId]/transcript
- * Transcribes an audio recording via Whisper and stores the result as a lesson chunk.
+ * Transcribes an audio recording via whisper-1 and stores the result as a lesson chunk.
  * Returns { transcript } on success.
  */
 export async function POST(
@@ -62,7 +62,7 @@ export async function POST(
 
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  // Whisper transcription
+  // Transcription via whisper-1
   let transcript = '';
   try {
     const transcription = await openai.audio.transcriptions.create({
@@ -72,7 +72,7 @@ export async function POST(
     });
     transcript = transcription.text ?? '';
   } catch (err) {
-    console.error('[transcript] Whisper error:', err);
+    console.error('[transcript] Transcription error:', err);
     return NextResponse.json(
       { error: 'Transcription failed. Please enter text manually.' },
       { status: 500 }

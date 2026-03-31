@@ -10,6 +10,7 @@ interface DiscussionTimerSectionProps {
   activeDiscussionId: string | null;
   timerEndTime: number | null;
   timerTotalSeconds: number | null;
+  isClosingDiscussion?: boolean;
   onClose: (discussionId: string) => void;
   onExtendTimer?: (extraSeconds: number) => Promise<void>;
   onEditTimer?: (newSeconds: number | null) => Promise<void>;
@@ -22,7 +23,7 @@ function formatTime(secs: number): string {
 }
 
 /** Circular SVG countdown timer for the instructor view. */
-function CircularTimer({ remaining, total }: { remaining: number; total: number }) {
+function CircularTimer({ remaining, total }: Readonly<{ remaining: number; total: number }>) {
   const radius = 45;
   const circumference = 2 * Math.PI * radius;
   const progress = total > 0 ? Math.max(0, remaining / total) : 0;
@@ -64,17 +65,19 @@ export function DiscussionTimerSection({
   activeDiscussionId,
   timerEndTime,
   timerTotalSeconds,
+  isClosingDiscussion,
   onClose,
   onExtendTimer,
   onEditTimer,
-}: DiscussionTimerSectionProps) {
+}: Readonly<DiscussionTimerSectionProps>) {
   const [remaining, setRemaining] = React.useState<number>(0);
   const [showEditDialog, setShowEditDialog] = React.useState(false);
 
   React.useEffect(() => {
     if (!timerEndTime) return;
+    const endTime = timerEndTime;
     function tick() {
-      const secs = Math.max(0, Math.ceil((timerEndTime! - Date.now()) / 1000));
+      const secs = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
       setRemaining(secs);
     }
     tick();
@@ -118,7 +121,7 @@ export function DiscussionTimerSection({
             Edit
           </button>
 
-          <CircularTimer remaining={remaining} total={timerTotalSeconds!} />
+          <CircularTimer remaining={remaining} total={timerTotalSeconds} />
 
           {/* +10s button — right of timer */}
           <button
@@ -144,11 +147,12 @@ export function DiscussionTimerSection({
 
       <Button
         onClick={() => onClose(activeDiscussionId)}
+        disabled={isClosingDiscussion}
         variant="outline"
-        className="w-full max-w-xs border-destructive text-destructive hover:bg-destructive hover:text-white font-semibold rounded-full"
+        className="w-full max-w-xs border-destructive text-destructive hover:bg-destructive hover:text-white font-semibold rounded-full disabled:opacity-60 disabled:cursor-not-allowed"
         data-testid="close-discussion-button"
       >
-        Close Discussion
+        {isClosingDiscussion ? 'Closing…' : 'Close Discussion'}
       </Button>
 
       <StartDiscussionDialog

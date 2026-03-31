@@ -5,7 +5,7 @@
 import * as React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { DiscussionWithResponseCount } from '@/types/discussion';
+import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
 import type { LessonFile } from '@/types/ai';
 import { SessionContext } from './SessionContext';
@@ -13,7 +13,7 @@ import { DiscussionHistory } from './DiscussionHistory';
 import { FilesTab } from './FilesTab';
 
 /** Renders the session sidebar with Discussions and Files tabs. Supports collapsing. */
-export function ActiveSidebar(props: {
+export function ActiveSidebar(props: Readonly<{
   discussions?: DiscussionWithResponseCount[];
   activeDiscussionId?: string | null;
   responses?: Response[];
@@ -21,8 +21,9 @@ export function ActiveSidebar(props: {
   isUploading?: boolean;
   onUploadFile?: (file: File) => Promise<void>;
   onDeleteFile?: (fileId: string) => Promise<void>;
+  onDownloadFile?: (fileId: string) => Promise<void>;
   studentCount?: number;
-}) {
+}>) {
   const context = React.useContext(SessionContext);
   const discussions = context ? context.discussions : props.discussions!;
   const activeDiscussionId = context ? (context.activeDiscussion?.id ?? null) : props.activeDiscussionId!;
@@ -30,6 +31,9 @@ export function ActiveSidebar(props: {
   const isUploading = context ? context.isUploading : props.isUploading!;
   const onUploadFile = context ? context.uploadFile : props.onUploadFile!;
   const onDeleteFile = context ? context.deleteFile : props.onDeleteFile!;
+  const onDownloadFile = context ? context.openFile : props.onDownloadFile!;
+  const handleRestartDiscussion = context ? context.handleRestartDiscussion : undefined;
+  const isLessonActive = context?.lesson?.status === 'active';
 
   const [collapsed, setCollapsed] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('discussions');
@@ -41,10 +45,7 @@ export function ActiveSidebar(props: {
 
   return (
     <aside
-      className="flex flex-col flex-shrink-0 transition-all duration-200 bg-surface-raised border-r border-line-default"
-      style={{
-        width: collapsed ? '52px' : '280px',
-      }}
+      className={`flex flex-col flex-shrink-0 transition-all duration-300 bg-surface-raised border-r border-line-default w-full ${collapsed ? 'lg:w-[52px]' : 'lg:w-[280px]'}`}
     >
       {/* Collapse toggle */}
       <div
@@ -84,74 +85,110 @@ export function ActiveSidebar(props: {
 
       {/* Collapsed state: icon buttons */}
       {collapsed ? (
-        <div className="flex flex-col items-center gap-3 pt-4 px-2">
-          <button
-            title="Discussions"
-            onClick={() => openTab('discussions')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150"
-            style={{ color: activeTab === 'discussions' ? 'var(--color-primary-500)' : 'var(--text-muted)', background: activeTab === 'discussions' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.10)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = activeTab === 'discussions' ? 'rgba(45,158,45,0.10)' : 'transparent';
-              (e.currentTarget as HTMLButtonElement).style.color = activeTab === 'discussions' ? 'var(--color-primary-500)' : 'var(--text-muted)';
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-          </button>
-          <button
-            title="Files"
-            onClick={() => openTab('files')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150"
-            style={{ color: activeTab === 'files' ? 'var(--color-primary-500)' : 'var(--text-muted)', background: activeTab === 'files' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(45,158,45,0.10)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = activeTab === 'files' ? 'rgba(45,158,45,0.10)' : 'transparent';
-              (e.currentTarget as HTMLButtonElement).style.color = activeTab === 'files' ? 'var(--color-primary-500)' : 'var(--text-muted)';
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-            </svg>
-          </button>
-        </div>
+        <CollapsedSidebarView activeTab={activeTab} openTab={openTab} />
       ) : (
-        /* Expanded: full tab panel */
-        <div className="flex-1 overflow-hidden p-3">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
-            <TabsList className="w-full grid grid-cols-2 mb-3">
-              <TabsTrigger value="discussions" className="text-xs">Discussions</TabsTrigger>
-              <TabsTrigger value="files" className="text-xs">Files</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="discussions" className="mt-0 flex-1">
-              <ScrollArea className="h-[calc(100vh-130px)] pr-1">
-                <DiscussionHistory
-                  discussions={discussions}
-                  activeDiscussionId={activeDiscussionId}
-                />
-              </ScrollArea>
-            </TabsContent>
-
-            <TabsContent value="files" className="mt-0 flex-1">
-              <FilesTab
-                files={files}
-                isUploading={isUploading}
-                onUploadFile={onUploadFile}
-                onDeleteFile={onDeleteFile}
-              />
-            </TabsContent>
-          </Tabs>
-        </div>
+        <ExpandedSidebarView
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          discussions={discussions}
+          activeDiscussionId={activeDiscussionId}
+          files={files}
+          isUploading={isUploading}
+          onUploadFile={onUploadFile}
+          onDeleteFile={onDeleteFile}
+          onDownloadFile={onDownloadFile}
+          onRestartDiscussion={handleRestartDiscussion}
+          isLessonActive={isLessonActive}
+        />
       )}
     </aside>
+  );
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function CollapsedSidebarView({ activeTab, openTab }: Readonly<{ activeTab: string; openTab: (tab: string) => void }>) {
+  return (
+    <div className="flex flex-col items-center gap-3 pt-4 px-2">
+      <button
+        title="Discussions"
+        onClick={() => openTab('discussions')}
+        className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150"
+        style={{ color: activeTab === 'discussions' ? 'var(--color-primary-500)' : 'var(--text-muted)', background: activeTab === 'discussions' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </button>
+      <button
+        title="Files"
+        onClick={() => openTab('files')}
+        className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150"
+        style={{ color: activeTab === 'files' ? 'var(--color-primary-500)' : 'var(--text-muted)', background: activeTab === 'files' ? 'rgba(45,158,45,0.10)' : 'transparent' }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+function ExpandedSidebarView({
+  activeTab,
+  setActiveTab,
+  discussions,
+  activeDiscussionId,
+  files,
+  isUploading,
+  onUploadFile,
+  onDeleteFile,
+  onDownloadFile,
+  onRestartDiscussion,
+  isLessonActive
+}: Readonly<{
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  discussions: DiscussionWithResponseCount[];
+  activeDiscussionId: string | null;
+  files: LessonFile[];
+  isUploading: boolean;
+  onUploadFile: (file: File) => Promise<void>;
+  onDeleteFile: (fileId: string) => Promise<void>;
+  onDownloadFile: (fileId: string) => Promise<void>;
+  onRestartDiscussion?: (original: Discussion, timerSecs: number | null, feedbackEnabled: boolean, multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }) => Promise<void>;
+  isLessonActive: boolean;
+}>) {
+  return (
+    <div className="flex-1 overflow-hidden p-3">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
+        <TabsList className="w-full grid grid-cols-2 mb-3">
+          <TabsTrigger value="discussions" className="text-xs">Discussions</TabsTrigger>
+          <TabsTrigger value="files" className="text-xs">Files</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="discussions" className="mt-0 flex-1 min-h-0">
+          <ScrollArea className="h-full pr-1">
+            <DiscussionHistory
+              discussions={discussions}
+              activeDiscussionId={activeDiscussionId}
+              onRestart={onRestartDiscussion}
+              isLessonActive={isLessonActive}
+            />
+          </ScrollArea>
+        </TabsContent>
+
+        <TabsContent value="files" className="mt-0 flex-1">
+          <FilesTab
+            files={files}
+            isUploading={isUploading}
+            onUploadFile={onUploadFile}
+            onDeleteFile={onDeleteFile}
+            onDownloadFile={onDownloadFile}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

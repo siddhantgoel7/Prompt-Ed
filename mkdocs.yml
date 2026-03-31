@@ -5,6 +5,8 @@ theme:
 
 nav:
   - Project Requirements: index.md
+  - User Manual: user-manual.md
+  - Job Description: job-description.md
   - Software Design: design.md
   - Project Management: project-management.md
   - Teamwork: teamwork.md
@@ -12,7 +14,9 @@ nav:
 
   - Technical Details:
       - API & Supabase: api.md
+      - Deployment: deployment.md
       - Run Locally: run-local.md
+      - Required Libraries: libraries.md
       - Interactions: interface-interactions.md
       - Workflow: ci-cd.md
       - Testing: testing.md

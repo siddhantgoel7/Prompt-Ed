@@ -52,13 +52,38 @@ test.describe('Instructor AI Features & Tools', () => {
 
         // Suppress the one-time AI tips spotlight so it doesn't block clicks in tests.
         await page.addInitScript(() => sessionStorage.setItem('ai-tips-seen-ai-lesson-id', 'true'));
+
+        // Stub Supabase Realtime WebSocket using Playwright's native WS interception.
+        // This ensures isConnected=true in CI without a real Supabase connection.
+        // Supabase Realtime uses Phoenix array protocol: [join_ref, ref, topic, event, payload]
+        await page.routeWebSocket(/.*/, (ws) => {
+            ws.onMessage((msg) => {
+                try {
+                    const data = JSON.parse(msg as string);
+                    if (Array.isArray(data)) {
+                        const [joinRef, ref, topic, event] = data;
+                        if (event === 'phx_join') {
+                            ws.send(JSON.stringify([joinRef, ref, topic, 'phx_reply', { status: 'ok', response: {} }]));
+                        } else if (event === 'heartbeat') {
+                            ws.send(JSON.stringify([null, ref, 'phoenix', 'phx_reply', { status: 'ok', response: {} }]));
+                        }
+                    } else if (data.event === 'phx_join') {
+                        ws.send(JSON.stringify({ topic: data.topic, event: 'phx_reply', payload: { status: 'ok', response: {} }, ref: data.ref }));
+                    } else if (data.event === 'heartbeat') {
+                        ws.send(JSON.stringify({ topic: 'phoenix', event: 'phx_reply', payload: { status: 'ok', response: {} }, ref: data.ref }));
+                    }
+                } catch (_) { /* ignore */ }
+            });
+        });
+
         await page.goto('/session/ai-lesson-id');
-        await expect(page.getByText('AI Lesson Room')).toBeVisible({ timeout: 15000 });
+        const titleLocator = page.getByTestId('session-title');
+        await expect(titleLocator).toBeVisible({ timeout: 15000 });
+        await expect(titleLocator).toContainText('AI Lesson Room');
     });
 
     // 43.1
     test('[US 1.16] success: file upload button exists and tab handles pdf sources', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
         const uploadTab = page.getByRole('tab', { name: 'Files' });
         await expect(uploadTab).toBeVisible({ timeout: 15000 });
         await uploadTab.click();
@@ -69,15 +94,14 @@ test.describe('Instructor AI Features & Tools', () => {
 
     // 43.2
     test('[US 1.17] success: toggle STT transcript capture', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
-        const startRecord = page.locator('button:has-text("Record")').or(page.locator('button', { hasText: /^Record$/i }));
+        const desktop = page.getByTestId('desktop-layout');
+        const startRecord = desktop.getByRole('button', { name: /Record/i });
         await expect(startRecord).toBeVisible({ timeout: 15000 });
-        await expect(page.locator('textarea[placeholder*="Spoken content"]')).toBeVisible({ timeout: 15000 });
+        await expect(desktop.locator('textarea[placeholder*="Spoken content"]')).toBeVisible({ timeout: 15000 });
     });
 
     // 43.3
     test('[US 1.18][US 1.19][US 1.23] success: generates different prompt types and allows selection', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
         await page.route('**/api/lessons/ai-lesson-id/generate', async (route) => {
             const payload = route.request().postDataJSON();
 
@@ -107,30 +131,30 @@ test.describe('Instructor AI Features & Tools', () => {
             }
         });
 
-        const contextBox = page.locator('textarea[placeholder*="Spoken content"]');
+        const desktop = page.getByTestId('desktop-layout');
+        const contextBox = desktop.locator('textarea[placeholder*="Spoken content"]');
         await expect(contextBox).toBeVisible({ timeout: 15000 });
         await contextBox.fill('This is my lecture context for the AI generator.');
 
-        await page.getByRole('button', { name: /Generate Prompt/i }).click();
+        await desktop.getByTestId('generate-prompts-button').first().click();
 
-        await expect(page.getByText('AI MOCKED: Short Answer Question?')).toBeVisible({ timeout: 15000 });
+        await expect(desktop.getByText(/AI MOCKED/i).filter({ visible: true }).first()).toBeVisible({ timeout: 15000 });
 
-        const producedPromptCard = page.locator('button').filter({ hasText: 'AI MOCKED: Short Answer Question?' }).first();
+        const producedPromptCard = desktop.getByTestId('ai-candidate-card').filter({ visible: true }).first();
         await producedPromptCard.click();
 
-        const selectDropdown = page.locator('select');
+        const selectDropdown = desktop.locator('select').first();
         await selectDropdown.selectOption('multiple_choice');
 
-        await page.getByRole('button', { name: /Regenerate Options/i }).or(page.getByRole('button', { name: /Generate Prompt/i })).click();
+        await desktop.getByRole('button', { name: /Regenerate Options/i }).or(desktop.getByRole('button', { name: /Generate Prompt/i })).first().click();
 
-        await expect(page.getByText('AI MOCKED: Multiple Choice Question?')).toBeVisible({ timeout: 15000 });
-        await expect(page.getByText('Option A')).toBeVisible();
-        await expect(page.getByText('Option B')).toBeVisible();
+        await expect(desktop.getByText('AI MOCKED: Multiple Choice Question?').filter({ visible: true }).first()).toBeVisible({ timeout: 15000 });
+        await expect(desktop.getByText('Option A').filter({ visible: true }).first()).toBeVisible();
+        await expect(desktop.getByText('Option B').filter({ visible: true }).first()).toBeVisible();
     });
 
     // 43.4
     test('[US 1.20] success: instructor can edit AI-generated prompts before publishing', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
 
         await page.route('**/api/lessons/ai-lesson-id/generate', async (route) => {
             await route.fulfill({
@@ -146,20 +170,21 @@ test.describe('Instructor AI Features & Tools', () => {
         });
 
         // Generate a prompt
-        const contextBox = page.locator('textarea[placeholder*="Spoken content"]');
+        const desktop = page.getByTestId('desktop-layout');
+        const contextBox = desktop.locator('textarea[placeholder*="Spoken content"]');
         await expect(contextBox).toBeVisible({ timeout: 15000 });
         await contextBox.fill('Generate me a short answer question.');
-        await page.getByRole('button', { name: /Generate Prompt/i }).click();
+        await desktop.getByTestId('generate-prompts-button').first().click();
 
         // Ensure candidate visible
-        await expect(page.getByText('AI MOCKED: Short Answer Question?')).toBeVisible({ timeout: 15000 });
+        await expect(desktop.getByText(/AI MOCKED/i).filter({ visible: true }).first()).toBeVisible({ timeout: 15000 });
 
         // Select the candidate
-        const producedPromptCard = page.locator('button').filter({ hasText: 'AI MOCKED: Short Answer Question?' }).first();
+        const producedPromptCard = desktop.getByTestId('ai-candidate-card').filter({ visible: true }).first();
         await producedPromptCard.click();
 
         // When selected, it becomes an editable textarea. The value should be the prompt text.
-        const editableTextarea = page.locator('textarea[placeholder="Edit this prompt..."]');
+        const editableTextarea = desktop.getByTestId('prompt-editor').filter({ visible: true }).first();
         await expect(editableTextarea).toBeVisible({ timeout: 5000 });
         await expect(editableTextarea).toHaveValue('AI MOCKED: Short Answer Question?');
 
@@ -183,11 +208,13 @@ test.describe('Instructor AI Features & Tools', () => {
 
         // Clicking "Publish This Question →" opens the StartDiscussionDialog (timer config).
         // The POST to /rest/v1/discussions only fires after the dialog is confirmed.
-        await page.getByRole('button', { name: /Publish This Question/i }).click();
+        const publishAiBtn = page.getByTestId('publish-ai-question-button');
+        await expect(publishAiBtn).toBeEnabled({ timeout: 15000 });
+        await publishAiBtn.click();
 
         // Wait for and interact with the timer dialog
         await expect(page.getByText('Set Time Limit')).toBeVisible({ timeout: 5000 });
-        await page.getByTestId('no-time-limit-checkbox').click();
+        await page.getByText('No Time Limit').click();
         // Click the dialog's confirm button (labelled "Start Discussion" by default)
         await page.getByRole('button', { name: /Start Discussion/i }).last().click();
 
@@ -199,7 +226,6 @@ test.describe('Instructor AI Features & Tools', () => {
     });
 
     test('[US 1.20] failure: cannot publish an empty edited prompt', async ({ page }) => {
-        test.skip(!!process.env.CI, 'Flaky in CI');
 
         await page.route('**/api/lessons/ai-lesson-id/generate', async (route) => {
             await route.fulfill({
@@ -214,16 +240,17 @@ test.describe('Instructor AI Features & Tools', () => {
             });
         });
 
-        const contextBox = page.locator('textarea[placeholder*="Spoken content"]');
+        const desktop = page.getByTestId('desktop-layout');
+        const contextBox = desktop.locator('textarea[placeholder*="Spoken content"]');
         await expect(contextBox).toBeVisible({ timeout: 15000 });
         await contextBox.fill('Generate me a short answer question.');
-        await page.getByRole('button', { name: /Generate Prompt/i }).click();
+        await desktop.getByTestId('generate-prompts-button').first().click();
 
-        const producedPromptCard = page.locator('button').filter({ hasText: 'AI MOCKED: Question?' }).first();
+        const producedPromptCard = desktop.getByTestId('ai-candidate-card').filter({ visible: true }).first();
         await expect(producedPromptCard).toBeVisible({ timeout: 15000 });
         await producedPromptCard.click();
 
-        const editableTextarea = page.locator('textarea[placeholder="Edit this prompt..."]');
+        const editableTextarea = desktop.getByTestId('prompt-editor').filter({ visible: true }).first();
         await expect(editableTextarea).toBeVisible({ timeout: 5000 });
 
         // Clear the text
@@ -233,7 +260,8 @@ test.describe('Instructor AI Features & Tools', () => {
         const innerPublishButton = page.getByRole('button', { name: /Publish This Question/i });
         await expect(innerPublishButton).toBeDisabled();
 
-        // Verify the outer discussion button is also disabled
+        // Verify the outer discussion button is also disabled (in Manual tab)
+        await page.getByRole('tab', { name: /Manual/i }).click();
         const outerStartDiscussionBtn = page.getByRole('button', { name: /Start Discussion/i, exact: true });
         await expect(outerStartDiscussionBtn).toBeDisabled();
     });

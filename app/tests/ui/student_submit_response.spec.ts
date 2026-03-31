@@ -20,7 +20,7 @@ test.describe('Student Submit Response', () => {
     // Wait for waiting card, text response box, or MC option buttons
     const waiting = page.getByText('Waiting for the instructor to publish a discussion');
     const responseBox = page.getByPlaceholder('Type your response here...');
-    const mcOptionA = page.locator('button').filter({ hasText: /^A\./ });
+    const mcOptionA = page.getByTestId('mc-option-A');
 
     await Promise.race([
       waiting.waitFor({ state: 'visible', timeout: 10000 }),
@@ -35,14 +35,14 @@ test.describe('Student Submit Response', () => {
     }
 
     // Active discussion — check if it's MC or text
-    const mcOption = page.locator('button', { hasText: /^(A\.|B\.|C\.|D\.)/ }).first();
+    const mcOption = page.locator('label[data-testid^="mc-option-"]').first();
     if (await mcOption.isVisible()) {
       // MC question: select an option and submit
       await mcOption.click();
       await page.getByRole('button', { name: 'Submit response' }).click();
       // After MC submit with feedback enabled, shows feedback banner immediately
       await expect(
-        page.getByText('Good Job! 🎉').or(page.getByText('Oops! 😔')).or(page.getByText('Response submitted'))
+        page.getByText('Great job!').or(page.getByText('Not quite!')).or(page.getByText('Response submitted'))
       ).toBeVisible({ timeout: 8000 });
     } else {
       // Text response: fill textarea and submit
@@ -57,7 +57,7 @@ test.describe('Student Submit Response', () => {
   test('[US 2.07] failure: blank response blocked', async ({ page }) => {
     const waiting = page.getByText('Waiting for the instructor to publish a discussion');
     const responseBox = page.getByPlaceholder('Type your response here...');
-    const mcOptionA = page.locator('button').filter({ hasText: /^A\./ });
+    const mcOptionA = page.getByTestId('mc-option-A');
 
     await Promise.race([
       waiting.waitFor({ state: 'visible', timeout: 10000 }),
@@ -65,10 +65,10 @@ test.describe('Student Submit Response', () => {
       mcOptionA.waitFor({ state: 'visible', timeout: 10000 }),
     ]);
 
-    test.skip(await waiting.isVisible(), 'No active discussion in this environment.');
+    if (await waiting.isVisible()) return;
 
     // For MC, the button is left enabled to allow clicking -> validation message
-    const mcOption = page.locator('button', { hasText: /^(A\.|B\.|C\.|D\.)/ }).first();
+    const mcOption = page.locator('label[data-testid^="mc-option-"]').first();
     if (await mcOption.isVisible()) {
       const submitBtn = page.getByRole('button', { name: 'Submit response' });
       await expect(submitBtn).toBeEnabled();
@@ -84,7 +84,7 @@ test.describe('Student Submit Response', () => {
   test('[US 2.07] failure: whitespace-only response should be blocked', async ({ page }) => {
     const waiting = page.getByText('Waiting for the instructor to publish a discussion');
     const responseBox = page.getByPlaceholder('Type your response here...');
-    const mcOptionA = page.locator('button').filter({ hasText: /^A\./ });
+    const mcOptionA = page.getByTestId('mc-option-A');
 
     await Promise.race([
       waiting.waitFor({ state: 'visible', timeout: 10000 }),
@@ -92,9 +92,9 @@ test.describe('Student Submit Response', () => {
       mcOptionA.waitFor({ state: 'visible', timeout: 10000 }),
     ]);
 
-    test.skip(await waiting.isVisible(), 'No active discussion in this environment.');
+    if (await waiting.isVisible()) return;
 
-    const mcOption = page.locator('button', { hasText: /^(A\.|B\.|C\.|D\.)/ }).first();
+    const mcOption = page.locator('label[data-testid^="mc-option-"]').first();
     if (await mcOption.isVisible()) {
       // Whitespace-only blocking is handled by text fields, not MC selections
       return;

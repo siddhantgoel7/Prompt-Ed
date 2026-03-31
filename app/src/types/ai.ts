@@ -66,7 +66,7 @@ export type ContentOrigin =
   | 'slide_notes'        // PPTX: text extracted from speaker notes
   | 'visual_description' // PDF or PPTX: AI-generated description of images/diagrams
   | 'page_text'          // PDF: text layer extracted by pdfjs
-  | 'transcript';        // STT: Whisper output
+  | 'transcript';        // STT: whisper-1 output
 
 /** Structural role a chunk plays in the index.
  *  'text' is the only active value; 'page_summary' and 'relationship' are reserved
@@ -89,6 +89,17 @@ export interface ChunkMetadata {
   segmentIndex?: number;
   /** Transcript-only: ISO timestamp of when the transcript was recorded */
   recordedAt?: string;
+}
+
+/** A pre-generated general question persisted in the general_questions table. */
+export interface GeneralQuestion {
+  id: string;
+  lesson_id: string;
+  prompt_text: string;
+  mc_options: MCOption[];
+  correct_option: string;
+  display_order: number;
+  created_at: string;
 }
 
 /** A single structured content section returned by a parser, before chunking.

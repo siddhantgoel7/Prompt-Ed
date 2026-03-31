@@ -14,7 +14,7 @@ export function TimerExpiredMessage({
   correctOption,
   correctOptionText,
   isMC,
-}: TimerExpiredMessageProps) {
+}: Readonly<TimerExpiredMessageProps>) {
   return (
     <div
       data-testid="timer-expired-message"

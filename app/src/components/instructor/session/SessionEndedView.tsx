@@ -14,6 +14,7 @@ import type { SessionVM } from '@/hooks/useSessionPage';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 import { SessionContext, SessionProvider } from './SessionContext';
 import { EndedDiscussionCard } from './EndedDiscussionCard';
+import { Trophy, MessageSquare, Clock } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Summary bar
@@ -24,12 +25,12 @@ function SummaryBar({
   totalResponses,
   startedAt,
   endedAt,
-}: {
+}: Readonly<{
   totalDiscussions: number;
   totalResponses: number;
   startedAt?: string | null;
   endedAt?: string | null;
-}) {
+}>) {
   const duration = React.useMemo(() => {
     if (!startedAt || !endedAt) return null;
     const ms = new Date(endedAt).getTime() - new Date(startedAt).getTime();
@@ -40,21 +41,24 @@ function SummaryBar({
 
   return (
     <div
-      className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-line-default bg-surface-raised"
+      className="grid grid-cols-3 gap-2 sm:gap-4 px-3 sm:px-6 py-4 sm:py-6 border-b border-line-default bg-surface-raised/50"
     >
-      <div className="flex flex-col items-center justify-center py-2">
-        <span className="text-2xl font-bold text-content-primary">{totalDiscussions}</span>
-        <span className="text-xs mt-0.5 text-content-muted">Discussions Created</span>
+      <div className="flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-brand-500/5 border border-brand-500/10 transition-all duration-300 hover:bg-brand-500/10">
+        <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 text-brand-600 opacity-80" />
+        <span className="text-xl sm:text-3xl font-black tracking-tight text-content-primary">{totalDiscussions}</span>
+        <span className="text-[9px] sm:text-[10px] text-center font-bold uppercase tracking-wider mt-0.5 sm:mt-1 text-content-muted">Total Discussions</span>
       </div>
       <div
-        className="flex flex-col items-center justify-center py-2 border-x border-line-default"
+        className="flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-primary-500/5 border border-primary-500/10 transition-all duration-300 hover:bg-primary-500/10"
       >
-        <span className="text-2xl font-bold text-content-primary">{totalResponses}</span>
-        <span className="text-xs mt-0.5 text-content-muted">Total Responses</span>
+        <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 text-primary-600 opacity-80" />
+        <span className="text-xl sm:text-3xl font-black tracking-tight text-content-primary">{totalResponses}</span>
+        <span className="text-[9px] sm:text-[10px] text-center font-bold uppercase tracking-wider mt-0.5 sm:mt-1 text-content-muted">Total Responses</span>
       </div>
-      <div className="flex flex-col items-center justify-center py-2">
-        <span className="text-2xl font-bold text-content-primary">{duration ?? '—'}</span>
-        <span className="text-xs mt-0.5 text-content-muted">Session Duration</span>
+      <div className="flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-amber-500/5 border border-amber-500/10 transition-all duration-300 hover:bg-amber-500/10">
+        <Clock className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 text-amber-600 opacity-80" />
+        <span className="text-xl sm:text-3xl font-black tracking-tight text-content-primary">{duration ?? '—'}</span>
+        <span className="text-[9px] sm:text-[10px] text-center font-bold uppercase tracking-wider mt-0.5 sm:mt-1 text-content-muted">Duration</span>
       </div>
     </div>
   );
@@ -65,7 +69,7 @@ function SummaryBar({
 // ---------------------------------------------------------------------------
 
 /** Renders the ended-session summary layout with discussions, transcripts, and lecture material sections. */
-export function SessionEndedView(props: { vm?: SessionVM }) {
+export function SessionEndedView(props: Readonly<{ vm?: SessionVM }>) {
   const context = React.useContext(SessionContext);
   const vm = context || props.vm!;
   const lesson = vm.lesson;
@@ -101,13 +105,15 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
         discussions={discussionsForSplit}
         lessonId={lesson.id}
         onBack={() => setSplitView(false)}
+        handleRestartDiscussion={vm.handleRestartDiscussion}
+        lessonStatus={lesson.status}
       />
     );
     return context ? splitContent : <SessionProvider vm={vm}>{splitContent}</SessionProvider>;
   }
 
   const content = (
-    <div className="min-h-screen flex flex-col bg-surface-base">
+    <div className="h-screen flex flex-col bg-surface-base">
       <SessionHeaderEnded onSplitView={() => setSplitView(true)} />
 
       {vm.endError && (
@@ -133,16 +139,17 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
         endedAt={(lesson as unknown as { ended_at?: string }).ended_at}
       />
 
-      <main className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
+      <main className="px-4 sm:px-6 flex-1 overflow-y-auto lg:overflow-hidden min-h-0">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:h-full lg:min-h-0 py-6">
 
         {/* Left — Discussions */}
-        <section className="flex flex-col min-h-0">
+        <section className="flex flex-col min-h-[450px] lg:min-h-0">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-semibold text-content-primary">Discussions</h2>
             <span className="text-xs text-content-muted">{vm.lessonDiscussions.length} prompts</span>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1 min-h-0">
             {vm.historyLoading && (
               <p className="text-sm text-content-muted">Loading lesson history...</p>
             )}
@@ -160,16 +167,19 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
                   discussion={d}
                   index={i}
                   total={vm.lessonDiscussions.length}
+                  lessonId={lesson.id}
+                  lessonStatus={lesson.status}
+                  onRestart={vm.handleRestartDiscussion}
                 />
               ))}
           </div>
         </section>
 
         {/* Right — Transcript + Lecture Material */}
-        <div className="grid grid-rows-2 gap-6 min-h-0">
+        <div className="flex flex-col lg:grid lg:grid-rows-2 gap-6 lg:min-h-0">
 
           <section
-            className="rounded-2xl p-4 flex flex-col min-h-0"
+            className="rounded-2xl p-4 flex flex-col min-h-[350px] lg:min-h-0"
             style={{
               background: 'var(--surface-glass)',
               backdropFilter: 'blur(8px)',
@@ -178,7 +188,7 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
             }}
           >
             <h2 className="text-base font-semibold mb-3 shrink-0 text-content-primary">Transcript</h2>
-            <div className="flex-1 overflow-y-auto space-y-2">
+            <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
               {transcriptsLoading && (
                 <p className="text-sm text-content-muted">Loading transcripts...</p>
               )}
@@ -205,7 +215,7 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
           </section>
 
           <section
-            className="rounded-2xl p-4 flex flex-col min-h-0"
+            className="rounded-2xl p-4 flex flex-col min-h-[250px] lg:min-h-0"
             style={{
               background: 'var(--surface-glass)',
               backdropFilter: 'blur(8px)',
@@ -214,7 +224,7 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
             }}
           >
             <h2 className="text-base font-semibold mb-3 shrink-0 text-content-primary">Lecture Material</h2>
-            <div className="flex-1 overflow-y-auto space-y-2">
+            <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
               {files.length === 0 ? (
                 <p className="text-sm text-content-muted">No lecture material uploaded.</p>
               ) : (
@@ -243,6 +253,7 @@ export function SessionEndedView(props: { vm?: SessionVM }) {
             </div>
           </section>
 
+        </div>
         </div>
       </main>
     </div>

@@ -3,26 +3,31 @@
 'use client';
 
 import { useRealtime } from '@/lib/realtime/useRealtime';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, type CSSProperties } from 'react';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { DiscussionAnalyticsContent } from '@/components/instructor/session/DiscussionAnalyticsModal';
-import { flagResponseApi, unflagResponseApi } from '@/lib/api/discussionsApi';
+import { flagResponseApi, unflagResponseApi, insertDiscussionApi, closeActiveDiscussionsApi } from '@/lib/api/discussionsApi';
+import { useParticipantPeak } from '@/hooks/useParticipantPeak';
 import { useResponseSelection } from '@/hooks/useResponseSelection';
 import { ResponseCard } from '@/components/instructor/ResponseCard';
-import { FilterToggle } from '@/components/instructor/FilterToggle';
+import { ExpandableCard } from '@/components/instructor/ExpandableCard';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
+import { ResponseStatusBar } from '@/components/instructor/ResponseStatusBar';
+import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
+import { RestartDiscussionButton } from '@/components/instructor/session/RestartDiscussionButton';
 
 /** Isolated response list — owns its own selection state so clicks don't re-render the whole page. */
-function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag }: {
+function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag }: Readonly<{
   responses: Response[];
   flaggedResponses: Response[];
   onRemoveResponse: (id: string) => void;
   onRestoreResponse: (id: string) => Promise<void>;
   canFlag: boolean;
-}) {
+}>) {
   const {
     selectedIds, flaggingId, showHighlightedOnly,
     toggleSelected, handleFlagInappropriate,
@@ -66,17 +71,13 @@ function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestore
   };
 
   return (
-    <div className="grid gap-4">
-      {/* Filter toggle — appears when responses are highlighted */}
-      {selectedIds.length > 0 && !showFlagged && (
-        <FilterToggle
-          variant="full"
-          selectedCount={selectedIds.length}
-          showHighlightedOnly={showHighlightedOnly}
-          onToggle={() => setShowHighlightedOnly(prev => !prev)}
-          onShowAll={() => setShowHighlightedOnly(false)}
-        />
-      )}
+    <div className="grid gap-4 min-w-0 w-full">
+      {/* Status bar: realtime connection + total count + inline highlight filter */}
+      <ResponseStatusBar
+        selectedCount={showFlagged ? 0 : selectedIds.length}
+        showHighlightedOnly={showHighlightedOnly}
+        onToggleHighlight={() => setShowHighlightedOnly(prev => !prev)}
+      />
 
       {/* Flagged toggle — appears when flagged responses exist */}
       {flaggedResponses.length > 0 && (
@@ -121,7 +122,6 @@ function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestore
   );
 }
 
-
 interface DiscussionClientProps {
   lessonId: string;
   discussionId: string;
@@ -129,6 +129,8 @@ interface DiscussionClientProps {
   initialResponses: Response[];
   initialFlaggedResponses: Response[];
   initialIsActive: boolean;
+  lessonStatus: string;
+  discussionCount: number;
 }
 
 /**
@@ -141,21 +143,18 @@ export function DiscussionPage({
   initialDiscussion,
   initialResponses,
   initialFlaggedResponses,
-  initialIsActive
-}: DiscussionClientProps) {
+  initialIsActive,
+  lessonStatus,
+  discussionCount
+}: Readonly<DiscussionClientProps>) {
+  const router = useRouter();
 
   // ── Initialize State with Server Data (Hydration) ──────────────────────────
-  // Server-fetched data is seeded into useState so that realtime updates can
-  // mutate it without triggering a full server re-fetch. Using server data
-  // directly (without useState) would freeze the list after the initial render.
   const [responses, setResponses] = useState<Response[]>(initialResponses);
   const [flaggedResponses, setFlaggedResponses] = useState<Response[]>(initialFlaggedResponses);
   const [isActive] = useState(initialIsActive);
 
   const handleRemoveResponse = useCallback((responseId: string) => {
-    // Capture the response via a functional updater (runs synchronously inside setResponses),
-    // then add it to flaggedResponses at the top level. React 18+ batches both setState
-    // calls into a single render, preventing duplicate keys during the transition.
     let flaggedItem: Response | undefined;
     setResponses((prev) => {
       flaggedItem = prev.find((r) => r.id === responseId);
@@ -164,8 +163,6 @@ export function DiscussionPage({
     if (flaggedItem) {
       const item = flaggedItem;
       setFlaggedResponses((prev) => {
-        // Deduplicate just in case — Supabase Realtime can replay broadcast events
-        // on reconnect, so the same response may arrive more than once.
         if (prev.some((r) => r.id === responseId)) return prev;
         return [{ ...item, flagged_at: new Date().toISOString() }, ...prev];
       });
@@ -174,8 +171,6 @@ export function DiscussionPage({
 
   const handleRestoreResponse = useCallback(async (responseId: string) => {
     await unflagResponseApi(responseId);
-    // Same functional-updater + React 18 batching pattern as handleRemoveResponse:
-    // capture the item synchronously inside the updater, then add it to the live list.
     let restoredItem: Response | undefined;
     setFlaggedResponses((prev) => {
       restoredItem = prev.find((r) => r.id === responseId);
@@ -184,33 +179,73 @@ export function DiscussionPage({
     if (restoredItem) {
       const item = restoredItem;
       setResponses((prev) => {
-        // Deduplicate just in case — Supabase Realtime can deliver the same event
-        // more than once after a reconnect.
         if (prev.some((r) => r.id === responseId)) return prev;
         return [{ ...item, flagged_at: null }, ...prev];
       });
     }
   }, []);
 
-  const { channel, isConnected } = useRealtime(lessonId, 'instructor');
+  const { channel, isConnected, studentCount: liveStudentCount } = useRealtime(lessonId, 'instructor');
+
+  const handleNewResponse = useCallback((payload: { payload?: { response?: Response } }) => {
+    const newResponse = payload.payload?.response;
+    if (newResponse?.discussion_id === discussionId) {
+      setResponses((prev) => {
+        if (prev.some(r => r.id === newResponse.id)) return prev;
+        return [newResponse, ...prev];
+      });
+    }
+  }, [discussionId]);
 
   useEffect(() => {
     if (!channel || !isConnected) return;
+    channel.on('broadcast', { event: 'response:new' }, handleNewResponse);
+  }, [channel, isConnected, handleNewResponse]);
 
-    channel.on('broadcast', { event: 'response:new' }, (payload) => {
-      const newResponse = payload.payload?.response;
-      if (newResponse && newResponse.discussion_id === discussionId) {
-        setResponses((prev) => {
-          // Deduplicate just in case — Supabase Realtime can deliver the same broadcast
-          // event twice on reconnect. Returning prev skips the re-render entirely.
-          if (prev.some(r => r.id === newResponse.id)) return prev;
-          return [newResponse, ...prev];
+  const handleRestart = async (
+    original: Discussion,
+    timerSecs: number | null,
+    feedbackEnabled: boolean,
+    multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }
+  ) => {
+    try {
+      const now = new Date().toISOString();
+      await closeActiveDiscussionsApi(lessonId, now);
+
+      const payload = {
+        lesson_id: lessonId,
+        prompt_text: original.prompt_text,
+        prompt_type: original.prompt_type,
+        status: 'active',
+        published_at: now,
+        display_order: discussionCount,
+        source: original.source,
+        mc_options: original.mc_options,
+        correct_option: original.correct_option,
+        feedback_enabled: feedbackEnabled,
+        participant_snapshot: null,
+        time_limit_seconds: timerSecs,
+        allow_multiple_responses: multipleResponseSettings?.allowMultipleResponses ?? original.allow_multiple_responses,
+        response_limit: multipleResponseSettings ? multipleResponseSettings.responseLimit : original.response_limit,
+      };
+
+      const newDiscussion = await insertDiscussionApi(payload);
+      if (newDiscussion && channel) {
+        await (channel as { send: (msg: unknown) => Promise<unknown> }).send({
+          type: 'broadcast',
+          event: 'discussion:published',
+          payload: { discussion: newDiscussion }
         });
+        router.push(`/session/${lessonId}`);
       }
-    });
-  }, [channel, isConnected, discussionId]);
+    } catch (err) {
+      console.error('Failed to restart discussion:', err);
+      throw err;
+    }
+  };
 
   const isMC = initialDiscussion.prompt_type === 'multiple_choice';
+  const [selectedMCOption, setSelectedMCOption] = useState<string | null>(null);
 
   const distribution: Record<string, number> = {};
   if (isMC && initialDiscussion.mc_options) {
@@ -229,14 +264,15 @@ export function DiscussionPage({
     ? initialDiscussion.mc_options?.find((opt) => opt.label === correctOptionLabel)?.text ?? null
     : null;
 
-  const studentCount = initialDiscussion.participant_snapshot ?? 0;
+  const studentCount = useParticipantPeak(
+    discussionId,
+    initialDiscussion.participant_snapshot ?? 0,
+    liveStudentCount,
+  );
 
   return (
-    <div
-      className="min-h-screen bg-surface-base"
-    >
-      <div className="max-w-7xl mx-auto p-4 md:p-8">
-        {/* Back navigation */}
+    <div className="min-h-screen bg-surface-base">
+      <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
         <div className="mb-6">
           <Link
             href={`/session/${lessonId}`}
@@ -260,68 +296,64 @@ export function DiscussionPage({
               border: '1px solid var(--border-default)',
             }}
           >
-            <h2
-              className="text-lg font-bold mb-4 pb-3 text-content-primary border-b border-line-subtle"
-            >
+            <h2 className="text-lg font-bold mb-4 pb-3 text-content-primary border-b border-line-subtle">
               Metrics
             </h2>
             <DiscussionAnalyticsContent
               discussion={initialDiscussion}
               responses={responses}
               studentCount={studentCount}
+              lessonId={lessonId}
             />
           </div>
 
           {/* RIGHT COLUMN: Question and Responses */}
-          <div className="flex-1 w-full min-w-0">
-            {/* Header */}
-            <div
-              className="flex flex-col gap-4 mb-6 pb-6 border-b border-line-default"
-            >
-              <div className="flex justify-between items-start gap-4">
-                <div className="space-y-1 flex-1">
-                  <h1
-                    className="text-2xl font-bold leading-tight text-content-primary"
-                  >
+          <div className="flex-1 w-full min-w-0 flex flex-col overflow-hidden">
+            <div className="flex flex-col gap-4 mb-6 pb-6 border-b border-line-default min-w-0 w-full">
+              <div className="flex justify-between items-start gap-4 min-w-0 w-full">
+                <div className="space-y-1 flex-1 min-w-0 w-full overflow-hidden">
+                  <h1 className="text-2xl font-bold leading-tight break-all break-words text-content-primary max-w-full">
                     {initialDiscussion.prompt_text}
                   </h1>
                 </div>
 
-                {/* Status badge */}
-                <div
-                  className="shrink-0 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide flex items-center gap-2"
-                  style={isActive ? {
-                    background: 'rgba(45,158,45,0.12)',
-                    border: '1px solid rgba(45,158,45,0.35)',
-                    color: 'var(--color-primary-500)',
-                  } : {
-                    background: 'var(--surface-raised)',
-                    border: '1px solid var(--border-default)',
-                    color: 'var(--text-muted)',
-                  }}
-                >
-                  {isActive ? (
-                    <>
-                      <span
-                        className="w-2 h-2 rounded-full animate-pulse"
-                        style={{ background: 'var(--color-primary-500)' }}
-                      />
-                      Active
-                    </>
-                  ) : (
-                    <>
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ background: 'var(--text-muted)' }}
-                      />
-                      Closed
-                    </>
-                  )}
+                <div className="flex items-center gap-3 shrink-0">
+                  <RestartDiscussionButton
+                    discussion={initialDiscussion}
+                    onRestart={handleRestart}
+                    isLessonActive={lessonStatus === 'active'}
+                    showText={true}
+                    className="px-4 py-1.5 rounded-full text-sm font-bold border-brand-500 text-brand-500 bg-surface-base hover:bg-brand-500/10 hover:shadow-lg"
+                  />
+
+                  <div
+                    className="shrink-0 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide flex items-center gap-2"
+                    style={isActive ? {
+                      background: 'rgba(45,158,45,0.12)',
+                      border: '1px solid rgba(45,158,45,0.35)',
+                      color: 'var(--color-primary-500)',
+                    } : {
+                      background: 'var(--surface-raised)',
+                      border: '1px solid var(--border-default)',
+                      color: 'var(--text-muted)',
+                    }}
+                  >
+                    {isActive ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-primary-500)' }} />
+                        {' '}Active
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-2 h-2 rounded-full" style={{ background: 'var(--text-muted)' }} />
+                        {' '}Closed
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* MC Options */}
             {isMC && initialDiscussion.mc_options && (
               <div
                 className="mb-8 p-6 rounded-2xl"
@@ -349,88 +381,94 @@ export function DiscussionPage({
                   {initialDiscussion.mc_options.map((opt) => {
                     const count = distribution[opt.label] || 0;
                     const isCorrect = initialDiscussion.correct_option === opt.label;
-                    return (
-                      <div
-                        key={opt.label}
-                        className="flex items-center justify-between p-3 rounded-xl"
-                        style={isCorrect ? {
-                          background: 'rgba(45,158,45,0.08)',
-                          border: '2px solid var(--color-primary-500)',
-                        } : {
-                          background: 'var(--surface-raised)',
-                          border: '1px solid var(--border-default)',
-                        }}
+                    const isSelected = selectedMCOption === opt.label;
+
+                    let badgeStyle: CSSProperties;
+                    if (isCorrect) {
+                      badgeStyle = { background: 'var(--color-primary-500)', color: 'white' };
+                    } else if (isSelected) {
+                      badgeStyle = { background: 'var(--color-highlight-alpha-55)', color: 'var(--text-primary)' };
+                    } else {
+                      badgeStyle = { background: 'var(--surface-overlay)', color: 'var(--text-secondary)' };
+                    }
+
+                    const badge = (
+                      <span
+                        className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0"
+                        style={badgeStyle}
                       >
-                        <div className="flex items-center gap-3">
-                          <span
-                            className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold"
-                            style={isCorrect ? {
-                              background: 'var(--color-primary-500)',
-                              color: 'white',
-                            } : {
-                              background: 'var(--surface-overlay)',
-                              color: 'var(--text-secondary)',
-                            }}
-                          >
-                            {opt.label}
-                          </span>
-                          <span
-                            className={isCorrect ? 'font-medium' : ''}
-                            style={{ color: isCorrect ? 'var(--color-primary-500)' : 'var(--text-secondary)' }}
-                          >
-                            {opt.text}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-content-muted">
-                            {count} responses
-                          </span>
-                        </div>
-                      </div>
+                        {opt.label}
+                      </span>
+                    );
+
+                    const selectedStyle = isCorrect ? {
+                      background: 'rgba(45,158,45,0.12)',
+                      border: '2px solid var(--color-primary-500)',
+                      boxShadow: '0 4px 24px rgba(45,158,45,0.12)',
+                    } : {
+                      background: 'var(--color-highlight-alpha-10)',
+                      border: '2px solid var(--color-highlight-alpha-55)',
+                      boxShadow: '0 4px 24px var(--color-highlight-alpha-12)',
+                    };
+
+                    const unselectedStyle = isCorrect ? {
+                      background: 'rgba(45,158,45,0.08)',
+                      border: '2px solid var(--color-primary-500)',
+                    } : {
+                      background: 'var(--surface-raised)',
+                      border: '1px solid var(--border-default)',
+                    };
+
+                    return (
+                      <ExpandableCard
+                        key={opt.label}
+                        badge={badge}
+                        text={opt.text}
+                        rightLabel={<span className="text-sm font-semibold text-content-muted">{count} {count === 1 ? 'response' : 'responses'}</span>}
+                        isSelected={isSelected}
+                        onClick={() => setSelectedMCOption(isSelected ? null : opt.label)}
+                        padding="12px 16px"
+                        selectedStyle={selectedStyle}
+                        unselectedStyle={unselectedStyle}
+                        selectedTextClassName={`text-3xl font-semibold leading-relaxed ${isCorrect ? 'text-[var(--color-primary-500)]' : 'text-content-primary'}`}
+                        unselectedTextClassName={`text-sm ${isCorrect ? 'font-medium text-[var(--color-primary-500)]' : 'text-[var(--text-secondary)]'}`}
+                        ariaLabel={isSelected ? 'Deselect option' : 'Select option'}
+                      />
                     );
                   })}
                 </div>
               </div>
             )}
 
-            {/* Responses List */}
-            <div className="space-y-4">
-              <div
-                className="flex justify-between items-center text-sm mb-2 text-content-muted"
-              >
-                <div className="flex items-center gap-2">
-                  <span>Realtime Status:</span>
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: isConnected ? 'var(--color-primary-400)' : '#f59e0b' }}
+            {!isMC && (
+              <div className="space-y-4 min-w-0 w-full overflow-hidden">
+                {responses.length === 0 && flaggedResponses.length === 0 ? (
+                  <>
+                    <ResponseStatusBar />
+                    <div
+                      className="text-center p-12 rounded-2xl bg-surface-raised text-content-muted"
+                      style={{ border: '2px dashed var(--border-default)' }}
+                    >
+                      <p>No responses recorded yet.</p>
+                    </div>
+                  </>
+                ) : (
+                  <ResponseList
+                    responses={responses}
+                    flaggedResponses={flaggedResponses}
+                    onRemoveResponse={handleRemoveResponse}
+                    onRestoreResponse={handleRestoreResponse}
+                    canFlag={true}
                   />
-                  <span>{isConnected ? 'Connected' : 'Connecting...'}</span>
-                </div>
-                <span>Total: {responses.length}</span>
+                )}
               </div>
+            )}
 
-              {responses.length === 0 && flaggedResponses.length === 0 ? (
-                <div
-                  className="text-center p-12 rounded-2xl bg-surface-raised text-content-muted"
-                  style={{
-                    border: '2px dashed var(--border-default)',
-                  }}
-                >
-                  <p>No responses recorded yet.</p>
-                </div>
-              ) : (
-                <ResponseList
-                  responses={responses}
-                  flaggedResponses={flaggedResponses}
-                  onRemoveResponse={handleRemoveResponse}
-                  onRestoreResponse={handleRestoreResponse}
-                  canFlag={!isMC}
-                />
-              )}
-            </div>
+            {isMC && <ResponseStatusBar />}
           </div>
         </div>
       </div>
+      <ConnectionStatus isConnected={isConnected} onReconnect={isConnected ? undefined : () => globalThis.location.reload()} />
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 export function StudentSessionShell({
   title,
   children,
-}: PropsWithChildren<{ title?: string }>) {
+}: Readonly<PropsWithChildren<{ title?: string }>>) {
   const router = useRouter();
 
   return (
@@ -36,7 +36,7 @@ export function StudentSessionShell({
 
       {/* Main content */}
       <main className="flex-1 flex items-start justify-center p-4 pt-8">
-        <div className="w-full max-w-2xl space-y-4">
+        <div className="w-full max-w-2xl lg:max-w-4xl space-y-4">
           {/* Session title */}
           {title && (
             <div className="text-center">

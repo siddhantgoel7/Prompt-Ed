@@ -40,6 +40,8 @@ const mockActiveDiscussion: Discussion = {
   ai_generated_correct_option: null,
   participant_snapshot: 0,
   time_limit_seconds: null,
+  allow_multiple_responses: false,
+  response_limit: 1,
 };
 
 const baseHookReturn = {
@@ -57,14 +59,27 @@ const baseHookReturn = {
   activeDiscussion: null,
   responseText: '',
   setResponseText: jest.fn(),
+  selectedOption: null,
+  setSelectedOption: jest.fn(),
+  isSubmitCorrect: null,
+  setIsSubmitCorrect: jest.fn(),
+  submittedAnswerText: null,
+  setSubmittedAnswerText: jest.fn(),
   submitting: false,
+  isConnected: true,
+  view: 'active' as const,
   endedMessage: null,
   errorMessage: null,
-  canSubmit: false,
-  submitResponse: jest.fn(),
   timerEndTime: null,
   timerTotalSeconds: null,
   timerExpired: false,
+  canSubmit: false,
+  submitResponse: jest.fn(),
+  submitAnotherResponse: jest.fn(),
+  canSubmitAnother: false,
+  responseCount: 0,
+  feedbackPeriodActive: false,
+  setFeedbackPeriodActive: jest.fn(),
 };
 
 describe('StudentSessionPage Rejoin Tests [US 2.14]', () => {

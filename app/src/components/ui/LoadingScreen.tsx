@@ -39,10 +39,10 @@ export function LoadingScreen() {
 
       {/* Three-dot bounce loader — dots staggered 200 ms apart via inline animationDelay.
           @keyframes dotBounce is in globals.css. */}
-      <div className="flex items-center gap-1.5" aria-label="Loading" role="status">
+      <output className="flex items-center gap-1.5" aria-label="Loading">
         {[0, 1, 2].map((i) => (
           <span
-            key={i}
+            key={`dot-${i}`}
             className="block w-1.5 h-1.5 rounded-full"
             style={{
               background: 'var(--color-primary-400)',
@@ -50,7 +50,7 @@ export function LoadingScreen() {
             }}
           />
         ))}
-      </div>
+      </output>
     </div>
   );
 }

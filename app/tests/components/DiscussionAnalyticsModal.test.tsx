@@ -26,6 +26,8 @@ const BASE_DISCUSSION: Discussion = {
   source: 'manual',
   feedback_enabled: false,
   ai_generated_correct_option: null,
+  allow_multiple_responses: false,
+  response_limit: 1,
 };
 
 const ACTIVE_DISCUSSION: Discussion = {
@@ -43,6 +45,7 @@ function makeResponse(id: string, overrides: Partial<Response> = {}): Response {
     response_text: 'A function that captures its lexical scope.',
     selected_option: null,
     created_at: '2024-01-01T10:00:09Z',
+    student_session_id: id,
     ...overrides,
   } as unknown as Response;
 }
@@ -215,8 +218,8 @@ describe('[US 1.40] Response metrics', () => {
     renderModal(MC_DISCUSSION, MC_RESPONSES, 3);
 
     expect(screen.getByText(/Answer Distribution/i)).toBeInTheDocument();
-    // Option B is correct — 2 votes out of 3 = 67%
-    expect(screen.getByText(/Correct/i)).toBeInTheDocument();
+    // Option B is correct — "correct" badge appears at least once in the distribution
+    expect(screen.getAllByText('correct').length).toBeGreaterThan(0);
   });
 
   // 60.15
@@ -224,10 +227,9 @@ describe('[US 1.40] Response metrics', () => {
     renderModal(MC_DISCUSSION, MC_RESPONSES, 3);
 
     // A: 1 vote (33%), B: 2 votes (67%), C: 0 votes (0%)
-    expect(screen.getByText(/Stores program state/i)).toBeInTheDocument();
-    expect(screen.getByText(/Pairs a lambda/i)).toBeInTheDocument();
+    // Modal shows option labels and counts, not full option text
     expect(screen.getByText(/1 \(33%\)/i)).toBeInTheDocument();
     expect(screen.getByText(/2 \(67%\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/0 \(0%\)/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/0 \(0%\)/i).length).toBeGreaterThan(0);
   });
 });

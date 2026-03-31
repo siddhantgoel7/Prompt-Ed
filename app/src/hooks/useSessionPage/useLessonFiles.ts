@@ -9,7 +9,15 @@ export function useLessonFiles(lessonId: string) {
     const fetchFiles = useCallback(async () => {
         try {
             const data = await fetchFilesApi(lessonId);
-            setFiles(data);
+            setFiles((prev) => {
+                // Merge server state with any local optimistic items that haven't 
+                // reached the server list yet (prevents vanishing during DB propagation lag).
+                const serverIds = new Set(data.map((f) => f.id));
+                const localOptimistic = prev.filter(
+                    (f) => (f.id.startsWith('temp-') || f.status === 'uploading' || f.status === 'processing') && !serverIds.has(f.id)
+                );
+                return [...localOptimistic, ...data];
+            });
         } catch (err) {
             console.error('Failed to fetch files', err);
         }
@@ -30,14 +38,22 @@ export function useLessonFiles(lessonId: string) {
         setFiles((prev) => [optimistic, ...prev]);
 
         try {
-            await uploadFileApi(lessonId, file);
+            const realFile = await uploadFileApi(lessonId, file);
+            setFiles((prev) => prev.map((f) => (f.id === tempId ? realFile : f)));
         } catch (err) {
             console.error(err);
+            setFiles((prev) => prev.filter((f) => f.id !== tempId));
             throw err;
         } finally {
             setIsUploading(false);
+            try {
+                await fetchFiles();
+            } catch (err) {
+                console.error('Post-upload fetch failed', err);
+            }
+            // Ensure any residual temp files are removed 
+            // (e.g. if the fetch returned and we still have the temp one somehow)
             setFiles((prev) => prev.filter((f) => f.id !== tempId));
-            await fetchFiles();
         }
     }, [lessonId, fetchFiles]);
 
@@ -63,7 +79,7 @@ export function useLessonFiles(lessonId: string) {
             a.download = fileName;
             document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
+            a.remove();
             URL.revokeObjectURL(blobUrl);
         } catch (err) {
             console.error('Failed to open file', err);

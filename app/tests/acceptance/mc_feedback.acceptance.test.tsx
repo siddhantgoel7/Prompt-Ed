@@ -85,13 +85,27 @@ function makeActiveHookValue(discussion = MC_DISCUSSION_FEEDBACK_ON) {
         activeDiscussion: discussion,
         responseText: '',
         setResponseText: jest.fn(),
+        selectedOption: null,
+        setSelectedOption: jest.fn(),
+        isSubmitCorrect: null,
+        setIsSubmitCorrect: jest.fn(),
+        submittedAnswerText: null,
+        setSubmittedAnswerText: jest.fn(),
         submitting: false,
         isConnected: true,
         view: 'active' as const,
         endedMessage: null,
         errorMessage: null,
-        canSubmit: false,
+        timerEndTime: null,
+        timerTotalSeconds: null,
+        timerExpired: false,
+        canSubmit: true,
         submitResponse: jest.fn(),
+        submitAnotherResponse: jest.fn(),
+        canSubmitAnother: false,
+        responseCount: 0,
+        feedbackPeriodActive: false,
+        setFeedbackPeriodActive: jest.fn(),
     };
 }
 
@@ -115,7 +129,12 @@ function renderAndSubmit(
     fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
 
     // Simulate hook returning 'submitted' view
-    mockHook.mockReturnValue(makeSubmittedHookValue(discussion));
+    mockHook.mockReturnValue({
+        ...makeSubmittedHookValue(discussion),
+        isSubmitCorrect: selectedLabel === discussion.correct_option,
+        selectedOption: selectedLabel,
+        feedbackPeriodActive: true,
+    });
     rerender(<StudentSessionPage lessonId="lesson-1" />);
 
     return { rerender };
@@ -235,19 +254,24 @@ describe('[US 2.10] MC Feedback — Feedback Disabled (Acceptance)', () => {
 
     // 29.15
     it('[US 2.10][AC3-AT3] success: "Response submitted" still appears when feedback is disabled', () => {
-        renderAndSubmit('A', MC_DISCUSSION_FEEDBACK_OFF);
+        const { rerender } = renderAndSubmit('A', MC_DISCUSSION_FEEDBACK_OFF);
+        // Reset feedbackPeriodActive to false for Scenario 3
+        mockHook.mockReturnValue({ ...makeSubmittedHookValue(MC_DISCUSSION_FEEDBACK_OFF), selectedOption: 'A', feedbackPeriodActive: false });
+        rerender(<StudentSessionPage lessonId="lesson-1" />);
         expect(screen.getByText(/Response submitted/i)).toBeInTheDocument();
     });
 
     // 29.16
     it('[US 2.10][AC3-AT4] success: selected option is highlighted when feedback is disabled', () => {
-        renderAndSubmit('B', MC_DISCUSSION_FEEDBACK_OFF);
+        const { rerender } = renderAndSubmit('B', MC_DISCUSSION_FEEDBACK_OFF);
+        // Reset feedbackPeriodActive to false for Scenario 3
+        mockHook.mockReturnValue({ ...makeSubmittedHookValue(MC_DISCUSSION_FEEDBACK_OFF), selectedOption: 'B', feedbackPeriodActive: false });
+        rerender(<StudentSessionPage lessonId="lesson-1" />);
         // The selected option button should have distinct styling (no correctness revealed)
-        const optionButtons = screen.getAllByRole('button');
-        const selectedBtn = optionButtons.find(btn => btn.textContent?.includes('B.'));
+        const selectedBtn = screen.getByTestId('mc-option-B');
         expect(selectedBtn).toBeInTheDocument();
-        // Selected option has a distinct background (green tint without correctness indicator)
-        expect(selectedBtn?.getAttribute('style')).toMatch(/45.*158.*45|primary/);
+        // Selected option style matches 'submitted' state in StudentPromptCard.tsx
+        expect(selectedBtn).toHaveAttribute('data-state', 'submitted');
     });
 });
 

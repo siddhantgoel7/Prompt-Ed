@@ -6,13 +6,14 @@ import * as React from 'react';
 import { SessionContext } from './SessionContext';
 
 /** Displays a green "Connected" badge or a red "Disconnected" badge with a Reconnect button. */
-export function ConnectionStatus(props: {
+export function ConnectionStatus(props: Readonly<{
   isConnected?: boolean;
   onReconnect?: () => void;
-}) {
+  className?: string;
+}>) {
   const context = React.useContext(SessionContext);
   const isConnected = context ? context.isConnected : props.isConnected!;
-  const onReconnect = context ? context.handleReconnect : props.onReconnect!;
+  const onReconnect = context ? context.handleReconnect : props.onReconnect;
   const [reconnecting, setReconnecting] = React.useState(false);
 
   // Reset reconnecting flag once connection is restored
@@ -24,13 +25,13 @@ export function ConnectionStatus(props: {
 
   const handleClick = () => {
     setReconnecting(true);
-    onReconnect();
+    if (onReconnect) onReconnect();
   };
 
   if (isConnected) {
     return (
       <div
-        className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-2 rounded-full"
+        className={`fixed bottom-20 lg:bottom-4 right-4 z-40 flex items-center gap-2 px-3 py-2 rounded-full ${props.className || ''}`}
         style={{
           background: 'var(--surface-glass)',
           backdropFilter: 'blur(8px)',
@@ -51,7 +52,7 @@ export function ConnectionStatus(props: {
 
   return (
     <div
-      className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-2 rounded-full"
+      className={`fixed bottom-20 lg:bottom-4 right-4 z-40 flex items-center gap-2 px-3 py-2 rounded-full ${props.className || ''}`}
       style={{
         background: 'var(--color-error-alpha-08)',
         backdropFilter: 'blur(8px)',
@@ -61,9 +62,9 @@ export function ConnectionStatus(props: {
     >
       <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
       <span className="text-sm font-medium text-err-600">
-        {reconnecting ? 'Reconnecting…' : 'Disconnected'}
+        {reconnecting ? 'Reconnecting\u2026' : 'Disconnected'}
       </span>
-      {!reconnecting ? (
+      {!reconnecting && onReconnect ? (
         <button
           onClick={handleClick}
           className="ml-1 px-2.5 py-1 text-xs rounded-full font-medium text-white transition-all duration-150"

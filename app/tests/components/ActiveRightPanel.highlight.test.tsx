@@ -13,7 +13,7 @@ global.ResizeObserver = class {
   disconnect() {}
 } as unknown as typeof ResizeObserver;
 
-import { render, screen, waitFor } from '../utils/renderWithProviders';
+import { render, screen, waitFor, within } from '../utils/renderWithProviders';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 import { ActiveRightPanel } from '@/components/instructor/session/ActiveRightPanel';
@@ -47,6 +47,8 @@ const DISCUSSION: Discussion = {
   source: 'manual',
   feedback_enabled: false,
   ai_generated_correct_option: null,
+  allow_multiple_responses: false,
+  response_limit: 1,
 };
 
 const MC_DISCUSSION: Discussion = {
@@ -69,6 +71,7 @@ function makeResponse(id: string, text: string): Response {
     created_at: '2024-01-01T10:01:00Z',
     is_correct: null,
     flagged_at: null,
+    student_session_id: id,
   };
 }
 
@@ -159,8 +162,8 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     expect(screen.getByText(/First student response/)).toBeInTheDocument();
     expect(screen.getByText(/Second student response/)).toBeInTheDocument();
     expect(screen.getByText(/Third student response/)).toBeInTheDocument();
-    // Flag button should not be visible when nothing is selected
-    expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
+    // No card should be highlighted by default
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
   });
 
   // 58.2
@@ -171,8 +174,8 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     const firstResponse = screen.getByText(/First student response/);
     await user.click(firstResponse);
 
-    // Flag button should now be visible
-    expect(screen.getByRole('button', { name: /Flag as Inappropriate/i })).toBeInTheDocument();
+    // Card should now be highlighted
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(1);
   });
 
   // 58.3
@@ -182,13 +185,13 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
 
     const firstResponse = screen.getByText(/First student response/);
 
-    // Click to expand
+    // Click to highlight
     await user.click(firstResponse);
-    expect(screen.getByRole('button', { name: /Flag as Inappropriate/i })).toBeInTheDocument();
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(1);
 
-    // Click again to collapse
+    // Click again to deselect
     await user.click(firstResponse);
-    expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
   });
 
   // 58.4
@@ -198,13 +201,12 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
 
     // Select the first response
     await user.click(screen.getByText(/First student response/));
-    expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(1);
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(1);
 
     // Select the second response as well
     await user.click(screen.getByText(/Second student response/));
-    // Both should now be highlighted with their own flag buttons
-    const flagButtons = screen.getAllByRole('button', { name: /Flag as Inappropriate/i });
-    expect(flagButtons).toHaveLength(2);
+    // Both should now be highlighted
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(2);
   });
 
   // 58.5
@@ -215,9 +217,11 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     // Select a response
     await user.click(screen.getByText(/Second student response/));
 
-    // Click the flag button
-    const flagBtn = screen.getByRole('button', { name: /Flag as Inappropriate/i });
-    await user.click(flagBtn);
+    // Click the flag button inside the highlighted card (two clicks: first expands, second fires)
+    const highlightedCard = document.querySelector('[data-highlighted="true"]')!;
+    const flagBtn = within(highlightedCard as HTMLElement).getByRole('button', { name: /Flag as Inappropriate/i });
+    await user.click(flagBtn); // expand
+    await user.click(flagBtn); // fire
 
     await waitFor(() => {
       expect(contextValue.removeResponse).toHaveBeenCalledWith('r2');
@@ -249,15 +253,15 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
 
     // Click first response
     await user.click(screen.getByText(/First student response/));
-    expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(1);
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(1);
 
     // Click third response
     await user.click(screen.getByText(/Third student response/));
-    expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(2);
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(2);
 
     // Click second response
     await user.click(screen.getByText(/Second student response/));
-    expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(3);
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(3);
   });
 
   // 58.8
@@ -268,12 +272,12 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     // Select first and third responses
     await user.click(screen.getByText(/First student response/));
     await user.click(screen.getByText(/Third student response/));
-    expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(2);
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(2);
 
     // Deselect first response by clicking it again
     await user.click(screen.getByText(/First student response/));
     // Only the third response should remain highlighted
-    expect(screen.getAllByRole('button', { name: /Flag as Inappropriate/i })).toHaveLength(1);
+    expect(document.querySelectorAll('[data-highlighted="true"]')).toHaveLength(1);
   });
 
   // 58.9
@@ -318,7 +322,7 @@ describe('ActiveRightPanel — response highlight & flag feature', () => {
     await user.click(screen.getByRole('button', { name: /Show highlighted only/i }));
     expect(screen.queryByText(/Second student response/)).not.toBeInTheDocument();
 
-    // Click "Show all"
+    // Click "Show all" to restore full list
     await user.click(screen.getByRole('button', { name: /Show all/i }));
 
     // All responses visible again
@@ -392,9 +396,12 @@ describe('ActiveRightPanel — highlight visual emphasis', () => {
     const user = userEvent.setup();
     const { contextValue } = renderWithContext();
 
-    // Select and flag
+    // Select and flag (two clicks: first expands badge, second fires action)
     await user.click(screen.getByText(/Second student response/));
-    await user.click(screen.getByRole('button', { name: /Flag as Inappropriate/i }));
+    const highlightedCard = document.querySelector('[data-highlighted="true"]')!;
+    const flagBtn = within(highlightedCard as HTMLElement).getByRole('button', { name: /Flag as Inappropriate/i });
+    await user.click(flagBtn); // expand
+    await user.click(flagBtn); // fire
 
     await waitFor(() => {
       expect(contextValue.removeResponse).toHaveBeenCalledWith('r2');

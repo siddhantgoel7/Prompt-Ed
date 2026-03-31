@@ -63,7 +63,7 @@ export function useHomeJoin() {
 
   const onChangeCode = useCallback((value: string) => {
     // keep digits only, max 6 (nice UX)
-    const digits = value.replace(/\D/g, '').slice(0, 6);
+    const digits = value.replaceAll(/\D/g, '').slice(0, 6);
     setCode(digits);
     setError(null);
   }, []);

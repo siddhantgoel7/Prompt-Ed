@@ -15,9 +15,9 @@ const LESSON_ID = 'highlight-lesson';
 const DISCUSSION_ID = 'd-hl-1';
 
 const MOCK_RESPONSES = [
-  { id: 'r1', discussion_id: DISCUSSION_ID, response_text: 'First response about pharmacokinetics', selected_option: null, created_at: '2024-01-01T10:01:00Z', is_correct: null, flagged_at: null },
-  { id: 'r2', discussion_id: DISCUSSION_ID, response_text: 'Second response about drug absorption', selected_option: null, created_at: '2024-01-01T10:02:00Z', is_correct: null, flagged_at: null },
-  { id: 'r3', discussion_id: DISCUSSION_ID, response_text: 'Third response about bioavailability', selected_option: null, created_at: '2024-01-01T10:03:00Z', is_correct: null, flagged_at: null },
+  { id: 'r1', discussion_id: DISCUSSION_ID, response_text: 'First response about pharmacokinetics', selected_option: null, created_at: '2024-01-01T10:01:00Z', is_correct: null, flagged_at: null, student_session_id: 'student-1' },
+  { id: 'r2', discussion_id: DISCUSSION_ID, response_text: 'Second response about drug absorption', selected_option: null, created_at: '2024-01-01T10:02:00Z', is_correct: null, flagged_at: null, student_session_id: 'student-2' },
+  { id: 'r3', discussion_id: DISCUSSION_ID, response_text: 'Third response about bioavailability', selected_option: null, created_at: '2024-01-01T10:03:00Z', is_correct: null, flagged_at: null, student_session_id: 'student-3' },
 ];
 
 test.describe('Instructor Highlight & Hide Responses', () => {
@@ -126,8 +126,10 @@ test.describe('Instructor Highlight & Hide Responses', () => {
     await expect(page.getByText('Second response about drug absorption')).toBeVisible();
     await expect(page.getByText('Third response about bioavailability')).toBeVisible();
 
-    // No flag button visible when nothing is highlighted
-    await expect(page.getByRole('button', { name: /Flag as Inappropriate/i })).toHaveCount(0);
+    // Flag badge is always present on all responses (collapsed to icon; text revealed on click)
+    await expect(page.getByRole('button', { name: /Flag as Inappropriate/i })).toHaveCount(3);
+    // No response is in the highlighted/selected state
+    await expect(page.getByLabel('Deselect response')).toHaveCount(0);
   });
 
   test('[US 1.36][AC1-AT2] clicking a response highlights it and shows the flag button', async ({ page }) => {
@@ -136,7 +138,8 @@ test.describe('Instructor Highlight & Hide Responses', () => {
 
     await response.click();
 
-    await expect(page.getByRole('button', { name: /Flag as Inappropriate/i })).toBeVisible();
+    // Flag badge is always visible; verify the selected card's flag button specifically
+    await expect(page.getByLabel('Deselect response').getByRole('button', { name: /Flag as Inappropriate/i })).toBeVisible();
   });
 
   test('[US 1.36][AC1-AT3] highlighted response shows prominent visual styling', async ({ page }) => {
@@ -168,7 +171,8 @@ test.describe('Instructor Highlight & Hide Responses', () => {
     await response.click();
     await expect(response).not.toHaveClass(/text-2xl/);
     await expect(response).not.toHaveClass(/font-semibold/);
-    await expect(page.getByRole('button', { name: /Flag as Inappropriate/i })).toHaveCount(0);
+    // No card is selected; flag badges still present but no card in deselect state
+    await expect(page.getByLabel('Deselect response')).toHaveCount(0);
   });
 
   test('[US 1.36][AC1-AT5] filter toggle appears when responses are highlighted', async ({ page }) => {
@@ -228,8 +232,8 @@ test.describe('Instructor Highlight & Hide Responses', () => {
     await first.click();
     await third.click();
 
-    const flagButtons = page.getByRole('button', { name: /Flag as Inappropriate/i });
-    await expect(flagButtons).toHaveCount(2);
+    // Both responses are in the selected/deselect state
+    await expect(page.getByLabel('Deselect response')).toHaveCount(2);
   });
 
   test('[US 1.36][AC2-AT2] each highlighted response has its own prominent styling', async ({ page }) => {
@@ -260,11 +264,11 @@ test.describe('Instructor Highlight & Hide Responses', () => {
     // Highlight both
     await first.click();
     await third.click();
-    await expect(page.getByRole('button', { name: /Flag as Inappropriate/i })).toHaveCount(2);
+    await expect(page.getByLabel('Deselect response')).toHaveCount(2);
 
     // Deselect first
     await first.click();
-    await expect(page.getByRole('button', { name: /Flag as Inappropriate/i })).toHaveCount(1);
+    await expect(page.getByLabel('Deselect response')).toHaveCount(1);
     await expect(third).toHaveClass(/text-2xl/);
     await expect(first).not.toHaveClass(/text-2xl/);
   });
@@ -277,9 +281,11 @@ test.describe('Instructor Highlight & Hide Responses', () => {
     const response = page.getByText('Second response about drug absorption');
     await expect(response).toBeVisible({ timeout: 10000 });
 
-    // Highlight and flag
+    // Select response, then two-click its flag button (expand then confirm)
     await response.click();
-    await page.getByRole('button', { name: /Flag as Inappropriate/i }).click();
+    const flagBtn = page.getByLabel('Deselect response').getByRole('button', { name: /Flag as Inappropriate/i });
+    await flagBtn.click(); // expand
+    await flagBtn.click(); // confirm flag
 
     // Flagged response should disappear
     await expect(response).not.toBeVisible({ timeout: 5000 });
@@ -294,9 +300,11 @@ test.describe('Instructor Highlight & Hide Responses', () => {
     const secondResponse = page.getByText('Second response about drug absorption');
     await expect(secondResponse).toBeVisible({ timeout: 10000 });
 
-    // 2. Hide response
+    // 2. Select and two-click flag (expand then confirm)
     await secondResponse.click();
-    await page.getByRole('button', { name: /Flag as Inappropriate/i }).click();
+    const flagBtn = page.getByLabel('Deselect response').getByRole('button', { name: /Flag as Inappropriate/i });
+    await flagBtn.click(); // expand
+    await flagBtn.click(); // confirm flag
     await expect(secondResponse).not.toBeVisible();
 
     // 3. Toggle flagged view
@@ -309,9 +317,11 @@ test.describe('Instructor Highlight & Hide Responses', () => {
     await expect(page.getByText('First response about pharmacokinetics')).not.toBeVisible();
     await expect(page.getByText('Third response about bioavailability')).not.toBeVisible();
 
-    // 5. Restore the response
+    // 5. Restore: select and two-click unflag (expand then confirm)
     await secondResponse.click();
-    await page.getByRole('button', { name: /Unflag/i }).click();
+    const unflagBtn = page.getByLabel('Deselect response').getByRole('button', { name: /Unflag/i });
+    await unflagBtn.click(); // expand
+    await unflagBtn.click(); // confirm unflag
 
     // 6. Verify automatically returns to normal view and all 3 are visible again
     await expect(page.getByText('First response about pharmacokinetics')).toBeVisible({ timeout: 5000 });

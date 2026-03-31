@@ -1,24 +1,14 @@
 'use client';
 
-// Full-screen split view overlay that renders two independent discussion-browsing panes
-// side by side.
-//
-// Logical sections (in order):
-//   Types          — SplitViewProps, PaneState
-//   DiscussionList — tab UI listing active/closed discussions; clicking one selects it
-//   DiscussionDetail — prompt text, status badge, and scrollable response list
-//   Pane           — one half of the split; owns selection state + response loading
-//   SplitView      — full-screen layout: header + two Panes
-
 import * as React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppLogo } from '@/components/ui/AppLogo';
-import type { DiscussionWithResponseCount } from '@/types/discussion';
+import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
-import { truncateText } from '@/lib/utils';
 import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 import { ResponseCard } from '@/components/instructor/ResponseCard';
+import { RestartDiscussionButton } from './RestartDiscussionButton';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -30,6 +20,13 @@ interface SplitViewProps {
   onBack: () => void;
   liveActiveDiscussionId?: string | null;
   liveActiveResponses?: Response[];
+  handleRestartDiscussion?: (
+    original: Discussion,
+    timerSecs: number | null,
+    feedbackEnabled: boolean,
+    multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }
+  ) => Promise<void>;
+  lessonStatus?: string;
 }
 
 interface PaneState {
@@ -46,10 +43,14 @@ interface PaneState {
 function DiscussionList({
   discussions,
   onSelect,
-}: {
+  onRestart,
+  isLessonActive,
+}: Readonly<{
   discussions: DiscussionWithResponseCount[];
   onSelect: (id: string) => void;
-}) {
+  onRestart?: SplitViewProps['handleRestartDiscussion'];
+  isLessonActive: boolean;
+}>) {
   const active = discussions.filter((d) => d.status === 'active');
   const closed = discussions.filter((d) => d.status === 'closed');
 
@@ -64,69 +65,80 @@ function DiscussionList({
     return (
       <div className="space-y-2">
         {list.map((d, idx) => (
-          <button
-            key={d.id}
-            onClick={() => onSelect(d.id)}
-            className="w-full text-left rounded-xl p-3 transition-all duration-150 bg-surface-raised"
-            style={{
-              border: '1px solid var(--border-default)',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-300)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-default)';
-            }}
-          >
-            <div className="flex items-start justify-between mb-1.5">
-              <span className="text-xs font-semibold text-content-muted">
-                #{idx + 1}
-              </span>
-              {d.status === 'active' ? (
-                <span
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-brand-600"
-                  style={{ background: 'rgba(45,158,45,0.15)' }}
-                >
-                  Active
+          <div key={d.id} className="relative group">
+            <button
+              onClick={() => onSelect(d.id)}
+              className="w-full text-left rounded-xl p-3 transition-all duration-150 bg-surface-raised"
+              style={{
+                border: '1px solid var(--border-default)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-300)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-default)';
+              }}
+            >
+              <div className="flex items-start justify-between mb-1.5">
+                <span className="text-xs font-semibold text-content-muted">
+                  #{idx + 1}
                 </span>
-              ) : (
-                <span
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-overlay text-content-muted"
-                >
-                  Closed
+                {d.status === 'active' ? (
+                  <span
+                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-brand-600"
+                    style={{ background: 'rgba(45,158,45,0.15)' }}
+                  >
+                    Active
+                  </span>
+                ) : (
+                  <span
+                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-overlay text-content-muted"
+                  >
+                    Closed
+                  </span>
+                )}
+              </div>
+              <p className="text-sm leading-relaxed mb-1.5 text-content-primary break-words whitespace-pre-wrap [overflow-wrap:anywhere] [word-break:break-word] line-clamp-3">
+                {d.prompt_text}
+              </p>
+              <div className="flex items-center gap-1.5 text-xs text-content-muted">
+                <span className="font-semibold text-content-secondary">
+                  {d.response_count}
                 </span>
-              )}
-            </div>
-            <p className="text-sm leading-relaxed mb-1.5 text-content-primary">
-              {truncateText(d.prompt_text)}
-            </p>
-            <div className="flex items-center gap-1.5 text-xs text-content-muted">
-              <span className="font-semibold text-content-secondary">
-                {d.response_count}
-              </span>
-              <span>{d.response_count === 1 ? 'response' : 'responses'}</span>
-            </div>
-          </button>
+                <span>{d.response_count === 1 ? 'response' : 'responses'}</span>
+              </div>
+            </button>
+
+            {onRestart && (
+              <RestartDiscussionButton
+                discussion={d}
+                onRestart={onRestart}
+                isLessonActive={isLessonActive}
+                size="sm"
+                className="absolute right-2 bottom-2 p-1.5 opacity-0 group-hover:opacity-100 bg-surface-base border-line-default text-content-muted hover:text-brand-500 hover:border-brand-500 hover:shadow-lg"
+              />
+            )}
+          </div>
         ))}
       </div>
     );
   };
 
   return (
-    <Tabs defaultValue="active" className="w-full">
+    <Tabs defaultValue="active" className="w-full h-full flex flex-col">
       <TabsList className="w-full mb-3">
         <TabsTrigger value="active" className="flex-1 text-xs">Active ({active.length})</TabsTrigger>
         <TabsTrigger value="closed" className="flex-1 text-xs">Closed ({closed.length})</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="active" className="mt-0">
-        <ScrollArea className="h-[calc(100vh-170px)]">
+      <TabsContent value="active" className="mt-0 flex-1 min-h-0">
+        <ScrollArea className="h-full">
           {renderList(active)}
         </ScrollArea>
       </TabsContent>
 
-      <TabsContent value="closed" className="mt-0">
-        <ScrollArea className="h-[calc(100vh-170px)]">
+      <TabsContent value="closed" className="mt-0 flex-1 min-h-0">
+        <ScrollArea className="h-full">
           {renderList(closed)}
         </ScrollArea>
       </TabsContent>
@@ -144,12 +156,16 @@ function DiscussionDetail({
   responses,
   loading,
   onBack,
-}: {
+  onRestart,
+  isLessonActive,
+}: Readonly<{
   discussion: DiscussionWithResponseCount;
   responses: Response[];
   loading: boolean;
   onBack: () => void;
-}) {
+  onRestart?: SplitViewProps['handleRestartDiscussion'];
+  isLessonActive: boolean;
+}>) {
   const isMC = discussion.prompt_type === 'multiple_choice' && !!discussion.mc_options;
   const distribution: Record<string, number> = {};
   if (isMC && discussion.mc_options) {
@@ -162,28 +178,41 @@ function DiscussionDetail({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0 w-full overflow-hidden">
       {/* Detail header */}
       <div
-        className="px-4 pt-3 pb-3 flex-shrink-0 border-b border-line-subtle"
+        className="px-4 pt-3 pb-3 flex-shrink-0 border-b border-line-subtle min-w-0 w-full"
       >
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-xs font-medium mb-3 transition-colors duration-150 text-content-muted"
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)';
-          }}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-          Back
-        </button>
+        <div className="flex items-center justify-between mb-3">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1.5 text-xs font-medium transition-colors duration-150 text-content-muted"
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-600)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)';
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Back
+          </button>
+          
+          {onRestart && (
+            <RestartDiscussionButton
+              discussion={discussion}
+              onRestart={onRestart}
+              isLessonActive={isLessonActive}
+              size="sm"
+              showText={true}
+              className="px-3 py-1 text-[10px] uppercase font-bold border-brand-500 text-brand-500 bg-surface-base hover:bg-brand-500/10"
+            />
+          )}
+        </div>
 
-        <p className="text-sm font-medium leading-relaxed mb-2 text-content-primary">
+        <p className="text-sm font-medium leading-relaxed mb-2 text-content-primary break-words whitespace-pre-wrap [overflow-wrap:anywhere] [word-break:break-word]">
           {discussion.prompt_text}
         </p>
 
@@ -224,31 +253,35 @@ function DiscussionDetail({
       )}
 
       {/* Responses */}
-      <ScrollArea className="flex-1 px-4 py-3">
-        {loading ? (
-          <div className="space-y-2">
-            <div className="skeleton-shimmer h-16 w-full rounded-xl" />
-            <div className="skeleton-shimmer h-16 w-full rounded-xl" />
-          </div>
-        ) : responses.length === 0 ? (
-          <p className="text-sm py-6 text-center text-content-muted">
-            No responses yet.
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {responses.map((r) => (
-              <ResponseCard
-                key={r.id}
-                variant="full"
-                responseText={r.response_text}
-                createdAt={r.created_at}
-                isSelected={false}
-                isBeingFlagged={false}
-                onToggle={() => {}}
-              />
-            ))}
-          </div>
-        )}
+      <ScrollArea className="flex-1 px-4 py-3 min-w-0 w-full">
+        {(() => {
+          if (loading) return (
+            <div className="space-y-2">
+              <div className="skeleton-shimmer h-16 w-full rounded-xl" />
+              <div className="skeleton-shimmer h-16 w-full rounded-xl" />
+            </div>
+          );
+          if (responses.length === 0) return (
+            <p className="text-sm py-6 text-center text-content-muted">
+              No responses yet.
+            </p>
+          );
+          return (
+            <div className="space-y-2 min-w-0 w-full overflow-hidden">
+              {responses.map((r) => (
+                <ResponseCard
+                  key={r.id}
+                  variant="full"
+                  responseText={r.response_text}
+                  createdAt={r.created_at}
+                  isSelected={false}
+                  isBeingFlagged={false}
+                  onToggle={() => {}}
+                />
+              ))}
+            </div>
+          );
+        })()}
       </ScrollArea>
     </div>
   );
@@ -264,21 +297,22 @@ function Pane({
   discussions,
   liveActiveDiscussionId,
   liveActiveResponses,
-}: {
+  onRestart,
+  isLessonActive,
+}: Readonly<{
   label: string;
   discussions: DiscussionWithResponseCount[];
   liveActiveDiscussionId?: string | null;
   liveActiveResponses?: Response[];
-}) {
+  onRestart?: SplitViewProps['handleRestartDiscussion'];
+  isLessonActive: boolean;
+}>) {
   const [state, setState] = React.useState<PaneState>({
     selectedDiscussionId: null,
     responses: [],
     loading: false,
   });
 
-  // Fetch responses whenever the selected discussion changes.
-  // `cancelled` is a closure flag that prevents stale async results from a previous
-  // selection from overwriting the new selection's state after the effect cleans up.
   React.useEffect(() => {
     if (!state.selectedDiscussionId) return;
     if (state.selectedDiscussionId === liveActiveDiscussionId) return;
@@ -311,9 +345,8 @@ function Pane({
 
   return (
     <div
-      className="flex-1 flex flex-col min-w-0 border-r border-line-default"
+      className="flex-1 flex flex-col min-w-0 w-full overflow-hidden border-r border-line-default"
     >
-      {/* Pane label */}
       <div
         className="px-4 py-2 flex-shrink-0 bg-surface-overlay border-b border-line-default"
       >
@@ -330,12 +363,16 @@ function Pane({
           responses={selectedResponses}
           loading={selectedLoading}
           onBack={() => setState({ selectedDiscussionId: null, responses: [], loading: false })}
+          onRestart={onRestart}
+          isLessonActive={isLessonActive}
         />
       ) : (
-        <div className="p-3 flex-1 overflow-hidden">
+        <div className="p-3 flex-1 overflow-hidden flex flex-col">
           <DiscussionList
             discussions={discussions}
             onSelect={(id) => setState({ selectedDiscussionId: id, responses: [], loading: false })}
+            onRestart={onRestart}
+            isLessonActive={isLessonActive}
           />
         </div>
       )}
@@ -347,66 +384,99 @@ function Pane({
 // SplitView
 // ---------------------------------------------------------------------------
 
-/** Full-screen overlay rendering two Panes side by side for simultaneous discussion monitoring. */
 export function SplitView({
   discussions,
   onBack,
   liveActiveDiscussionId,
   liveActiveResponses = [],
-}: SplitViewProps) {
+  handleRestartDiscussion,
+  lessonStatus,
+}: Readonly<SplitViewProps>) {
+  const [mobileActivePane, setMobileActivePane] = React.useState<'left' | 'right'>('left');
+
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col bg-surface-base"
     >
       {/* Top bar */}
       <header
-        className="glass flex-shrink-0 px-4 py-2.5 flex items-center justify-between"
+        className="glass flex-shrink-0 px-4 py-2.5 flex items-center justify-between border-b border-line-subtle"
       >
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-medium transition-all duration-150 bg-surface-raised text-content-secondary"
-          style={{
-            border: '1px solid var(--border-default)',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-400)';
-            (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-default)';
-            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
-          }}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-          Back to Session
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 hover:scale-105 active:scale-95 bg-surface-raised text-content-secondary border border-line-default"
+            onMouseEnter={(e) => {
+              const btn = e.currentTarget as HTMLButtonElement;
+              btn.style.borderColor = 'var(--color-primary-400)';
+              btn.style.color = 'var(--color-primary-600)';
+            }}
+            onMouseLeave={(e) => {
+              const btn = e.currentTarget as HTMLButtonElement;
+              btn.style.borderColor = 'var(--border-default)';
+              btn.style.color = 'var(--text-secondary)';
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Back <span className="hidden sm:inline">to Session</span>
+          </button>
+        </div>
 
-        <AppLogo size="sm" />
+        <div className="flex items-center gap-2">
+          <AppLogo size="sm" className="hidden xs:block" />
+          <div className="hidden xs:block w-px h-4 bg-line-default mx-1" />
+          <span
+            className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest text-brand-600"
+            style={{ background: 'rgba(45,158,45,0.12)' }}
+          >
+            Split View
+          </span>
+        </div>
 
-        <span
-          className="text-xs font-semibold px-3 py-1.5 rounded-full text-brand-600"
-          style={{ background: 'rgba(45,158,45,0.12)' }}
-        >
-          Split View
-        </span>
+        {/* Mobile Pane Switcher */}
+        <div className="lg:hidden flex items-center bg-muted/30 p-1 rounded-xl border border-line-subtle">
+           <button 
+             onClick={() => setMobileActivePane('left')}
+             className={`px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all duration-300 ${mobileActivePane === 'left' ? 'bg-surface-base text-brand-600 shadow-sm' : 'text-content-muted'}`}
+           >
+             Left
+           </button>
+           <button 
+             onClick={() => setMobileActivePane('right')}
+             className={`px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all duration-300 ${mobileActivePane === 'right' ? 'bg-surface-base text-brand-600 shadow-sm' : 'text-content-muted'}`}
+           >
+             Right
+           </button>
+        </div>
+        <div className="hidden lg:block w-[120px]" /> {/* Spacer for desktop symmetry */}
       </header>
 
-      {/* Two panes */}
-      <div className="flex-1 flex min-h-0">
-        <Pane
-          label="Left Pane"
-          discussions={discussions}
-          liveActiveDiscussionId={liveActiveDiscussionId}
-          liveActiveResponses={liveActiveResponses}
-        />
-        <Pane
-          label="Right Pane"
-          discussions={discussions}
-          liveActiveDiscussionId={liveActiveDiscussionId}
-          liveActiveResponses={liveActiveResponses}
-        />
+      {/* Pane Layout */}
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        {/* Desktop: both visible | Mobile: only active visible */}
+        <div className={`flex-1 flex min-w-0 ${mobileActivePane === 'left' ? 'flex' : 'hidden lg:flex'}`}>
+          <Pane
+            label="Left Pane"
+            discussions={discussions}
+            liveActiveDiscussionId={liveActiveDiscussionId}
+            liveActiveResponses={liveActiveResponses}
+            onRestart={handleRestartDiscussion}
+            isLessonActive={lessonStatus === 'active'}
+          />
+        </div>
+        
+        <div className={`flex-1 flex min-w-0 ${mobileActivePane === 'right' ? 'flex' : 'hidden lg:flex'}`}>
+          <Pane
+            label="Right Pane"
+            discussions={discussions}
+            liveActiveDiscussionId={liveActiveDiscussionId}
+            liveActiveResponses={liveActiveResponses}
+            onRestart={handleRestartDiscussion}
+            isLessonActive={lessonStatus === 'active'}
+          />
+        </div>
       </div>
     </div>
   );

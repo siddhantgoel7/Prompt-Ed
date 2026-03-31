@@ -7,9 +7,9 @@ import { StudentSessionPage } from '@/components/student/session/StudentSessionP
 
 export default function StudentRoute({
   params,
-}: {
+}: Readonly<{
   params: Promise<{ lessonId: string }>;
-}) {
+}>) {
   const { lessonId } = use(params);
   return <StudentSessionPage lessonId={lessonId} />;
 }

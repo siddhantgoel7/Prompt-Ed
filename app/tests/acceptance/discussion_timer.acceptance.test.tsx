@@ -88,16 +88,27 @@ function makeTimerHookValue(overrides: Record<string, unknown> = {}) {
         activeDiscussion: BASE_DISCUSSION,
         responseText: '',
         setResponseText: jest.fn(),
+        selectedOption: null,
+        setSelectedOption: jest.fn(),
+        isSubmitCorrect: null,
+        setIsSubmitCorrect: jest.fn(),
+        submittedAnswerText: null,
+        setSubmittedAnswerText: jest.fn(),
         submitting: false,
         isConnected: true,
         view: 'active' as const,
         endedMessage: null,
         errorMessage: null,
-        canSubmit: false,
-        submitResponse: jest.fn(),
         timerEndTime: endTime,
         timerTotalSeconds: 60,
         timerExpired: false,
+        canSubmit: true,
+        submitResponse: jest.fn(),
+        submitAnotherResponse: jest.fn(),
+        canSubmitAnother: false,
+        responseCount: 0,
+        feedbackPeriodActive: false,
+        setFeedbackPeriodActive: jest.fn(),
         ...overrides,
     };
 }
@@ -143,20 +154,13 @@ function makeExpiredHookValue(discussion = BASE_DISCUSSION) {
 function makeSubmittedWithTimerHookValue(timerExpired = false) {
     const endTime = timerExpired ? Date.now() - 1000 : Date.now() + 20_000;
     return {
-        lesson: { title: 'PMCOL 401' },
-        activeDiscussion: MC_DISCUSSION_WITH_TIMER,
-        responseText: '',
-        setResponseText: jest.fn(),
-        submitting: false,
-        isConnected: true,
-        view: 'submitted' as const,
-        endedMessage: null,
-        errorMessage: null,
-        canSubmit: false,
-        submitResponse: jest.fn(),
-        timerEndTime: endTime,
-        timerTotalSeconds: 30,
-        timerExpired,
+        ...makeTimerHookValue({
+            activeDiscussion: MC_DISCUSSION_WITH_TIMER,
+            view: 'submitted' as const,
+            timerEndTime: endTime,
+            timerTotalSeconds: 30,
+            timerExpired,
+        }),
     };
 }
 
@@ -276,7 +280,7 @@ describe('[US 2.11] MC Feedback Timing with Timer', () => {
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
 
         // Now timer expires and view moves to submitted
-        mockHook.mockReturnValue(makeSubmittedWithTimerHookValue(true));
+        mockHook.mockReturnValue({ ...makeSubmittedWithTimerHookValue(true), isSubmitCorrect: true, selectedOption: 'A', feedbackPeriodActive: true });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         expect(screen.getByText(/Great job/i)).toBeInTheDocument();

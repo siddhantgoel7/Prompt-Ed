@@ -1,9 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { GeneratedPrompt, TokenUsage } from '@/types/ai';
 import type { PromptType } from '@/types/discussion';
 import { generateCandidatesApi } from '@/lib/api/aiApi';
 
 export function useLessonAI(lessonId: string, setPromptInput: (p: string) => void) {
+    const aiDraftKey = `lesson:${lessonId}:ai-draft`;
+
     const [transcriptText, setTranscriptText] = useState('');
     const [promptType, setPromptType] = useState<PromptType>('long_answer');
     const [candidates, setCandidates] = useState<GeneratedPrompt[]>([]);
@@ -12,6 +14,34 @@ export function useLessonAI(lessonId: string, setPromptInput: (p: string) => voi
     const [generationTimeMs, setGenerationTimeMs] = useState<number | null>(null);
     const [lastTokenUsage, setLastTokenUsage] = useState<TokenUsage | null>(null);
     const [lastModel, setLastModel] = useState<string | null>(null);
+
+    // Hydrate state from localStorage on mount
+    useEffect(() => {
+        const raw = localStorage.getItem(aiDraftKey);
+        if (!raw) return;
+        try {
+            const data = JSON.parse(raw) as {
+                transcriptText?: string;
+                promptType?: PromptType;
+                candidates?: GeneratedPrompt[];
+            };
+            if (data.transcriptText) setTranscriptText(data.transcriptText);
+            if (data.promptType) setPromptType(data.promptType);
+            if (data.candidates) setCandidates(data.candidates);
+        } catch (err) {
+            console.error('Failed to parse AI draft from localStorage:', err);
+        }
+    }, [aiDraftKey]);
+
+    // Persist state to localStorage whenever it changes
+    useEffect(() => {
+        const data = {
+            transcriptText,
+            promptType,
+            candidates,
+        };
+        localStorage.setItem(aiDraftKey, JSON.stringify(data));
+    }, [aiDraftKey, transcriptText, promptType, candidates]);
 
     const generateCandidates = useCallback(async (transcriptOverride?: string) => {
         const transcriptToUse = transcriptOverride ?? transcriptText;
@@ -36,7 +66,7 @@ export function useLessonAI(lessonId: string, setPromptInput: (p: string) => voi
     const selectCandidate = useCallback((p: GeneratedPrompt) => {
         setPromptInput(p.promptText);
         setPromptType(p.promptType);
-    }, [setPromptInput]);
+    }, [setPromptInput, setPromptType]);
 
     const regenerateCandidates = useCallback(async () => {
         setCandidates([]);
@@ -51,7 +81,8 @@ export function useLessonAI(lessonId: string, setPromptInput: (p: string) => voi
         setGenerationTimeMs(null);
         setLastTokenUsage(null);
         setLastModel(null);
-    }, [setPromptInput]);
+        localStorage.removeItem(aiDraftKey);
+    }, [aiDraftKey, setPromptInput]);
 
     return {
         transcriptText,

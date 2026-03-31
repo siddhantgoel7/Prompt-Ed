@@ -74,10 +74,18 @@ const LONG_ANSWER = { ...SHORT_ANSWER, id: 'la-1', prompt_type: 'long_answer' as
 function makeBase(overrides: Record<string, unknown> = {}) {
     return {
         lesson: { title: 'PMCOL 401' },
+        activeDiscussion: null,
         responseText: '',
         setResponseText: jest.fn(),
+        selectedOption: null,
+        setSelectedOption: jest.fn(),
+        isSubmitCorrect: null,
+        setIsSubmitCorrect: jest.fn(),
+        submittedAnswerText: null,
+        setSubmittedAnswerText: jest.fn(),
         submitting: false,
         isConnected: true,
+        view: 'waiting',
         endedMessage: null,
         errorMessage: null,
         canSubmit: true,
@@ -85,6 +93,9 @@ function makeBase(overrides: Record<string, unknown> = {}) {
         timerEndTime: null,
         timerTotalSeconds: null,
         timerExpired: false,
+        responseCount: 0,
+        canSubmitAnother: false,
+        submitAnotherResponse: jest.fn(),
         ...overrides,
     };
 }
@@ -138,7 +149,7 @@ describe('MC Submitted View — Scenario 1: no timer + feedback enabled', () => 
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
         fireEvent.click(screen.getByText(`${selectedLabel}.`));
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
-        mockHook.mockReturnValue(makeSubmitted());
+        mockHook.mockReturnValue({ ...makeSubmitted(), isSubmitCorrect: selectedLabel === 'A', selectedOption: selectedLabel, feedbackPeriodActive: true });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
         return { rerender };
     }
@@ -221,15 +232,14 @@ describe('MC Submitted View — Scenario 2: timed + feedback enabled', () => {
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
         fireEvent.click(screen.getByText('A.'));
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
-        mockHook.mockReturnValue(makeSubmitted(MC_FEEDBACK_ON, timerRunning));
+        mockHook.mockReturnValue({ ...makeSubmitted(MC_FEEDBACK_ON, timerRunning), selectedOption: 'A' });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         // Timer running: no feedback banner shown yet
         expect(screen.queryByText(/Great job/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/Not quite/i)).not.toBeInTheDocument();
         // Option button should exist (submitted state shown)
-        const optionButtons = screen.getAllByRole('button');
-        const submittedBtn = optionButtons.find(btn => btn.textContent?.includes('A.'));
+        const submittedBtn = screen.getByTestId('mc-option-A');
         expect(submittedBtn).toBeInTheDocument();
     });
 
@@ -239,7 +249,7 @@ describe('MC Submitted View — Scenario 2: timed + feedback enabled', () => {
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
         fireEvent.click(screen.getByText('A.'));
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
-        mockHook.mockReturnValue(makeSubmitted(MC_FEEDBACK_ON, timerRunning));
+        mockHook.mockReturnValue({ ...makeSubmitted(MC_FEEDBACK_ON, timerRunning), selectedOption: 'A' });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         expect(screen.getByText(/results will be shown when time/i)).toBeInTheDocument();
@@ -253,7 +263,7 @@ describe('MC Submitted View — Scenario 2: timed + feedback enabled', () => {
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
 
         // Timer expires
-        mockHook.mockReturnValue(makeSubmitted(MC_FEEDBACK_ON, timerExpired));
+        mockHook.mockReturnValue({ ...makeSubmitted(MC_FEEDBACK_ON, timerExpired), isSubmitCorrect: true, selectedOption: 'A', feedbackPeriodActive: true });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         expect(screen.getByText(/Great job/i)).toBeInTheDocument();
@@ -267,7 +277,7 @@ describe('MC Submitted View — Scenario 2: timed + feedback enabled', () => {
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
 
         // Timer expires
-        mockHook.mockReturnValue(makeSubmitted(MC_FEEDBACK_ON, timerExpired));
+        mockHook.mockReturnValue({ ...makeSubmitted(MC_FEEDBACK_ON, timerExpired), isSubmitCorrect: false, selectedOption: 'B', feedbackPeriodActive: true });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         expect(screen.getByText(/Not quite/i)).toBeInTheDocument();
@@ -285,7 +295,7 @@ describe('MC Submitted View — Scenario 3: no feedback', () => {
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
         fireEvent.click(screen.getByText('B.'));
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
-        mockHook.mockReturnValue(makeSubmitted(MC_FEEDBACK_OFF));
+        mockHook.mockReturnValue({ ...makeSubmitted(MC_FEEDBACK_OFF), selectedOption: 'B' });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         // data-state="submitted" confirms submitted-without-correctness styling — stronger than .toBeTruthy()
@@ -300,7 +310,7 @@ describe('MC Submitted View — Scenario 3: no feedback', () => {
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
         fireEvent.click(screen.getByText('A.'));
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
-        mockHook.mockReturnValue(makeSubmitted(MC_FEEDBACK_OFF));
+        mockHook.mockReturnValue({ ...makeSubmitted(MC_FEEDBACK_OFF), selectedOption: 'A' });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         expect(screen.queryByTestId('mc-feedback-banner')).not.toBeInTheDocument();
@@ -314,7 +324,7 @@ describe('MC Submitted View — Scenario 3: no feedback', () => {
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
         fireEvent.click(screen.getByText('C.'));
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
-        mockHook.mockReturnValue(makeSubmitted(MC_FEEDBACK_OFF));
+        mockHook.mockReturnValue({ ...makeSubmitted(MC_FEEDBACK_OFF), selectedOption: 'C' });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         expect(screen.getByText('What is the mechanism of aspirin?')).toBeInTheDocument();
@@ -334,7 +344,7 @@ describe('Short/Long Answer Submitted View — Scenario 1: no timer', () => {
             target: { value: 'Aspirin inhibits COX enzymes.' },
         });
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
-        mockHook.mockReturnValue(makeSubmitted(SHORT_ANSWER));
+        mockHook.mockReturnValue({ ...makeSubmitted(SHORT_ANSWER), submittedAnswerText: 'Aspirin inhibits COX enzymes.' });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         expect(screen.getByText('Explain the pharmacokinetics of ibuprofen.')).toBeInTheDocument();
@@ -348,7 +358,7 @@ describe('Short/Long Answer Submitted View — Scenario 1: no timer', () => {
         });
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
-        mockHook.mockReturnValue(makeSubmitted(SHORT_ANSWER));
+        mockHook.mockReturnValue({ ...makeSubmitted(SHORT_ANSWER), submittedAnswerText: 'Aspirin inhibits COX enzymes.' });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         expect(screen.getByTestId('submitted-answer-display')).toBeInTheDocument();
@@ -363,7 +373,7 @@ describe('Short/Long Answer Submitted View — Scenario 1: no timer', () => {
             target: { value: 'Detailed pharmacokinetics...' },
         });
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
-        mockHook.mockReturnValue(makeSubmitted(LONG_ANSWER));
+        mockHook.mockReturnValue({ ...makeSubmitted(LONG_ANSWER), submittedAnswerText: 'Detailed pharmacokinetics...' });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         expect(screen.getByText('Explain the pharmacokinetics of ibuprofen.')).toBeInTheDocument();
@@ -393,7 +403,7 @@ describe('Short/Long Answer Submitted View — Scenario 2: timed', () => {
             target: { value: 'My answer.' },
         });
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
-        mockHook.mockReturnValue(makeSubmitted(SHORT_ANSWER, timerRunning));
+        mockHook.mockReturnValue({ ...makeSubmitted(SHORT_ANSWER, timerRunning), submittedAnswerText: 'My answer.' });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         expect(screen.getByText(/results will be shown when time/i)).toBeInTheDocument();
@@ -408,7 +418,7 @@ describe('Short/Long Answer Submitted View — Scenario 2: timed', () => {
         const { rerender } = render(<StudentSessionPage lessonId="lesson-1" />);
         fireEvent.click(screen.getByRole('button', { name: /Submit response/i }));
 
-        mockHook.mockReturnValue(makeSubmitted(SHORT_ANSWER, timerExpiredState));
+        mockHook.mockReturnValue({ ...makeSubmitted(SHORT_ANSWER, timerExpiredState), submittedAnswerText: 'My pharmacokinetics answer.' });
         rerender(<StudentSessionPage lessonId="lesson-1" />);
 
         expect(screen.getByText('Explain the pharmacokinetics of ibuprofen.')).toBeInTheDocument();

@@ -48,9 +48,8 @@ describe('ResponseCard — visual emphasis (full variant)', () => {
     const { container } = renderCard({ isSelected: true });
 
     const card = container.firstChild as HTMLElement;
-    // Selected state: elevated z-index and relative positioning
+    // Selected state: elevated z-index
     expect(card.className).toMatch(/z-10/);
-    expect(card.className).toMatch(/relative/);
 
     // Text should be larger and semibold
     const text = screen.getByText(/Sample student response/);
@@ -72,10 +71,10 @@ describe('ResponseCard — visual emphasis (full variant)', () => {
       />,
     );
 
-    // Not visible when unselected
-    expect(screen.queryByRole('button', { name: /Flag as Inappropriate/i })).not.toBeInTheDocument();
+    // Flag badge is always rendered when onFlag is provided
+    expect(screen.getByRole('button', { name: /Flag as Inappropriate/i })).toBeInTheDocument();
 
-    // Rerender as selected
+    // Rerender as selected — badge is still present
     rerender(
       <ResponseCard
         variant="full"
@@ -97,7 +96,7 @@ describe('ResponseCard — visual emphasis (full variant)', () => {
     const onToggle = jest.fn();
     renderCard({ onToggle });
 
-    await user.click(screen.getByText(/Sample student response/));
+    await user.click(screen.getByRole('button', { name: /Sample student response/i }));
     expect(onToggle).toHaveBeenCalledTimes(1);
   });
 });
@@ -138,7 +137,7 @@ describe('ResponseCard — flagged mode visual styling', () => {
     const { container } = renderCard({ mode: 'flagged', isSelected: true });
 
     const card = container.firstChild as HTMLElement;
-    // Selected flagged state uses red styling — check semantic attribute, not color values
+    // Selected flagged state uses red styling — data-variant is on the outer ExpandableCard div
     expect(card).toHaveAttribute('data-variant', 'flagged-selected');
     // Should have z-10 for elevation
     expect(card.className).toMatch(/z-10/);

@@ -51,8 +51,8 @@ function makeDiscussion(overrides: Record<string, unknown> = {}) {
     display_order: 1,
     participant_snapshot: 4,
     responses: [
-      { id: 'r1', response_text: 'First response.', created_at: '2024-01-01T10:00:30Z' },
-      { id: 'r2', response_text: 'Second response.', created_at: '2024-01-01T10:01:00Z' },
+      { id: 'r1', response_text: 'First response.', created_at: '2024-01-01T10:00:30Z', student_session_id: 'student-1' },
+      { id: 'r2', response_text: 'Second response.', created_at: '2024-01-01T10:01:00Z', student_session_id: 'student-2' },
     ],
     ...overrides,
   };
@@ -186,8 +186,8 @@ describe('[US 1.40] Ended view metrics', () => {
 
   beforeEach(() => {
     fetchResponsesMock.mockResolvedValue([
-      { id: 'r1', discussion_id: 'disc-1', response_text: 'First response.', created_at: '2024-01-01T10:00:30Z' },
-      { id: 'r2', discussion_id: 'disc-1', response_text: 'Second response.', created_at: '2024-01-01T10:01:00Z' },
+      { id: 'r1', discussion_id: 'disc-1', response_text: 'First response.', created_at: '2024-01-01T10:00:30Z', student_session_id: 'student-1' },
+      { id: 'r2', discussion_id: 'disc-1', response_text: 'Second response.', created_at: '2024-01-01T10:01:00Z', student_session_id: 'student-2' },
     ]);
   });
 
@@ -263,11 +263,11 @@ describe('[US 1.40] Ended view metrics', () => {
   it('[AT8] success: multiple discussion cards each show their own response count', () => {
     const vm = makeVM({
       lessonDiscussions: [
-        makeDiscussion({ id: 'disc-1', responses: [{ id: 'r1', response_text: 'A', created_at: '2024-01-01T10:00:00Z' }] }) as any,
+        makeDiscussion({ id: 'disc-1', responses: [{ id: 'r1', response_text: 'A', created_at: '2024-01-01T10:00:00Z', student_session_id: 'student-1' }] }) as any,
         makeDiscussion({ id: 'disc-2', prompt_text: 'Second prompt', participant_snapshot: 4, responses: [
-          { id: 'r2', response_text: 'B', created_at: '2024-01-01T10:00:00Z' },
-          { id: 'r3', response_text: 'C', created_at: '2024-01-01T10:00:00Z' },
-          { id: 'r4', response_text: 'D', created_at: '2024-01-01T10:00:00Z' },
+          { id: 'r2', response_text: 'B', created_at: '2024-01-01T10:00:00Z', student_session_id: 'student-2' },
+          { id: 'r3', response_text: 'C', created_at: '2024-01-01T10:00:00Z', student_session_id: 'student-3' },
+          { id: 'r4', response_text: 'D', created_at: '2024-01-01T10:00:00Z', student_session_id: 'student-4' },
         ]}) as any,
       ],
     });

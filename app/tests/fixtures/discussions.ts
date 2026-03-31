@@ -26,6 +26,8 @@ export const mockDiscussion: Discussion = {
   ai_generated_correct_option: null,
   participant_snapshot: 0,
   time_limit_seconds: null,
+  allow_multiple_responses: false,
+  response_limit: 1,
 };
 
 // 18.2
@@ -46,6 +48,8 @@ export const mockClosedDiscussion: Discussion = {
   ai_generated_correct_option: null,
   participant_snapshot: 0,
   time_limit_seconds: null,
+  allow_multiple_responses: false,
+  response_limit: 1,
 };
 
 // 18.3
@@ -66,6 +70,8 @@ export const mockMultipleChoiceDiscussion: Discussion = {
   ai_generated_correct_option: null,
   participant_snapshot: 0,
   time_limit_seconds: null,
+  allow_multiple_responses: false,
+  response_limit: 1,
 };
 
 // 18.4
@@ -77,6 +83,7 @@ export const mockResponse: Response = {
   selected_option: null,
   is_correct: null,
   flagged_at: null,
+  student_session_id: 'student-1',
 };
 
 // 18.5
@@ -88,6 +95,7 @@ export const mockResponse2: Response = {
   selected_option: null,
   is_correct: null,
   flagged_at: null,
+  student_session_id: 'student-2',
 };
 
 // 18.6
@@ -99,6 +107,7 @@ export const mockResponse3: Response = {
   selected_option: null,
   is_correct: null,
   flagged_at: null,
+  student_session_id: 'student-3',
 };
 
 // 18.6b — Flagged response fixture for restore tests
@@ -110,6 +119,7 @@ export const mockFlaggedResponse: Response = {
   selected_option: null,
   is_correct: null,
   flagged_at: '2026-02-10T14:09:00Z',
+  student_session_id: 'student-4',
 };
 
 // 18.7
@@ -155,6 +165,8 @@ export function createMockDiscussions(count: number): Discussion[] {
     feedback_enabled: false,
     ai_generated_correct_option: null,
     participant_snapshot: 0,
+    allow_multiple_responses: false,
+    response_limit: 1,
   }));
 }
 
@@ -175,6 +187,7 @@ export function createMockResponses(discussionId: string, count: number): Respon
     selected_option: null,
     is_correct: null,
     flagged_at: null,
+    student_session_id: `student-${index + 1}`,
   }));
 }
 

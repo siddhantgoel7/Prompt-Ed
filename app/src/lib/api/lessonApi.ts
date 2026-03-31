@@ -1,6 +1,7 @@
 // Client-side Supabase helpers for lesson and course CRUD operations.
 import { createClient } from '@/lib/supabase/client';
 import type { CreateLessonInput } from '@/types/lesson';
+import { generateSecureAlphanumeric } from '@/lib/utils/random';
 
 export async function getOwnedCourse(courseId: string, instructorId: string) {
     const supabase = createClient();
@@ -29,14 +30,34 @@ export async function createLesson(courseId: string, input: CreateLessonInput) {
             {
                 title: input.title.trim(),
                 course_id: courseId,
-                pin_code: Math.random().toString(36).substring(2, 8).toUpperCase(),
+                pin_code: generateSecureAlphanumeric(6),
             },
         ])
         .select();
 }
 
+/**
+ * Deletes a lesson and all its associated data (files, chunks, etc.).
+ * Uses DB-level ON DELETE CASCADE for data, and manually cleans up Supabase Storage.
+ */
 export async function deleteLesson(lessonId: string) {
     const supabase = createClient();
+
+    // 1. Fetch all storage paths for files in this lesson
+    const { data: storagePaths } = await supabase
+        .from('lesson_files')
+        .select('storage_path')
+        .eq('lesson_id', lessonId);
+
+    // 2. Delete files from storage if they exist
+    if (storagePaths && storagePaths.length > 0) {
+        const paths = storagePaths.map((f) => f.storage_path).filter(Boolean);
+        if (paths.length > 0) {
+            await supabase.storage.from('lesson-files').remove(paths);
+        }
+    }
+
+    // 3. Delete the lesson (DB CASCADE will handle chunks, discussions, etc.)
     return supabase.from('lessons').delete().eq('id', lessonId);
 }
 

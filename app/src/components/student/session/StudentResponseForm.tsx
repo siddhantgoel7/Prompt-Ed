@@ -10,7 +10,7 @@ export function StudentResponseForm({
   submitting,
   validationMessage,
   showTextarea = true,
-}: {
+}: Readonly<{
   value: string;
   onChange: (v: string) => void;
   onSubmit: () => void;
@@ -24,7 +24,7 @@ export function StudentResponseForm({
    * selection in StudentPromptCard rather than typed text.
    */
   showTextarea?: boolean;
-}) {
+}>) {
   const chars = value.length;
 
   return (

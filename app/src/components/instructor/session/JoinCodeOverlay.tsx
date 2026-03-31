@@ -7,11 +7,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { SessionContext } from './SessionContext';
 
 /** Renders a dialog overlay showing the PIN code in large font for in-class projection. */
-export function JoinCodeOverlay(props: {
+export function JoinCodeOverlay(props: Readonly<{
   open?: boolean;
   code?: string | null;
   onClose?: () => void;
-}) {
+}>) {
   const context = React.useContext(SessionContext);
   const open = context ? context.displayState : props.open!;
   const code = context ? (context.lesson?.pin_code ?? null) : props.code!;

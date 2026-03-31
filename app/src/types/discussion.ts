@@ -16,7 +16,7 @@ export interface Discussion {
   published_at: string | null;
   closed_at: string | null;
   display_order: number;
-  source: 'manual' | 'ai_generated' | null;
+  source: 'manual' | 'ai_generated' | 'general' | null;
   mc_options: MCOptionSafe[] | null;
   correct_option: string | null;
   feedback_enabled: boolean;
@@ -25,6 +25,10 @@ export interface Discussion {
   participant_snapshot: number | null;
   // Time limit in seconds set by instructor; null means no time limit
   time_limit_seconds?: number | null;
+  // Whether students can submit more than one response (non-MC only)
+  allow_multiple_responses: boolean;
+  // Max number of responses per student; null means unlimited (when allow_multiple_responses is true)
+  response_limit: number | null;
 }
 
 export interface CreateDiscussionInput {

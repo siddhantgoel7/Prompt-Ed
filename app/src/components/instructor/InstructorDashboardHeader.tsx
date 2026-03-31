@@ -3,19 +3,14 @@
 
 import { AppLogo } from '@/components/ui/AppLogo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useRouter } from 'next/navigation';
 
 /** Renders the dashboard header bar with the PromptED logo and a Log-Out button. */
-export function InstructorDashboardHeader({
-  loggingOut,
-  onLogout,
-}: {
-  loggingOut: boolean;
-  onLogout: () => void;
-}) {
+export function InstructorDashboardHeader({ onLogout, loggingOut }: Readonly<{ onLogout?: () => void; loggingOut?: boolean }>) {
+  const router = useRouter();
+
   return (
-    <header
-      className="glass sticky top-0 z-50"
-    >
+    <header className="glass sticky top-0 z-50">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3">
         <AppLogo size="sm" />
 
@@ -23,12 +18,9 @@ export function InstructorDashboardHeader({
           <ThemeToggle />
 
           <button
-            onClick={onLogout}
-            disabled={loggingOut}
-            className="px-4 py-2 rounded-[10px] text-sm font-medium transition-all duration-150 disabled:opacity-60 bg-surface-raised text-content-secondary"
-            style={{
-              border: '1px solid var(--border-default)',
-            }}
+            onClick={() => router.push('/account')}
+            className="px-4 py-2 rounded-[10px] text-sm font-medium transition-all duration-150 bg-surface-raised text-content-secondary"
+            style={{ border: '1px solid var(--border-default)' }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-primary-400)';
               (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-primary-500)';
@@ -38,8 +30,19 @@ export function InstructorDashboardHeader({
               (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
             }}
           >
-            {loggingOut ? 'Logging out…' : 'Log Out'}
+            Account
           </button>
+
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              disabled={loggingOut}
+              className="px-4 py-2 rounded-[10px] text-sm font-medium transition-all duration-150 bg-destructive/10 text-destructive hover:bg-destructive/20 disabled:opacity-50"
+              style={{ border: '1px solid currentColor' }}
+            >
+              {loggingOut ? 'Logging Out...' : 'Logout'}
+            </button>
+          )}
         </div>
       </div>
     </header>

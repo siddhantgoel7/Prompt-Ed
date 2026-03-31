@@ -6,7 +6,7 @@ Our style guidelines prioritize legibility, clear contrast, and easily tappable 
 We cannot rely on color alone to convey meaning (e.g., a red background for an error must also have an error icon or clear text message).
 
 * **The Contrast Rule:** All text and critical UI elements MUST pass a WCAG AA contrast ratio (at least 4.5:1 for normal text, and 3:1 for large text).
-* **The Tool:** Before adding any new color csombination to the UI, you must verify it passes using this [Colour Contrast Checker](https://accessibilityaid.com/free-tools/colour-contrast-checker).
+* **The Tool:** Before adding any new color combination to the UI, you must verify it passes using this [Colour Contrast Checker](https://accessibilityaid.com/free-tools/colour-contrast-checker).
 
 ### Color Contrast Checker Results
 

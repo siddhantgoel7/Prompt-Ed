@@ -45,6 +45,7 @@ describe('fetchFlaggedResponsesApi', () => {
         selected_option: null,
         is_correct: null,
         flagged_at: '2024-01-01T11:00:00Z',
+        student_session_id: 'student-1',
       },
     ];
     mockOrder.mockResolvedValue({ data: mockData, error: null });

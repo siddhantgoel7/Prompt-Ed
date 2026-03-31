@@ -103,14 +103,14 @@ describe('[US 1.12] Instructor Reconnect (Acceptance)', () => {
         const { rerender } = render(<SessionActiveView vm={vm} />);
 
         // Check discussion is present
-        expect(screen.getByTestId('center-panel')).toHaveTextContent('activeDiscussionId=disc-1');
+        expect(screen.getAllByTestId('center-panel')[0]).toHaveTextContent('activeDiscussionId=disc-1');
 
         // Rerender as connected
         vm = makeVM({ isConnected: true });
         rerender(<SessionActiveView vm={vm} />);
 
         // State is still there
-        expect(screen.getByTestId('center-panel')).toHaveTextContent('activeDiscussionId=disc-1');
+        expect(screen.getAllByTestId('center-panel')[0]).toHaveTextContent('activeDiscussionId=disc-1');
     });
 
     // 36.3
@@ -118,12 +118,12 @@ describe('[US 1.12] Instructor Reconnect (Acceptance)', () => {
         let vm = makeVM({ isConnected: false, responses: [] });
         const { rerender } = render(<SessionActiveView vm={vm} />);
 
-        expect(screen.getByTestId('right-panel')).toHaveTextContent('RightPanel count=0');
+        expect(screen.getAllByTestId('right-panel')[0]).toHaveTextContent('RightPanel count=0');
 
         // Simulated reconnect fetching new responses
         vm = makeVM({ isConnected: true, responses: [{ id: 'resp-1' }, { id: 'resp-2' }] as any });
         rerender(<SessionActiveView vm={vm} />);
 
-        expect(screen.getByTestId('right-panel')).toHaveTextContent('RightPanel count=2');
+        expect(screen.getAllByTestId('right-panel')[0]).toHaveTextContent('RightPanel count=2');
     });
 });
