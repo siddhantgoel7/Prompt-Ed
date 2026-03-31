@@ -43,6 +43,8 @@ export function useLessonDiscussions(
   const [discussions, setDiscussions] = useState<DiscussionWithResponseCount[]>([]);
   const [activeDiscussion, setActiveDiscussion] = useState<Discussion | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [isClosingDiscussion, setIsClosingDiscussion] = useState(false);
+  const closingRef = useRef(false);
 
   // Peak student count tracking
   const peakStudentCountRef = useRef<number>(0);
@@ -73,21 +75,31 @@ export function useLessonDiscussions(
   } = useDiscussionTimerInternal(activeDiscussion, channel);
 
   const handleCloseDiscussion = useCallback(async (discussionId: string) => {
-    const peak = peakStudentCountRef.current;
-    if (peak > 0) await updateParticipantSnapshotApi(discussionId, peak);
-    peakStudentCountRef.current = 0;
-    setPeakStudentCount(0);
-    clearTimerState();
-    await closeDiscussionApi(discussionId);
-    if (channel) {
-      await (channel as RealtimeLikeChannel).send({
-        type: 'broadcast',
-        event: 'discussion:closed',
-        payload: { discussionId },
-      });
+    // Guard against double-invocation from rapid clicks or a race with the
+    // auto-close timer. Both the ref (synchronous) and state (for UI) are set.
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setIsClosingDiscussion(true);
+    try {
+      const peak = peakStudentCountRef.current;
+      if (peak > 0) await updateParticipantSnapshotApi(discussionId, peak);
+      peakStudentCountRef.current = 0;
+      setPeakStudentCount(0);
+      clearTimerState();
+      await closeDiscussionApi(discussionId);
+      if (channel) {
+        await (channel as RealtimeLikeChannel).send({
+          type: 'broadcast',
+          event: 'discussion:closed',
+          payload: { discussionId },
+        });
+      }
+      setActiveDiscussion(null);
+      await fetchDiscussions();
+    } finally {
+      closingRef.current = false;
+      setIsClosingDiscussion(false);
     }
-    setActiveDiscussion(null);
-    await fetchDiscussions();
   }, [channel, fetchDiscussions, clearTimerState]);
 
   // Check for auto-close
@@ -281,8 +293,9 @@ export function useLessonDiscussions(
   return {
     peakStudentCount, discussions, activeDiscussion, responses,
     discussionTimerEndTime: timerEndTime, discussionTimerSeconds: timerSeconds, flaggedResponses,
-    fetchDiscussions, fetchResponses, handleCloseDiscussion, handlePublishDiscussion,
-    handlePublishAiCandidate, handleExtendTimer, handleEditTimer, handleRestartDiscussion, removeResponse, restoreResponse,
+    fetchDiscussions, fetchResponses, handleCloseDiscussion, isClosingDiscussion,
+    handlePublishDiscussion, handlePublishAiCandidate, handleExtendTimer, handleEditTimer,
+    handleRestartDiscussion, removeResponse, restoreResponse,
   };
 }
 
