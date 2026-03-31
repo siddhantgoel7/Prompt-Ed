@@ -223,6 +223,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../user-manual/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Manual
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../job-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Job Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../design/" class="md-nav__link">
         
   
@@ -341,10 +395,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -362,8 +416,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -408,6 +462,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../run-local/" class="md-nav__link">
         
   
@@ -416,6 +498,34 @@
     
   
     Run Locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Required Libraries
   
 
     
@@ -752,15 +862,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-speech-to-text-whisper" class="md-nav__link">
+  <a href="#4-speech-to-text-whisper-1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Speech-to-Text — Whisper
+        4. Speech-to-Text — whisper-1
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="4. Speech-to-Text — Whisper">
+    <nav class="md-nav" aria-label="4. Speech-to-Text — whisper-1">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1860,10 +1970,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -1881,8 +1991,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2182,15 +2292,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-speech-to-text-whisper" class="md-nav__link">
+  <a href="#4-speech-to-text-whisper-1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Speech-to-Text — Whisper
+        4. Speech-to-Text — whisper-1
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="4. Speech-to-Text — Whisper">
+    <nav class="md-nav" aria-label="4. Speech-to-Text — whisper-1">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3282,7 +3392,7 @@
 <li>System Overview</li>
 <li>File Upload &amp; Parsing</li>
 <li>Embeddings</li>
-<li>Speech-to-Text (Whisper)</li>
+<li>Speech-to-Text (whisper-1)</li>
 <li>RAG Generation</li>
 <li>Prompt Engineering</li>
 <li>AI Preferences System</li>
@@ -3296,13 +3406,13 @@
 </ol>
 <hr />
 <h2 id="1-system-overview">1. System Overview</h2>
-<p>The AI pipeline is a <strong>pluggable, provider-agnostic Retrieval-Augmented Generation (RAG) system</strong> built natively in Next.js (TypeScript). Instructors upload PDF or PPTX lecture slides; the system parses, chunks, embeds, and stores them in a pgvector store. During class, the instructor records a spoken segment which is transcribed by Whisper. The transcript is embedded, blended with any focus area preferences, and used for semantic similarity search — retrieving the most relevant slide chunks before GPT-4o-mini generates discussion question candidates. The instructor selects one and publishes it to students via Supabase Realtime.</p>
+<p>The AI pipeline is a <strong>pluggable, provider-agnostic Retrieval-Augmented Generation (RAG) system</strong> built natively in Next.js (TypeScript). Instructors upload PDF or PPTX lecture slides; the system parses, chunks, embeds, and stores them in a pgvector store. During class, the instructor records a spoken segment which is transcribed by whisper-1. The transcript is embedded, blended with any focus area preferences, and used for semantic similarity search — retrieving the most relevant slide chunks before GPT-4o-mini generates discussion question candidates. The instructor selects one and publishes it to students via Supabase Realtime.</p>
 <h3 id="11-end-to-end-instructor-workflow">1.1 End-to-End Instructor Workflow</h3>
 <pre><code>Before class:  Upload PDF/PPTX via Files tab in session sidebar
 System:        Detect file type → parse text + visual content → chunk → embed → store in lesson_chunks (status = ready)
 
 During class:  Click &quot;Start Recording&quot; while explaining a concept
-               Click &quot;Stop &amp; Transcribe&quot; → audio POST → /api/lessons/[lessonId]/transcript → Whisper returns text
+               Click &quot;Stop &amp; Transcribe&quot; → audio POST → /api/lessons/[lessonId]/transcript → whisper-1 returns text
 System:        Embed transcript → (optionally blend with focusAreas embedding) → vector similarity search
                → retrieve top-8 chunks → GPT-4o-mini → 5 candidates
 
@@ -3348,7 +3458,7 @@ Realtime:      Discussion broadcast to all students (is_correct stripped before 
 </tr>
 <tr>
 <td>Speech-to-Text</td>
-<td>OpenAI Whisper <code>whisper-1</code> — <code>audio/webm;codecs=opus</code> preferred</td>
+<td>OpenAI <code>whisper-1</code> — <code>audio/webm;codecs=opus</code> preferred</td>
 </tr>
 <tr>
 <td>Generation</td>
@@ -3505,7 +3615,7 @@ for (let i = 0; i &lt; chunks.length; i += BATCH_SIZE) {
 <h3 id="32-error-handling">3.2 Error Handling</h3>
 <p>If a batch fails, <code>embedChunks</code> throws back to the upload background handler, which sets <code>lesson_files.status = 'failed'</code>. Chunk rows remain in the DB with <code>null</code> embeddings. Re-uploading the file triggers fresh parsing and re-embedding.</p>
 <hr />
-<h2 id="4-speech-to-text-whisper">4. Speech-to-Text — Whisper</h2>
+<h2 id="4-speech-to-text-whisper-1">4. Speech-to-Text — whisper-1</h2>
 <p><strong>User Story:</strong> US 1.17</p>
 <h3 id="41-useaudiorecorder-hook">4.1 useAudioRecorder Hook</h3>
 <p><strong>File:</strong> <code>src/hooks/useAudioRecorder.ts</code></p>
@@ -3614,7 +3724,7 @@ Retrieve 8 most recently created chunks (recency fallback). A warning is include
 - MC_DISTRACTORS: Each wrong option must use one of four named strategies; no strategy repeated within one question (see §6.5)
 - MC_ANSWER_POSITION: Distribute correct answers across A, B, C, D positions across the 5 candidates
 - META_LECTURE: Do not ask about class logistics, schedules, or assessment procedures
-- STT_NOISE: Skip transcription artifacts — Whisper produces filler words and false starts that should not become question fodder
+- STT_NOISE: Skip transcription artifacts — whisper-1 may produce filler words and false starts that should not become question fodder
 - OUTPUT: Valid JSON only, matching the defined schema</p>
 <h3 id="62-difficulty-blooms-taxonomy">6.2 Difficulty &amp; Bloom's Taxonomy</h3>
 <p>Difficulty preference maps to different Bloom's taxonomy level schedules. MC and free-response have different schedules because multiple choice cannot meaningfully assess "create" (creation requires generating novel artefacts, which selection prevents).</p>
@@ -3859,7 +3969,7 @@ if (course.instructor_id !== user.id) return 403;
 <p>To add a new provider: implement <code>AIProvider</code> and swap at the construction site. Verify before switching:</p>
 <ul>
 <li><strong>Embedding dimensions:</strong> System assumes 1536. A different dimension requires a schema migration on <code>lesson_chunks.embedding</code> and a rebuild of the <code>match_lesson_chunks</code> RPC.</li>
-<li><strong>Whisper availability:</strong> Most providers do not expose <code>audio/transcriptions</code>. Keep Whisper on OpenAI separately if switching chat provider.</li>
+<li><strong>STT availability:</strong> Most providers do not expose <code>audio/transcriptions</code>. Keep whisper-1 on OpenAI separately if switching chat provider.</li>
 <li><strong><code>json_object</code> mode:</strong> Not universally supported. If unavailable, the system prompt must instruct JSON-only output and the parser must strip markdown fences.</li>
 </ul>
 <hr />
@@ -3996,7 +4106,7 @@ if (course.instructor_id !== user.id) return 403;
 </tr>
 <tr>
 <td><code>transcript</code></td>
-<td>STT output from Whisper</td>
+<td>STT output from whisper-1</td>
 </tr>
 </tbody>
 </table>
@@ -4093,7 +4203,7 @@ $$;
 <tr>
 <td><code>OPENAI_API_KEY</code></td>
 <td>Yes</td>
-<td>Chat completion (gpt-4o-mini), embeddings (text-embedding-3-small), Whisper, vision (gpt-4o)</td>
+<td>Chat completion (gpt-4o-mini), embeddings (text-embedding-3-small), STT (whisper-1), vision (gpt-4o)</td>
 </tr>
 <tr>
 <td><code>GOOGLE_AI_API_KEY</code></td>
@@ -4188,7 +4298,7 @@ serverExternalPackages: ['pdfjs-serverless', '@napi-rs/canvas']
 <tbody>
 <tr>
 <td><code>openai</code></td>
-<td>OpenAI SDK — chat, embeddings, Whisper, vision</td>
+<td>OpenAI SDK — chat, embeddings, STT (whisper-1), vision</td>
 </tr>
 <tr>
 <td><code>@google/generative-ai</code></td>
@@ -4429,7 +4539,7 @@ serverExternalPackages: ['pdfjs-serverless', '@napi-rs/canvas']
 </tr>
 <tr>
 <td><code>src/app/api/lessons/[lessonId]/transcript/route.ts</code></td>
-<td>Whisper STT endpoint</td>
+<td>STT endpoint (whisper-1)</td>
 </tr>
 <tr>
 <td><code>src/app/api/user/ai-preferences/route.ts</code></td>

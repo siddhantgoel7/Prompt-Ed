@@ -12,7 +12,7 @@
         <link rel="prev" href="../meetings/">
       
       
-        <link rel="next" href="../run-local/">
+        <link rel="next" href="../deployment/">
       
       
         
@@ -223,6 +223,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../user-manual/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Manual
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../job-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Job Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../design/" class="md-nav__link">
         
   
@@ -341,10 +395,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -362,8 +416,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -440,13 +494,286 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#openapi-specification" class="md-nav__link">
+  <a href="#authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
-        OpenAPI specification
+        Authentication
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Routes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auth
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Auth">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-apiauthcallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /api/auth/callback
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-apiauthcheck-email" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POST /api/auth/check-email
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lesson-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lesson Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lesson Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-apilessonslessonidfiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /api/lessons/{lessonId}/files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-apilessonslessonidupload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POST /api/lessons/{lessonId}/upload
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-apilessonslessonidfilesfileid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /api/lessons/{lessonId}/files/{fileId}
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-apilessonslessonidfilesfileid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DELETE /api/lessons/{lessonId}/files/{fileId}
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lessons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lessons">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#post-apilessonslessonidtranscript" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POST /api/lessons/{lessonId}/transcript
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-apilessonslessonidgenerate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POST /api/lessons/{lessonId}/generate
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="User">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-apiuserai-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /api/user/ai-preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#put-apiuserai-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PUT /api/user/ai-preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internal
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Internal">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-apisocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /api/socket
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schemas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schemas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schemas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lessonfile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LessonFile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aipromptpreferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AIPromptPreferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#candidateset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CandidateSet
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -454,21 +781,27 @@
   <a href="#supabase-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Supabase configuration
+        Supabase Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supabase Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#direct-client-access-browser-supabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direct Client Access (Browser → Supabase)
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#data-access-client-supabase" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data access (client → Supabase)
-      
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -484,10 +817,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#swagger-ui-preview" class="md-nav__link">
+  <a href="#swagger-ui" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Swagger UI preview
+        Swagger UI
       
     </span>
   </a>
@@ -495,10 +828,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#change-log-notes" class="md-nav__link">
+  <a href="#environment-variables" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Change log notes
+        Environment Variables
       
     </span>
   </a>
@@ -521,6 +854,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../run-local/" class="md-nav__link">
         
   
@@ -529,6 +890,34 @@
     
   
     Run Locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Required Libraries
   
 
     
@@ -676,10 +1065,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -697,8 +1086,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -826,13 +1215,286 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#openapi-specification" class="md-nav__link">
+  <a href="#authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
-        OpenAPI specification
+        Authentication
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Routes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auth
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Auth">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-apiauthcallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /api/auth/callback
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-apiauthcheck-email" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POST /api/auth/check-email
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lesson-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lesson Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lesson Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-apilessonslessonidfiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /api/lessons/{lessonId}/files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-apilessonslessonidupload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POST /api/lessons/{lessonId}/upload
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-apilessonslessonidfilesfileid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /api/lessons/{lessonId}/files/{fileId}
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-apilessonslessonidfilesfileid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DELETE /api/lessons/{lessonId}/files/{fileId}
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lessons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lessons">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#post-apilessonslessonidtranscript" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POST /api/lessons/{lessonId}/transcript
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-apilessonslessonidgenerate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POST /api/lessons/{lessonId}/generate
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="User">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-apiuserai-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /api/user/ai-preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#put-apiuserai-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PUT /api/user/ai-preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internal
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Internal">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-apisocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /api/socket
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schemas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schemas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schemas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lessonfile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LessonFile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aipromptpreferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AIPromptPreferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#candidateset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CandidateSet
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -840,21 +1502,27 @@
   <a href="#supabase-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Supabase configuration
+        Supabase Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supabase Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#direct-client-access-browser-supabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direct Client Access (Browser → Supabase)
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#data-access-client-supabase" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data access (client → Supabase)
-      
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -870,10 +1538,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#swagger-ui-preview" class="md-nav__link">
+  <a href="#swagger-ui" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Swagger UI preview
+        Swagger UI
       
     </span>
   </a>
@@ -881,10 +1549,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#change-log-notes" class="md-nav__link">
+  <a href="#environment-variables" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Change log notes
+        Environment Variables
       
     </span>
   </a>
@@ -909,89 +1577,317 @@
 
 
 <h1 id="api-supabase-guide">API &amp; Supabase Guide</h1>
-<p>This project uses a small set of Next.js App Router API endpoints and relies on Supabase for auth, database access, and realtime events. Below is an OpenAPI 3.0 overview plus implementation notes.</p>
-<h2 id="openapi-specification">OpenAPI specification</h2>
-<pre><code class="language-yaml">openapi: 3.0.3
-info:
-  title: PMCOL Teaching Tool API
-  version: 0.1.0
-  description: Minimal server endpoints; most data access happens directly from the browser via Supabase.
-servers:
-  - url: https://ualberta-cmput401.github.io/W26project-DeptofPharmacology
-    description: Deployed site (static; API hosted with the app runtime)
-  - url: http://localhost:3000
-    description: Local dev server
-paths:
-  /api/auth/callback:
-    get:
-      summary: Exchange Supabase OAuth code for a session
-      parameters:
-        - name: code
-          in: query
-          required: true
-          schema:
-            type: string
-          description: Authorization code from Supabase OAuth provider
-      responses:
-        '302':
-          description: Redirects to instructor dashboard on success
-          headers:
-            Location:
-              schema:
-                type: string
-              description: Redirect target (e.g., /instructor_dashboard)
-        '302_error':
-          description: Redirects to /create_instructor?error=&lt;message&gt; when Supabase returns an error
-      security: []
-  /api/socket:
-    get:
-      summary: Placeholder endpoint for Socket.io
-      responses:
-        '200':
-          description: Indicates placeholder or connected state
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-      security: []
+<p>The PMCOL Teaching Tool exposes a small set of server-side Next.js API routes. Most read/write operations on courses, lessons, discussions, and responses happen directly from the browser via the Supabase client using the anon key. The server routes handle operations that require elevated privileges: OAuth session exchange, admin user lookups, AI generation, file upload/parsing, and audio transcription.</p>
+<p>A full OpenAPI 3.0 specification is available at <a href="../docs/openapi.yaml"><code>docs/openapi.yaml</code></a> and can be browsed interactively — see <a href="#swagger-ui">Swagger UI</a> below.</p>
+<hr />
+<h2 id="authentication">Authentication</h2>
+<p>All protected routes use the <strong>server-side Supabase client</strong> (<code>app/src/lib/supabase/server.ts</code>) to verify the session cookie set by the OAuth callback. Routes that return <code>401</code> have no valid session; routes that return <code>403</code> have a valid session but the authenticated user does not own the requested resource.</p>
+<p>Ownership is verified via a two-step lookup: lesson → course → <code>instructor_id === user.id</code>.</p>
+<hr />
+<h2 id="routes">Routes</h2>
+<h3 id="auth">Auth</h3>
+<h4 id="get-apiauthcallback"><code>GET /api/auth/callback</code></h4>
+<p>Handles the Google OAuth redirect from Supabase. Exchanges the one-time authorization code for a server-side session cookie, then enforces the <code>@ualberta.ca</code> domain restriction. Accounts that fail the domain check are signed out and deleted via the admin client before redirecting to the sign-up page with an error.</p>
+<table>
+<thead>
+<tr>
+<th>Query param</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>code</code></td>
+<td>Yes</td>
+<td>One-time authorization code from Supabase OAuth provider</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Responses:</strong>
+- <code>302 → /instructor_dashboard</code> — success
+- <code>302 → /create_instructor?error=&lt;message&gt;</code> — Supabase error or domain rejection</p>
+<p><strong>Security:</strong> No session required. Uses <code>SUPABASE_SERVICE_ROLE_KEY</code> (server-only) to delete rejected accounts.</p>
+<hr />
+<h4 id="post-apiauthcheck-email"><code>POST /api/auth/check-email</code></h4>
+<p>Checks whether an email address already has a registered account. Called during sign-up to prevent duplicates. Uses the Supabase admin client to enumerate users — requires no session so the UI can show a message before OAuth begins.</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;email&quot;: &quot;instructor@ualberta.ca&quot; }
 </code></pre>
-<h2 id="supabase-configuration">Supabase configuration</h2>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{ &quot;exists&quot;: false }
+</code></pre>
+<p><strong>Error responses:</strong> <code>500</code> if the admin query fails.</p>
+<hr />
+<h3 id="lesson-files">Lesson Files</h3>
+<p>All file routes require an authenticated session and verify that the caller owns the lesson's course.</p>
+<h4 id="get-apilessonslessonidfiles"><code>GET /api/lessons/{lessonId}/files</code></h4>
+<p>Returns all files uploaded to a lesson, ordered by upload time descending. Each record includes the current processing <code>status</code>: <code>processing | ready | failed</code>.</p>
+<p><strong>Response:</strong> Array of <code>LessonFile</code> objects — see <a href="#schemas">Schemas</a>.</p>
+<hr />
+<h4 id="post-apilessonslessonidupload"><code>POST /api/lessons/{lessonId}/upload</code></h4>
+<p>Uploads a PDF or PPTX lecture file (max 25 MB, max 5 files per lesson). File type is verified by magic bytes, not just extension.</p>
+<p>The route <strong>returns immediately</strong> with <code>status: "processing"</code> while background work continues asynchronously:
+1. File parsed — text extracted; GPT-4o vision generates descriptions for image-heavy slides
+2. Content split into overlapping sentence-boundary chunks
+3. Near-duplicate chunks dropped via Jaccard similarity (threshold 0.7)
+4. Chunks embedded with <code>text-embedding-3-small</code> and stored in <code>lesson_chunks</code>
+5. File status updated to <code>ready</code> (or <code>failed</code> on error)</p>
+<p><strong>Request:</strong> <code>multipart/form-data</code> with a <code>file</code> field.</p>
+<p><strong>Response:</strong> <code>LessonFile</code> object with <code>status: "processing"</code>.</p>
+<p><strong>Error responses:</strong> <code>400</code> (no file / too large / wrong type), <code>401</code>, <code>403</code>, <code>404</code>, <code>500</code>.</p>
+<hr />
+<h4 id="get-apilessonslessonidfilesfileid"><code>GET /api/lessons/{lessonId}/files/{fileId}</code></h4>
+<p>Returns a short-lived Supabase Storage signed URL (valid 10 minutes) for downloading the original file, plus the original filename.</p>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;url&quot;: &quot;https://xyz.supabase.co/storage/v1/object/sign/...&quot;,
+  &quot;fileName&quot;: &quot;lecture-week3.pdf&quot;
+}
+</code></pre>
+<hr />
+<h4 id="delete-apilessonslessonidfilesfileid"><code>DELETE /api/lessons/{lessonId}/files/{fileId}</code></h4>
+<p>Permanently removes a file in three steps:
+1. Deletes all associated vector chunks from <code>lesson_chunks</code>
+2. Removes the record from <code>lesson_files</code>
+3. Removes the raw file from Supabase Storage</p>
+<p><strong>Response:</strong> <code>{ "success": true }</code></p>
+<hr />
+<h3 id="lessons">Lessons</h3>
+<h4 id="post-apilessonslessonidtranscript"><code>POST /api/lessons/{lessonId}/transcript</code></h4>
+<p>Accepts an audio recording (max 25 MB, any Whisper-supported format) and transcribes it using OpenAI Whisper (<code>whisper-1</code>, English). The transcript text is <strong>returned immediately</strong>. In the background, the transcript is embedded and stored as a <code>lesson_chunk</code> so it becomes available for RAG-based prompt generation.</p>
+<p><strong>Request:</strong> <code>multipart/form-data</code> with an <code>audio</code> field.</p>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{ &quot;transcript&quot;: &quot;Today we will cover the pharmacokinetics of beta-blockers...&quot; }
+</code></pre>
+<p><strong>Error responses:</strong> <code>400</code> (no audio / too large / no speech detected), <code>401</code>, <code>403</code>, <code>404</code>, <code>500</code>.</p>
+<hr />
+<h4 id="post-apilessonslessonidgenerate"><code>POST /api/lessons/{lessonId}/generate</code></h4>
+<p>Generates AI discussion prompt candidates using Retrieval-Augmented Generation. The pipeline:
+1. Embeds any provided <code>transcriptText</code>
+2. Retrieves the most semantically similar chunks from <code>lesson_chunks</code> via pgvector
+3. Constructs a context-aware prompt and calls GPT-4o
+4. Returns a <code>CandidateSet</code> with multiple prompt options</p>
+<p>For <code>multiple_choice</code> prompts, <code>is_correct</code> is included in the instructor response so the UI can pre-select the correct answer. It is stripped before being broadcast to student clients.</p>
+<p>Set <code>MOCK_AI=true</code> in <code>.env.local</code> to return deterministic fake prompts without calling OpenAI (useful for development).</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{
+  &quot;promptType&quot;: &quot;multiple_choice&quot;,
+  &quot;transcriptText&quot;: &quot;optional live lecture text&quot;,
+  &quot;preferencesOverride&quot;: { &quot;difficulty&quot;: &quot;advanced&quot;, &quot;style&quot;: &quot;socratic&quot;, &quot;length&quot;: &quot;standard&quot;, &quot;focusAreas&quot;: &quot;&quot; }
+}
+</code></pre>
+<p><code>promptType</code> must be one of: <code>short_answer</code>, <code>long_answer</code>, <code>multiple_choice</code>. Defaults to <code>long_answer</code>.</p>
+<p><code>preferencesOverride</code> is optional — if omitted, the instructor's saved preferences are fetched from the database.</p>
+<p><strong>Response:</strong> <code>CandidateSet</code> — see <a href="#schemas">Schemas</a>.</p>
+<p><strong>Error responses:</strong> <code>400</code> (invalid promptType), <code>401</code>, <code>403</code>, <code>404</code>, <code>500</code>.</p>
+<hr />
+<h3 id="user">User</h3>
+<h4 id="get-apiuserai-preferences"><code>GET /api/user/ai-preferences</code></h4>
+<p>Returns the authenticated instructor's saved AI generation preferences. Returns defaults if none have been saved yet:</p>
+<pre><code class="language-json">{
+  &quot;difficulty&quot;: &quot;intermediate&quot;,
+  &quot;style&quot;: &quot;socratic&quot;,
+  &quot;length&quot;: &quot;standard&quot;,
+  &quot;focusAreas&quot;: &quot;&quot;
+}
+</code></pre>
+<hr />
+<h4 id="put-apiuserai-preferences"><code>PUT /api/user/ai-preferences</code></h4>
+<p>Saves (upserts) the instructor's AI generation preferences. <code>focusAreas</code> is trimmed and capped at 500 characters; an empty string is stored as <code>null</code>.</p>
+<p><strong>Request body:</strong> <code>AIPromptPreferences</code> — see <a href="#schemas">Schemas</a>.</p>
+<p><strong>Response:</strong> <code>{ "success": true }</code></p>
+<hr />
+<h3 id="internal">Internal</h3>
+<h4 id="get-apisocket"><code>GET /api/socket</code></h4>
+<p>Placeholder stub — not used in production. Real-time functionality is handled entirely through Supabase Realtime WebSocket channels. See <a href="#realtime">Realtime</a> below.</p>
+<hr />
+<h2 id="schemas">Schemas</h2>
+<h3 id="lessonfile"><code>LessonFile</code></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>uuid</td>
+<td>File record ID</td>
+</tr>
+<tr>
+<td><code>lessonId</code></td>
+<td>uuid</td>
+<td>Parent lesson ID</td>
+</tr>
+<tr>
+<td><code>fileName</code></td>
+<td>string</td>
+<td>Original filename</td>
+</tr>
+<tr>
+<td><code>fileType</code></td>
+<td><code>pdf</code> | <code>pptx</code></td>
+<td>Detected file type</td>
+</tr>
+<tr>
+<td><code>fileSizeBytes</code></td>
+<td>integer</td>
+<td>File size in bytes</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td><code>processing</code> | <code>ready</code> | <code>failed</code></td>
+<td>Embedding pipeline status</td>
+</tr>
+<tr>
+<td><code>uploadedAt</code></td>
+<td>datetime</td>
+<td>Upload timestamp</td>
+</tr>
+</tbody>
+</table>
+<h3 id="aipromptpreferences"><code>AIPromptPreferences</code></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>difficulty</code></td>
+<td>string</td>
+<td><code>beginner</code>, <code>intermediate</code>, <code>advanced</code></td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td>string</td>
+<td><code>socratic</code>, <code>direct</code>, <code>conceptual</code>, <code>applied</code></td>
+</tr>
+<tr>
+<td><code>length</code></td>
+<td>string</td>
+<td><code>brief</code>, <code>standard</code>, <code>detailed</code></td>
+</tr>
+<tr>
+<td><code>focusAreas</code></td>
+<td>string</td>
+<td>Free-text, max 500 chars</td>
+</tr>
+</tbody>
+</table>
+<h3 id="candidateset"><code>CandidateSet</code></h3>
+<pre><code class="language-json">{
+  &quot;promptType&quot;: &quot;multiple_choice&quot;,
+  &quot;candidates&quot;: [
+    {
+      &quot;question&quot;: &quot;Which receptor does propranolol primarily target?&quot;,
+      &quot;rationale&quot;: &quot;Tests recall of drug mechanism...&quot;,
+      &quot;mcOptions&quot;: [
+        { &quot;label&quot;: &quot;A&quot;, &quot;text&quot;: &quot;Alpha-1 adrenergic&quot;, &quot;is_correct&quot;: false },
+        { &quot;label&quot;: &quot;B&quot;, &quot;text&quot;: &quot;Beta-1 adrenergic&quot;, &quot;is_correct&quot;: true }
+      ]
+    }
+  ]
+}
+</code></pre>
+<hr />
+<h2 id="supabase-configuration">Supabase Configuration</h2>
 <ul>
-<li>Public keys live in <code>app/.env.local</code> (<code>NEXT_PUBLIC_SUPABASE_URL</code>, <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>).</li>
-<li>Browser client factory: <code>app/src/lib/supabase/client.ts</code>.</li>
-<li>Server client with cookie-based auth: <code>app/src/lib/supabase/server.ts</code>.</li>
-<li>Auth helpers (email/password, Google OAuth redirect to <code>/api/auth/callback</code>): <code>app/src/lib/supabase/auth.ts</code>.</li>
+<li>Public keys: <code>app/.env.local</code> (<code>NEXT_PUBLIC_SUPABASE_URL</code>, <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>)</li>
+<li>Browser client factory: <code>app/src/lib/supabase/client.ts</code></li>
+<li>Server client (cookie-based auth): <code>app/src/lib/supabase/server.ts</code></li>
+<li>Auth helpers (email/password, Google OAuth): <code>app/src/lib/supabase/auth.ts</code></li>
 </ul>
-<h2 id="data-access-client-supabase">Data access (client → Supabase)</h2>
-<p>These functions call Supabase directly from the frontend using the anon key:
-- Courses: <code>app/src/services/courseService.ts</code>
-- Lessons: <code>app/src/services/lessonService.ts</code>
-- Discussions: <code>app/src/services/discussionService.ts</code>
-- Responses: <code>app/src/services/responseService.ts</code></p>
-<p>Refer to the TypeScript models in <code>app/src/types/*.ts</code> for field names used in the Supabase tables (<code>instructors</code>, <code>courses</code>, <code>lessons</code>, <code>discussions</code>, <code>responses</code>). Additional type files include <code>instructor.ts</code> and <code>user.ts</code>.</p>
+<h3 id="direct-client-access-browser-supabase">Direct Client Access (Browser → Supabase)</h3>
+<p>These service functions call Supabase directly from the frontend using the anon key — they are <strong>not</strong> API routes:</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Courses</td>
+<td><code>app/src/services/courseService.ts</code></td>
+</tr>
+<tr>
+<td>Lessons</td>
+<td><code>app/src/services/lessonService.ts</code></td>
+</tr>
+<tr>
+<td>Discussions</td>
+<td><code>app/src/services/discussionService.ts</code></td>
+</tr>
+<tr>
+<td>Responses</td>
+<td><code>app/src/services/responseService.ts</code></td>
+</tr>
+</tbody>
+</table>
+<p>TypeScript models for all Supabase tables (<code>instructors</code>, <code>courses</code>, <code>lessons</code>, <code>discussions</code>, <code>responses</code>) are in <code>app/src/types/*.ts</code>.</p>
+<hr />
 <h2 id="realtime">Realtime</h2>
+<p>Live session updates between instructors and students use Supabase Realtime broadcast channels — not the API routes.</p>
 <ul>
-<li>Channel naming: <code>lesson:{lessonId}</code></li>
-<li>Managed by hook <code>app/src/lib/realtime/useRealtime.ts</code> with <code>broadcast</code> ack enabled.</li>
-<li>Used for live updates between instructors and students within a lesson.</li>
+<li><strong>Channel naming:</strong> <code>lesson:{lessonId}</code></li>
+<li><strong>Hook:</strong> <code>app/src/lib/realtime/useRealtime.ts</code> (broadcast with ack enabled)</li>
+<li><strong>Used for:</strong> prompt publishing, response aggregation, session status, timer sync</li>
 </ul>
-<h2 id="swagger-ui-preview">Swagger UI preview</h2>
-<ul>
-<li>Install deps (once): <code>cd app &amp;&amp; npm install</code></li>
-<li>Serve the OpenAPI spec with Swagger UI:<br />
-<code>bash
-  cd app
-  npm run api:swagger</code>
-  Opens http://127.0.0.1:8080 using <code>docs/openapi.yaml</code> with live reload.</li>
-</ul>
-<h2 id="change-log-notes">Change log notes</h2>
-<ul>
-<li><code>/api/auth/callback</code> uses the <strong>server</strong> Supabase client and awaits <code>exchangeCodeForSession</code>.</li>
-<li>OAuth redirects now go through <code>/api/auth/callback</code> to ensure cookies are set server-side.</li>
-</ul>
+<hr />
+<h2 id="swagger-ui">Swagger UI</h2>
+<p>Browse the full OpenAPI spec interactively:</p>
+<pre><code class="language-bash">cd app
+npm install          # first time only
+npm run api:swagger  # opens http://127.0.0.1:8080 with live reload
+</code></pre>
+<p>Stop with <code>Ctrl+C</code>.</p>
+<hr />
+<h2 id="environment-variables">Environment Variables</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Where used</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NEXT_PUBLIC_SUPABASE_URL</code></td>
+<td>Client + Server</td>
+<td>Supabase project URL</td>
+</tr>
+<tr>
+<td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td>
+<td>Client</td>
+<td>Supabase anon key for browser access</td>
+</tr>
+<tr>
+<td><code>SUPABASE_SERVICE_ROLE_KEY</code></td>
+<td>Server only</td>
+<td>Admin key for user enumeration and deletion</td>
+</tr>
+<tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td>Server only</td>
+<td>OpenAI key for GPT-4o, Whisper, and embeddings</td>
+</tr>
+<tr>
+<td><code>MOCK_AI</code></td>
+<td>Server only</td>
+<td>Set to <code>true</code> to bypass OpenAI calls during development</td>
+</tr>
+</tbody>
+</table>
 
 
 

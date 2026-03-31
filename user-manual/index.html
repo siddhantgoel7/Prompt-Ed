@@ -1,0 +1,2044 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../job-description/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>User Manual - PMCOL Teaching Tool</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#user-manual" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PMCOL Teaching Tool" class="md-header__button md-logo" aria-label="PMCOL Teaching Tool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PMCOL Teaching Tool
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              User Manual
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PMCOL Teaching Tool" class="md-nav__button md-logo" aria-label="PMCOL Teaching Tool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PMCOL Teaching Tool
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Manual
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Manual
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instructor-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instructor Tasks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instructor Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-creating-an-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Creating an Account
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-signing-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Signing In
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-creating-a-course" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Creating a Course
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-creating-a-lesson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Creating a Lesson
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-uploading-lecture-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Uploading Lecture Materials
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-recording-live-audio-for-transcription" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Recording Live Audio for Transcription
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-generating-ai-discussion-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Generating AI Discussion Prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-customizing-ai-prompt-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Customizing AI Prompt Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-starting-a-live-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Starting a Live Session
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-running-a-live-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Running a Live Session
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Running a Live Session">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#publishing-a-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Publishing a prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setting-a-timer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setting a timer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-and-flagging-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Viewing and flagging responses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#revealing-the-correct-answer-multiple-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Revealing the correct answer (Multiple Choice)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ending-the-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ending the session
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-exporting-student-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Exporting Student Responses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-managing-courses-and-lessons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Managing Courses and Lessons
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Managing Courses and Lessons">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#renaming-a-course-or-lesson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renaming a course or lesson
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-a-lesson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deleting a lesson
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-a-course" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deleting a course
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removing-an-uploaded-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removing an uploaded file
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#student-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Student Tasks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Student Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#13-joining-a-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Joining a Session
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-answering-a-discussion-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Answering a Discussion Prompt
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Answering a Discussion Prompt">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#short-answer-or-long-answer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Short answer or long answer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple choice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-you-accidentally-close-or-reload-the-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If you accidentally close or reload the page
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#waiting-for-the-next-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Waiting for the next prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frequently-asked-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frequently Asked Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../job-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Job Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../project-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../teamwork/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Teamwork
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../meetings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meetings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Details
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Technical Details
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API & Supabase
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../run-local/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run Locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Required Libraries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../interface-interactions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interactions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UX/UI Guidelines
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    UX/UI Guidelines
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../audience/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product & Audience
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../principles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UX Principles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../accessibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accessibility & Style
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instructor-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instructor Tasks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instructor Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-creating-an-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Creating an Account
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-signing-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Signing In
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-creating-a-course" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Creating a Course
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-creating-a-lesson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Creating a Lesson
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-uploading-lecture-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Uploading Lecture Materials
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-recording-live-audio-for-transcription" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Recording Live Audio for Transcription
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-generating-ai-discussion-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Generating AI Discussion Prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-customizing-ai-prompt-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Customizing AI Prompt Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-starting-a-live-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Starting a Live Session
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-running-a-live-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Running a Live Session
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Running a Live Session">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#publishing-a-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Publishing a prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setting-a-timer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setting a timer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-and-flagging-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Viewing and flagging responses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#revealing-the-correct-answer-multiple-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Revealing the correct answer (Multiple Choice)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ending-the-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ending the session
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-exporting-student-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Exporting Student Responses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-managing-courses-and-lessons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Managing Courses and Lessons
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Managing Courses and Lessons">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#renaming-a-course-or-lesson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renaming a course or lesson
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-a-lesson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deleting a lesson
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-a-course" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deleting a course
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removing-an-uploaded-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removing an uploaded file
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#student-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Student Tasks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Student Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#13-joining-a-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Joining a Session
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-answering-a-discussion-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Answering a Discussion Prompt
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Answering a Discussion Prompt">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#short-answer-or-long-answer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Short answer or long answer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple choice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-you-accidentally-close-or-reload-the-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If you accidentally close or reload the page
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#waiting-for-the-next-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Waiting for the next prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frequently-asked-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frequently Asked Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="user-manual">User Manual</h1>
+<p>This manual covers everything you need to use the PMCOL Teaching Tool. It is organized by the tasks you will actually perform — not by screen or menu names.</p>
+<p>The tool has two types of users:</p>
+<ul>
+<li><strong>Instructors</strong> — university instructors or teaching assistants who create courses, upload lecture materials, generate discussion prompts, and run live classroom sessions.</li>
+<li><strong>Students</strong> — students who join a session using a PIN and respond to discussion prompts anonymously.</li>
+</ul>
+<p>No installation is required for either role. Everything runs in a web browser.</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<p><strong>Instructor Tasks</strong></p>
+<ol>
+<li><a href="#1-creating-an-account">Creating an Account</a></li>
+<li><a href="#2-signing-in">Signing In</a></li>
+<li><a href="#3-creating-a-course">Creating a Course</a></li>
+<li><a href="#4-creating-a-lesson">Creating a Lesson</a></li>
+<li><a href="#5-uploading-lecture-materials">Uploading Lecture Materials</a></li>
+<li><a href="#6-recording-live-audio-for-transcription">Recording Live Audio for Transcription</a></li>
+<li><a href="#7-generating-ai-discussion-prompts">Generating AI Discussion Prompts</a></li>
+<li><a href="#8-customizing-ai-prompt-settings">Customizing AI Prompt Settings</a></li>
+<li><a href="#9-starting-a-live-session">Starting a Live Session</a></li>
+<li><a href="#10-running-a-live-session">Running a Live Session</a></li>
+<li><a href="#11-exporting-student-responses">Exporting Student Responses</a></li>
+<li><a href="#12-managing-courses-and-lessons">Managing Courses and Lessons</a></li>
+</ol>
+<p><strong>Student Tasks</strong></p>
+<ol>
+<li><a href="#13-joining-a-session">Joining a Session</a></li>
+<li><a href="#14-answering-a-discussion-prompt">Answering a Discussion Prompt</a></li>
+</ol>
+<hr />
+<h2 id="instructor-tasks">Instructor Tasks</h2>
+<hr />
+<h3 id="1-creating-an-account">1. Creating an Account</h3>
+<p>You must use your University of Alberta email address (<code>@ualberta.ca</code>). Personal email addresses are not accepted.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Go to the application in your browser.</li>
+<li>On the landing page, click <strong>Get Started</strong> or <strong>Sign Up</strong>.</li>
+<li>Click <strong>Continue with Google</strong>.</li>
+<li>When prompted by Google, select or enter your <code>@ualberta.ca</code> email address.</li>
+<li>Grant the requested permissions.</li>
+<li>You will be redirected to your instructor dashboard automatically.</li>
+</ol>
+<blockquote>
+<p>If you see an error saying <em>"You must use a UAlberta email address"</em>, sign in again using your <code>@ualberta.ca</code> Google account instead of a personal one.</p>
+</blockquote>
+<hr />
+<h3 id="2-signing-in">2. Signing In</h3>
+<p>Once your account exists, signing in follows the same steps as creating an account. The system recognizes your account automatically.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Go to the application in your browser.</li>
+<li>Click <strong>Sign In</strong>.</li>
+<li>Click <strong>Continue with Google</strong> and select your <code>@ualberta.ca</code> account.</li>
+<li>You are taken directly to your instructor dashboard.</li>
+</ol>
+<hr />
+<h3 id="3-creating-a-course">3. Creating a Course</h3>
+<p>A course is the top-level container for your lessons. Create one for each class or subject you teach.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>From the instructor dashboard, click <strong>Create Course</strong> (or the <strong>+</strong> button in the course list).</li>
+<li>Enter a course name (e.g., <em>PMCOL 201 — Principles of Pharmacology</em>).</li>
+<li>Click <strong>Save</strong> (or press Enter).</li>
+<li>The new course appears in your dashboard.</li>
+</ol>
+<p>You can create as many courses as you need.</p>
+<hr />
+<h3 id="4-creating-a-lesson">4. Creating a Lesson</h3>
+<p>A lesson belongs to a course and represents a single class session or topic.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Open a course from your dashboard by clicking its name.</li>
+<li>Click <strong>Create Lesson</strong> (or the <strong>+</strong> button in the lesson list).</li>
+<li>Enter a lesson title (e.g., <em>Week 3 — Beta-Blockers and Adrenergic Pharmacology</em>).</li>
+<li>Click <strong>Save</strong>.</li>
+<li>The lesson opens in the lesson editor.</li>
+</ol>
+<hr />
+<h3 id="5-uploading-lecture-materials">5. Uploading Lecture Materials</h3>
+<p>Uploading your slides or notes gives the AI context about your lesson content, which makes the generated discussion prompts more relevant and accurate.</p>
+<p><strong>Supported formats:</strong> PDF and PowerPoint (PPTX). Maximum file size: 25 MB per file. Maximum 5 files per lesson.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Open the lesson editor.</li>
+<li>In the <strong>Materials</strong> or <strong>Files</strong> section, click <strong>Upload File</strong>.</li>
+<li>Select a PDF or PPTX file from your computer.</li>
+<li>The file uploads and shows a <strong>Processing</strong> status.</li>
+<li>Wait until the status changes to <strong>Ready</strong> before generating prompts. This typically takes 30–90 seconds depending on file size.</li>
+</ol>
+<blockquote>
+<p>If a file shows <strong>Failed</strong>, the content could not be extracted. Try re-exporting the file as a standard PDF and uploading again.</p>
+</blockquote>
+<p>The system automatically:
+- Extracts text from all slides or pages
+- Generates visual descriptions for image-heavy slides using AI
+- Breaks content into searchable chunks for prompt generation</p>
+<hr />
+<h3 id="6-recording-live-audio-for-transcription">6. Recording Live Audio for Transcription</h3>
+<p>You can record a portion of your live lecture and have it transcribed. The transcript is added to the lesson's knowledge base so the AI can generate prompts based on what you just said in class.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Open the lesson editor during or before your class.</li>
+<li>Click <strong>Record</strong> (microphone icon) in the transcript section.</li>
+<li>Speak clearly into your device's microphone.</li>
+<li>Click <strong>Stop</strong> when done.</li>
+<li>The recording is sent to the transcription service. The transcript appears in the text box within a few seconds.</li>
+<li>Review the transcript for accuracy. You can edit it manually if needed.</li>
+<li>Click <strong>Save Transcript</strong> to add it to the lesson context.</li>
+</ol>
+<blockquote>
+<p>Recordings are limited to 25 MB. For a typical lecture recording this is approximately 25–30 minutes at standard quality.</p>
+</blockquote>
+<hr />
+<h3 id="7-generating-ai-discussion-prompts">7. Generating AI Discussion Prompts</h3>
+<p>Once you have uploaded materials or recorded a transcript, you can generate discussion prompts for your class.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Open the lesson editor.</li>
+<li>In the <strong>Generate Prompts</strong> section, choose a <strong>prompt type</strong>:</li>
+<li><strong>Multiple Choice</strong> — students pick from 4 options; one is correct</li>
+<li><strong>Short Answer</strong> — students write a brief response (a few sentences)</li>
+<li><strong>Long Answer</strong> — students write a more detailed explanation</li>
+<li>Optionally, paste or type a <strong>transcript excerpt</strong> in the text box if you want prompts based on what you just covered verbally.</li>
+<li>Click <strong>Generate</strong>.</li>
+<li>Several prompt candidates appear. Each shows the question and a brief rationale explaining why it is pedagogically useful.</li>
+<li>Click the prompt you want to use, or click <strong>Regenerate</strong> to get new candidates.</li>
+<li>For multiple choice prompts, the correct answer is highlighted in the editor. Students will not see which option is correct until you reveal it.</li>
+<li>Click <strong>Publish to Session</strong> to make the prompt live for students.</li>
+</ol>
+<blockquote>
+<p>Generation typically takes 5–15 seconds. If the lesson has no uploaded materials or transcript, the AI will still generate prompts but they will be based on general pharmacology knowledge rather than your specific content.</p>
+</blockquote>
+<hr />
+<h3 id="8-customizing-ai-prompt-settings">8. Customizing AI Prompt Settings</h3>
+<p>You can adjust how the AI generates prompts to better match your teaching style and the level of your students.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>In the lesson editor, click <strong>AI Settings</strong> or the settings icon near the Generate button.</li>
+<li>Adjust the following options:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Options</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Difficulty</strong></td>
+<td>Basic, Intermediate, Advanced</td>
+<td>Basic tests recall and definitions; Intermediate applies concepts to scenarios; Advanced requires analysis and critical comparison</td>
+</tr>
+<tr>
+<td><strong>Style</strong></td>
+<td>Socratic, Factual, Clinical</td>
+<td>Socratic encourages open reasoning; Factual tests direct recall; Clinical frames questions as patient case scenarios</td>
+</tr>
+<tr>
+<td><strong>Length</strong></td>
+<td>Brief Setup, Standard Context, Rich Detail</td>
+<td>Controls how much setup and context the prompt includes</td>
+</tr>
+<tr>
+<td><strong>Focus Areas</strong></td>
+<td>Free text (e.g., <em>drug interactions, dosing</em>)</td>
+<td>Steers the AI toward specific topics within the lesson content</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>Click <strong>Save Preferences</strong>. These settings apply to all future generations until you change them.</li>
+</ol>
+<hr />
+<h3 id="9-starting-a-live-session">9. Starting a Live Session</h3>
+<p>Starting a session makes your lesson active so students can join.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>From the lesson editor or the course dashboard, click <strong>Start Session</strong>.</li>
+<li>A <strong>6-digit PIN</strong> and <strong>QR code</strong> are displayed.</li>
+<li>Share the PIN with your students verbally, on the projector, or let them scan the QR code.</li>
+<li>Students can join immediately — no account or app required.</li>
+<li>The session dashboard opens showing the number of connected students and a live response feed.</li>
+</ol>
+<hr />
+<h3 id="10-running-a-live-session">10. Running a Live Session</h3>
+<p>Once the session is active, you control what students see in real time.</p>
+<h4 id="publishing-a-prompt">Publishing a prompt</h4>
+<ol>
+<li>In the session dashboard, click <strong>Publish</strong> next to any prompt in your prompt list.</li>
+<li>The prompt appears on all connected students' screens simultaneously.</li>
+<li>Student responses begin appearing in the response feed as they submit.</li>
+</ol>
+<h4 id="setting-a-timer">Setting a timer</h4>
+<ol>
+<li>Click the <strong>Timer</strong> icon on the published prompt.</li>
+<li>Set a duration (e.g., 2 minutes).</li>
+<li>The countdown is visible to both you and all students.</li>
+<li>When the timer expires, response submission is automatically closed.</li>
+</ol>
+<h4 id="viewing-and-flagging-responses">Viewing and flagging responses</h4>
+<ul>
+<li>Responses appear in real time in the feed as students submit them.</li>
+<li>Click the <strong>Flag</strong> icon on any response to highlight it for class discussion.</li>
+<li>Flagged responses are visually marked so you can return to them.</li>
+</ul>
+<h4 id="revealing-the-correct-answer-multiple-choice">Revealing the correct answer (Multiple Choice)</h4>
+<ol>
+<li>After the response period, click <strong>Reveal Answer</strong>.</li>
+<li>The correct option is highlighted on all student screens.</li>
+<li>Students see whether their selection was correct.</li>
+</ol>
+<h4 id="connection-status">Connection status</h4>
+<p>A small badge is visible in the bottom-right corner of the session page at all times. A pulsing green dot means you are connected. If it turns red and shows <strong>Disconnected</strong>, click <strong>Reconnect</strong> — your session state is preserved and students are not affected while you reconnect.</p>
+<h4 id="ending-the-session">Ending the session</h4>
+<ol>
+<li>Click <strong>End Session</strong> in the session controls.</li>
+<li>The session closes. Students see a "Session ended" message.</li>
+<li>All responses are saved and available for export.</li>
+</ol>
+<hr />
+<h3 id="11-exporting-student-responses">11. Exporting Student Responses</h3>
+<p>After a session you can download all student responses for review or grading.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>From the course dashboard or lesson editor, open the completed lesson.</li>
+<li>Click <strong>Export Responses</strong> or the download icon.</li>
+<li>A CSV file is downloaded to your computer.</li>
+<li>Open it in Excel, Google Sheets, or any spreadsheet application.</li>
+</ol>
+<p>The CSV includes: prompt text, prompt type, each anonymized student response, and submission timestamp.</p>
+<blockquote>
+<p>Responses are anonymous — no student names or identifiers are stored.</p>
+</blockquote>
+<hr />
+<h3 id="12-managing-courses-and-lessons">12. Managing Courses and Lessons</h3>
+<h4 id="renaming-a-course-or-lesson">Renaming a course or lesson</h4>
+<ol>
+<li>Click the pencil/edit icon next to the course or lesson name.</li>
+<li>Type the new name.</li>
+<li>Click <strong>Save</strong> or press Enter.</li>
+</ol>
+<h4 id="deleting-a-lesson">Deleting a lesson</h4>
+<ol>
+<li>Open the course containing the lesson.</li>
+<li>Click the <strong>Delete</strong> (trash) icon next to the lesson.</li>
+<li>Confirm the deletion. This action cannot be undone.</li>
+</ol>
+<h4 id="deleting-a-course">Deleting a course</h4>
+<ol>
+<li>From the instructor dashboard, click the <strong>Delete</strong> icon next to the course.</li>
+<li>Confirm the deletion. All lessons and materials within the course are permanently removed.</li>
+</ol>
+<h4 id="removing-an-uploaded-file">Removing an uploaded file</h4>
+<ol>
+<li>Open the lesson editor.</li>
+<li>In the <strong>Materials</strong> section, click the <strong>Delete</strong> icon next to the file.</li>
+<li>Confirm the deletion. The file and all its extracted content are removed from the lesson's knowledge base.</li>
+</ol>
+<hr />
+<h2 id="student-tasks">Student Tasks</h2>
+<hr />
+<h3 id="13-joining-a-session">13. Joining a Session</h3>
+<p>No account, app download, or registration is required. Students join anonymously using only the PIN provided by their instructor.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Open a web browser on your phone, tablet, or laptop.</li>
+<li>Go to the application URL provided by your instructor (or scan the QR code displayed in class).</li>
+<li>On the join page, enter the <strong>6-digit PIN</strong> shown on the projector or given verbally.</li>
+<li>Click <strong>Join</strong>.</li>
+<li>You are taken directly to the student session page. Your responses are anonymous.</li>
+</ol>
+<blockquote>
+<p>If the PIN does not work, check that you entered it correctly. PINs are case-insensitive and digits only. Ask your instructor if the session is still active.</p>
+</blockquote>
+<hr />
+<h3 id="14-answering-a-discussion-prompt">14. Answering a Discussion Prompt</h3>
+<p>When your instructor publishes a prompt, it appears automatically on your screen — you do not need to refresh.</p>
+<h4 id="short-answer-or-long-answer">Short answer or long answer</h4>
+<ol>
+<li>Read the question displayed on your screen.</li>
+<li>Type your response in the text box provided.</li>
+<li>Click <strong>Submit</strong>.</li>
+<li>A confirmation message appears. You cannot edit your response after submitting.</li>
+</ol>
+<h4 id="multiple-choice">Multiple choice</h4>
+<ol>
+<li>Read the question and the four answer options (A, B, C, D).</li>
+<li>Click the option you believe is correct.</li>
+<li>Click <strong>Submit</strong>.</li>
+<li>If your instructor has revealed the answer, your screen will indicate whether your selection was correct.</li>
+</ol>
+<h4 id="timer">Timer</h4>
+<p>If your instructor has set a timer, a countdown is shown at the top of the prompt. Submit your response before the timer reaches zero — once it expires, the text box is locked.</p>
+<h4 id="if-you-accidentally-close-or-reload-the-page">If you accidentally close or reload the page</h4>
+<p>Your response draft is automatically saved as you type. If you reload the page or lose your connection and rejoin before submitting, your draft will be restored exactly as you left it.</p>
+<h4 id="waiting-for-the-next-prompt">Waiting for the next prompt</h4>
+<p>After submitting, your screen shows a waiting state. When your instructor publishes the next prompt, it appears automatically.</p>
+<hr />
+<h2 id="frequently-asked-questions">Frequently Asked Questions</h2>
+<p><strong>Can students see each other's responses?</strong>
+No. Responses are only visible to the instructor in their session dashboard.</p>
+<p><strong>Is my name attached to my response?</strong>
+No. Students join and respond completely anonymously. No personal information is collected from students.</p>
+<p><strong>What happens if I lose my internet connection during a session?</strong>
+A <strong>Disconnected</strong> badge appears in the bottom-right corner of your screen. Click the <strong>Reconnect</strong> button inside the badge to restore the connection without leaving the session. If that does not work, reload the page and re-enter the PIN — your previous responses and any in-progress draft are saved.</p>
+<p><strong>Can I use the same lesson across multiple class sessions?</strong>
+Yes. You can start a new session for the same lesson any number of times. Each session's responses are saved separately.</p>
+<p><strong>Can I edit a prompt after publishing it?</strong>
+No. Once a prompt is published to students it cannot be edited. Unpublish it and publish a different prompt from your candidate list if needed.</p>
+<p><strong>The AI-generated prompt is not relevant to my content — what should I try?</strong>
+Make sure your uploaded files have status <strong>Ready</strong> before generating. Try adding a transcript excerpt in the generation panel that reflects what you just covered. Adjusting the <strong>Focus Areas</strong> in AI Settings to name specific topics also improves relevance significantly.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
