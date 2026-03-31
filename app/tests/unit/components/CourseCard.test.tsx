@@ -81,4 +81,12 @@ describe('CourseCard', () => {
         fireEvent.mouseLeave(btn);
         expect(btn).toHaveStyle('background: var(--color-primary-alpha-12)');
     });
+    it('success: renders course image when provided', () => {
+        const courseWithImage = { ...mockCourse, image_url: 'http://test.com/img.png' };
+        render(<CourseCard {...props} course={courseWithImage} />);
+        
+        const img = screen.getByTestId('course-card-image');
+        expect(img).toBeInTheDocument();
+        expect(img).toHaveAttribute('src', 'http://test.com/img.png');
+    });
 });
