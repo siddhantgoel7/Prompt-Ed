@@ -17,6 +17,7 @@ import type { Discussion } from '@/types/discussion';
 import { ResponseCard } from '@/components/instructor/ResponseCard';
 import { FilterToggle } from '@/components/instructor/FilterToggle';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
+import { cn } from '@/lib/utils';
 
 export interface ResponseListTabProps {
   activeDiscussion: Discussion | null;
@@ -123,12 +124,15 @@ export function ResponseListTab({
                   {opt.label}.
                 </span>
                 <span
-                  className={activeDiscussion.correct_option === opt.label ? 'font-semibold text-brand-600' : 'text-content-secondary'}
+                  className={cn(
+                    'flex-1 break-words [overflow-wrap:anywhere] [word-break:break-word]',
+                    activeDiscussion.correct_option === opt.label ? 'font-semibold text-brand-600' : 'text-content-secondary'
+                  )}
                 >
                   {opt.text}
                   {activeDiscussion.correct_option === opt.label && (
                     <span
-                      className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider text-brand-600"
+                      className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider text-brand-600 inline-block align-middle"
                       style={{ background: 'rgba(45,158,45,0.15)' }}
                     >
                       Correct
@@ -180,7 +184,7 @@ export function ResponseListTab({
           Waiting for student responses…
         </p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 min-w-0 w-full overflow-hidden">
           {!showFlagged && filterResponses(responses).map((r) => (
             <ResponseCard
               key={r.id}

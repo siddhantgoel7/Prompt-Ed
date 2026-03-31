@@ -52,13 +52,13 @@ export function ExpandableCard({
   return (
     <div
       className={cn(
-        'transition-all duration-300 ease-in-out relative group',
+        'transition-all duration-300 ease-in-out relative group w-full min-w-0',
         isSelected ? cn(selectedMargin, 'z-10') : 'z-0'
       )}
       data-highlighted={dataHighlighted}
       data-variant={dataVariant}
     >
-      <fieldset
+      <section
         className="w-full flex items-start justify-between rounded-xl transition-all duration-300 ease-in-out"
         style={{ padding, border: 'none', margin: '0', minWidth: '0', ...(isSelected ? selectedStyle : unselectedStyle) }}
         aria-label={ariaLabel}
@@ -75,12 +75,12 @@ export function ExpandableCard({
             type="button"
             onClick={onClick}
             className={cn(
-              'flex-1 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] cursor-pointer rounded-lg -m-1 p-1',
+              'flex-1 min-w-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] cursor-pointer rounded-lg -m-1 p-1 whitespace-pre-wrap break-words [overflow-wrap:anywhere] [word-break:break-word]',
               isSelected ? 'cursor-default' : 'cursor-pointer'
             )}
           >
             <span className={cn(
-              'transition-all duration-300 whitespace-pre-wrap break-words text-content-primary block',
+              'transition-all duration-300 break-words whitespace-pre-wrap text-content-primary block w-full [overflow-wrap:anywhere] [word-break:break-word]',
               isSelected ? selectedTextClassName : unselectedTextClassName,
             )}>
               {text}
@@ -92,7 +92,7 @@ export function ExpandableCard({
         <div className="shrink-0 ml-3">
           {rightLabel}
         </div>
-      </fieldset>
+      </section>
     </div>
   );
 }

@@ -122,9 +122,8 @@ export function GeneralQuestionsTab() {
                 </p>
             )}
 
-            {/* Question list */}
             {generalQuestions.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 min-w-0 w-full overflow-hidden">
                     {generalQuestions.map((q, i) => (
                         <CandidateCard
                             key={q.id}

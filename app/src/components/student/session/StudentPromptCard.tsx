@@ -54,7 +54,7 @@ export function StudentPromptCard({
         <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-brand-500">
           Discussion Prompt
         </p>
-        <p className="text-base leading-relaxed text-content-primary">
+        <p className="text-base leading-relaxed text-content-primary whitespace-pre-wrap break-all break-words">
           {discussion.prompt_text}
         </p>
 

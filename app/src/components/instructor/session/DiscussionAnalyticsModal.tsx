@@ -328,9 +328,9 @@ export function DiscussionAnalyticsContent({
   const [ciChartType, setCiChartType] = useState<'donut' | 'bar'>('donut');
 
   return (
-    <div className="flex flex-col gap-5 pb-4">
+    <div className="flex flex-col gap-5 pb-4 min-w-0 w-full overflow-hidden">
       {/* ── Headline stats ── */}
-      <div className="grid grid-cols-2 gap-3 mt-2 pr-1">
+      <div className="grid grid-cols-2 gap-3 mt-2 pr-1 min-w-0 w-full">
         <StatCard label="Responses" value={String(total)} />
         <StatCard
           label="Response Rate"
@@ -428,7 +428,7 @@ export function DiscussionAnalyticsContent({
                 <span
                   key={entry.word}
                   title={`${entry.word}: ${entry.count}`}
-                  className="leading-none"
+                  className="leading-none break-all max-w-full"
                   style={{
                     fontSize: `${sizePx}px`,
                     color: i % 2 === 0 ? 'var(--color-primary-500)' : 'var(--text-secondary)',
@@ -467,20 +467,20 @@ export function DiscussionAnalyticsContent({
       )}
 
       {/* ── All responses ── */}
-      <div>
+      <div className="min-w-0 w-full">
         <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-content-muted">
           All Responses ({total})
         </p>
         {total === 0 ? (
           <p className="text-sm text-content-muted">No responses yet.</p>
         ) : (
-          <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-56 overflow-y-auto pr-1 min-w-0 w-full">
             {responses.map((r) => (
               <div
                 key={r.id}
-                className="rounded-xl p-3 bg-surface-raised border border-line-subtle"
+                className="rounded-xl p-3 bg-surface-raised border border-line-subtle max-w-full w-full min-w-0 overflow-hidden"
               >
-                <p className="text-sm whitespace-pre-wrap break-words text-content-primary">
+                <p className="text-sm whitespace-pre-wrap break-all break-words text-content-primary">
                   {r.response_text}
                 </p>
                 <p className="text-xs mt-1 text-content-muted" suppressHydrationWarning>

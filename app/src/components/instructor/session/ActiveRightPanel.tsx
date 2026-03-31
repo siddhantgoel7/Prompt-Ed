@@ -64,7 +64,7 @@ export function ActiveRightPanel(props: Readonly<{
 
   return (
     <aside
-      className="flex flex-col flex-shrink-0 transition-all duration-200 bg-surface-raised border-l border-line-default"
+      className="flex flex-col flex-shrink-0 transition-all duration-300 bg-surface-raised border-l border-line-default w-full lg:w-auto"
       style={{ width: collapsed ? '52px' : '380px' }}
     >
       {/* ── Collapse toggle header ── */}
@@ -110,7 +110,7 @@ export function ActiveRightPanel(props: Readonly<{
         )}
       </div>
 
-      <div className="flex-1 flex flex-col h-full">
+      <div className="flex-1 flex flex-col h-full min-w-0 w-full overflow-hidden">
         {collapsed ? (
           <CollapsedSidebarIcons
             responses={responses}
@@ -265,7 +265,7 @@ function ExpandedSidebarContent(props: Readonly<ReturnType<typeof useActiveRight
 }>) {
   const { activeTab, setActiveTab, activeDiscussion, responses, distribution, activeDiscussionId, timerEndTime, timerTotalSeconds, handleCloseDiscussion, handleExtendTimer, handleEditTimer, peakStudentCount, isMC } = props;
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full overflow-hidden min-w-0 w-full">
       {/* Active discussion strip — always visible above tabs when a discussion is running */}
       {activeDiscussionId && (
         <ActiveDiscussionStrip
@@ -283,12 +283,12 @@ function ExpandedSidebarContent(props: Readonly<ReturnType<typeof useActiveRight
           <TabsTrigger value="analytics" className="text-xs">Metrics</TabsTrigger>
         </TabsList>
       </div>
-      <ScrollArea className="flex-1 mt-3">
-        <div className="px-3 pb-4">
-          <TabsContent value="list" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+      <ScrollArea className="flex-1 mt-3 min-w-0 w-full">
+        <div className="px-3 pb-4 min-w-0 w-full">
+          <TabsContent value="list" className="mt-0 focus-visible:outline-none focus-visible:ring-0 min-w-0 w-full">
             <ResponseListTab {...props} isMC={isMC} distribution={distribution} />
           </TabsContent>
-          <TabsContent value="analytics" className="mt-0 pt-2 focus-visible:outline-none focus-visible:ring-0">
+          <TabsContent value="analytics" className="mt-0 pt-2 focus-visible:outline-none focus-visible:ring-0 min-w-0 w-full">
             {activeDiscussion ? <DiscussionAnalyticsContent discussion={activeDiscussion} responses={responses} studentCount={peakStudentCount} lessonId={props.lessonId} /> : <p className="text-sm py-8 text-center text-content-muted">No active discussion</p>}
           </TabsContent>
         </div>
@@ -342,13 +342,17 @@ function ActiveDiscussionStrip({
   return (
     <div className="px-3 pt-2" data-testid="discussion-strip">
       <div
-        className="flex items-center gap-2 px-3 py-2 rounded-xl"
-        style={{ background: 'var(--color-primary-alpha-06)', border: '1px solid var(--color-primary-alpha-16)' }}
+        className="flex items-center gap-1.5 px-2 py-2 rounded-xl"
+        style={{ 
+          background: 'var(--color-primary-alpha-06)', 
+          border: '1px solid var(--color-primary-alpha-16)',
+          boxShadow: 'inset 0 1px 2px rgba(45,158,45,0.05)'
+        }}
       >
         {/* Active indicator */}
-        <span className="flex items-center gap-1.5 text-xs font-semibold text-brand-600 shrink-0">
+        <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-brand-600 shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
-          {' '}Active
+          <span className="hidden xs:inline">Active</span>
         </span>
 
         <div className="w-px h-4 bg-line-subtle shrink-0" />
@@ -366,7 +370,7 @@ function ActiveDiscussionStrip({
             <button
               onClick={() => onExtendTimer?.(10)}
               data-testid="extend-timer-button"
-              className="px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 transition-all duration-150"
+              className="px-1.5 py-0.5 rounded-md text-[10px] font-bold shrink-0 transition-all duration-150"
               style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'var(--color-primary-alpha-06)' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-14)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-06)'; }}
@@ -376,7 +380,7 @@ function ActiveDiscussionStrip({
             <button
               onClick={() => setShowEditDialog(true)}
               data-testid="edit-timer-button"
-              className="px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 transition-all duration-150"
+              className="px-1.5 py-0.5 rounded-md text-[10px] font-bold shrink-0 transition-all duration-150"
               style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'var(--color-primary-alpha-06)' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-14)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-06)'; }}
@@ -394,8 +398,11 @@ function ActiveDiscussionStrip({
         <button
           onClick={() => onClose(activeDiscussionId)}
           data-testid="close-discussion-button"
-          className="px-3 py-1 rounded-full text-xs font-semibold text-white shrink-0 transition-all duration-150"
-          style={{ background: 'var(--color-error-600)' }}
+          className="px-2.5 py-1 rounded-full text-xs font-bold text-white shrink-0 transition-all duration-150"
+          style={{ 
+            background: 'var(--color-error-600)',
+            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.25)'
+          }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-700)'; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-600)'; }}
         >

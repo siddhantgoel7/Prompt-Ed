@@ -401,7 +401,7 @@ export function WordCloudPageClient({
                     data-testid={`word-btn-${entry.word}`}
                     title={`${entry.word}: ${entry.count} occurrence${entry.count === 1 ? '' : 's'}`}
                     onClick={() => handleWordClick(entry.word)}
-                    className="leading-none transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded px-0.5"
+                    className="leading-none transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded px-0.5 break-all max-w-full"
                     style={{
                       fontSize: `${sizePx}px`,
                       fontWeight: isSelected ? 800 : 400,

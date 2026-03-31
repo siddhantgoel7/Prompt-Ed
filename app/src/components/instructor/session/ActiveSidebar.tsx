@@ -43,10 +43,7 @@ export function ActiveSidebar(props: Readonly<{
 
   return (
     <aside
-      className="flex flex-col flex-shrink-0 transition-all duration-200 bg-surface-raised border-r border-line-default"
-      style={{
-        width: collapsed ? '52px' : '280px',
-      }}
+      className={`flex flex-col flex-shrink-0 transition-all duration-300 bg-surface-raised border-r border-line-default w-full ${collapsed ? 'lg:w-[52px]' : 'lg:w-[280px]'}`}
     >
       {/* Collapse toggle */}
       <div
