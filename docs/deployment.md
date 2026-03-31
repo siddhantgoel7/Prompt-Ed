@@ -56,7 +56,53 @@ Click **Deploy**. Vercel will install dependencies, build the Next.js app, and p
 
 ## Redeployments
 
-Any push to the `main` branch automatically triggers a new Vercel deployment. No manual steps are needed. Pull requests also get a preview deployment URL automatically.
+### 1. Vercel (Current Production)
+Any push to the `main` branch of the [Forked GitHub Repository](https://github.com/W26project-DeptofPharmacology/app) automatically triggers a new Vercel deployment. No manual steps are needed. Pull requests also get a preview deployment URL automatically.
+- **Trigger**: `git push origin main`
+- **Confirmation**: View the deployment status in the Vercel dashboard under **Deployments**.
+
+### 2. VM / On-Premise (Buxton Labs)
+The client intends to host this project on a colleague's VM (Buxton Labs) for a dedicated instance. This requires a manual or automated build-and-start process.
+
+#### 2.1 One-time Setup
+1.  **SSH into the VM**: Connect to the Buxton Labs server.
+2.  **Clone the Repository**:
+    ```bash
+    git clone https://github.com/W26project-DeptofPharmacology/app.git
+    cd app
+    ```
+3.  **Install Node.js & Dependencies**:
+    ```bash
+    npm install
+    ```
+4.  **Configure Environment Variables**:
+    Create a `.env.local` file with the contents from Section 1.2.
+5.  **Build the Project**:
+    ```bash
+    npm run build
+    ```
+
+#### 2.2 Process Management (PM2)
+To ensure the app remains running after SSH disconnects:
+```bash
+# Install PM2 globally
+npm install -g pm2
+
+# Start the Next.js app
+pm2 start npm --name "pmcol-teaching-tool" -- start
+
+# Save process list for auto-restart on reboot
+pm2 save
+```
+
+#### 2.3 Redeployment on the VM
+To update the instance with new code:
+```bash
+git pull origin main
+npm install
+npm run build
+pm2 restart pmcol-teaching-tool
+```
 
 ---
 
