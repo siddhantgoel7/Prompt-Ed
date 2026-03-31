@@ -8,14 +8,16 @@ import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { DiscussionAnalyticsContent } from '@/components/instructor/session/DiscussionAnalyticsModal';
-import { flagResponseApi, unflagResponseApi } from '@/lib/api/discussionsApi';
+import { flagResponseApi, unflagResponseApi, insertDiscussionApi, closeActiveDiscussionsApi } from '@/lib/api/discussionsApi';
 import { useResponseSelection } from '@/hooks/useResponseSelection';
 import { ResponseCard } from '@/components/instructor/ResponseCard';
 import { ExpandableCard } from '@/components/instructor/ExpandableCard';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
 import { ResponseStatusBar } from '@/components/instructor/ResponseStatusBar';
 import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
+import { RestartDiscussionButton } from '@/components/instructor/session/RestartDiscussionButton';
 
 /** Isolated response list — owns its own selection state so clicks don't re-render the whole page. */
 function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag }: Readonly<{
@@ -126,6 +128,8 @@ interface DiscussionClientProps {
   initialResponses: Response[];
   initialFlaggedResponses: Response[];
   initialIsActive: boolean;
+  lessonStatus: string;
+  discussionCount: number;
 }
 
 /**
@@ -138,21 +142,18 @@ export function DiscussionPage({
   initialDiscussion,
   initialResponses,
   initialFlaggedResponses,
-  initialIsActive
+  initialIsActive,
+  lessonStatus,
+  discussionCount
 }: Readonly<DiscussionClientProps>) {
+  const router = useRouter();
 
   // ── Initialize State with Server Data (Hydration) ──────────────────────────
-  // Server-fetched data is seeded into useState so that realtime updates can
-  // mutate it without triggering a full server re-fetch. Using server data
-  // directly (without useState) would freeze the list after the initial render.
   const [responses, setResponses] = useState<Response[]>(initialResponses);
   const [flaggedResponses, setFlaggedResponses] = useState<Response[]>(initialFlaggedResponses);
   const [isActive] = useState(initialIsActive);
 
   const handleRemoveResponse = useCallback((responseId: string) => {
-    // Capture the response via a functional updater (runs synchronously inside setResponses),
-    // then add it to flaggedResponses at the top level. React 18+ batches both setState
-    // calls into a single render, preventing duplicate keys during the transition.
     let flaggedItem: Response | undefined;
     setResponses((prev) => {
       flaggedItem = prev.find((r) => r.id === responseId);
@@ -161,8 +162,6 @@ export function DiscussionPage({
     if (flaggedItem) {
       const item = flaggedItem;
       setFlaggedResponses((prev) => {
-        // Deduplicate just in case — Supabase Realtime can replay broadcast events
-        // on reconnect, so the same response may arrive more than once.
         if (prev.some((r) => r.id === responseId)) return prev;
         return [{ ...item, flagged_at: new Date().toISOString() }, ...prev];
       });
@@ -171,8 +170,6 @@ export function DiscussionPage({
 
   const handleRestoreResponse = useCallback(async (responseId: string) => {
     await unflagResponseApi(responseId);
-    // Same functional-updater + React 18 batching pattern as handleRemoveResponse:
-    // capture the item synchronously inside the updater, then add it to the live list.
     let restoredItem: Response | undefined;
     setFlaggedResponses((prev) => {
       restoredItem = prev.find((r) => r.id === responseId);
@@ -181,8 +178,6 @@ export function DiscussionPage({
     if (restoredItem) {
       const item = restoredItem;
       setResponses((prev) => {
-        // Deduplicate just in case — Supabase Realtime can deliver the same event
-        // more than once after a reconnect.
         if (prev.some((r) => r.id === responseId)) return prev;
         return [{ ...item, flagged_at: null }, ...prev];
       });
@@ -195,8 +190,6 @@ export function DiscussionPage({
     const newResponse = payload.payload?.response;
     if (newResponse?.discussion_id === discussionId) {
       setResponses((prev) => {
-        // Deduplicate just in case — Supabase Realtime can deliver the same broadcast
-        // event twice on reconnect. Returning prev skips the re-render entirely.
         if (prev.some(r => r.id === newResponse.id)) return prev;
         return [newResponse, ...prev];
       });
@@ -205,9 +198,50 @@ export function DiscussionPage({
 
   useEffect(() => {
     if (!channel || !isConnected) return;
-
     channel.on('broadcast', { event: 'response:new' }, handleNewResponse);
   }, [channel, isConnected, handleNewResponse]);
+
+  const handleRestart = async (
+    original: Discussion,
+    timerSecs: number | null,
+    feedbackEnabled: boolean,
+    multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }
+  ) => {
+    try {
+      const now = new Date().toISOString();
+      await closeActiveDiscussionsApi(lessonId, now);
+
+      const payload = {
+        lesson_id: lessonId,
+        prompt_text: original.prompt_text,
+        prompt_type: original.prompt_type,
+        status: 'active',
+        published_at: now,
+        display_order: discussionCount,
+        source: original.source,
+        mc_options: original.mc_options,
+        correct_option: original.correct_option,
+        feedback_enabled: feedbackEnabled,
+        participant_snapshot: null,
+        time_limit_seconds: timerSecs,
+        allow_multiple_responses: multipleResponseSettings?.allowMultipleResponses ?? original.allow_multiple_responses,
+        response_limit: multipleResponseSettings ? multipleResponseSettings.responseLimit : original.response_limit,
+      };
+
+      const newDiscussion = await insertDiscussionApi(payload);
+      if (newDiscussion && channel) {
+        await (channel as { send: (msg: unknown) => Promise<unknown> }).send({
+          type: 'broadcast',
+          event: 'discussion:published',
+          payload: { discussion: newDiscussion }
+        });
+        router.push(`/session/${lessonId}`);
+      }
+    } catch (err) {
+      console.error('Failed to restart discussion:', err);
+      throw err;
+    }
+  };
 
   const isMC = initialDiscussion.prompt_type === 'multiple_choice';
   const [selectedMCOption, setSelectedMCOption] = useState<string | null>(null);
@@ -232,11 +266,8 @@ export function DiscussionPage({
   const studentCount = initialDiscussion.participant_snapshot ?? 0;
 
   return (
-    <div
-      className="min-h-screen bg-surface-base"
-    >
+    <div className="min-h-screen bg-surface-base">
       <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
-        {/* Back navigation */}
         <div className="mb-6">
           <Link
             href={`/session/${lessonId}`}
@@ -260,14 +291,9 @@ export function DiscussionPage({
               border: '1px solid var(--border-default)',
             }}
           >
-            <h2
-              className="text-lg font-bold mb-4 pb-3 text-content-primary border-b border-line-subtle"
-            >
+            <h2 className="text-lg font-bold mb-4 pb-3 text-content-primary border-b border-line-subtle">
               Metrics
             </h2>
-            {/* lessonId is required so the ExternalLink button in DiscussionAnalyticsContent
-                opens the interactive word cloud page (/session/[lessonId]/word-cloud/[discussionId])
-                instead of falling back to the static HTML popup. */}
             <DiscussionAnalyticsContent
               discussion={initialDiscussion}
               responses={responses}
@@ -278,54 +304,51 @@ export function DiscussionPage({
 
           {/* RIGHT COLUMN: Question and Responses */}
           <div className="flex-1 w-full min-w-0 flex flex-col overflow-hidden">
-            {/* Header */}
-            <div
-              className="flex flex-col gap-4 mb-6 pb-6 border-b border-line-default min-w-0 w-full"
-            >
+            <div className="flex flex-col gap-4 mb-6 pb-6 border-b border-line-default min-w-0 w-full">
               <div className="flex justify-between items-start gap-4 min-w-0 w-full">
                 <div className="space-y-1 flex-1 min-w-0 w-full overflow-hidden">
-                  <h1
-                    className="text-2xl font-bold leading-tight break-all break-words text-content-primary max-w-full"
-                  >
+                  <h1 className="text-2xl font-bold leading-tight break-all break-words text-content-primary max-w-full">
                     {initialDiscussion.prompt_text}
                   </h1>
                 </div>
 
-                {/* Status badge */}
-                <div
-                  className="shrink-0 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide flex items-center gap-2"
-                  style={isActive ? {
-                    background: 'rgba(45,158,45,0.12)',
-                    border: '1px solid rgba(45,158,45,0.35)',
-                    color: 'var(--color-primary-500)',
-                  } : {
-                    background: 'var(--surface-raised)',
-                    border: '1px solid var(--border-default)',
-                    color: 'var(--text-muted)',
-                  }}
-                >
-                  {isActive ? (
-                    <>
-                      <span
-                        className="w-2 h-2 rounded-full animate-pulse"
-                        style={{ background: 'var(--color-primary-500)' }}
-                      />
-                      {' '}Active
-                    </>
-                  ) : (
-                    <>
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ background: 'var(--text-muted)' }}
-                      />
-                      {' '}Closed
-                    </>
-                  )}
+                <div className="flex items-center gap-3 shrink-0">
+                  <RestartDiscussionButton
+                    discussion={initialDiscussion}
+                    onRestart={handleRestart}
+                    isLessonActive={lessonStatus === 'active'}
+                    showText={true}
+                    className="px-4 py-1.5 rounded-full text-sm font-bold border-brand-500 text-brand-500 bg-surface-base hover:bg-brand-500/10 hover:shadow-lg"
+                  />
+
+                  <div
+                    className="shrink-0 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide flex items-center gap-2"
+                    style={isActive ? {
+                      background: 'rgba(45,158,45,0.12)',
+                      border: '1px solid rgba(45,158,45,0.35)',
+                      color: 'var(--color-primary-500)',
+                    } : {
+                      background: 'var(--surface-raised)',
+                      border: '1px solid var(--border-default)',
+                      color: 'var(--text-muted)',
+                    }}
+                  >
+                    {isActive ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-primary-500)' }} />
+                        {' '}Active
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-2 h-2 rounded-full" style={{ background: 'var(--text-muted)' }} />
+                        {' '}Closed
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* MC Options */}
             {isMC && initialDiscussion.mc_options && (
               <div
                 className="mb-8 p-6 rounded-2xl"
@@ -412,7 +435,6 @@ export function DiscussionPage({
               </div>
             )}
 
-            {/* Responses List — hidden for MC since distribution is shown in the options section above */}
             {!isMC && (
               <div className="space-y-4 min-w-0 w-full overflow-hidden">
                 {responses.length === 0 && flaggedResponses.length === 0 ? (
@@ -437,10 +459,7 @@ export function DiscussionPage({
               </div>
             )}
 
-            {/* MC: realtime status only (no individual response cards — distribution shown above) */}
-            {isMC && (
-              <ResponseStatusBar />
-            )}
+            {isMC && <ResponseStatusBar />}
           </div>
         </div>
       </div>

@@ -105,6 +105,8 @@ export function SessionEndedView(props: Readonly<{ vm?: SessionVM }>) {
         discussions={discussionsForSplit}
         lessonId={lesson.id}
         onBack={() => setSplitView(false)}
+        handleRestartDiscussion={vm.handleRestartDiscussion}
+        lessonStatus={lesson.status}
       />
     );
     return context ? splitContent : <SessionProvider vm={vm}>{splitContent}</SessionProvider>;
@@ -166,6 +168,8 @@ export function SessionEndedView(props: Readonly<{ vm?: SessionVM }>) {
                   index={i}
                   total={vm.lessonDiscussions.length}
                   lessonId={lesson.id}
+                  lessonStatus={lesson.status}
+                  onRestart={vm.handleRestartDiscussion}
                 />
               ))}
           </div>

@@ -226,11 +226,63 @@ export function useLessonDiscussions(
     setPublishing(false);
   }, [publishing, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, clearAIState, setTimerState, setResponses]);
 
+  const handleRestartDiscussion = useCallback(async (
+    original: Discussion,
+    timerSecs: number | null = null,
+    feedbackEnabled: boolean = false,
+    multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }
+  ) => {
+    if (publishing) return;
+    setPublishing(true);
+    if (activeDiscussion) await handleCloseDiscussion(activeDiscussion.id);
+    peakStudentCountRef.current = studentCount;
+    setPeakStudentCount(studentCount);
+
+    const payload = {
+      lesson_id: lessonId,
+      prompt_text: original.prompt_text,
+      prompt_type: original.prompt_type,
+      status: 'active',
+      published_at: new Date().toISOString(),
+      display_order: discussions.length,
+      source: original.source,
+      mc_options: original.mc_options,
+      correct_option: original.correct_option,
+      feedback_enabled: feedbackEnabled,
+      participant_snapshot: studentCount > 0 ? studentCount : null,
+      time_limit_seconds: timerSecs,
+      allow_multiple_responses: multipleResponseSettings?.allowMultipleResponses ?? original.allow_multiple_responses,
+      response_limit: multipleResponseSettings ? multipleResponseSettings.responseLimit : original.response_limit,
+    };
+
+    const newDiscussion = await insertDiscussionApi(payload);
+    if (!newDiscussion) { setPublishing(false); return; }
+
+    if (channel) {
+      await (channel as RealtimeLikeChannel).send({
+        type: 'broadcast',
+        event: 'discussion:published',
+        payload: { discussion: newDiscussion }
+      });
+    }
+
+    if (timerSecs && timerSecs > 0) {
+      const endTime = new Date(newDiscussion.published_at!).getTime() + timerSecs * 1000;
+      setTimerState(endTime, timerSecs);
+      autoCloseCalledRef.current = false;
+    }
+
+    setActiveDiscussion(newDiscussion);
+    setDiscussions((prev) => [...prev, { ...newDiscussion, response_count: 0 }]);
+    setResponses([]);
+    setPublishing(false);
+  }, [publishing, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, setTimerState, setResponses]);
+
   return {
     peakStudentCount, discussions, activeDiscussion, responses,
     discussionTimerEndTime: timerEndTime, discussionTimerSeconds: timerSeconds, flaggedResponses,
     fetchDiscussions, fetchResponses, handleCloseDiscussion, handlePublishDiscussion,
-    handlePublishAiCandidate, handleExtendTimer, handleEditTimer, removeResponse, restoreResponse,
+    handlePublishAiCandidate, handleExtendTimer, handleEditTimer, handleRestartDiscussion, removeResponse, restoreResponse,
   };
 }
 
