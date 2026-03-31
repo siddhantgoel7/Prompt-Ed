@@ -161,6 +161,7 @@ function useActiveRightPanelContext(props: Readonly<{
       timerEndTime: context.discussionTimerEndTime,
       timerTotalSeconds: context.discussionTimerSeconds,
       handleCloseDiscussion: context.handleCloseDiscussion,
+      isClosingDiscussion: context.isClosingDiscussion,
       handleExtendTimer: context.handleExtendTimer,
       handleEditTimer: context.handleEditTimer,
       lessonId: context.lesson?.id,
@@ -180,6 +181,7 @@ function useActiveRightPanelContext(props: Readonly<{
     timerEndTime: null,
     timerTotalSeconds: null,
     handleCloseDiscussion: () => { },
+    isClosingDiscussion: false,
     handleExtendTimer: undefined,
     handleEditTimer: undefined,
     lessonId: undefined,
@@ -273,6 +275,7 @@ function ExpandedSidebarContent(props: Readonly<ReturnType<typeof useActiveRight
           timerEndTime={timerEndTime}
           timerTotalSeconds={timerTotalSeconds}
           onClose={handleCloseDiscussion}
+          isClosing={props.isClosingDiscussion}
           onExtendTimer={handleExtendTimer}
           onEditTimer={handleEditTimer}
         />
@@ -311,6 +314,7 @@ function ActiveDiscussionStrip({
   timerEndTime,
   timerTotalSeconds,
   onClose,
+  isClosing,
   onExtendTimer,
   onEditTimer,
 }: Readonly<{
@@ -318,6 +322,7 @@ function ActiveDiscussionStrip({
   timerEndTime: number | null;
   timerTotalSeconds: number | null;
   onClose: (id: string) => void;
+  isClosing?: boolean;
   onExtendTimer?: (extra: number) => Promise<void>;
   onEditTimer?: (newSecs: number | null) => Promise<void>;
 }>) {
@@ -397,16 +402,17 @@ function ActiveDiscussionStrip({
         {/* Close Discussion */}
         <button
           onClick={() => onClose(activeDiscussionId)}
+          disabled={isClosing}
           data-testid="close-discussion-button"
-          className="px-2.5 py-1 rounded-full text-xs font-bold text-white shrink-0 transition-all duration-150"
+          className="px-2.5 py-1 rounded-full text-xs font-bold text-white shrink-0 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ 
             background: 'var(--color-error-600)',
             boxShadow: '0 2px 8px rgba(220, 38, 38, 0.25)'
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-700)'; }}
+          onMouseEnter={(e) => { if (!isClosing) (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-700)'; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-600)'; }}
         >
-          Close Discussion
+          {isClosing ? 'Closing…' : 'Close Discussion'}
         </button>
       </div>
 

@@ -3,19 +3,29 @@
 'use client';
 
 import * as React from 'react';
-import type { DiscussionWithResponseCount } from '@/types/discussion';
+import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { formatTime } from '@/lib/utils';
+import { RestartDiscussionButton } from './RestartDiscussionButton';
 
 
 /** Renders a reverse-chronological list of discussion cards, highlighting the currently active one. */
 export function DiscussionHistory({
     discussions,
     activeDiscussionId,
+    onRestart,
+    isLessonActive = false,
 }: Readonly<{
     discussions: DiscussionWithResponseCount[];
     activeDiscussionId: string | null;
+    onRestart?: (
+        original: Discussion,
+        timerSecs: number | null,
+        feedbackEnabled: boolean,
+        multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }
+    ) => Promise<void>;
+    isLessonActive?: boolean;
 }>) {
     const params = useParams();
     const lessonId = params.lessonId as string;
@@ -30,28 +40,28 @@ export function DiscussionHistory({
     }
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-3">
             {[...discussions].reverse().map((d, index) => {
                 const originalIndex = discussions.length - index;
                 const isActive = d.id === activeDiscussionId;
 
                 return (
-                    <Link
-                        key={d.id}
-                        href={`/session/${lessonId}/discussion/${d.id}`}
-                        className="block"
-                        aria-current={isActive ? 'page' : undefined}
-                    >
-                        <div
-                            className="rounded-xl p-3 cursor-pointer transition-all duration-150"
-                            style={isActive ? {
-                                background: 'rgba(45,158,45,0.08)',
-                                border: '1px solid var(--color-primary-500)',
-                            } : {
-                                background: 'var(--surface-raised)',
-                                border: '1px solid var(--border-default)',
-                            }}
+                    <div key={d.id} className="relative group">
+                        <Link
+                            href={`/session/${lessonId}/discussion/${d.id}`}
+                            className="block"
+                            aria-current={isActive ? 'page' : undefined}
                         >
+                            <div
+                                className="rounded-xl p-3 cursor-pointer transition-all duration-150"
+                                style={isActive ? {
+                                    background: 'rgba(45,158,45,0.08)',
+                                    border: '1px solid var(--color-primary-500)',
+                                } : {
+                                    background: 'var(--surface-raised)',
+                                    border: '1px solid var(--border-default)',
+                                }}
+                            >
                                 <div className="flex items-start justify-between mb-2">
                                     <span className="text-xs font-semibold text-content-muted">#{originalIndex}</span>
 
@@ -86,8 +96,19 @@ export function DiscussionHistory({
                                         </>
                                     ) : null}
                                 </div>
-                        </div>
-                    </Link>
+                            </div>
+                        </Link>
+                        
+                        {onRestart && (
+                            <RestartDiscussionButton
+                                discussion={d}
+                                onRestart={onRestart}
+                                isLessonActive={isLessonActive}
+                                size="sm"
+                                className="absolute right-2 bottom-2 p-2 opacity-0 group-hover:opacity-100 bg-surface-base border-line-default text-content-muted hover:text-brand-500 hover:border-brand-500 hover:shadow-lg"
+                            />
+                        )}
+                    </div>
                 );
             })}
         </div>

@@ -321,7 +321,8 @@ function SubmittedMCView(props: Readonly<SharedSubmittedProps>) {
   if (!activeDiscussion) return null;
 
   if (activeDiscussion.feedback_enabled) {
-    if (feedbackPeriodActive && isSubmitCorrect !== null) {
+    const isOver = isTimerExpired || activeDiscussion.status === 'closed';
+    if ((feedbackPeriodActive || isOver) && isSubmitCorrect !== null) {
       return (
         <>
           <FeedbackResultBanner isCorrect={isSubmitCorrect} />

@@ -78,6 +78,7 @@ export type SessionVM = {
   openFile: (fileId: string) => Promise<void>;
   handlePublishDiscussion: (timerSeconds?: number | null, multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }) => Promise<void> | void;
   handleCloseDiscussion: (discussionId: string) => Promise<void> | void;
+  isClosingDiscussion: boolean;
   historyLoading: boolean;
   historyError: string | null;
   lessonDiscussions: DiscussionWithResponses[];
@@ -109,6 +110,12 @@ export type SessionVM = {
   discussionTimerSeconds: number | null;
   handleExtendTimer: (extraSeconds: number) => Promise<void>;
   handleEditTimer: (newSeconds: number | null) => Promise<void>;
+  handleRestartDiscussion: (
+    original: Discussion,
+    timerSecs?: number | null,
+    feedbackEnabled?: boolean,
+    multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }
+  ) => Promise<void>;
   removeResponse: (responseId: string) => Promise<void>;
   flaggedResponses: Response[];
   restoreResponse: (responseId: string) => Promise<void>;
@@ -159,10 +166,12 @@ export function useSessionPage(lessonId: string): SessionVM {
     fetchDiscussions,
     fetchResponses,
     handleCloseDiscussion,
+    isClosingDiscussion,
     handlePublishDiscussion,
     handlePublishAiCandidate,
     handleExtendTimer,
     handleEditTimer,
+    handleRestartDiscussion,
     removeResponse,
     flaggedResponses,
     restoreResponse,
@@ -673,7 +682,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     discussions, activeDiscussion, responses, promptInput, setPromptInput,
     displayState: false, handleDisplay,
     endingLesson, endError, handleEnd,
-    handlePublishDiscussion, handleCloseDiscussion,
+    handlePublishDiscussion, handleCloseDiscussion, isClosingDiscussion,
     historyLoading, historyError, lessonDiscussions,
     transcripts, transcriptsLoading, transcriptsError,
     exportingData, activatingLesson, handleExportOverviewTxt, handleExportDiscussionsCsv, handleExportStatistics, handleActivate,
@@ -683,7 +692,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
     discussionTimerEndTime, discussionTimerSeconds,
-    handleExtendTimer, handleEditTimer,
+    handleExtendTimer, handleEditTimer, handleRestartDiscussion,
     removeResponse,
     flaggedResponses,
     restoreResponse,
@@ -696,7 +705,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     discussions, activeDiscussion, responses, promptInput,
     handleDisplay,
     endingLesson, endError, handleEnd,
-    handlePublishDiscussion, handleCloseDiscussion,
+    handlePublishDiscussion, handleCloseDiscussion, isClosingDiscussion,
     historyLoading, historyError, lessonDiscussions,
     transcripts, transcriptsLoading, transcriptsError,
     exportingData, activatingLesson, handleExportOverviewTxt, handleExportDiscussionsCsv, handleExportStatistics, handleActivate,
@@ -706,7 +715,7 @@ export function useSessionPage(lessonId: string): SessionVM {
     generateCandidates, selectCandidate, regenerateCandidates,
     handlePublishAiCandidate,
     discussionTimerEndTime, discussionTimerSeconds,
-    handleExtendTimer, handleEditTimer,
+    handleExtendTimer, handleEditTimer, handleRestartDiscussion,
     removeResponse,
     flaggedResponses,
     restoreResponse,

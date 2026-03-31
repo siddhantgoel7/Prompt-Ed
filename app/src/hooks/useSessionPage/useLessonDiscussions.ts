@@ -43,6 +43,8 @@ export function useLessonDiscussions(
   const [discussions, setDiscussions] = useState<DiscussionWithResponseCount[]>([]);
   const [activeDiscussion, setActiveDiscussion] = useState<Discussion | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [isClosingDiscussion, setIsClosingDiscussion] = useState(false);
+  const closingRef = useRef(false);
 
   // Peak student count tracking
   const peakStudentCountRef = useRef<number>(0);
@@ -73,21 +75,31 @@ export function useLessonDiscussions(
   } = useDiscussionTimerInternal(activeDiscussion, channel);
 
   const handleCloseDiscussion = useCallback(async (discussionId: string) => {
-    const peak = peakStudentCountRef.current;
-    if (peak > 0) await updateParticipantSnapshotApi(discussionId, peak);
-    peakStudentCountRef.current = 0;
-    setPeakStudentCount(0);
-    clearTimerState();
-    await closeDiscussionApi(discussionId);
-    if (channel) {
-      await (channel as RealtimeLikeChannel).send({
-        type: 'broadcast',
-        event: 'discussion:closed',
-        payload: { discussionId },
-      });
+    // Guard against double-invocation from rapid clicks or a race with the
+    // auto-close timer. Both the ref (synchronous) and state (for UI) are set.
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setIsClosingDiscussion(true);
+    try {
+      const peak = peakStudentCountRef.current;
+      if (peak > 0) await updateParticipantSnapshotApi(discussionId, peak);
+      peakStudentCountRef.current = 0;
+      setPeakStudentCount(0);
+      clearTimerState();
+      await closeDiscussionApi(discussionId);
+      if (channel) {
+        await (channel as RealtimeLikeChannel).send({
+          type: 'broadcast',
+          event: 'discussion:closed',
+          payload: { discussionId },
+        });
+      }
+      setActiveDiscussion(null);
+      await fetchDiscussions();
+    } finally {
+      closingRef.current = false;
+      setIsClosingDiscussion(false);
     }
-    setActiveDiscussion(null);
-    await fetchDiscussions();
   }, [channel, fetchDiscussions, clearTimerState]);
 
   // Check for auto-close
@@ -226,11 +238,64 @@ export function useLessonDiscussions(
     setPublishing(false);
   }, [publishing, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, clearAIState, setTimerState, setResponses]);
 
+  const handleRestartDiscussion = useCallback(async (
+    original: Discussion,
+    timerSecs: number | null = null,
+    feedbackEnabled: boolean = false,
+    multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }
+  ) => {
+    if (publishing) return;
+    setPublishing(true);
+    if (activeDiscussion) await handleCloseDiscussion(activeDiscussion.id);
+    peakStudentCountRef.current = studentCount;
+    setPeakStudentCount(studentCount);
+
+    const payload = {
+      lesson_id: lessonId,
+      prompt_text: original.prompt_text,
+      prompt_type: original.prompt_type,
+      status: 'active',
+      published_at: new Date().toISOString(),
+      display_order: discussions.length,
+      source: original.source,
+      mc_options: original.mc_options,
+      correct_option: original.correct_option,
+      feedback_enabled: feedbackEnabled,
+      participant_snapshot: studentCount > 0 ? studentCount : null,
+      time_limit_seconds: timerSecs,
+      allow_multiple_responses: multipleResponseSettings?.allowMultipleResponses ?? original.allow_multiple_responses,
+      response_limit: multipleResponseSettings ? multipleResponseSettings.responseLimit : original.response_limit,
+    };
+
+    const newDiscussion = await insertDiscussionApi(payload);
+    if (!newDiscussion) { setPublishing(false); return; }
+
+    if (channel) {
+      await (channel as RealtimeLikeChannel).send({
+        type: 'broadcast',
+        event: 'discussion:published',
+        payload: { discussion: newDiscussion }
+      });
+    }
+
+    if (timerSecs && timerSecs > 0) {
+      const endTime = new Date(newDiscussion.published_at!).getTime() + timerSecs * 1000;
+      setTimerState(endTime, timerSecs);
+      autoCloseCalledRef.current = false;
+    }
+
+    setActiveDiscussion(newDiscussion);
+    setDiscussions((prev) => [...prev, { ...newDiscussion, response_count: 0 }]);
+    setResponses([]);
+    setPublishing(false);
+  }, [publishing, activeDiscussion, discussions.length, lessonId, channel, studentCount, handleCloseDiscussion, setTimerState, setResponses]);
+
   return {
     peakStudentCount, discussions, activeDiscussion, responses,
     discussionTimerEndTime: timerEndTime, discussionTimerSeconds: timerSeconds, flaggedResponses,
-    fetchDiscussions, fetchResponses, handleCloseDiscussion, handlePublishDiscussion,
-    handlePublishAiCandidate, handleExtendTimer, handleEditTimer, removeResponse, restoreResponse,
+    fetchDiscussions, fetchResponses, handleCloseDiscussion, isClosingDiscussion,
+    handlePublishDiscussion, handlePublishAiCandidate, handleExtendTimer, handleEditTimer,
+    handleRestartDiscussion, removeResponse, restoreResponse,
   };
 }
 

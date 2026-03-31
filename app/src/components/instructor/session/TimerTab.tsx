@@ -21,6 +21,7 @@ export function TimerTab({
   timerEndTime,
   timerTotalSeconds,
   onClose,
+  isClosingDiscussion,
   onExtendTimer,
   onEditTimer,
 }: Readonly<{
@@ -31,6 +32,8 @@ export function TimerTab({
   timerTotalSeconds: number | null;
   /** Called with the discussion ID when the instructor closes the discussion manually. */
   onClose: (id: string) => void;
+  /** True while handleCloseDiscussion is awaiting its network calls — disables the button. */
+  isClosingDiscussion?: boolean;
   /** Adds `extra` seconds to the running timer by updating the DB end time. */
   onExtendTimer?: (extra: number) => Promise<void>;
   /** Replaces the timer entirely; pass null to remove the time limit. */
@@ -121,13 +124,14 @@ export function TimerTab({
         {/* Close Discussion — solid red, compact, inside the card so it's always visible */}
         <button
           onClick={() => onClose(activeDiscussionId)}
+          disabled={isClosingDiscussion}
           data-testid="close-discussion-button"
-          className="px-5 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150"
+          className="px-5 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ background: 'var(--color-error-600)', boxShadow: '0 2px 8px var(--color-error-600-alpha-35)' }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-700)'; }}
+          onMouseEnter={(e) => { if (!isClosingDiscussion) (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-700)'; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-600)'; }}
         >
-          Close Discussion
+          {isClosingDiscussion ? 'Closing…' : 'Close Discussion'}
         </button>
       </div>
 
