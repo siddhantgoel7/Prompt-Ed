@@ -149,6 +149,7 @@ export function useStudentSession(lessonId: string) {
   const [timerExpired, setTimerExpired] = useState(false);
   const timerExpiredRef = useRef(false);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const feedbackStartedForRef = useRef<string | null>(null);
 
   // Refs for callbacks
   const viewRef = useRef<ViewState>('loading');
@@ -178,6 +179,20 @@ export function useStudentSession(lessonId: string) {
       (activeDiscussion?.prompt_type === 'multiple_choice' ? Boolean(selectedOption) : responseText.trim().length > 0)
     );
   }, [view, submitting, isConnected, activeDiscussion, responseText, selectedOption]);
+
+  // Extracted from submitResponse to keep its cognitive complexity within SonarQube limits.
+  // Activates the 7-second feedback window for MC questions when feedback is enabled and
+  // the timer has already expired (or there is no timer).
+  const tryActivateMCFeedback = useCallback((discussionId: string) => {
+    if (feedbackStartedForRef.current === discussionId) return;
+    const isTimed = timerEndTimeRef.current != null;
+    const shouldShowFeedback = !isTimed || timerExpiredRef.current;
+    if (!shouldShowFeedback) return;
+    feedbackStartedForRef.current = discussionId;
+    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    setFeedbackPeriodActive(true);
+    feedbackTimerRef.current = setTimeout(() => setFeedbackPeriodActive(false), 7000);
+  }, []);
 
   const submitResponse = useCallback(async (textOverride?: string, optionOverride?: string, isCorrectOverride?: boolean) => {
     const currentDiscussion = activeDiscussionRef.current;
@@ -241,7 +256,12 @@ export function useStudentSession(lessonId: string) {
     }
 
     setView('submitted');
-  }, [channel, responseCount, responseText, selectedOption, submittedDiscussionsKey, submitting]);
+
+    // Activate feedback period for MC with feedback enabled (extracted to keep complexity low).
+    if (isMC && currentDiscussion.feedback_enabled) {
+      tryActivateMCFeedback(currentDiscussion.id);
+    }
+  }, [channel, responseCount, responseText, selectedOption, submittedDiscussionsKey, submitting, tryActivateMCFeedback]);
 
   // 1) Boot
   useEffect(() => {
@@ -353,6 +373,13 @@ export function useStudentSession(lessonId: string) {
 
       setTimerExpired(false);
       timerExpiredRef.current = false;
+      // Reset feedback tracking so the new discussion can trigger its own feedback window
+      feedbackStartedForRef.current = null;
+      setFeedbackPeriodActive(false);
+      if (feedbackTimerRef.current) {
+        clearTimeout(feedbackTimerRef.current);
+        feedbackTimerRef.current = null;
+      }
 
       if (disc.time_limit_seconds && disc.time_limit_seconds > 0 && disc.published_at) {
         const endTime = new Date(disc.published_at).getTime() + disc.time_limit_seconds * 1000;
@@ -453,36 +480,24 @@ export function useStudentSession(lessonId: string) {
       if (Date.now() >= timerEndTime && !timerExpiredRef.current) {
         timerExpiredRef.current = true;
         setTimerExpired(true);
-        performAutoSubmit();
+
+        if (viewRef.current === 'active') {
+          // Student hasn't submitted yet — auto-submit their draft (if any)
+          performAutoSubmit();
+        } else if (viewRef.current === 'submitted') {
+          // Student already submitted before time ran out.
+          // submitResponse ran while timerExpiredRef was still false, so it
+          // skipped feedback activation. Trigger the feedback window now.
+          const disc = activeDiscussionRef.current;
+          if (disc?.prompt_type === 'multiple_choice' && disc?.feedback_enabled) {
+            tryActivateMCFeedback(disc.id);
+          }
+        }
       }
     }, 500);
     return () => clearInterval(id);
-  }, [timerEndTime, responseText, selectedOption, submitting, submitResponse]);
+  }, [timerEndTime, responseText, selectedOption, submitting, submitResponse, tryActivateMCFeedback]);
 
-  // 4) Feedback display period for MC
-  const startedFeedbackForRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (
-      timerExpired &&
-      view === 'submitted' &&
-      activeDiscussion?.id &&
-      activeDiscussion?.prompt_type === 'multiple_choice' &&
-      activeDiscussion?.feedback_enabled &&
-      isSubmitCorrect !== null &&
-      startedFeedbackForRef.current !== activeDiscussion.id
-    ) {
-      startedFeedbackForRef.current = activeDiscussion.id;
-      // Wrap in setTimeout to avoid "setState in effect" warning if synchronous
-      const timeoutId = setTimeout(() => setFeedbackPeriodActive(true), 0);
-      
-      const hideId = setTimeout(() => setFeedbackPeriodActive(false), 7000);
-      feedbackTimerRef.current = hideId;
-      return () => {
-        clearTimeout(timeoutId);
-        clearTimeout(hideId);
-      };
-    }
-  }, [timerExpired, view, activeDiscussion, isSubmitCorrect]);
 
   const submitAnotherResponse = () => {
     if (!activeDiscussion?.allow_multiple_responses) return;
@@ -505,6 +520,6 @@ export function useStudentSession(lessonId: string) {
     submitting, isConnected, view, endedMessage, errorMessage,
     timerEndTime, timerTotalSeconds, timerExpired, canSubmit,
     submitResponse, submitAnotherResponse, canSubmitAnother, responseCount,
-    feedbackPeriodActive, setFeedbackPeriodActive,
+    feedbackPeriodActive,
   };
 }

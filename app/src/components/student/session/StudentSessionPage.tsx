@@ -43,7 +43,6 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
     canSubmitAnother,
     responseCount,
     feedbackPeriodActive,
-    setFeedbackPeriodActive,
   } = useStudentSession(lessonId);
 
   // Normalize timerExpired: treat undefined (from older test mocks) as false
@@ -95,11 +94,6 @@ export function StudentSessionPage({ lessonId }: Readonly<{ lessonId: string }>)
       const isCorrect = selectedOption === activeDiscussion?.correct_option;
       setIsSubmitCorrect(isCorrect);
       submitResponse(`Option ${selectedOption}: ${optionText}`, selectedOption, isCorrect);
-
-      // Scenario 1 (no timer, feedback enabled): start the 7-second feedback window immediately
-      if (activeDiscussion?.feedback_enabled && !hasTimer) {
-        setFeedbackPeriodActive(true);
-      }
       return;
     }
     // Short/long answer: capture the submitted text for display
