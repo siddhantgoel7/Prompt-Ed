@@ -174,7 +174,7 @@ describe('DiscussionPage', () => {
         };
 
         render(<DiscussionPage {...mcProps} />);
-        expect(screen.getByText('1 responses')).toBeInTheDocument(); // For option A
+        expect(screen.getByText('1 response')).toBeInTheDocument(); // For option A (singular)
         expect(screen.getByText(/Correct: A/i)).toBeInTheDocument();
     });
 });

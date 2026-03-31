@@ -40,10 +40,6 @@ const VISION_MIME_MAP: Record<string, 'image/png' | 'image/jpeg' | 'image/webp'>
  *   - OpenAI file inputs only support PDF natively; PPTX is not a supported format.
  *   - We extract images directly from the ZIP and send them as image_url parts.
  */
-export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promise<ParsedSection[]> {
-  const zip = await JSZip.loadAsync(buffer);
-  validateZipIntegrity(zip);
-
 function validateZipIntegrity(zip: JSZip) {
   const MAX_ENTRIES = 10000;
   const MAX_TOTAL_SIZE = 150 * 1024 * 1024;
@@ -69,6 +65,10 @@ function validateZipIntegrity(zip: JSZip) {
     throw new Error(`PPTX extraction aborted: Total size (${Math.round(totalSize/1024/1024)}MB) exceeds safety limit.`);
   }
 }
+
+export async function parsePptx(buffer: Buffer, aiProvider?: AIProvider): Promise<ParsedSection[]> {
+  const zip = await JSZip.loadAsync(buffer);
+  validateZipIntegrity(zip);
 
   const slideFiles = Object.keys(zip.files)
     .filter((name) => /^ppt\/slides\/slide\d+\.xml$/.test(name))
@@ -166,6 +166,7 @@ function extractTextNodes(xml: string): string {
   const parser = new XMLParser({
     ignoreAttributes: false,
     parseAttributeValue: false,
+    parseTagValue: false,  // prevent numbers/booleans being cast — "2026" must stay "2026"
     processEntities: true,
   });
   

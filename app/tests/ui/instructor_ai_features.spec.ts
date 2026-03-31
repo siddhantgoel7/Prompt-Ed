@@ -77,7 +77,9 @@ test.describe('Instructor AI Features & Tools', () => {
         });
 
         await page.goto('/session/ai-lesson-id');
-        await expect(page.getByText('AI Lesson Room')).toBeVisible({ timeout: 15000 });
+        const titleLocator = page.getByTestId('session-title');
+        await expect(titleLocator).toBeVisible({ timeout: 15000 });
+        await expect(titleLocator).toContainText('AI Lesson Room');
     });
 
     // 43.1
@@ -144,7 +146,7 @@ test.describe('Instructor AI Features & Tools', () => {
 
         await page.getByRole('button', { name: /Regenerate Options/i }).or(page.getByRole('button', { name: /Generate Prompt/i })).click();
 
-        await expect(page.getByText('AI MOCKED: Multiple Choice Question?')).toBeVisible({ timeout: 15000 });
+        await expect(page.getByText('AI MOCKED: Multiple Choice Question?').first()).toBeVisible({ timeout: 15000 });
         await expect(page.getByText('Option A')).toBeVisible();
         await expect(page.getByText('Option B')).toBeVisible();
     });
@@ -254,7 +256,8 @@ test.describe('Instructor AI Features & Tools', () => {
         const innerPublishButton = page.getByRole('button', { name: /Publish This Question/i });
         await expect(innerPublishButton).toBeDisabled();
 
-        // Verify the outer discussion button is also disabled
+        // Verify the outer discussion button is also disabled (in Manual tab)
+        await page.getByRole('tab', { name: /Manual/i }).click();
         const outerStartDiscussionBtn = page.getByRole('button', { name: /Start Discussion/i, exact: true });
         await expect(outerStartDiscussionBtn).toBeDisabled();
     });

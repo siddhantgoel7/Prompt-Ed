@@ -13,11 +13,13 @@ export function FilesTab({
     isUploading,
     onUploadFile,
     onDeleteFile,
+    onDownloadFile,
 }: Readonly<{
     files: LessonFile[];
     isUploading: boolean;
     onUploadFile: (file: File) => Promise<void>;
     onDeleteFile: (fileId: string) => Promise<void>;
+    onDownloadFile: (fileId: string) => Promise<void>;
 }>) {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [uploadError, setUploadError] = React.useState<string | null>(null);
@@ -97,7 +99,7 @@ export function FilesTab({
             ) : (
                 <div className="space-y-2">
                     {files.map((f) => (
-                        <div key={f.id} className="flex items-center justify-between gap-2 p-2 rounded-xl bg-surface-raised border border-line-subtle">
+                        <div key={f.id} className="flex items-center justify-between gap-2 p-2 rounded-xl bg-surface-raised border border-line-subtle" onDoubleClick={f.status === 'ready' ? () => onDownloadFile(f.id) : undefined} style={f.status === 'ready' ? { cursor: 'pointer' } : undefined} title={f.status === 'ready' ? 'Double-click to download' : undefined}>
                             <div className="min-w-0 flex-1">
                                 <p className="text-xs font-medium truncate" title={f.fileName}>{f.fileName}</p>
                                 <div className="flex items-center gap-2 mt-1">

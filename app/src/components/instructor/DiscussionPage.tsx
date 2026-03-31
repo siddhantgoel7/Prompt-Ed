@@ -3,7 +3,7 @@
 'use client';
 
 import { useRealtime } from '@/lib/realtime/useRealtime';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, type CSSProperties } from 'react';
 import type { Response } from '@/types/response';
 import type { Discussion } from '@/types/discussion';
 import { ArrowLeft } from 'lucide-react';
@@ -13,16 +13,18 @@ import { flagResponseApi, unflagResponseApi } from '@/lib/api/discussionsApi';
 import { useParticipantPeak } from '@/hooks/useParticipantPeak';
 import { useResponseSelection } from '@/hooks/useResponseSelection';
 import { ResponseCard } from '@/components/instructor/ResponseCard';
-import { FilterToggle } from '@/components/instructor/FilterToggle';
+import { ExpandableCard } from '@/components/instructor/ExpandableCard';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
+import { ResponseStatusBar } from '@/components/instructor/ResponseStatusBar';
 
 /** Isolated response list — owns its own selection state so clicks don't re-render the whole page. */
-function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag }: Readonly<{
+function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag, isConnected }: Readonly<{
   responses: Response[];
   flaggedResponses: Response[];
   onRemoveResponse: (id: string) => void;
   onRestoreResponse: (id: string) => Promise<void>;
   canFlag: boolean;
+  isConnected: boolean;
 }>) {
   const {
     selectedIds, flaggingId, showHighlightedOnly,
@@ -68,16 +70,13 @@ function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestore
 
   return (
     <div className="grid gap-4">
-      {/* Filter toggle — appears when responses are highlighted */}
-      {selectedIds.length > 0 && !showFlagged && (
-        <FilterToggle
-          variant="full"
-          selectedCount={selectedIds.length}
-          showHighlightedOnly={showHighlightedOnly}
-          onToggle={() => setShowHighlightedOnly(prev => !prev)}
-          onShowAll={() => setShowHighlightedOnly(false)}
-        />
-      )}
+      {/* Status bar: realtime connection + total count + inline highlight filter */}
+      <ResponseStatusBar
+        isConnected={isConnected}
+        selectedCount={showFlagged ? 0 : selectedIds.length}
+        showHighlightedOnly={showHighlightedOnly}
+        onToggleHighlight={() => setShowHighlightedOnly(prev => !prev)}
+      />
 
       {/* Flagged toggle — appears when flagged responses exist */}
       {flaggedResponses.length > 0 && (
@@ -214,6 +213,7 @@ export function DiscussionPage({
   }, [channel, isConnected, handleNewResponse]);
 
   const isMC = initialDiscussion.prompt_type === 'multiple_choice';
+  const [selectedMCOption, setSelectedMCOption] = useState<string | null>(null);
 
   const distribution: Record<string, number> = {};
   if (isMC && initialDiscussion.mc_options) {
@@ -242,7 +242,7 @@ export function DiscussionPage({
     <div
       className="min-h-screen bg-surface-base"
     >
-      <div className="max-w-7xl mx-auto p-4 md:p-8">
+      <div className="w-2/3 mx-auto p-4 md:p-8">
         {/* Back navigation */}
         <div className="mb-6">
           <Link
@@ -360,85 +360,95 @@ export function DiscussionPage({
                   {initialDiscussion.mc_options.map((opt) => {
                     const count = distribution[opt.label] || 0;
                     const isCorrect = initialDiscussion.correct_option === opt.label;
-                    return (
-                      <div
-                        key={opt.label}
-                        className="flex items-center justify-between p-3 rounded-xl"
-                        style={isCorrect ? {
-                          background: 'rgba(45,158,45,0.08)',
-                          border: '2px solid var(--color-primary-500)',
-                        } : {
-                          background: 'var(--surface-raised)',
-                          border: '1px solid var(--border-default)',
-                        }}
+                    const isSelected = selectedMCOption === opt.label;
+
+                    let badgeStyle: CSSProperties;
+                    if (isCorrect) {
+                      badgeStyle = { background: 'var(--color-primary-500)', color: 'white' };
+                    } else if (isSelected) {
+                      badgeStyle = { background: 'var(--color-highlight-alpha-55)', color: 'var(--text-primary)' };
+                    } else {
+                      badgeStyle = { background: 'var(--surface-overlay)', color: 'var(--text-secondary)' };
+                    }
+
+                    const badge = (
+                      <span
+                        className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0"
+                        style={badgeStyle}
                       >
-                        <div className="flex items-center gap-3">
-                          <span
-                            className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold"
-                            style={isCorrect ? {
-                              background: 'var(--color-primary-500)',
-                              color: 'white',
-                            } : {
-                              background: 'var(--surface-overlay)',
-                              color: 'var(--text-secondary)',
-                            }}
-                          >
-                            {opt.label}
-                          </span>
-                          <span
-                            className={isCorrect ? 'font-medium' : ''}
-                            style={{ color: isCorrect ? 'var(--color-primary-500)' : 'var(--text-secondary)' }}
-                          >
-                            {opt.text}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-content-muted">
-                            {count} responses
-                          </span>
-                        </div>
-                      </div>
+                        {opt.label}
+                      </span>
+                    );
+
+                    const selectedStyle = isCorrect ? {
+                      background: 'rgba(45,158,45,0.12)',
+                      border: '2px solid var(--color-primary-500)',
+                      boxShadow: '0 4px 24px rgba(45,158,45,0.12)',
+                    } : {
+                      background: 'var(--color-highlight-alpha-10)',
+                      border: '2px solid var(--color-highlight-alpha-55)',
+                      boxShadow: '0 4px 24px var(--color-highlight-alpha-12)',
+                    };
+
+                    const unselectedStyle = isCorrect ? {
+                      background: 'rgba(45,158,45,0.08)',
+                      border: '2px solid var(--color-primary-500)',
+                    } : {
+                      background: 'var(--surface-raised)',
+                      border: '1px solid var(--border-default)',
+                    };
+
+                    return (
+                      <ExpandableCard
+                        key={opt.label}
+                        badge={badge}
+                        text={opt.text}
+                        rightLabel={<span className="text-sm font-semibold text-content-muted">{count} {count === 1 ? 'response' : 'responses'}</span>}
+                        isSelected={isSelected}
+                        onClick={() => setSelectedMCOption(isSelected ? null : opt.label)}
+                        padding="12px 16px"
+                        selectedStyle={selectedStyle}
+                        unselectedStyle={unselectedStyle}
+                        selectedTextClassName={`text-3xl font-semibold leading-relaxed ${isCorrect ? 'text-[var(--color-primary-500)]' : 'text-content-primary'}`}
+                        unselectedTextClassName={`text-sm ${isCorrect ? 'font-medium text-[var(--color-primary-500)]' : 'text-[var(--text-secondary)]'}`}
+                        ariaLabel={isSelected ? 'Deselect option' : 'Select option'}
+                      />
                     );
                   })}
                 </div>
               </div>
             )}
 
-            {/* Responses List */}
-            <div className="space-y-4">
-              <div
-                className="flex justify-between items-center text-sm mb-2 text-content-muted"
-              >
-                <div className="flex items-center gap-2">
-                  <span>Realtime Status:</span>
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: isConnected ? 'var(--color-primary-400)' : '#f59e0b' }}
+            {/* Responses List — hidden for MC since distribution is shown in the options section above */}
+            {!isMC && (
+              <div className="space-y-4">
+                {responses.length === 0 && flaggedResponses.length === 0 ? (
+                  <>
+                    <ResponseStatusBar isConnected={isConnected} />
+                    <div
+                      className="text-center p-12 rounded-2xl bg-surface-raised text-content-muted"
+                      style={{ border: '2px dashed var(--border-default)' }}
+                    >
+                      <p>No responses recorded yet.</p>
+                    </div>
+                  </>
+                ) : (
+                  <ResponseList
+                    responses={responses}
+                    flaggedResponses={flaggedResponses}
+                    onRemoveResponse={handleRemoveResponse}
+                    onRestoreResponse={handleRestoreResponse}
+                    canFlag={true}
+                    isConnected={isConnected}
                   />
-                  <span>{isConnected ? 'Connected' : 'Connecting...'}</span>
-                </div>
-                <span>Total: {responses.length}</span>
+                )}
               </div>
+            )}
 
-              {responses.length === 0 && flaggedResponses.length === 0 ? (
-                <div
-                  className="text-center p-12 rounded-2xl bg-surface-raised text-content-muted"
-                  style={{
-                    border: '2px dashed var(--border-default)',
-                  }}
-                >
-                  <p>No responses recorded yet.</p>
-                </div>
-              ) : (
-                <ResponseList
-                  responses={responses}
-                  flaggedResponses={flaggedResponses}
-                  onRemoveResponse={handleRemoveResponse}
-                  onRestoreResponse={handleRestoreResponse}
-                  canFlag={!isMC}
-                />
-              )}
-            </div>
+            {/* MC: realtime status only (no individual response cards — distribution shown above) */}
+            {isMC && (
+              <ResponseStatusBar isConnected={isConnected} />
+            )}
           </div>
         </div>
       </div>

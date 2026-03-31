@@ -36,7 +36,7 @@ export function useLessonAI(lessonId: string, setPromptInput: (p: string) => voi
     const selectCandidate = useCallback((p: GeneratedPrompt) => {
         setPromptInput(p.promptText);
         setPromptType(p.promptType);
-    }, [setPromptInput]);
+    }, [setPromptInput, setPromptType]);
 
     const regenerateCandidates = useCallback(async () => {
         setCandidates([]);

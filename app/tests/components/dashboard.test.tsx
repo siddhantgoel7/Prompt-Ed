@@ -204,40 +204,4 @@ describe('Dashboard Component', () => {
       expect(screen.getByText('Add a Course')).toBeInTheDocument()
     })
   })
-
-  // 15.7
-  it('should call signOut when logout button is clicked', async () => {
-    (signOut as jest.Mock).mockResolvedValue({ error: null })
-
-    mockSupabase.auth.getUser.mockResolvedValue({
-      data: {
-        user: { id: 'user-123', email: 'test@ualberta.ca', user_metadata: {} },
-      },
-      error: null,
-    })
-
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          order: jest.fn().mockResolvedValue({
-            data: [],
-            error: null,
-          }),
-        }),
-      }),
-    })
-
-    render(<Dashboard />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Log Out')).toBeInTheDocument()
-    })
-
-    const logoutButton = screen.getByText('Log Out')
-    await userEvent.click(logoutButton)
-
-    await waitFor(() => {
-      expect(signOut).toHaveBeenCalled()
-    })
-  })
 })

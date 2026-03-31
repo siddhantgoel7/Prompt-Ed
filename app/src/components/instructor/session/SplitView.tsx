@@ -113,20 +113,20 @@ function DiscussionList({
   };
 
   return (
-    <Tabs defaultValue="active" className="w-full">
+    <Tabs defaultValue="active" className="w-full h-full flex flex-col">
       <TabsList className="w-full mb-3">
         <TabsTrigger value="active" className="flex-1 text-xs">Active ({active.length})</TabsTrigger>
         <TabsTrigger value="closed" className="flex-1 text-xs">Closed ({closed.length})</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="active" className="mt-0">
-        <ScrollArea className="h-[calc(100vh-170px)]">
+      <TabsContent value="active" className="mt-0 flex-1 min-h-0">
+        <ScrollArea className="h-full">
           {renderList(active)}
         </ScrollArea>
       </TabsContent>
 
-      <TabsContent value="closed" className="mt-0">
-        <ScrollArea className="h-[calc(100vh-170px)]">
+      <TabsContent value="closed" className="mt-0 flex-1 min-h-0">
+        <ScrollArea className="h-full">
           {renderList(closed)}
         </ScrollArea>
       </TabsContent>
@@ -336,7 +336,7 @@ function Pane({
           onBack={() => setState({ selectedDiscussionId: null, responses: [], loading: false })}
         />
       ) : (
-        <div className="p-3 flex-1 overflow-hidden">
+        <div className="p-3 flex-1 overflow-hidden flex flex-col">
           <DiscussionList
             discussions={discussions}
             onSelect={(id) => setState({ selectedDiscussionId: id, responses: [], loading: false })}

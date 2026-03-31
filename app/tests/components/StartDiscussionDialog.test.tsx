@@ -52,7 +52,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         const onConfirm = jest.fn();
         renderDialog(onConfirm);
         fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
-        expect(onConfirm).toHaveBeenCalledWith(60, { allowMultipleResponses: false, responseLimit: null });
+        expect(onConfirm).toHaveBeenCalledWith(60, false, { allowMultipleResponses: false, responseLimit: null });
     });
 
     // 66.6
@@ -61,7 +61,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         renderDialog(onConfirm);
         fireEvent.click(screen.getByTestId('no-time-limit-checkbox'));
         fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
-        expect(onConfirm).toHaveBeenCalledWith(null, { allowMultipleResponses: false, responseLimit: null });
+        expect(onConfirm).toHaveBeenCalledWith(null, false, { allowMultipleResponses: false, responseLimit: null });
     });
 
     // 66.7
@@ -71,7 +71,7 @@ describe('StartDiscussionDialog [US 1.29]', () => {
         fireEvent.change(screen.getByTestId('timer-minutes'), { target: { value: '2' } });
         fireEvent.change(screen.getByTestId('timer-seconds'), { target: { value: '30' } });
         fireEvent.click(screen.getByRole('button', { name: /Start Discussion/i }));
-        expect(onConfirm).toHaveBeenCalledWith(150, { allowMultipleResponses: false, responseLimit: null });
+        expect(onConfirm).toHaveBeenCalledWith(150, false, { allowMultipleResponses: false, responseLimit: null });
     });
 
     // 66.8
@@ -139,6 +139,6 @@ describe('StartDiscussionDialog [US 1.29]', () => {
             />
         );
         fireEvent.click(screen.getByRole('button', { name: /Update Timer/i }));
-        expect(onConfirm).toHaveBeenCalledWith(60, { allowMultipleResponses: false, responseLimit: null }); // default 1 minute
+        expect(onConfirm).toHaveBeenCalledWith(60, false, { allowMultipleResponses: false, responseLimit: null }); // default 1 minute
     });
 });

@@ -37,6 +37,7 @@ function buildProps(overrides: Record<string, unknown> = {}) {
     isUploading: false,
     onUploadFile: jest.fn().mockResolvedValue(undefined),
     onDeleteFile: jest.fn().mockResolvedValue(undefined),
+    onDownloadFile: jest.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
@@ -170,6 +171,24 @@ describe('FilesTab', () => {
       fireEvent.change(input, { target: { files: [] } });
     });
     expect(onUploadFile).not.toHaveBeenCalled();
+  });
+
+  // ── Double-click download ─────────────────────────────────────────────────
+
+  it('calls onDownloadFile with the file id when a ready file is double-clicked', async () => {
+    const onDownloadFile = jest.fn().mockResolvedValue(undefined);
+    const files = [makeFile({ id: 'f1', status: 'ready' })];
+    render(<FilesTab {...buildProps({ files, onDownloadFile })} />);
+    await act(async () => { fireEvent.doubleClick(screen.getByTitle('Double-click to download')); });
+    expect(onDownloadFile).toHaveBeenCalledWith('f1');
+  });
+
+  it('does not call onDownloadFile when a non-ready file is double-clicked', async () => {
+    const onDownloadFile = jest.fn();
+    const files = [makeFile({ id: 'f1', status: 'processing' })];
+    render(<FilesTab {...buildProps({ files, onDownloadFile })} />);
+    await act(async () => { fireEvent.doubleClick(screen.getByText('lecture.pdf').closest('div')!); });
+    expect(onDownloadFile).not.toHaveBeenCalled();
   });
 
   it('upload button click triggers the hidden file input', () => {

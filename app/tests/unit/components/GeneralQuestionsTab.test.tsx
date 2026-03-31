@@ -19,6 +19,13 @@ jest.mock('@/components/ui/tooltip', () => ({
   TooltipContent: ({ children }: any) => <div>{children}</div>,
 }));
 
+// Mock ResizeObserver for JSDOM
+global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+};
+
 // Expose onCancel so we can test the cancel path
 jest.mock('@/components/instructor/session/StartDiscussionDialog', () => ({
   StartDiscussionDialog: ({ open, onConfirm, onCancel }: any) =>
@@ -51,6 +58,7 @@ function buildContext(overrides: Record<string, unknown> = {}) {
     generalWarning: undefined as string | undefined,
     generateGeneralQuestions: jest.fn(),
     handlePublishAiCandidate: jest.fn(),
+    setPromptInput: jest.fn(),
     isConnected: true,
     files: [] as { id: string; status: string }[],
     ...overrides,
@@ -122,25 +130,24 @@ describe('GeneralQuestionsTab', () => {
     expect(ctx.generateGeneralQuestions).toHaveBeenCalled();
   });
 
-  it('renders question list inside ScrollArea when questions are present', () => {
+  it('renders question list when questions are present', () => {
     renderTab({ generalQuestions: [makeQuestion('q1', 'What is pharmacology?')] });
-    expect(screen.getByTestId('scroll-area')).toBeInTheDocument();
     expect(screen.getByText('What is pharmacology?')).toBeInTheDocument();
   });
 
   it('expands a compact card to show Selected badge and Publish button', () => {
     renderTab({ generalQuestions: [makeQuestion('q1', 'What is pharmacology?')] });
-    fireEvent.click(screen.getByText('What is pharmacology?'));
-    expect(screen.getByText('Selected')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText(/Select: What is pharmacology/i));
+    expect(screen.getByText('Selected (Editing)')).toBeInTheDocument();
     expect(screen.getByText('Publish This Question →')).toBeInTheDocument();
   });
 
   it('fires mouse enter/leave events on the compact question card', () => {
     renderTab({ generalQuestions: [makeQuestion('q1', 'Hover test Q')] });
-    // The compact card is a <button> wrapping the question text
-    const btn = screen.getByText('Hover test Q').closest('button')!;
-    fireEvent.mouseEnter(btn);
-    fireEvent.mouseLeave(btn);
+    // The compact card container houses the hover listeners
+    const card = screen.getByText('Hover test Q').closest('div.p-3')!;
+    fireEvent.mouseEnter(card);
+    fireEvent.mouseLeave(card);
   });
 
   it('switches selection to a different card', () => {
@@ -149,35 +156,32 @@ describe('GeneralQuestionsTab', () => {
     renderTab({ generalQuestions: [q1, q2] });
 
     // Select first card
-    fireEvent.click(screen.getByText('Question Alpha'));
-    expect(screen.getByText('Selected')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText(/Select: Question Alpha/i));
+    expect(screen.getByText('Selected (Editing)')).toBeInTheDocument();
 
-    // Click the compact card for Q2 to switch selection
-    const q2Btn = screen.getByText('Question Beta').closest('button')!;
-    fireEvent.click(q2Btn);
-    // Q1 is now compact again, Q2 is selected
-    expect(screen.getByText('Selected')).toBeInTheDocument();
+    // Click Q2 to switch selection
+    fireEvent.click(screen.getByLabelText(/Select: Question Beta/i));
+    expect(screen.getByText('Selected (Editing)')).toBeInTheDocument();
   });
 
-  it('toggles the correctness-feedback checkbox in the expanded card', () => {
+  it('shows correct answer radio buttons in the expanded MC card', () => {
     renderTab({ generalQuestions: [makeQuestion('q1', 'Q?')] });
-    fireEvent.click(screen.getByText('Q?'));
-    const checkbox = screen.getByRole('checkbox');
-    expect(checkbox).not.toBeChecked();
-    fireEvent.click(checkbox);
-    expect(checkbox).toBeChecked();
+    fireEvent.click(screen.getByLabelText(/Select: Q?/i));
+    // MC options editor shows radio buttons for correct answer selection
+    const radios = screen.getAllByRole('radio');
+    expect(radios.length).toBeGreaterThan(0);
   });
 
   it('opens the timer dialog when "Publish This Question" is clicked', () => {
     renderTab({ generalQuestions: [makeQuestion('q1', 'Q?')] });
-    fireEvent.click(screen.getByText('Q?'));
+    fireEvent.click(screen.getByLabelText(/Select: Q?/i));
     fireEvent.click(screen.getByText('Publish This Question →'));
     expect(screen.getByTestId('timer-dialog')).toBeInTheDocument();
   });
 
   it('calls handlePublishAiCandidate with the question when the timer is confirmed', () => {
     const { ctx } = renderTab({ generalQuestions: [makeQuestion('q1', 'Q?')] });
-    fireEvent.click(screen.getByText('Q?'));
+    fireEvent.click(screen.getByLabelText(/Select: Q?/i));
     fireEvent.click(screen.getByText('Publish This Question →'));
     fireEvent.click(screen.getByText('Confirm Timer'));
     expect(ctx.handlePublishAiCandidate).toHaveBeenCalled();
@@ -186,7 +190,7 @@ describe('GeneralQuestionsTab', () => {
 
   it('closes the timer dialog without publishing when cancelled', () => {
     const { ctx } = renderTab({ generalQuestions: [makeQuestion('q1', 'Q?')] });
-    fireEvent.click(screen.getByText('Q?'));
+    fireEvent.click(screen.getByLabelText(/Select: Q?/i));
     fireEvent.click(screen.getByText('Publish This Question →'));
     fireEvent.click(screen.getByText('Cancel Timer'));
     expect(ctx.handlePublishAiCandidate).not.toHaveBeenCalled();
@@ -202,8 +206,8 @@ describe('GeneralQuestionsTab', () => {
       </SessionContext.Provider>
     );
     // Select the question
-    fireEvent.click(screen.getByText('Original Question'));
-    expect(screen.getByText('Selected')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText(/Select: Original Question/i));
+    expect(screen.getByText('Selected (Editing)')).toBeInTheDocument();
 
     // Simulate regeneration: two new questions (length 1 → 2 triggers the reset ref)
     const newCtx = buildContext({
@@ -216,7 +220,7 @@ describe('GeneralQuestionsTab', () => {
         </SessionContext.Provider>
       );
     });
-    // Selection should be cleared — no "Selected" badge
-    expect(screen.queryByText('Selected')).not.toBeInTheDocument();
+    // Selection should be cleared — no "Selected (Editing)" text
+    expect(screen.queryByText('Selected (Editing)')).not.toBeInTheDocument();
   });
 });
