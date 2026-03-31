@@ -481,7 +481,28 @@ export function useStudentSession(lessonId: string) {
       if (Date.now() >= timerEndTime && !timerExpiredRef.current) {
         timerExpiredRef.current = true;
         setTimerExpired(true);
-        performAutoSubmit();
+
+        if (viewRef.current === 'active') {
+          // Student hasn't submitted yet — auto-submit their draft (if any)
+          performAutoSubmit();
+        } else if (viewRef.current === 'submitted') {
+          // Student already submitted before time ran out.
+          // submitResponse ran while timerExpiredRef was still false, so it
+          // skipped feedback activation. Trigger the feedback window now.
+          const disc = activeDiscussionRef.current;
+          if (
+            disc?.prompt_type === 'multiple_choice' &&
+            disc?.feedback_enabled &&
+            disc.id !== feedbackStartedForRef.current
+          ) {
+            feedbackStartedForRef.current = disc.id;
+            if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+            setFeedbackPeriodActive(true);
+            feedbackTimerRef.current = setTimeout(() => {
+              setFeedbackPeriodActive(false);
+            }, 7000);
+          }
+        }
       }
     }, 500);
     return () => clearInterval(id);
