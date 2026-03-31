@@ -5,7 +5,7 @@
 import * as React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { DiscussionWithResponseCount } from '@/types/discussion';
+import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
 import type { LessonFile } from '@/types/ai';
 import { SessionContext } from './SessionContext';
@@ -157,7 +157,7 @@ function ExpandedSidebarView({
   onUploadFile: (file: File) => Promise<void>;
   onDeleteFile: (fileId: string) => Promise<void>;
   onDownloadFile: (fileId: string) => Promise<void>;
-  onRestartDiscussion?: (original: any, timerSecs: number | null, feedbackEnabled: boolean, multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }) => Promise<void>;
+  onRestartDiscussion?: (original: Discussion, timerSecs: number | null, feedbackEnabled: boolean, multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }) => Promise<void>;
   isLessonActive: boolean;
 }>) {
   return (

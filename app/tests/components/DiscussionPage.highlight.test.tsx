@@ -93,6 +93,8 @@ function renderPage(responses = RESPONSES, flaggedResponses: Response[] = []) {
       initialResponses={responses}
       initialFlaggedResponses={flaggedResponses}
       initialIsActive={false}
+      lessonStatus="active"
+      discussionCount={responses.length}
     />,
   );
 }

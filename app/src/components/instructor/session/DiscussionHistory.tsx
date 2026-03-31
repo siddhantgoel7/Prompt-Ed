@@ -3,7 +3,7 @@
 'use client';
 
 import * as React from 'react';
-import type { DiscussionWithResponseCount } from '@/types/discussion';
+import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { formatTime } from '@/lib/utils';
@@ -20,7 +20,7 @@ export function DiscussionHistory({
     discussions: DiscussionWithResponseCount[];
     activeDiscussionId: string | null;
     onRestart?: (
-        original: any,
+        original: Discussion,
         timerSecs: number | null,
         feedbackEnabled: boolean,
         multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }
