@@ -342,13 +342,17 @@ function ActiveDiscussionStrip({
   return (
     <div className="px-3 pt-2" data-testid="discussion-strip">
       <div
-        className="flex items-center gap-2 px-3 py-2 rounded-xl"
-        style={{ background: 'var(--color-primary-alpha-06)', border: '1px solid var(--color-primary-alpha-16)' }}
+        className="flex items-center gap-1.5 px-2 py-2 rounded-xl"
+        style={{ 
+          background: 'var(--color-primary-alpha-06)', 
+          border: '1px solid var(--color-primary-alpha-16)',
+          boxShadow: 'inset 0 1px 2px rgba(45,158,45,0.05)'
+        }}
       >
         {/* Active indicator */}
-        <span className="flex items-center gap-1.5 text-xs font-semibold text-brand-600 shrink-0">
+        <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-brand-600 shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
-          {' '}Active
+          <span className="hidden xs:inline">Active</span>
         </span>
 
         <div className="w-px h-4 bg-line-subtle shrink-0" />
@@ -366,7 +370,7 @@ function ActiveDiscussionStrip({
             <button
               onClick={() => onExtendTimer?.(10)}
               data-testid="extend-timer-button"
-              className="px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 transition-all duration-150"
+              className="px-1.5 py-0.5 rounded-md text-[10px] font-bold shrink-0 transition-all duration-150"
               style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'var(--color-primary-alpha-06)' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-14)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-06)'; }}
@@ -376,7 +380,7 @@ function ActiveDiscussionStrip({
             <button
               onClick={() => setShowEditDialog(true)}
               data-testid="edit-timer-button"
-              className="px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 transition-all duration-150"
+              className="px-1.5 py-0.5 rounded-md text-[10px] font-bold shrink-0 transition-all duration-150"
               style={{ border: '1px solid var(--color-primary-400)', color: 'var(--color-primary-500)', background: 'var(--color-primary-alpha-06)' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-14)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-primary-alpha-06)'; }}
@@ -394,8 +398,11 @@ function ActiveDiscussionStrip({
         <button
           onClick={() => onClose(activeDiscussionId)}
           data-testid="close-discussion-button"
-          className="px-3 py-1 rounded-full text-xs font-semibold text-white shrink-0 transition-all duration-150"
-          style={{ background: 'var(--color-error-600)' }}
+          className="px-2.5 py-1 rounded-full text-xs font-bold text-white shrink-0 transition-all duration-150"
+          style={{ 
+            background: 'var(--color-error-600)',
+            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.25)'
+          }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-700)'; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-error-600)'; }}
         >
