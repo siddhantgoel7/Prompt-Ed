@@ -15,13 +15,21 @@ import { RestartDiscussionButton } from './RestartDiscussionButton';
 export function DiscussionHistory({
     discussions,
     activeDiscussionId,
+    onRestart,
+    isLessonActive = false,
 }: Readonly<{
     discussions: DiscussionWithResponseCount[];
     activeDiscussionId: string | null;
+    onRestart?: (
+        original: any,
+        timerSecs: number | null,
+        feedbackEnabled: boolean,
+        multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }
+    ) => Promise<void>;
+    isLessonActive?: boolean;
 }>) {
     const params = useParams();
     const lessonId = params.lessonId as string;
-    const { handleRestartDiscussion, lesson } = useSessionContext();
 
     if (discussions.length === 0) {
         return (
@@ -92,13 +100,15 @@ export function DiscussionHistory({
                             </div>
                         </Link>
                         
-                        <RestartDiscussionButton
-                            discussion={d}
-                            onRestart={handleRestartDiscussion}
-                            isLessonActive={lesson.status === 'active'}
-                            size="sm"
-                            className="absolute right-2 bottom-2 p-2 opacity-0 group-hover:opacity-100 bg-surface-base border-line-default text-content-muted hover:text-brand-500 hover:border-brand-500 hover:shadow-lg"
-                        />
+                        {onRestart && (
+                            <RestartDiscussionButton
+                                discussion={d}
+                                onRestart={onRestart}
+                                isLessonActive={isLessonActive}
+                                size="sm"
+                                className="absolute right-2 bottom-2 p-2 opacity-0 group-hover:opacity-100 bg-surface-base border-line-default text-content-muted hover:text-brand-500 hover:border-brand-500 hover:shadow-lg"
+                            />
+                        )}
                     </div>
                 );
             })}
