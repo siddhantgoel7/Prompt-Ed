@@ -1090,14 +1090,16 @@ The analysis was run against the `doc` branch (commit `9b5f952`). Results reflec
 | **Security** | A | 0 open issues |
 | **Reliability** | A | 0 open issues |
 | **Maintainability** | A | 0 open issues |
-| **Coverage** | — | **84.7%** on ~4 800 lines to cover |
+| **Coverage** | — | **85.3%** on ~4 800 lines to cover |
 | **Duplications** | — | **1.6%** on ~19 000 lines |
-| **Security Hotspots** | E | **1** hotspot requiring review |
+| **Security Hotspots** | A | 0 open issues |
 | **Accepted Issues** | — | 0 |
 
 ---
 
 ### Analysis of Findings
+
+![sonarqube](image.png)
 
 #### Security — Grade A (0 issues)
 No security vulnerabilities were detected in the codebase. This reflects deliberate security practices throughout the project:
@@ -1112,7 +1114,7 @@ No bugs were flagged. The codebase consistently handles error states returned fr
 #### Maintainability — Grade A (0 issues)
 No code smells were reported. The codebase is well-structured with a clear separation between UI components, service functions, API routes, and the AI pipeline. TypeScript strict typing throughout eliminates an entire class of runtime issues that SonarQube would otherwise flag as smells.
 
-#### Coverage — 84.7%
+#### Coverage — 85.3%
 SonarQube consumed the LCOV report produced by `npm run test:coverage`. **84.7% of the ~4 800 coverable lines are exercised by the Jest test suite**. The remaining uncovered lines are primarily:
 - Background fire-and-forget processing paths inside the file upload and transcript routes (these are hard to test synchronously).
 - Edge-case error branches in the AI pipeline that require mocking specific OpenAI failure modes.
@@ -1121,8 +1123,8 @@ SonarQube consumed the LCOV report produced by `npm run test:coverage`. **84.7% 
 #### Duplications — 1.6%
 Only 1.6% of the ~19 000 analysed lines are duplicated. The small amount of duplication that exists is deliberate: the ownership verification pattern (checking lesson → course → instructor chain) is intentionally repeated inline across API routes rather than extracted into a shared helper, because each route has slightly different error-handling requirements and premature abstraction was avoided per the project's coding principles.
 
-#### Security Hotspot — 1 (Grade E)
-SonarQube flagged **one security hotspot** for manual review. A hotspot is not a confirmed vulnerability — it is a pattern that requires a human to decide whether the context makes it safe.
+#### Security Hotspot — 0 (Grade A)
+SonarQube flagged **one security hotspot** for manual review. A hotspot is not a confirmed vulnerability — it is a pattern that requires a human to decide whether the context makes it safe. This was fixed so now no security issues.
 
 **Location:** `app/src/lib/ai/parsers/pptxParser.ts`, line 44
 
