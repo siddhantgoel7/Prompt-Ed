@@ -283,7 +283,7 @@ export function useStudentSession(lessonId: string) {
     if (isMC && currentDiscussion.feedback_enabled) {
       tryActivateMCFeedback(currentDiscussion.id);
     }
-  }, [channel, responseCount, responseText, selectedOption, submittedDiscussionsKey, submitting, tryActivateMCFeedback]);
+  }, [channel, responseCount, responseText, selectedOption, studentSessionId, submittedDiscussionsKey, submitting, tryActivateMCFeedback]);
 
   // 1) Boot
   useEffect(() => {
