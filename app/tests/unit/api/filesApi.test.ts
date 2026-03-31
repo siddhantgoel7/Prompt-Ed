@@ -39,9 +39,11 @@ describe('filesApi', () => {
 
   describe('uploadFileApi', () => {
     it('resolves on success', async () => {
-      mockFetch.mockReturnValue(mockOk({}));
+      const mockResult = { id: 'f1', lessonId: 'l1', fileName: 'slides.pdf' };
+      mockFetch.mockReturnValue(mockOk(mockResult));
       const file = new File(['content'], 'slides.pdf', { type: 'application/pdf' });
-      await expect(uploadFileApi('l1', file)).resolves.toBeUndefined();
+      const result = await uploadFileApi('l1', file);
+      expect(result).toEqual(mockResult);
       expect(mockFetch).toHaveBeenCalledWith(
         '/api/lessons/l1/upload',
         expect.objectContaining({ method: 'POST' })
