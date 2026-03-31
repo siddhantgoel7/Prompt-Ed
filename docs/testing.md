@@ -1078,15 +1078,15 @@ Test files themselves were excluded from the production quality metrics but thei
 
 ### Results (Overall Code)
 
-The analysis was run against the `sprint-5-proper-documentation` branch. Results reflect the state of the codebase as of that scan. The latest Jest coverage run (current codebase, 1,147 tests, **143/143 suites passing**) produced: **84.82% line coverage**, **81.53% statement coverage**, **72.68% branch coverage**, **77.16% function coverage** — an improvement over the prior scan as a result of the expanded unit test suite added in Sprint 5.
+The analysis was run against the `doc` branch (commit `9b5f952`). Results reflect the state of the codebase as of that scan. The latest Jest coverage run (current codebase, 1,147 tests, **143/143 suites passing**) produced: **84.7% line coverage** — consistent with the prior sprint, reflecting the stable and well-tested state of the codebase.
 
 | Dimension | Grade | Finding |
 |-----------|-------|---------|
 | **Security** | A | 0 open issues |
 | **Reliability** | A | 0 open issues |
 | **Maintainability** | A | 0 open issues |
-| **Coverage** | — | **84.82% lines / 81.53% statements** on ~3 948 lines to cover |
-| **Duplications** | — | **1.1%** on ~16 000 lines |
+| **Coverage** | — | **84.7%** on ~4 800 lines to cover |
+| **Duplications** | — | **1.6%** on ~19 000 lines |
 | **Security Hotspots** | E | **1** hotspot requiring review |
 | **Accepted Issues** | — | 0 |
 
@@ -1107,14 +1107,14 @@ No bugs were flagged. The codebase consistently handles error states returned fr
 #### Maintainability — Grade A (0 issues)
 No code smells were reported. The codebase is well-structured with a clear separation between UI components, service functions, API routes, and the AI pipeline. TypeScript strict typing throughout eliminates an entire class of runtime issues that SonarQube would otherwise flag as smells.
 
-#### Coverage — 84.82% lines / 81.53% statements
-SonarQube consumed the LCOV report produced by `npm run test:coverage`. **84.82% of the ~3 948 coverable lines are exercised by the Jest test suite** (up from 80.8% after the Sprint 5 unit test expansion). The remaining uncovered lines are primarily:
+#### Coverage — 84.7%
+SonarQube consumed the LCOV report produced by `npm run test:coverage`. **84.7% of the ~4 800 coverable lines are exercised by the Jest test suite**. The remaining uncovered lines are primarily:
 - Background fire-and-forget processing paths inside the file upload and transcript routes (these are hard to test synchronously).
 - Edge-case error branches in the AI pipeline that require mocking specific OpenAI failure modes.
 - Some UI-only render paths covered by Playwright end-to-end tests, which produce separate coverage data not merged into the Jest LCOV report.
 
-#### Duplications — 1.1%
-Only 1.1% of the ~16 000 analysed lines are duplicated. The small amount of duplication that exists is deliberate: the ownership verification pattern (checking lesson → course → instructor chain) is intentionally repeated inline across API routes rather than extracted into a shared helper, because each route has slightly different error-handling requirements and premature abstraction was avoided per the project's coding principles.
+#### Duplications — 1.6%
+Only 1.6% of the ~19 000 analysed lines are duplicated. The small amount of duplication that exists is deliberate: the ownership verification pattern (checking lesson → course → instructor chain) is intentionally repeated inline across API routes rather than extracted into a shared helper, because each route has slightly different error-handling requirements and premature abstraction was avoided per the project's coding principles.
 
 #### Security Hotspot — 1 (Grade E)
 SonarQube flagged **one security hotspot** for manual review. A hotspot is not a confirmed vulnerability — it is a pattern that requires a human to decide whether the context makes it safe.
