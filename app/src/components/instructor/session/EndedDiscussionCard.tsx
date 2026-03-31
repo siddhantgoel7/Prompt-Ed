@@ -15,6 +15,9 @@ import type { Response } from '@/types/response';
 import { fetchResponsesApi } from '@/lib/api/discussionsApi';
 import { DiscussionAnalyticsModal } from './DiscussionAnalyticsModal';
 
+import { RestartDiscussionButton } from './RestartDiscussionButton';
+import type { Discussion as GlobalDiscussion } from '@/types/discussion';
+
 type Discussion = SessionVM['lessonDiscussions'][number];
 
 export function EndedDiscussionCard({
@@ -22,11 +25,15 @@ export function EndedDiscussionCard({
   index,
   total,
   lessonId,
+  lessonStatus,
+  onRestart,
 }: Readonly<{
   discussion: Discussion;
   index: number;
   total: number;
   lessonId?: string;
+  lessonStatus?: string;
+  onRestart?: SessionVM['handleRestartDiscussion'];
 }>) {
   const [analyticsOpen, setAnalyticsOpen] = React.useState(false);
   const [modalResponses, setModalResponses] = React.useState<Response[]>([]);
@@ -107,6 +114,17 @@ export function EndedDiscussionCard({
         >
           {loadingResponses ? 'Loading…' : 'View Analytics'}
         </button>
+
+        {onRestart && (
+          <RestartDiscussionButton
+            discussion={discussion as unknown as GlobalDiscussion}
+            onRestart={onRestart}
+            isLessonActive={lessonStatus === 'active'}
+            size="sm"
+            showText={true}
+            className="text-xs h-7 px-3 font-semibold border-brand-500 text-brand-500 bg-surface-base hover:bg-brand-500/10"
+          />
+        )}
         {/* Word Cloud link — only shown for free-text discussions (short/long answer) that have
             at least one response and a known lessonId. Opens the interactive word cloud page in
             a new tab so the instructor can keep the session view open alongside it. */}

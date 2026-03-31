@@ -172,9 +172,9 @@ You can adjust how the AI generates prompts to better match your teaching style 
 
 | Setting | Options | Effect |
 |---------|---------|--------|
-| **Difficulty** | Beginner, Intermediate, Advanced | Controls complexity and assumed prior knowledge |
-| **Style** | Socratic, Direct, Conceptual, Applied | Socratic prompts with guiding questions; Direct asks for factual recall; Conceptual asks for understanding; Applied asks for real-world scenarios |
-| **Length** | Brief, Standard, Detailed | Controls expected depth of student responses |
+| **Difficulty** | Basic, Intermediate, Advanced | Basic tests recall and definitions; Intermediate applies concepts to scenarios; Advanced requires analysis and critical comparison |
+| **Style** | Socratic, Factual, Clinical | Socratic encourages open reasoning; Factual tests direct recall; Clinical frames questions as patient case scenarios |
+| **Length** | Brief Setup, Standard Context, Rich Detail | Controls how much setup and context the prompt includes |
 | **Focus Areas** | Free text (e.g., *drug interactions, dosing*) | Steers the AI toward specific topics within the lesson content |
 
 3. Click **Save Preferences**. These settings apply to all future generations until you change them.
@@ -223,6 +223,10 @@ Once the session is active, you control what students see in real time.
 1. After the response period, click **Reveal Answer**.
 2. The correct option is highlighted on all student screens.
 3. Students see whether their selection was correct.
+
+#### Connection status
+
+A small badge is visible in the bottom-right corner of the session page at all times. A pulsing green dot means you are connected. If it turns red and shows **Disconnected**, click **Reconnect** — your session state is preserved and students are not affected while you reconnect.
 
 #### Ending the session
 
@@ -318,6 +322,10 @@ When your instructor publishes a prompt, it appears automatically on your screen
 
 If your instructor has set a timer, a countdown is shown at the top of the prompt. Submit your response before the timer reaches zero — once it expires, the text box is locked.
 
+#### If you accidentally close or reload the page
+
+Your response draft is automatically saved as you type. If you reload the page or lose your connection and rejoin before submitting, your draft will be restored exactly as you left it.
+
 #### Waiting for the next prompt
 
 After submitting, your screen shows a waiting state. When your instructor publishes the next prompt, it appears automatically.
@@ -333,7 +341,7 @@ No. Responses are only visible to the instructor in their session dashboard.
 No. Students join and respond completely anonymously. No personal information is collected from students.
 
 **What happens if I lose my internet connection during a session?**
-Reload the page and re-enter the PIN. Your previous responses are saved. If the session is still active you can continue participating.
+A **Disconnected** badge appears in the bottom-right corner of your screen. Click the **Reconnect** button inside the badge to restore the connection without leaving the session. If that does not work, reload the page and re-enter the PIN — your previous responses and any in-progress draft are saved.
 
 **Can I use the same lesson across multiple class sessions?**
 Yes. You can start a new session for the same lesson any number of times. Each session's responses are saved separately.

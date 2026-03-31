@@ -78,7 +78,9 @@ describe('DiscussionPage', () => {
             { id: 'r1', discussion_id: 'd1', response_text: 'Resp 1', created_at: new Date().toISOString(), selected_option: null, is_correct: null, flagged_at: null, student_session_id: 'student-1' }
         ],
         initialFlaggedResponses: [],
-        initialIsActive: true
+        initialIsActive: true,
+        lessonStatus: 'active',
+        discussionCount: 1
     };
 
     const mockChannel = {

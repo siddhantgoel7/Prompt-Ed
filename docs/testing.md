@@ -62,11 +62,15 @@ app/tests/
 │   ├── student_session_page.test.tsx
 │   └── student_submitted_view.test.tsx
 ├── api/                     # Backend API tests
+│   ├── user/
+│   │   └── delete/
+│   │       └── route.test.ts
 │   ├── ai_preferences.test.ts
 │   ├── auth.test.ts
 │   ├── courses.test.ts
 │   ├── fetchFlaggedResponses.test.ts
 │   ├── flagResponse.test.ts
+│   ├── generalQuestions.test.ts
 │   ├── lesson_scoping.test.ts
 │   ├── mc_feedback.test.ts
 │   ├── socket.test.ts
@@ -89,9 +93,11 @@ app/tests/
 │   ├── SessionHeaderActive.test.tsx
 │   ├── SessionHeaderEnded.test.tsx
 │   ├── splitView.test.tsx
+│   ├── StartDiscussionDialog.multipleResponses.test.tsx
 │   ├── StartDiscussionDialog.test.tsx
 │   ├── student_prompt_card.test.tsx
 │   ├── StudentSessionPage.ended.test.tsx
+│   ├── StudentSessionPage.multipleResponses.test.tsx
 │   ├── StudentSessionPage.rejoin.test.tsx
 │   └── StudentSessionShellLeave.test.tsx
 ├── fixtures/                # Test data fixtures
@@ -116,12 +122,97 @@ app/tests/
 │   ├── student_submit_response.spec.ts
 │   └── student_timer.spec.ts
 ├── unit/                    # Unit tests for utilities and hooks
-│   ├── ai/
+│   ├── ai/                  # AI pipeline unit tests
+│   │   ├── discussionPrompt.test.ts
+│   │   ├── embedChunks_extra.test.ts
+│   │   ├── generalQuestionPrompt.test.ts
+│   │   ├── generatePrompts.test.ts
+│   │   ├── generatePrompts_extra.test.ts
 │   │   ├── parsers.test.ts
-│   │   └── providers.test.ts
+│   │   ├── providers.test.ts
+│   │   ├── providers_extra.test.ts
+│   │   ├── retrieval_logic.test.ts
+│   │   └── retrieveChunks.test.ts
+│   ├── api/                 # API route unit tests
+│   │   ├── aiApi.test.ts
+│   │   ├── aiPreferences.test.ts
+│   │   ├── api_routes_coverage.test.ts
+│   │   ├── auth_callback.test.ts
+│   │   ├── check_email.test.ts
+│   │   ├── courseApi.test.ts
+│   │   ├── courseApi_extra.test.ts
+│   │   ├── filesApi.test.ts
+│   │   ├── general_questions_route.test.ts
+│   │   ├── generate_general_route.test.ts
+│   │   ├── generate_route.test.ts
+│   │   ├── lessonApi.test.ts
+│   │   ├── lesson_file_route.test.tsx
+│   │   ├── lesson_file_route_extra.test.ts
+│   │   ├── lesson_files_list_extra.test.ts
+│   │   ├── lesson_files_list_route.test.tsx
+│   │   ├── transcript_route.test.tsx
+│   │   ├── transcript_route_extra.test.ts
+│   │   ├── upload_route_extra.test.ts
+│   │   └── upload_route_sync.test.ts
+│   ├── components/          # Component unit tests
+│   │   ├── AccountPage.test.tsx
+│   │   ├── ActiveCenter.test.tsx
+│   │   ├── ActiveRightPanel.test.tsx
+│   │   ├── ActiveSidebar.test.tsx
+│   │   ├── AppLogoThemeToggle.test.tsx
+│   │   ├── CandidateCard.test.tsx
+│   │   ├── CourseCard.test.tsx
+│   │   ├── DiscussionHistory.test.tsx
+│   │   ├── DiscussionPage.test.tsx
+│   │   ├── DisplayCodeState.test.tsx
+│   │   ├── FilesTab.test.tsx
+│   │   ├── GeneralQuestionsTab.test.tsx
+│   │   ├── HamburgerMenu.test.tsx
+│   │   ├── HomeJoin.test.tsx
+│   │   ├── JoinCodeOverlay.test.tsx
+│   │   ├── LessonCard.test.tsx
+│   │   ├── MultipleChoiceEditor.test.tsx
+│   │   ├── ResponseListTab.test.tsx
+│   │   ├── SessionDisplayView.test.tsx
+│   │   ├── SessionEndedView.test.tsx
+│   │   ├── SignUpForm.test.tsx
+│   │   ├── SplitView.test.tsx
+│   │   ├── StartDiscussionDialog.test.tsx
+│   │   ├── TimerTab.test.tsx
+│   │   ├── UIComponents.test.tsx
+│   │   ├── WordCloudPage.test.tsx
+│   │   └── ui_basics.test.tsx
+│   ├── hooks/               # Custom hook unit tests
+│   │   ├── useAccount.test.ts
+│   │   ├── useAudioRecorder.test.tsx
+│   │   ├── useDebugSweep.test.tsx
+│   │   ├── useHomeJoin.test.ts
+│   │   ├── useInstructorDashboard.test.ts
+│   │   ├── useInstructorDashboard.test.tsx
+│   │   ├── useInstructorDashboard_errors.test.ts
+│   │   ├── useLessonAI.test.ts
+│   │   ├── useLessonDiscussions.test.ts
+│   │   ├── useLessonDiscussions_timer.test.ts
+│   │   ├── useLessonFiles.test.ts
+│   │   ├── useLessonGeneralQuestions.test.ts
+│   │   ├── useRealtime.test.ts
+│   │   ├── useStudentSession.multipleResponses.test.ts
+│   │   ├── useStudentSession.test.ts
+│   │   ├── useStudentSession.test.tsx
+│   │   └── useStudentSession_branches.test.ts
+│   ├── lib/                 # Library utility unit tests
+│   │   ├── auth_helpers.test.ts
+│   │   ├── supabase_server.test.ts
+│   │   └── utils.test.ts
+│   ├── pages/               # Page component unit tests
+│   │   ├── small_pages.test.tsx
+│   │   └── word_cloud_page.test.tsx
 │   ├── authHelpers.test.ts
 │   ├── csv_utils.test.ts
+│   ├── embeddingBlend.test.ts
 │   ├── mc_feedback_logic.test.ts
+│   ├── random_utils.test.ts
+│   ├── supabase.test.ts
 │   ├── useAIPreferences.test.ts
 │   ├── useRealtime.test.ts
 │   ├── useStudentSession.test.ts
@@ -144,7 +235,7 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 |------------|-------------|------------------|-----------------------|----------------|----------|
 | **US 1.01** | Create instructor account | `auth.acceptance.test.tsx` (2.5) | `instructor_login.spec.ts` (20.1–20.5) | `auth.test.ts` (13.1, 13.2, 13.3)<br>`authHelpers.test.ts` (25.1, 25.2)<br>`validation.test.ts` (27.1–27.6) | **Complete**: Signup navigation, API auth, validation |
 | **US 1.02** | Login via UAlberta SSO | `auth.acceptance.test.tsx` (2.1, 2.2, 2.3, 2.4) | `instructor_login.spec.ts` (20.6, 20.7, 20.8, 20.9) | `authHelpers.test.ts` (25.3, 25.4) | **Complete**: Email/password + OAuth flows + signup page validation |
-| **US 1.03** | Logout securely | `instructor_dashboard.acceptance.test.tsx` (4.8) | `instructor_dashboard.spec.ts` (19.1) | `authHelpers.test.ts` (25.5) | **Complete**: Dashboard integration + API |
+| **US 1.03** | Logout securely | `instructor_dashboard.acceptance.test.tsx` (4.8) | `instructor_dashboard.spec.ts` (19.1) | `authHelpers.test.ts` (25.5)<br>`InstructorDashboardHeader.test.tsx` (71.1–71.6) | **Complete**: Dashboard integration + API |
 | **US 1.04** | Private lesson viewing | `instructor_dashboard.acceptance.test.tsx` (4.9)<br>`instructor_session_page.test.tsx` (7.1)<br>`lessons_page.acceptance.test.tsx` (8.9) | `instructor_dashboard.spec.ts` (19.2)<br>`lessons_page.test.tsx` (16.1, 16.2, 16.3, 16.4) | — | **Complete**: Authorization checks across all pages |
 | **US 1.05** | Create new lesson | `lessons_page.acceptance.test.tsx` (8.2, 8.3, 8.4, 8.8) | `instructor_dashboard.spec.ts` (19.2) | `lessons_page.test.tsx` (16.13–16.17) | **Complete**: Creation flow + validation + errors |
 | **US 1.06** | Start lesson (PIN/QR) | `instructor_session_page.test.tsx` (7.2)<br>`instructor_session_active_view.test.tsx` (5.1)<br>`instructor_session_ended_view.test.tsx` (6.6) | — | — | **Complete**: Active state + PIN display tested; QR code generation not explicitly tested |
@@ -153,10 +244,10 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | **US 1.10** | Auto-save lesson | `auto_save.acceptance.test.tsx` (3.1, 3.2, 3.3, 3.4) | — | — | **Complete**: Data persistence verification |
 | **US 1.25** | Multiple discussions | `multiple_discussions.acceptance.test.tsx` (9.1, 9.2, 9.3, 9.4) | — | — | **Complete**: Sequential discussion flow |
 | **US 1.27** | Display prompt | `instructor_session_active_view.test.tsx` (5.5)<br>`student_session_page.test.tsx` (12.1) | — | — | **Complete**: Prompt display covered implicitly via US 1.21/1.28 publish handler (test 5.5) and student prompt visibility (test 12.1); no explicit US 1.27 label in tests |
-| **US 1.28** | Start/close discussions | `instructor_session_active_view.test.tsx` (5.5, 5.6) | — | — | **Complete**: Start/close handler calls verified; student-side closed state tested via student_session_page |
+| **US 1.28** | Start/close discussions | `instructor_session_active_view.test.tsx` (5.5, 5.6) | — | `RestartDiscussionButton.test.tsx` (72.1–72.6) | **Complete**: Start/close handler calls verified; student-side closed state tested via student_session_page |
 | **US 1.31** | Display PIN code | `instructor_session_active_view.test.tsx` (5.1, 5.2, 5.3)<br>`instructor_session_page.test.tsx` (7.2, 7.4) | — | — | **Complete**: PIN visibility + overlay |
 | **US 1.34** | Real-time responses | `real_time_responses.acceptance.test.tsx` (10.1, 10.2, 10.3, 10.4)<br>`instructor_session_ended_view.test.tsx` (6.2) | — | `useRealtime.test.ts` (26.1–26.8) | **Complete**: Live updates + hook behavior |
-| **US 1.49** | Add course | `instructor_dashboard.acceptance.test.tsx` (4.2, 4.3, 4.4) | `instructor_dashboard.spec.ts` (19.1) | `dashboard.test.tsx` (15.6)<br>`courses.test.ts` (14.1, 14.3, 14.4)<br>`validation.test.ts` (27.7, 27.8) | **Complete**: Full CRUD + validation |
+| **US 1.49** | Add course | `instructor_dashboard.acceptance.test.tsx` (4.2, 4.3, 4.4) | `instructor_dashboard.spec.ts` (19.1) | `dashboard.test.tsx` (15.6)<br>`courses.test.ts` (14.1, 14.3, 14.4)<br>`validation.test.ts` (27.7, 27.8)<br>`CourseDialog.test.tsx` (73.1–73.8)<br>`CourseCard.test.tsx` (75.1–75.5) | **Complete**: Full CRUD + validation |
 | **US 1.50** | Delete course | `instructor_dashboard.acceptance.test.tsx` (4.5, 4.6, 4.7) | — | `dashboard.test.tsx` (15.7)<br>`courses.test.ts` (14.5, 14.6) | **Complete**: Delete flow + errors |
 | **US 2.01** | Desktop access | `lessons_page.acceptance.test.tsx` (8.1)<br>`instructor_dashboard.acceptance.test.tsx` (4.1) | `student_responsive.spec.ts` (23.1) | — | **Complete**: Desktop viewport validation |
 | **US 2.02** | Mobile access | — | `student_responsive.spec.ts` (23.2, 23.3) | — | **Complete**: Viewport rendering + no horizontal overflow validated; touch interactions not tested |
@@ -201,7 +292,7 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 |------------|-------------|------------------|-----------------------|----------------|----------|
 | **US 1.22** | AI preferences / custom AI settings | — | `instructor_ai_preferences.spec.ts` (8 tests) | `api/ai_preferences.test.ts` (51.1–51.4)<br>`components/AIPreferencesDialog.test.tsx` (57.1–57.3)<br>`unit/useAIPreferences.test.ts` (53.1–53.4) | **Complete**: API CRUD, dialog UI, hook behavior |
 | **US 1.29** | Set a time limit for a response window | `discussion_timer.acceptance.test.tsx` (69.13, 69.14) | `instructor_timer.spec.ts` (18 tests) | `components/DiscussionTimerSection.test.tsx` (67.1–67.22)<br>`components/StartDiscussionDialog.test.tsx` (66.1–66.14) | **Complete**: Start dialog, timer section UI, countdown, extend/edit, acceptance flow |
-| **US 1.30** | Student can update/resubmit response | — | `student_multiple_responses.spec.ts` (4 tests) | — | **Partial**: UI-level resubmit flow covered; no unit tests |
+| **US 1.30** | Student can update/resubmit response | — | `student_multiple_responses.spec.ts` (4 tests) | `components/StartDiscussionDialog.multipleResponses.test.tsx` (12 tests)<br>`components/StudentSessionPage.multipleResponses.test.tsx` (14 tests)<br>`unit/hooks/useStudentSession.multipleResponses.test.ts` (11 tests) | **Complete**: Allow multiple responses toggle, student re-submit UI, hook logic for response limits and `canSubmitAnother` |
 | **US 1.35** | Hide inappropriate responses | — | `instructor_highlight_hide.spec.ts` (14 tests) | `api/fetchFlaggedResponses.test.ts` (48.1–48.4)<br>`api/flagResponse.test.ts` (50.1–50.4)<br>`api/unflagResponse.test.ts` (49.1–49.4)<br>`components/ResponseCard.test.tsx` (62.3, 62.7–62.10)<br>`components/ActiveRightPanel.highlight.test.tsx` (58.1–58.16)<br>`components/DiscussionPage.highlight.test.tsx` (59.1–59.26) | **Complete**: Flag/unflag API, card red styling, Unflag button, panel hide/show logic |
 | **US 1.36** | Highlight a specific response | — | `instructor_highlight_hide.spec.ts` (14 tests) | `components/ResponseCard.test.tsx` (62.1, 62.2, 62.4–62.6)<br>`components/ActiveRightPanel.highlight.test.tsx` (58.1–58.16)<br>`components/DiscussionPage.highlight.test.tsx` (59.1–59.26) | **Complete**: Yellow emphasis, larger text, z-index elevation, toggle behavior |
 | **US 1.37** | View responses to a discussion in detail | — | — | `components/splitView.test.tsx` (64.9–64.12) | **Complete**: Response fetch, display, loading state, empty state in split-view panes |
@@ -225,16 +316,24 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 
 ---
 
-### Cumulative Test Coverage Summary (Sprints 1–4)
+### Must Have Features (Sprint 5)
 
-- **Total User Stories Tested**: 52 (22 Sprint 2 + 15 Sprint 3 + 15 Sprint 4)
+| User Story | Description | Acceptance Tests | UI Tests (Playwright) | API/Unit Tests | Coverage |
+|------------|-------------|------------------|-----------------------|----------------|----------|
+| **US 1.51** | General questions AI feature | — | — | `api/generalQuestions.test.ts` (10 tests)<br>`unit/ai/generalQuestionPrompt.test.ts` (13 tests)<br>`unit/api/general_questions_route.test.ts` (8 tests)<br>`unit/api/generate_general_route.test.ts` (10 tests)<br>`unit/components/GeneralQuestionsTab.test.tsx` (19 tests)<br>`unit/hooks/useLessonGeneralQuestions.test.ts` (8 tests) | **Complete**: Data layer CRUD, API routes (401/403/404/success), prompt builder with Bloom's difficulty levels, component UI (empty/upload-prompt/generation/error states), hook lifecycle |
+
+---
+
+### Cumulative Test Coverage Summary (Sprints 1–5)
+
+- **Total User Stories Tested**: 53 (22 Sprint 2 + 15 Sprint 3 + 15 Sprint 4 + 1 Sprint 5)
 - **Acceptance Tests**: 17 files, 148 test cases
-- **Component Tests**: 22 files, 193 test cases
+- **Component Tests**: 27 files, 219 test cases
 - **UI Tests (Playwright)**: 17 spec files, 104 test cases
-- **API Tests**: 9 files, 29 test cases
-- **Unit Tests**: 8 files, 92 test cases
+- **API Tests**: 11 files, 43 test cases
+- **Unit Tests**: 89 files, 643 test cases
 - **Smoke Tests**: 1 file, 1 test case
-- **Total Test Cases**: 567 (across 74 files)
+- **Total Test Cases**: 1,147 (across 159 files)
 
 ---
 
@@ -262,7 +361,7 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | `student_session_page.test.tsx` | US 1.09, 2.03, 2.06, 2.07, 2.09, 2.10, 2.15 | 12 |
 | `student_submitted_view.test.tsx` | US 2.08, 2.10 | 24 |
 
-#### Component Tests (193 tests)
+#### Component Tests (219 tests)
 
 | Test File | User Stories | Tests |
 |-----------|-------------|-------|
@@ -283,11 +382,18 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | `SessionHeaderActive.test.tsx` | US 1.06, 1.31 | 1 |
 | `SessionHeaderEnded.test.tsx` | US 1.09, 1.14 | 2 |
 | `splitView.test.tsx` | US 1.25, 1.34, 1.37, 1.39 | 16 |
+| `StartDiscussionDialog.multipleResponses.test.tsx` | US 1.30 | 12 |
 | `StartDiscussionDialog.test.tsx` | US 1.29 | 14 |
 | `student_prompt_card.test.tsx` | US 2.08, 2.10 | 13 |
 | `StudentSessionPage.ended.test.tsx` | US 2.12 | 6 |
+| `StudentSessionPage.multipleResponses.test.tsx` | US 1.30 | 14 |
 | `StudentSessionPage.rejoin.test.tsx` | US 2.14 | 7 |
 | `StudentSessionShellLeave.test.tsx` | US 2.13 | 4 |
+| `InstructorDashboardHeader.test.tsx` | US 1.03 | 6 |
+| `RestartDiscussionButton.test.tsx` | US 1.28 | 6 |
+| `CourseDialog.test.tsx` | US 1.49 | 8 |
+| `ThemeProvider.test.tsx` | Layout | 1 |
+| `CourseCard.test.tsx` | US 1.49 | 5 |
 
 #### UI Tests — Playwright (104 tests)
 
@@ -310,7 +416,7 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | `student_submit_response.spec.ts` | US 2.07, 2.09 | 3 |
 | `student_timer.spec.ts` | US 2.11 | 20 |
 
-#### API Tests (29 tests)
+#### API Tests (43 tests)
 
 | Test File | User Stories | Tests |
 |-----------|-------------|-------|
@@ -319,24 +425,138 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | `courses.test.ts` | US 1.49, 1.50 | 6 |
 | `fetchFlaggedResponses.test.ts` | US 1.35 | 4 |
 | `flagResponse.test.ts` | US 1.35 | 4 |
+| `generalQuestions.test.ts` | US 1.51 | 10 |
 | `lesson_scoping.test.ts` | US 1.26, 2.04 | 3 |
 | `mc_feedback.test.ts` | US 2.08, 2.10 | 11 |
 | `socket.test.ts` | Infrastructure | 1 |
 | `unflagResponse.test.ts` | US 1.35 | 4 |
+| `user/delete/route.test.ts` | Infrastructure | 4 |
 
-#### Unit Tests (92 tests)
+#### Unit Tests (643 tests)
+
+**Top-level unit tests:**
 
 | Test File | User Stories | Tests |
 |-----------|-------------|-------|
-| `unit/ai/parsers.test.ts` | US 1.16 | 22 |
-| `unit/ai/providers.test.ts` | US 1.16, 1.23 | 20 |
 | `unit/authHelpers.test.ts` | US 1.01, 1.02, 1.03 | 5 |
 | `unit/csv_utils.test.ts` | US 1.41, 1.42, 1.43 | 16 |
+| `unit/embeddingBlend.test.ts` | US 1.18 | 7 |
 | `unit/mc_feedback_logic.test.ts` | US 2.10 | 20 |
+| `unit/random_utils.test.ts` | Infrastructure | 7 |
+| `unit/supabase.test.ts` | Infrastructure | 4 |
 | `unit/useAIPreferences.test.ts` | US 1.22 | 4 |
 | `unit/useRealtime.test.ts` | US 1.12, 1.34, 2.06 | 8 |
 | `unit/useStudentSession.test.ts` | US 2.14 | 3 |
 | `unit/validation.test.ts` | US 1.01, 1.49 | 8 |
+
+**unit/ai/ — AI pipeline tests:**
+
+| Test File | User Stories | Tests |
+|-----------|-------------|-------|
+| `unit/ai/discussionPrompt.test.ts` | US 1.18, 1.22 | 8 |
+| `unit/ai/embedChunks_extra.test.ts` | US 1.16 | 3 |
+| `unit/ai/generalQuestionPrompt.test.ts` | US 1.51 | 13 |
+| `unit/ai/generatePrompts.test.ts` | US 1.18 | 5 |
+| `unit/ai/generatePrompts_extra.test.ts` | US 1.18 | 5 |
+| `unit/ai/parsers.test.ts` | US 1.16 | 22 |
+| `unit/ai/providers.test.ts` | US 1.16, 1.23 | 20 |
+| `unit/ai/providers_extra.test.ts` | US 1.16 | 3 |
+| `unit/ai/retrieval_logic.test.ts` | US 1.16 | 7 |
+| `unit/ai/retrieveChunks.test.ts` | US 1.16 | 6 |
+
+**unit/api/ — API route unit tests:**
+
+| Test File | User Stories | Tests |
+|-----------|-------------|-------|
+| `unit/api/aiApi.test.ts` | US 1.18, 1.51 | 13 |
+| `unit/api/aiPreferences.test.ts` | US 1.22 | 6 |
+| `unit/api/api_routes_coverage.test.ts` | Infrastructure | 4 |
+| `unit/api/auth_callback.test.ts` | US 1.01, 1.02 | 4 |
+| `unit/api/check_email.test.ts` | US 1.01 | 3 |
+| `unit/api/courseApi.test.ts` | US 1.49, 1.50 | 4 |
+| `unit/api/courseApi_extra.test.ts` | US 1.49, 1.50 | 3 |
+| `unit/api/filesApi.test.ts` | US 1.16 | 9 |
+| `unit/api/general_questions_route.test.ts` | US 1.51 | 8 |
+| `unit/api/generate_general_route.test.ts` | US 1.51 | 10 |
+| `unit/api/generate_route.test.ts` | US 1.18 | 7 |
+| `unit/api/lessonApi.test.ts` | US 1.05, 1.08 | 2 |
+| `unit/api/lesson_file_route.test.tsx` | US 1.16 | 4 |
+| `unit/api/lesson_file_route_extra.test.ts` | US 1.16 | 9 |
+| `unit/api/lesson_files_list_extra.test.ts` | US 1.16 | 5 |
+| `unit/api/lesson_files_list_route.test.tsx` | US 1.16 | 2 |
+| `unit/api/transcript_route.test.tsx` | US 1.17 | 3 |
+| `unit/api/transcript_route_extra.test.ts` | US 1.17 | 4 |
+| `unit/api/upload_route_extra.test.ts` | US 1.16 | 7 |
+| `unit/api/upload_route_sync.test.ts` | US 1.16 | 6 |
+
+**unit/components/ — Component unit tests:**
+
+| Test File | User Stories | Tests |
+|-----------|-------------|-------|
+| `unit/components/AccountPage.test.tsx` | US 1.03 | 5 |
+| `unit/components/ActiveCenter.test.tsx` | US 1.18, 1.19 | 3 |
+| `unit/components/ActiveRightPanel.test.tsx` | US 1.39, 1.40 | 4 |
+| `unit/components/ActiveSidebar.test.tsx` | US 1.25, 1.34 | 6 |
+| `unit/components/AppLogoThemeToggle.test.tsx` | Infrastructure | 13 |
+| `unit/components/CandidateCard.test.tsx` | US 1.19, 1.23 | 15 |
+| `unit/components/CourseCard.test.tsx` | US 1.49, 1.50 | 4 |
+| `unit/components/DiscussionHistory.test.tsx` | US 1.14, 1.25 | 11 |
+| `unit/components/DiscussionPage.test.tsx` | US 1.34, 1.35 | 4 |
+| `unit/components/DisplayCodeState.test.tsx` | US 1.31 | 3 |
+| `unit/components/FilesTab.test.tsx` | US 1.16 | 19 |
+| `unit/components/GeneralQuestionsTab.test.tsx` | US 1.51 | 19 |
+| `unit/components/HamburgerMenu.test.tsx` | Infrastructure | 14 |
+| `unit/components/HomeJoin.test.tsx` | US 2.06 | 7 |
+| `unit/components/JoinCodeOverlay.test.tsx` | US 1.31 | 4 |
+| `unit/components/LessonCard.test.tsx` | US 1.05, 1.08 | 12 |
+| `unit/components/MultipleChoiceEditor.test.tsx` | US 1.23, 2.08 | 10 |
+| `unit/components/ResponseListTab.test.tsx` | US 1.34, 1.35 | 13 |
+| `unit/components/SessionDisplayView.test.tsx` | US 1.06, 1.31 | 7 |
+| `unit/components/SessionEndedView.test.tsx` | US 1.39, 1.40 | 6 |
+| `unit/components/SignUpForm.test.tsx` | US 1.01 | 6 |
+| `unit/components/SplitView.test.tsx` | US 1.37, 1.39 | 20 |
+| `unit/components/StartDiscussionDialog.test.tsx` | US 1.29 | 7 |
+| `unit/components/TimerTab.test.tsx` | US 1.29, 2.11 | 5 |
+| `unit/components/UIComponents.test.tsx` | Infrastructure | 1 |
+| `unit/components/WordCloudPage.test.tsx` | US 1.34 | 11 |
+| `unit/components/ui_basics.test.tsx` | Infrastructure | 5 |
+
+**unit/hooks/ — Custom hook unit tests:**
+
+| Test File | User Stories | Tests |
+|-----------|-------------|-------|
+| `unit/hooks/useAccount.test.ts` | US 1.03 | 6 |
+| `unit/hooks/useAudioRecorder.test.tsx` | US 1.17 | 8 |
+| `unit/hooks/useDebugSweep.test.tsx` | Infrastructure | 3 |
+| `unit/hooks/useHomeJoin.test.ts` | US 2.06 | 4 |
+| `unit/hooks/useInstructorDashboard.test.ts` | US 1.03, 1.49, 1.50 | 7 |
+| `unit/hooks/useInstructorDashboard.test.tsx` | US 1.03, 1.49, 1.50 | 4 |
+| `unit/hooks/useInstructorDashboard_errors.test.ts` | US 1.03, 1.49, 1.50 | 11 |
+| `unit/hooks/useLessonAI.test.ts` | US 1.18, 1.19 | 4 |
+| `unit/hooks/useLessonDiscussions.test.ts` | US 1.25, 1.28, 1.34 | 8 |
+| `unit/hooks/useLessonDiscussions_timer.test.ts` | US 1.29 | 2 |
+| `unit/hooks/useLessonFiles.test.ts` | US 1.16 | 12 |
+| `unit/hooks/useLessonGeneralQuestions.test.ts` | US 1.51 | 8 |
+| `unit/hooks/useRealtime.test.ts` | US 1.12, 1.34, 2.06 | 9 |
+| `unit/hooks/useStudentSession.multipleResponses.test.ts` | US 1.30 | 11 |
+| `unit/hooks/useStudentSession.test.ts` | US 2.06, 2.14 | 5 |
+| `unit/hooks/useStudentSession.test.tsx` | US 2.06, 2.14 | 5 |
+| `unit/hooks/useStudentSession_branches.test.ts` | US 2.06, 2.14 | 9 |
+
+**unit/lib/ — Library utility tests:**
+
+| Test File | User Stories | Tests |
+|-----------|-------------|-------|
+| `unit/lib/auth_helpers.test.ts` | US 1.01, 1.02 | 1 |
+| `unit/lib/supabase_server.test.ts` | Infrastructure | 2 |
+| `unit/lib/utils.test.ts` | Infrastructure | 9 |
+
+**unit/pages/ — Page component tests:**
+
+| Test File | User Stories | Tests |
+|-----------|-------------|-------|
+| `unit/pages/small_pages.test.tsx` | US 1.01, 1.02 | 4 |
+| `unit/pages/word_cloud_page.test.tsx` | US 1.34 | 5 |
 
 ---
 
@@ -354,7 +574,7 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | Lesson Scoping (US 1.26, 2.04) | 5 | 1 | 6 |
 | AI Preferences (US 1.22) | 14 | 5 | 19 |
 | Timer / Time Limit (US 1.29, 2.11) | 74 | 8 | 82 |
-| Multiple Responses (US 1.30) | 4 | 0 | 4 |
+| Multiple Responses (US 1.30) | 35 | 6 | 41 |
 | PIN Display (US 1.31) | 5 | 0 | 5 |
 | Real-time (US 1.34) | 10 | 1 | 11 |
 | Highlight / Hide Responses (US 1.35, 1.36) | 52 | 14 | 66 |
@@ -368,20 +588,21 @@ This matrix maps user stories to their corresponding tests, ensuring complete co
 | MC Feedback (US 2.10) | 52 | 19 | 71 |
 | Student Session State (US 2.12, 2.13, 2.14) | 15 | 2 | 17 |
 | Status Indicators (US 2.15) | 6 | 0 | 6 |
-| **TOTALS** | **426** | **98** | **524** |
+| General Questions AI (US 1.51) | 52 | 16 | 68 |
+| **TOTALS** | **515** | **120** | **635** |
 
 ---
 
 ### Coverage Depth by User Story (Cumulative)
 
 **Well-Covered (8+ tests):**
-US 1.01 (12), US 1.04 (7), US 1.05 (9), US 1.12 (13), US 1.16 (39), US 1.22 (19), US 1.29 (54), US 1.34 (11), US 1.35 (66), US 1.36 (52), US 1.39 (31), US 1.40 (25), US 1.41 (16), US 1.49 (10), US 2.03 (7), US 2.06 (10), US 2.08 (19), US 2.10 (71), US 2.11 (46)
+US 1.01 (12), US 1.04 (7), US 1.05 (9), US 1.12 (13), US 1.16 (57), US 1.17 (10), US 1.18 (22), US 1.22 (29), US 1.29 (61), US 1.30 (41), US 1.34 (28), US 1.35 (79), US 1.36 (52), US 1.39 (51), US 1.40 (35), US 1.41 (16), US 1.49 (21), US 1.51 (68), US 2.06 (21), US 2.08 (29), US 2.10 (71), US 2.11 (46), US 2.14 (22)
 
 **Adequately Covered (4–7 tests):**
-US 1.02 (5), US 1.03 (4), US 1.08 (6), US 1.09 (4), US 1.10 (4), US 1.13 (4), US 1.14 (6), US 1.18 (5), US 1.25 (5), US 1.30 (4), US 1.31 (6), US 1.37 (4), US 1.50 (6), US 2.07 (4), US 2.12 (6), US 2.14 (10), US 2.15 (6)
+US 1.02 (5), US 1.03 (26), US 1.08 (6), US 1.09 (4), US 1.10 (4), US 1.13 (4), US 1.14 (6), US 1.19 (7), US 1.23 (9), US 1.25 (5), US 1.31 (13), US 1.37 (24), US 1.50 (13), US 2.03 (7), US 2.07 (4), US 2.12 (6), US 2.15 (6)
 
 **Minimally Covered (1–3 tests):**
-US 1.06 (3), US 1.17 (3), US 1.19 (3), US 1.23 (4), US 1.24 (2), US 1.26 (6), US 1.27 (1), US 1.28 (2), US 1.42 (2), US 1.43 (6), US 2.01 (3), US 2.02 (2), US 2.04 (5), US 2.09 (2), US 2.13 (4)
+US 1.06 (3), US 1.24 (2), US 1.26 (6), US 1.27 (1), US 1.28 (2), US 1.42 (2), US 1.43 (6), US 2.01 (3), US 2.02 (2), US 2.04 (5), US 2.09 (2), US 2.13 (4)
 
 Even minimally covered stories have tests across multiple test types (acceptance + UI or unit), providing confidence through diverse validation rather than test count alone.
 
@@ -627,18 +848,19 @@ export default async function globalTeardown() {
 - Tests custom React hooks
 - Fast execution time
 
-**Test Files**:
+**Test Files** (organized by subdirectory):
 
-1. **`authHelpers.test.ts`** - Authentication helper functions
-2. **`useRealtime.test.ts`** - Real-time Supabase channel hook
-3. **`validation.test.ts`** - Input validation utilities
-4. **`mc_feedback_logic.test.ts`** - MC answer evaluation and feedback display logic
-5. **`unit/ai/parsers.test.ts`** - PDF and PPTX parsing pipeline (text + vision)
-6. **`unit/ai/providers.test.ts`** - AI provider wrappers (GPT-4o vision, chat, embeddings)
+1. **`unit/ai/`** — AI pipeline: parsers (PDF/PPTX), providers (GPT-4o/Gemini/embeddings), prompt builders, embedding blend, retrieval, general question prompt
+2. **`unit/api/`** — API route handlers: auth callback, course/lesson/file APIs, generate route, transcript route, upload route, general questions route, AI preferences
+3. **`unit/components/`** — Component unit tests: instructor UI (CandidateCard, FilesTab, GeneralQuestionsTab, ActiveSidebar, etc.), student UI (HomeJoin, MultipleChoiceEditor, SplitView, etc.)
+4. **`unit/hooks/`** — Custom hook unit tests: useInstructorDashboard, useLessonAI, useLessonDiscussions, useLessonFiles, useLessonGeneralQuestions, useStudentSession, useRealtime, useAudioRecorder, useHomeJoin, useAccount
+5. **`unit/lib/`** — Library utilities: auth helpers, Supabase server client, `cn`/`formatTime` utilities
+6. **`unit/pages/`** — Page component tests: login/signup pages, word cloud page
+7. **Top-level unit** — authHelpers, validation, csv utils, mc_feedback_logic, embeddingBlend, random_utils, supabase, useAIPreferences, useRealtime, useStudentSession
 
 **Coverage**:
-- **9 unit test files** with **92 test cases**
-- Auth helpers, real-time hook, validation, MC feedback logic, AI parsers, AI providers
+- **89 unit test files** with **643 test cases**
+- Full coverage of AI pipeline, all API routes, all custom hooks, and all major components
 
 ---
 
@@ -861,15 +1083,15 @@ Test files themselves were excluded from the production quality metrics but thei
 
 ### Results (Overall Code)
 
-The analysis was run against the `sprint-5-proper-documentation` branch. Results reflect the state of the codebase as of that scan.
+The analysis was run against the `doc` branch (commit `9b5f952`). Results reflect the state of the codebase as of that scan. The latest Jest coverage run (current codebase, 1,147 tests, **143/143 suites passing**) produced: **84.7% line coverage** — consistent with the prior sprint, reflecting the stable and well-tested state of the codebase.
 
 | Dimension | Grade | Finding |
 |-----------|-------|---------|
 | **Security** | A | 0 open issues |
 | **Reliability** | A | 0 open issues |
 | **Maintainability** | A | 0 open issues |
-| **Coverage** | — | **80.8%** on ~4 000 lines to cover |
-| **Duplications** | — | **1.1%** on ~16 000 lines |
+| **Coverage** | — | **84.7%** on ~4 800 lines to cover |
+| **Duplications** | — | **1.6%** on ~19 000 lines |
 | **Security Hotspots** | E | **1** hotspot requiring review |
 | **Accepted Issues** | — | 0 |
 
@@ -890,14 +1112,14 @@ No bugs were flagged. The codebase consistently handles error states returned fr
 #### Maintainability — Grade A (0 issues)
 No code smells were reported. The codebase is well-structured with a clear separation between UI components, service functions, API routes, and the AI pipeline. TypeScript strict typing throughout eliminates an entire class of runtime issues that SonarQube would otherwise flag as smells.
 
-#### Coverage — 80.8%
-SonarQube consumed the LCOV report produced by `npm run test:coverage`. **80.8% of the ~4 000 coverable lines are exercised by the Jest test suite.** The remaining uncovered lines are primarily:
+#### Coverage — 84.7%
+SonarQube consumed the LCOV report produced by `npm run test:coverage`. **84.7% of the ~4 800 coverable lines are exercised by the Jest test suite**. The remaining uncovered lines are primarily:
 - Background fire-and-forget processing paths inside the file upload and transcript routes (these are hard to test synchronously).
 - Edge-case error branches in the AI pipeline that require mocking specific OpenAI failure modes.
 - Some UI-only render paths covered by Playwright end-to-end tests, which produce separate coverage data not merged into the Jest LCOV report.
 
-#### Duplications — 1.1%
-Only 1.1% of the ~16 000 analysed lines are duplicated. The small amount of duplication that exists is deliberate: the ownership verification pattern (checking lesson → course → instructor chain) is intentionally repeated inline across API routes rather than extracted into a shared helper, because each route has slightly different error-handling requirements and premature abstraction was avoided per the project's coding principles.
+#### Duplications — 1.6%
+Only 1.6% of the ~19 000 analysed lines are duplicated. The small amount of duplication that exists is deliberate: the ownership verification pattern (checking lesson → course → instructor chain) is intentionally repeated inline across API routes rather than extracted into a shared helper, because each route has slightly different error-handling requirements and premature abstraction was avoided per the project's coding principles.
 
 #### Security Hotspot — 1 (Grade E)
 SonarQube flagged **one security hotspot** for manual review. A hotspot is not a confirmed vulnerability — it is a pattern that requires a human to decide whether the context makes it safe.

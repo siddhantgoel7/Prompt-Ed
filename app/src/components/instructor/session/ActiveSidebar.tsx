@@ -5,7 +5,7 @@
 import * as React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { DiscussionWithResponseCount } from '@/types/discussion';
+import type { Discussion, DiscussionWithResponseCount } from '@/types/discussion';
 import type { Response } from '@/types/response';
 import type { LessonFile } from '@/types/ai';
 import { SessionContext } from './SessionContext';
@@ -32,6 +32,8 @@ export function ActiveSidebar(props: Readonly<{
   const onUploadFile = context ? context.uploadFile : props.onUploadFile!;
   const onDeleteFile = context ? context.deleteFile : props.onDeleteFile!;
   const onDownloadFile = context ? context.openFile : props.onDownloadFile!;
+  const handleRestartDiscussion = context ? context.handleRestartDiscussion : undefined;
+  const isLessonActive = context?.lesson?.status === 'active';
 
   const [collapsed, setCollapsed] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('discussions');
@@ -95,6 +97,8 @@ export function ActiveSidebar(props: Readonly<{
           onUploadFile={onUploadFile}
           onDeleteFile={onDeleteFile}
           onDownloadFile={onDownloadFile}
+          onRestartDiscussion={handleRestartDiscussion}
+          isLessonActive={isLessonActive}
         />
       )}
     </aside>
@@ -132,7 +136,17 @@ function CollapsedSidebarView({ activeTab, openTab }: Readonly<{ activeTab: stri
 }
 
 function ExpandedSidebarView({
-  activeTab, setActiveTab, discussions, activeDiscussionId, files, isUploading, onUploadFile, onDeleteFile, onDownloadFile
+  activeTab,
+  setActiveTab,
+  discussions,
+  activeDiscussionId,
+  files,
+  isUploading,
+  onUploadFile,
+  onDeleteFile,
+  onDownloadFile,
+  onRestartDiscussion,
+  isLessonActive
 }: Readonly<{
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -143,6 +157,8 @@ function ExpandedSidebarView({
   onUploadFile: (file: File) => Promise<void>;
   onDeleteFile: (fileId: string) => Promise<void>;
   onDownloadFile: (fileId: string) => Promise<void>;
+  onRestartDiscussion?: (original: Discussion, timerSecs: number | null, feedbackEnabled: boolean, multipleResponseSettings?: { allowMultipleResponses: boolean; responseLimit: number | null }) => Promise<void>;
+  isLessonActive: boolean;
 }>) {
   return (
     <div className="flex-1 overflow-hidden p-3">
@@ -157,6 +173,8 @@ function ExpandedSidebarView({
             <DiscussionHistory
               discussions={discussions}
               activeDiscussionId={activeDiscussionId}
+              onRestart={onRestartDiscussion}
+              isLessonActive={isLessonActive}
             />
           </ScrollArea>
         </TabsContent>

@@ -10,6 +10,7 @@ interface DiscussionTimerSectionProps {
   activeDiscussionId: string | null;
   timerEndTime: number | null;
   timerTotalSeconds: number | null;
+  isClosingDiscussion?: boolean;
   onClose: (discussionId: string) => void;
   onExtendTimer?: (extraSeconds: number) => Promise<void>;
   onEditTimer?: (newSeconds: number | null) => Promise<void>;
@@ -64,6 +65,7 @@ export function DiscussionTimerSection({
   activeDiscussionId,
   timerEndTime,
   timerTotalSeconds,
+  isClosingDiscussion,
   onClose,
   onExtendTimer,
   onEditTimer,
@@ -145,11 +147,12 @@ export function DiscussionTimerSection({
 
       <Button
         onClick={() => onClose(activeDiscussionId)}
+        disabled={isClosingDiscussion}
         variant="outline"
-        className="w-full max-w-xs border-destructive text-destructive hover:bg-destructive hover:text-white font-semibold rounded-full"
+        className="w-full max-w-xs border-destructive text-destructive hover:bg-destructive hover:text-white font-semibold rounded-full disabled:opacity-60 disabled:cursor-not-allowed"
         data-testid="close-discussion-button"
       >
-        Close Discussion
+        {isClosingDiscussion ? 'Closing…' : 'Close Discussion'}
       </Button>
 
       <StartDiscussionDialog
