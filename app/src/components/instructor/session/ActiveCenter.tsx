@@ -394,7 +394,7 @@ function AIGenerationPanel({
               index={i}
               isSelected={selectedIndex === i}
               onSelect={() => handleSelectCandidate(c, i)}
-              onPromptTextChange={(text) => setPromptInput(text)}
+              onPromptTextChange={setPromptInput}
               isConnected={isConnected}
               onRequestPublish={(editedCandidate, correctOption) => {
                 setOverrideCorrectOption(correctOption);

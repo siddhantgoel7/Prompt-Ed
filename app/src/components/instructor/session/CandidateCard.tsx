@@ -263,6 +263,9 @@ function useCardExpansion(isSelected: boolean, candidate: GeneratedPrompt, onPro
   const [isExpanded, setIsExpanded]   = React.useState(false);
   const expandedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const lastIsSelected = React.useRef(isSelected);
+  const lastPromptText = React.useRef(candidate.promptText);
+
   const setEditText = React.useCallback((t: string) => {
     setEditTextInternal(t);
     onPromptTextChange?.(t);
@@ -270,23 +273,34 @@ function useCardExpansion(isSelected: boolean, candidate: GeneratedPrompt, onPro
 
   React.useEffect(() => {
     if (expandedTimerRef.current) clearTimeout(expandedTimerRef.current);
+
+    const becameSelected = isSelected && !lastIsSelected.current;
+    const promptTextChanged = candidate.promptText !== lastPromptText.current;
+
     if (isSelected) {
       isExpandedRef.current = true;
       setIsExpanded(true);
-      setEditText(candidate.promptText);
-      setEditingOptions(
-        candidate.mcOptions?.reduce(
-          (acc, opt) => ({ ...acc, [opt.label]: opt.text }),
-          {} as Record<string, string>,
-        ) ?? {},
-      );
-      setOverrideCorrectOption(candidate.mcOptions?.find((o) => o.is_correct)?.label ?? null);
+
+      if (becameSelected || promptTextChanged) {
+        setEditText(candidate.promptText);
+        setEditingOptions(
+          candidate.mcOptions?.reduce(
+            (acc, opt) => ({ ...acc, [opt.label]: opt.text }),
+            {} as Record<string, string>,
+          ) ?? {},
+        );
+        setOverrideCorrectOption(candidate.mcOptions?.find((o) => o.is_correct)?.label ?? null);
+      }
     } else {
       expandedTimerRef.current = setTimeout(() => {
         isExpandedRef.current = false;
         setIsExpanded(false);
       }, EXPANDED_HOLD_MS);
     }
+
+    lastIsSelected.current = isSelected;
+    lastPromptText.current = candidate.promptText;
+
     return () => { if (expandedTimerRef.current) clearTimeout(expandedTimerRef.current); };
   }, [isSelected, candidate.promptText, candidate.mcOptions, setEditText]);
 
