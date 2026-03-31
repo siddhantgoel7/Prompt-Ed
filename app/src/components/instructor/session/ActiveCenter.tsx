@@ -87,7 +87,7 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
   });
 
   return (
-    <div className="flex-1 p-4 md:p-6 space-y-4">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 min-w-0 w-full">
       <div
         className="space-y-3 rounded-2xl p-4"
         style={{
@@ -98,13 +98,13 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
         }}
       >
         <Tabs value={creationMode} onValueChange={(v) => setCreationMode(v as 'ai' | 'manual' | 'general')} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="ai">AI Generation</TabsTrigger>
-            <TabsTrigger value="manual">Manual Creation</TabsTrigger>
-            <TabsTrigger value="general">General Questions</TabsTrigger>
+          <TabsList className="flex w-full overflow-x-auto scrollbar-hide mb-4 h-auto p-1 bg-muted/40 rounded-xl">
+            <TabsTrigger value="ai" className="flex-shrink-0 whitespace-nowrap px-4 py-2">AI Generation</TabsTrigger>
+            <TabsTrigger value="manual" className="flex-shrink-0 whitespace-nowrap px-4 py-2">Manual Creation</TabsTrigger>
+            <TabsTrigger value="general" className="flex-shrink-0 whitespace-nowrap px-4 py-2">General Questions</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="ai" className="space-y-3 mt-0">
+          <TabsContent value="ai" className="space-y-3 mt-0 min-w-0 w-full">
             <AIGenerationPanel
               {...state}
               {...handlers}
@@ -125,11 +125,11 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
             />
           </TabsContent>
 
-          <TabsContent value="general" className="mt-0">
+          <TabsContent value="general" className="mt-0 min-w-0 w-full">
             <GeneralQuestionsTab />
           </TabsContent>
 
-          <TabsContent value="manual" className="space-y-3 mt-0">
+          <TabsContent value="manual" className="space-y-3 mt-0 min-w-0 w-full">
             <ManualCreationPanel
               promptType={state.promptType} setPromptType={state.setPromptType}
               promptInput={state.promptInput} setPromptInput={state.setPromptInput}
@@ -137,14 +137,13 @@ export function ActiveCenter(props: Readonly<Partial<ActiveCenterProps>>) {
               overrideCorrectOption={overrideCorrectOption} setOverrideCorrectOption={setOverrideCorrectOption}
               manualOptions={manualOptions} setManualOptions={setManualOptions}
             />
-            {/* Start Discussion — manual tab only */}
             {!state.activeDiscussionId && (
-              <div className="pt-3 flex justify-end border-t border-line-subtle">
+              <div className="pt-3 flex justify-center sm:justify-end border-t border-line-subtle">
                 <button
                   onClick={() => setShowTimerDialog(true)}
                   disabled={!state.promptInput.trim() || !state.isConnected}
                   data-testid="start-discussion-button"
-                  className="px-4 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
+                  className="w-full sm:w-auto px-6 py-2.5 sm:px-4 sm:py-1.5 rounded-full text-sm sm:text-xs font-semibold text-white transition-all duration-150 disabled:opacity-50 btn-primary-glow"
                   style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))' }}
                 >
                   Start Discussion
@@ -319,10 +318,10 @@ function useActiveCenterHandlers(allProps: Readonly<ActiveCenterProps & {
 
 function AIGenerationPanel({
   lessonId, recorder, isGenerating, sttStatus, sttError, handleStopAndTranscribe,
-  transcriptText, promptInput, setPromptInput, setTranscriptText, transcriptRef,
+  transcriptText, setPromptInput, setTranscriptText, transcriptRef,
   promptType, setPromptType, onGenerate, handleRunAllCombinations, sweepProgress,
   generationWarning, candidates, selectedIndex, handleSelectCandidate,
-  overrideCorrectOption, setOverrideCorrectOption,
+  setOverrideCorrectOption,
   setPendingCandidate, setShowTimerDialog,
   isConnected, onRegenerate, handleCopyReport, copiedReport
 }: Readonly<ActiveCenterProps & {
@@ -367,15 +366,15 @@ function AIGenerationPanel({
       {sttStatus === 'transcribing' && <p className="text-xs animate-pulse text-content-muted">Transcribing audio…</p>}
       {sttStatus === 'error' && sttError && <p className="text-xs" style={{ color: 'var(--recording-text, oklch(0.55 0.22 27))' }}>{sttError}</p>}
       <textarea ref={transcriptRef} value={transcriptText} onChange={(e) => setTranscriptText(e.target.value)} placeholder="Spoken content will appear here after recording, or type a topic manually" className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none overflow-hidden leading-snug min-h-[50px] transition-all duration-150 bg-surface-raised text-content-primary" style={{ border: '1px solid var(--border-default)' }} rows={2} />
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 w-full">
         <AITipsButton lessonId={lessonId} />
         <PromptTypeSelect value={promptType} onChange={(v) => setPromptType(v as PromptType)} />
         <AIPreferencesDialog />
-        <div className={`rotating-glow-wrap${isGenerating ? ' generating' : ''}`}>
+        <div className={`rotating-glow-wrap w-full sm:w-auto mt-1 sm:mt-0 flex-shrink-0 ${isGenerating ? ' generating' : ''}`}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button onClick={() => onGenerate()} disabled={isGenerating || recorder.isRecording} size="sm" className="px-4 py-1.5 rounded-full font-semibold" style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))', color: 'white', opacity: 1 }}>
-                {isGenerating ? <GeneratingIndicator /> : 'Generate Prompts'}
+              <Button data-testid="generate-prompts-button" onClick={() => onGenerate()} disabled={isGenerating || recorder.isRecording} size="sm" className="w-full px-4 py-1.5 rounded-full font-semibold" style={{ background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))', color: 'white', opacity: 1 }}>
+                {isGenerating ? <GeneratingIndicator /> : <span>Generate Prompts</span>}
               </Button>
             </TooltipTrigger>
             <TooltipContent>Use AI to generate 5 discussion prompt candidates from your transcript and uploaded files. Takes 5 to 15 seconds.</TooltipContent>
@@ -386,15 +385,16 @@ function AIGenerationPanel({
       {generationWarning && <WarningMessage message={generationWarning} />}
       {DEBUG_TOOLS && sweepProgress && <SweepProgressMessage progress={sweepProgress} />}
       {candidates.length > 0 && (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-3 min-w-0 w-full overflow-hidden">
           {candidates.map((c: GeneratedPrompt, i: number) => (
             <CandidateCard
+              data-testid="ai-candidate-card"
               key={`candidate-${c.promptType}-${i}`}
               candidate={c}
               index={i}
               isSelected={selectedIndex === i}
               onSelect={() => handleSelectCandidate(c, i)}
-              onPromptTextChange={(text) => setPromptInput(text)}
+              onPromptTextChange={setPromptInput}
               isConnected={isConnected}
               onRequestPublish={(editedCandidate, correctOption) => {
                 setOverrideCorrectOption(correctOption);
@@ -403,7 +403,9 @@ function AIGenerationPanel({
               }}
             />
           ))}
-          <CandidateActions onRegenerate={onRegenerate} onCopyReport={handleCopyReport} isGenerating={isGenerating} hasCandidates={candidates.length > 0} copiedReport={copiedReport} />
+          <div className="mt-2">
+            <CandidateActions onRegenerate={onRegenerate} onCopyReport={handleCopyReport} isGenerating={isGenerating} hasCandidates={candidates.length > 0} copiedReport={copiedReport} />
+          </div>
         </div>
       )}
     </>

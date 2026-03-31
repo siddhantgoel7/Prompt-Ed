@@ -193,36 +193,37 @@ interface PromptCrossfadeProps {
   isSelected: boolean;
   isExpanded: boolean;
   pRef: React.RefObject<HTMLParagraphElement | null>;
-  naturalHeight: number;
 }
 
 function PromptCrossfade({
-  promptText, editText, onEditTextChange, isSelected, isExpanded, pRef, naturalHeight,
+  promptText, editText, onEditTextChange, isSelected, isExpanded, pRef,
 }: Readonly<PromptCrossfadeProps>) {
   const promptTransition = isSelected
     ? `opacity ${DRIFT_MS}ms ease, transform ${SWAP_MS}ms ease`
     : `opacity ${SWAP_MS}ms ease, transform ${SWAP_MS}ms ease`;
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        height: `${isSelected || isExpanded ? Math.max(naturalHeight, 80) : naturalHeight}px`,
-        transition: 'height 180ms ease',
-      }}
-    >
+    <div style={{ position: 'relative', width: '100%', minHeight: isSelected || isExpanded ? '80px' : '24px' }}>
+      <p 
+        className="leading-snug text-sm select-none whitespace-pre-wrap break-all break-words" 
+        style={{ margin: 0, paddingBottom: isSelected ? '8px' : 0, visibility: 'hidden' }}
+        aria-hidden="true"
+      >
+        {isSelected ? editText : promptText}
+      </p>
+
       <p
         ref={pRef}
         aria-hidden={isSelected || undefined}
-        className="leading-snug text-sm text-content-primary"
+        className="leading-snug text-sm text-content-primary whitespace-pre-wrap break-all break-words"
         style={{
           margin:        0,
           opacity:       isSelected ? 0 : 1,
           transform:     isSelected ? 'translate(14px, 11px)' : 'translate(0, 0)',
           transition:    promptTransition,
           pointerEvents: 'none',
-          position:      isExpanded ? 'absolute' : 'relative',
-          inset:         isExpanded ? 0 : 'auto',
+          position:      'absolute',
+          inset:         0,
           zIndex:        2,
         }}
       >
@@ -234,7 +235,7 @@ function PromptCrossfade({
           data-testid={isSelected ? "prompt-editor" : undefined}
           aria-hidden={!isSelected || undefined}
           onChange={(e) => onEditTextChange(e.target.value)}
-          className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none leading-snug bg-surface-raised text-content-primary"
+          className="w-full px-3 py-2.5 text-sm rounded-[10px] resize-none leading-snug bg-surface-raised text-content-primary shadow-inner"
           style={{
             position:      'absolute',
             inset:         0,
@@ -254,74 +255,99 @@ function PromptCrossfade({
 // ─── useCardExpansion ─────────────────────────────────────────────────────────
 
 function useCardExpansion(isSelected: boolean, candidate: GeneratedPrompt, onPromptTextChange?: (t: string) => void) {
-  const [editText, setEditTextInternal]                   = React.useState(candidate.promptText);
-  const [editingOptions, setEditingOptions]               = React.useState<Record<string, string>>({});
+  const [editText, setEditTextInternal] = React.useState(candidate.promptText);
+  const [editingOptions, setEditingOptions] = React.useState<Record<string, string>>({});
   const [overrideCorrectOption, setOverrideCorrectOption] = React.useState<string | null>(null);
 
-  const isExpandedRef    = React.useRef(false);
-  const [isExpanded, setIsExpanded]   = React.useState(false);
+  const isExpandedRef = React.useRef(false);
+  const [isExpanded, setIsExpanded] = React.useState(false);
   const expandedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const setEditText = (t: string) => {
+  const lastIsSelected = React.useRef(isSelected);
+  const lastPromptText = React.useRef(candidate.promptText);
+  const pRef = React.useRef<HTMLParagraphElement>(null);
+
+  const setEditText = React.useCallback((t: string) => {
     setEditTextInternal(t);
     onPromptTextChange?.(t);
-  };
+  }, [onPromptTextChange]);
 
   React.useEffect(() => {
     if (expandedTimerRef.current) clearTimeout(expandedTimerRef.current);
+
+    const becameSelected = isSelected && !lastIsSelected.current;
+    const promptTextChanged = candidate.promptText !== lastPromptText.current;
+
     if (isSelected) {
       isExpandedRef.current = true;
       setIsExpanded(true);
-      setEditText(candidate.promptText);
-      setEditingOptions(
-        candidate.mcOptions?.reduce(
-          (acc, opt) => ({ ...acc, [opt.label]: opt.text }),
-          {} as Record<string, string>,
-        ) ?? {},
-      );
-      setOverrideCorrectOption(candidate.mcOptions?.find((o) => o.is_correct)?.label ?? null);
+
+      if (becameSelected || promptTextChanged) {
+        setEditText(candidate.promptText);
+        setEditingOptions(
+          candidate.mcOptions?.reduce(
+            (acc, opt) => ({ ...acc, [opt.label]: opt.text }),
+            {} as Record<string, string>,
+          ) ?? {},
+        );
+        setOverrideCorrectOption(candidate.mcOptions?.find((o) => o.is_correct)?.label ?? null);
+      }
     } else {
       expandedTimerRef.current = setTimeout(() => {
         isExpandedRef.current = false;
         setIsExpanded(false);
       }, EXPANDED_HOLD_MS);
     }
+
+    lastIsSelected.current = isSelected;
+    lastPromptText.current = candidate.promptText;
+
     return () => { if (expandedTimerRef.current) clearTimeout(expandedTimerRef.current); };
-  }, [isSelected, candidate.promptText, candidate.mcOptions]);
+  }, [isSelected, candidate.promptText, candidate.mcOptions, setEditText]);
 
   return {
     editText, setEditText,
     editingOptions, setEditingOptions,
     overrideCorrectOption, setOverrideCorrectOption,
-    isExpanded, isExpandedRef,
+    isExpanded, pRef,
   };
 }
 
 // ─── CandidateCard ────────────────────────────────────────────────────────────
 
+/**
+ * Calculates accessible attributes and premium styles for the CandidateCard wrapper.
+ * Extracted to reduce cognitive complexity of the main component.
+ */
+function getCardWrapperProps(isSelected: boolean, isHovered: boolean) {
+  const borderStyle = isSelected || !isHovered ? 'var(--border-default)' : 'var(--color-primary-300)';
+  
+  return {
+    role: isSelected ? undefined : "button",
+    tabIndex: isSelected ? -1 : 0,
+    className: `p-3 rounded-xl text-sm w-full min-w-0 overflow-hidden ${isSelected ? '' : 'cursor-pointer hover:shadow-sm'}`,
+    style: {
+      background: isSelected ? 'var(--color-primary-alpha-08)' : 'var(--surface-raised)',
+      border: `1px solid ${borderStyle}`,
+      outline: '2px solid',
+      outlineColor: isSelected ? 'var(--color-primary-500)' : 'transparent',
+      outlineOffset: '-1px',
+      boxSizing: 'border-box' as const,
+      transition: `background ${CARD_BG_MS}ms${isSelected ? '' : ', border-color 120ms ease'}`,
+    }
+  };
+}
+
 export function CandidateCard({
   candidate, index, isSelected, onSelect, onPromptTextChange, isConnected, onRequestPublish,
 }: Readonly<Props>) {
+  const [isHovered, setIsHovered] = React.useState(false);
   const {
     editText, setEditText,
     editingOptions, setEditingOptions,
     overrideCorrectOption, setOverrideCorrectOption,
-    isExpanded, isExpandedRef,
+    isExpanded, pRef,
   } = useCardExpansion(isSelected, candidate, onPromptTextChange);
-
-  const [isHovered, setIsHovered] = React.useState(false);
-  const pRef = React.useRef<HTMLParagraphElement>(null);
-  const [naturalHeight, setNaturalHeight] = React.useState(24);
-
-  React.useLayoutEffect(() => {
-    const el = pRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => {
-      if (!isExpandedRef.current) setNaturalHeight(el.scrollHeight);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [isExpandedRef]);
 
   const handlePublish = () => {
     const published: GeneratedPrompt =
@@ -339,21 +365,16 @@ export function CandidateCard({
   };
 
   const hasMc = (candidate.mcOptions?.length ?? 0) > 0;
+  const wrapperProps = getCardWrapperProps(isSelected, isHovered);
 
   return (
     <div
-      className="p-3 rounded-xl text-sm"
-      style={{
-        background: isSelected ? 'rgba(45,158,45,0.06)' : 'var(--surface-raised)',
-        border: `1px solid ${!isSelected && isHovered ? 'var(--color-primary-300)' : 'var(--border-default)'}`,
-        outline: '2px solid',
-        outlineColor: isSelected ? 'var(--color-primary-400)' : 'transparent',
-        outlineOffset: '-1px',
-        boxSizing: 'border-box',
-        transition: `background ${CARD_BG_MS}ms${isSelected ? '' : ', border-color 120ms ease'}`,
-      }}
+      {...wrapperProps}
+      onClick={isSelected ? undefined : onSelect}
+      onKeyDown={isSelected ? undefined : (e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(); }}
       onMouseEnter={isSelected ? undefined : () => setIsHovered(true)}
       onMouseLeave={isSelected ? undefined : () => setIsHovered(false)}
+      data-testid="ai-candidate-card"
     >
       <CardHeader
         promptType={candidate.promptType}
@@ -362,9 +383,8 @@ export function CandidateCard({
         rationale={candidate.rationale}
         isSelected={isSelected}
       />
-
       {isSelected ? (
-        <div className="flex flex-col">
+        <div className="flex flex-col cursor-default min-w-0 w-full overflow-hidden">
           <PromptCrossfade
             promptText={candidate.promptText}
             editText={editText}
@@ -372,7 +392,6 @@ export function CandidateCard({
             isSelected={isSelected}
             isExpanded={isExpanded}
             pRef={pRef}
-            naturalHeight={naturalHeight}
           />
           {hasMc && (
             <MCEditorSection
@@ -393,10 +412,8 @@ export function CandidateCard({
           />
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={onSelect}
-          className="w-full text-left appearance-none focus:outline-none"
+        <div
+          className="w-full min-w-0 text-left overflow-hidden"
           aria-label={`Select: ${candidate.promptText}`}
         >
           <PromptCrossfade
@@ -406,10 +423,9 @@ export function CandidateCard({
             isSelected={isSelected}
             isExpanded={isExpanded}
             pRef={pRef}
-            naturalHeight={naturalHeight}
           />
           <UnselectedMCList isSelected={isSelected} mcOptions={candidate.mcOptions} />
-        </button>
+        </div>
       )}
     </div>
   );

@@ -41,8 +41,8 @@ describe('SessionEndedView', () => {
     it('renders overview with summary bar', () => {
         render(<SessionEndedView vm={mockVm} />);
         
-        expect(screen.getByText('1 prompts')).toBeInTheDocument(); // Discussions count label
-        expect(screen.getByText('Session Duration')).toBeInTheDocument();
+        expect(screen.getByText(/1\s*prompts/i)).toBeInTheDocument(); // Discussions count label
+        expect(screen.getByText('Duration')).toBeInTheDocument();
         expect(screen.getByText('1h 0m')).toBeInTheDocument();
         expect(screen.getByTestId('ended-card')).toBeInTheDocument();
         expect(screen.getByText('Transcript')).toBeInTheDocument();

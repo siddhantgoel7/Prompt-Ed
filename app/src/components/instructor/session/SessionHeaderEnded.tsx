@@ -45,13 +45,13 @@ export function SessionHeaderEnded(props: Readonly<{
 
   return (
     <header
-      className="glass sticky top-0 z-50 px-4 md:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0"
+      className="glass sticky top-0 z-50 px-4 md:px-6 py-2.5 md:py-3 flex items-center justify-between gap-3"
     >
-      <h1 className="text-xl font-semibold text-content-primary truncate max-w-full sm:max-w-[40%] text-center sm:text-left">
+      <h1 className="text-base sm:text-xl font-semibold text-content-primary truncate flex-shrink min-w-[50px] max-w-[30%] sm:max-w-[40%]">
         {title}
       </h1>
 
-      <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-nowrap flex-shrink-0">
         <Button onClick={onBackToLessons} disabled={!onBackToLessons} variant="outline" className="text-xs h-8 px-2 sm:px-3">
           <span className="hidden xs:inline">Back to Lessons</span>
           <span className="xs:hidden">Back</span>

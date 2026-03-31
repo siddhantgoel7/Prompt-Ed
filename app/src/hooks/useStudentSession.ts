@@ -1,7 +1,7 @@
 // src/hooks/useStudentSession.ts
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 
@@ -35,6 +35,7 @@ type RealtimeLikeChannel = {
   send: (message: unknown) => Promise<unknown>;
 };
 
+// Persistence helpers
 function getSubmittedDiscussionIdsFromStorage(storageKey: string): string[] {
   try {
     const raw = localStorage.getItem(storageKey);
@@ -57,25 +58,67 @@ function markDiscussionSubmittedInStorage(storageKey: string, discussionId: stri
     ids.add(discussionId);
     localStorage.setItem(storageKey, JSON.stringify([...ids]));
   } catch {
-    // Non-fatal: if storage fails, we still keep the current in-memory submitted state.
-    }
+    // Non-fatal
+  }
 }
 
 function getResponseCountFromStorage(storageKey: string, discussionId: string): number {
-    try {
-        const raw = localStorage.getItem(`${storageKey}:${discussionId}:count`);
-        return raw ? Number.parseInt(raw, 10) : 0;
-    } catch {
-        return 0;
-    }
+  try {
+    const raw = localStorage.getItem(`${storageKey}:${discussionId}:count`);
+    return raw ? Number.parseInt(raw, 10) : 0;
+  } catch {
+    return 0;
+  }
 }
 
 function setResponseCountInStorage(storageKey: string, discussionId: string, count: number): void {
-    try {
-        localStorage.setItem(`${storageKey}:${discussionId}:count`, count.toString());
-    } catch {
-        // Non-fatal
-    }
+  try {
+    localStorage.setItem(`${storageKey}:${discussionId}:count`, count.toString());
+  } catch {
+    // Non-fatal
+  }
+}
+
+function getSavedResponseFromStorage(storageKey: string, discussionId: string): { responseText?: string; selectedOption?: string; isCorrect?: boolean } | null {
+  try {
+    const raw = localStorage.getItem(`${storageKey}:${discussionId}:response`);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setSavedResponseInStorage(storageKey: string, discussionId: string, data: { responseText?: string; selectedOption?: string; isCorrect?: boolean }): void {
+  try {
+    localStorage.setItem(`${storageKey}:${discussionId}:response`, JSON.stringify(data));
+  } catch {
+    // Non-fatal
+  }
+}
+
+function getDraftFromStorage(storageKey: string, discussionId: string): { responseText?: string; selectedOption?: string } | null {
+  try {
+    const raw = localStorage.getItem(`${storageKey}:${discussionId}:draft`);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setDraftInStorage(storageKey: string, discussionId: string, data: { responseText?: string; selectedOption?: string }): void {
+  try {
+    localStorage.setItem(`${storageKey}:${discussionId}:draft`, JSON.stringify(data));
+  } catch {
+    // Non-fatal
+  }
+}
+
+function clearDraftFromStorage(storageKey: string, discussionId: string): void {
+  try {
+    localStorage.removeItem(`${storageKey}:${discussionId}:draft`);
+  } catch {
+    // Non-fatal
+  }
 }
 
 /** Returns a persistent anonymous session ID for the student, stored in localStorage.
@@ -107,11 +150,17 @@ export function useStudentSession(lessonId: string) {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [activeDiscussion, setActiveDiscussion] = useState<Discussion | null>(null);
 
+  // Response state
   const [responseText, setResponseText] = useState('');
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [isSubmitCorrect, setIsSubmitCorrect] = useState<boolean | null>(null);
+  const [submittedAnswerText, setSubmittedAnswerText] = useState<string | null>(null);
+
   const [submitting, setSubmitting] = useState(false);
   const [endedMessage, setEndedMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [responseCount, setResponseCount] = useState(0);
+  const [feedbackPeriodActive, setFeedbackPeriodActive] = useState(false);
 
   const [view, setView] = useState<ViewState>('loading');
 
@@ -120,8 +169,9 @@ export function useStudentSession(lessonId: string) {
   const [timerTotalSeconds, setTimerTotalSeconds] = useState<number | null>(null);
   const [timerExpired, setTimerExpired] = useState(false);
   const timerExpiredRef = useRef(false);
+  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Refs to read current values inside broadcast callbacks without stale closures
+  // Refs for callbacks
   const viewRef = useRef<ViewState>('loading');
   const activeDiscussionRef = useRef<Discussion | null>(null);
   const timerEndTimeRef = useRef<number | null>(null);
@@ -130,120 +180,206 @@ export function useStudentSession(lessonId: string) {
   useEffect(() => { activeDiscussionRef.current = activeDiscussion; }, [activeDiscussion]);
   useEffect(() => { timerEndTimeRef.current = timerEndTime; }, [timerEndTime]);
 
+  // Persist draft on every change
+  useEffect(() => {
+    if (activeDiscussion?.id && view === 'active') {
+      setDraftInStorage(submittedDiscussionsKey, activeDiscussion.id, {
+        responseText,
+        selectedOption: selectedOption ?? undefined
+      });
+    }
+  }, [submittedDiscussionsKey, activeDiscussion?.id, view, responseText, selectedOption]);
+
   const canSubmit = useMemo(() => {
     return (
       view === 'active' &&
       !submitting &&
       isConnected &&
       Boolean(activeDiscussion?.id) &&
-      responseText.trim().length > 0
+      (activeDiscussion?.prompt_type === 'multiple_choice' ? Boolean(selectedOption) : responseText.trim().length > 0)
     );
-  }, [view, submitting, isConnected, activeDiscussion?.id, responseText]);
+  }, [view, submitting, isConnected, activeDiscussion, responseText, selectedOption]);
 
-  // 1) Boot: validate lesson + hydrate active discussion (if any)
+  const submitResponse = useCallback(async (textOverride?: string, optionOverride?: string, isCorrectOverride?: boolean) => {
+    const currentDiscussion = activeDiscussionRef.current;
+    if (!currentDiscussion?.id || viewRef.current !== 'active' || submitting) return;
+
+    const isMC = currentDiscussion.prompt_type === 'multiple_choice';
+    const text = (textOverride ?? responseText).trim();
+    const opt = optionOverride ?? selectedOption;
+    const corr = isCorrectOverride ?? (isMC && opt ? opt === currentDiscussion.correct_option : null);
+
+    if (!text && !isMC) return;
+    if (isMC && !opt) return;
+
+    setSubmitting(true);
+    setErrorMessage(null);
+
+    const { data, error } = await submitStudentResponseApi(
+      currentDiscussion.id,
+      text,
+      opt,
+      corr,
+      studentSessionId,
+    );
+
+    const newResponse = data as Response | null;
+
+    if (error || !newResponse) {
+      console.error('Error submitting response:', error);
+      setErrorMessage('Could not submit your response. Please try again.');
+      setSubmitting(false);
+      return;
+    }
+
+    if (channel) {
+      const ch = channel as unknown as RealtimeLikeChannel;
+      await ch.send({
+        type: 'broadcast',
+        event: 'response:new',
+        payload: { response: newResponse } satisfies ResponseNewPayload,
+      });
+    }
+
+    setSubmitting(false);
+    setResponseText('');
+    const newCount = responseCount + 1;
+    setResponseCount(newCount);
+    setResponseCountInStorage(submittedDiscussionsKey, currentDiscussion.id, newCount);
+    markDiscussionSubmittedInStorage(submittedDiscussionsKey, currentDiscussion.id);
+
+    // Persist specifically what was submitted and clear draft
+    setSavedResponseInStorage(submittedDiscussionsKey, currentDiscussion.id, {
+      responseText: text,
+      selectedOption: opt ?? undefined,
+      isCorrect: corr ?? undefined
+    });
+    clearDraftFromStorage(submittedDiscussionsKey, currentDiscussion.id);
+
+    setSubmittedAnswerText(text);
+    if (isMC) {
+      setIsSubmitCorrect(corr);
+      setSelectedOption(opt);
+    }
+
+    setView('submitted');
+  }, [channel, responseCount, responseText, selectedOption, studentSessionId, submittedDiscussionsKey, submitting]);
+
+  // 1) Boot
   useEffect(() => {
     let cancelled = false;
 
-    async function boot() {
+    const hydrateHistory = (disc: Discussion) => {
+      const isSubmitted = hasSubmittedDiscussionInStorage(submittedDiscussionsKey, disc.id);
+      const count = getResponseCountFromStorage(submittedDiscussionsKey, disc.id);
+      setResponseCount(count);
+
+      if (isSubmitted) {
+        const saved = getSavedResponseFromStorage(submittedDiscussionsKey, disc.id);
+        if (saved) {
+          setSubmittedAnswerText(saved.responseText ?? null);
+          setSelectedOption(saved.selectedOption ?? null);
+          setIsSubmitCorrect(saved.isCorrect ?? null);
+        }
+        setView('submitted');
+      } else {
+        const draft = getDraftFromStorage(submittedDiscussionsKey, disc.id);
+        setResponseText(draft?.responseText ?? '');
+        setSelectedOption(draft?.selectedOption ?? null);
+        setView('active');
+      }
+    };
+
+    const setupTimer = (disc: Discussion) => {
+      if (disc.time_limit_seconds && disc.time_limit_seconds > 0 && disc.published_at) {
+        const endTime = new Date(disc.published_at).getTime() + disc.time_limit_seconds * 1000;
+        if (endTime > Date.now()) {
+          setTimerEndTime(endTime);
+          setTimerTotalSeconds(disc.time_limit_seconds);
+        }
+      }
+    };
+
+    const boot = async () => {
       setView('loading');
       setErrorMessage(null);
 
-
-
       const { data: lessonData, error: lessonError } = await fetchLessonByIdApi(lessonId);
-
       if (lessonError || !lessonData || (lessonData as { status?: string }).status !== 'active') {
         router.push('/');
         return;
       }
-
       if (cancelled) return;
       setLesson(lessonData as Lesson);
 
       const { data: discussionData, error: discussionError } = await fetchStudentActiveDiscussionApi(lessonId);
-
       if (cancelled) return;
-
-      if (discussionError) {
-        console.error('Error fetching active discussion:', discussionError);
-      }
+      if (discussionError) console.error('Error fetching active discussion:', discussionError);
 
       if (discussionData) {
-        const nextDiscussion = discussionData as Discussion;
-        setActiveDiscussion(nextDiscussion);
-        setResponseText('');
-        setView(
-          hasSubmittedDiscussionInStorage(submittedDiscussionsKey, nextDiscussion.id)
-            ? 'submitted'
-            : 'active'
-        );
-        setResponseCount(getResponseCountFromStorage(submittedDiscussionsKey, nextDiscussion.id));
-
-        // Restore timer for late-joining students using published_at from DB
-        if (nextDiscussion.time_limit_seconds && nextDiscussion.time_limit_seconds > 0 && nextDiscussion.published_at) {
-          const endTime = new Date(nextDiscussion.published_at).getTime() + nextDiscussion.time_limit_seconds * 1000;
-          if (endTime > Date.now()) {
-            setTimerEndTime(endTime);
-            setTimerTotalSeconds(nextDiscussion.time_limit_seconds);
-          }
-          // If endTime is in the past, timer already expired — leave timerEndTime null
-          // (instructor auto-close will have fired already)
-        }
+        const disc = discussionData as Discussion;
+        setActiveDiscussion(disc);
+        hydrateHistory(disc);
+        setupTimer(disc);
       } else {
         setView('waiting');
       }
-    }
-
-    if (lessonId) boot();
-
-    return () => {
-      cancelled = true;
     };
+
+    if (lessonId) void boot();
+    return () => { cancelled = true; };
   }, [lessonId, router, submittedDiscussionsKey]);
 
-  // 2) Realtime listeners
+  // 2) Realtime
   useEffect(() => {
     if (!channel) return;
-
     const ch = channel as unknown as RealtimeLikeChannel;
 
     const lessonEndedSub = ch.on('broadcast', { event: 'lesson:ended' }, (raw) => {
       const data = unwrapBroadcast<LessonEndedPayload>(raw as BroadcastEnvelope<LessonEndedPayload>);
-      const message = data?.message || 'Lesson has ended';
-
-      setEndedMessage(message);
+      setEndedMessage(data?.message || 'Lesson has ended');
       setActiveDiscussion(null);
       setResponseText('');
+      setSelectedOption(null);
       setSubmitting(false);
       setView('ended');
     });
 
     const discussionPublishedSub = ch.on('broadcast', { event: 'discussion:published' }, (raw) => {
-      const data = unwrapBroadcast<DiscussionPublishedPayload>(
-        raw as BroadcastEnvelope<DiscussionPublishedPayload>
-      );
-      const discussion = data?.discussion;
-      if (!discussion) return;
+      const data = unwrapBroadcast<DiscussionPublishedPayload>(raw as BroadcastEnvelope<DiscussionPublishedPayload>);
+      const disc = data?.discussion;
+      if (!disc) return;
 
-      setActiveDiscussion(discussion);
+      setActiveDiscussion(disc);
       setResponseText('');
+      setSelectedOption(null);
+      setIsSubmitCorrect(null);
+      setSubmittedAnswerText(null);
       setSubmitting(false);
       setResponseCount(0);
-      setView(
-        hasSubmittedDiscussionInStorage(submittedDiscussionsKey, discussion.id)
-          ? 'submitted'
-          : 'active'
-      );
-      setResponseCount(getResponseCountFromStorage(submittedDiscussionsKey, discussion.id));
+
+      const isSubmitted = hasSubmittedDiscussionInStorage(submittedDiscussionsKey, disc.id);
+      if (isSubmitted) {
+        const saved = getSavedResponseFromStorage(submittedDiscussionsKey, disc.id);
+        if (saved) {
+          setSubmittedAnswerText(saved.responseText ?? null);
+          setSelectedOption(saved.selectedOption ?? null);
+          setIsSubmitCorrect(saved.isCorrect ?? null);
+        }
+        setView('submitted');
+      } else {
+        // Discussion changed: draft reset is handled by setActiveDiscussion trigger
+        setView('active');
+      }
+      setResponseCount(getResponseCountFromStorage(submittedDiscussionsKey, disc.id));
 
       setTimerExpired(false);
       timerExpiredRef.current = false;
 
-      // Set up timer from discussion data
-      if (discussion.time_limit_seconds && discussion.time_limit_seconds > 0 && discussion.published_at) {
-        const endTime = new Date(discussion.published_at).getTime() + discussion.time_limit_seconds * 1000;
+      if (disc.time_limit_seconds && disc.time_limit_seconds > 0 && disc.published_at) {
+        const endTime = new Date(disc.published_at).getTime() + disc.time_limit_seconds * 1000;
         setTimerEndTime(endTime);
-        setTimerTotalSeconds(discussion.time_limit_seconds);
+        setTimerTotalSeconds(disc.time_limit_seconds);
       } else {
         setTimerEndTime(null);
         setTimerTotalSeconds(null);
@@ -251,43 +387,22 @@ export function useStudentSession(lessonId: string) {
     });
 
     const discussionClosedSub = ch.on('broadcast', { event: 'discussion:closed' }, (raw) => {
-      const data = unwrapBroadcast<DiscussionClosedPayload>(
-        raw as BroadcastEnvelope<DiscussionClosedPayload>
-      );
-      const discussionId = data?.discussionId;
+      const data = unwrapBroadcast<DiscussionClosedPayload>(raw as BroadcastEnvelope<DiscussionClosedPayload>);
+      const discId = data?.discussionId;
 
-      // Snapshot refs before any state updates.
-      // Check timer expiry directly from the end-time ref rather than timerExpiredRef:
-      // the auto-close broadcast can arrive before the student's 500ms interval fires,
-      // so timerExpiredRef may still be false even though the time has passed.
-      const timerActuallyExpired =
-        timerEndTimeRef.current != null && Date.now() >= timerEndTimeRef.current;
+      const timerActuallyExpired = timerEndTimeRef.current != null && Date.now() >= timerEndTimeRef.current;
       const wasExpiredAndActive = timerActuallyExpired && viewRef.current === 'active';
       const disc = activeDiscussionRef.current;
       const isMCWithFeedback = disc?.prompt_type === 'multiple_choice' && !!disc?.feedback_enabled;
 
-      // Mark the discussion as closed but keep its data for the expired message
-      setActiveDiscussion((prev) => {
-        if (!prev || prev.id !== discussionId) return prev;
-        return { ...prev, status: 'closed' } as Discussion;
-      });
-
-      // Stop the countdown UI
+      setActiveDiscussion((prev) => (prev?.id === discId ? { ...prev, status: 'closed' } as Discussion : prev));
       setTimerEndTime(null);
       setTimerTotalSeconds(null);
 
       if (wasExpiredAndActive) {
-        // Student was in active view when timer expired (never submitted).
-        // Ensure timerExpired state is set (may not have been set yet due to the race
-        // between the auto-close broadcast and the student's 500ms polling interval).
         timerExpiredRef.current = true;
         setTimerExpired(true);
-
-        if (isMCWithFeedback) {
-          // MC with correct-answer feedback: hold until the next discussion is published
-          // (discussion:published resets timerExpired and switches view to active again)
-        } else {
-          // All other questions: show "no answer submitted" for 5 seconds then go to waiting
+        if (!isMCWithFeedback) {
           setTimeout(() => {
             setTimerExpired(false);
             timerExpiredRef.current = false;
@@ -296,21 +411,16 @@ export function useStudentSession(lessonId: string) {
           }, 5000);
         }
       } else {
-        // Normal close (student submitted, or no timer expiry)
         setTimerExpired(false);
         timerExpiredRef.current = false;
-        setView((prevView) => (prevView === 'active' ? 'waiting' : prevView));
+        if (viewRef.current === 'active') setView('waiting');
       }
     });
 
     const timerUpdatedSub = ch.on('broadcast', { event: 'discussion:timer_updated' }, (raw) => {
-      const data = unwrapBroadcast<TimerUpdatedPayload>(
-        raw as BroadcastEnvelope<TimerUpdatedPayload>
-      );
+      const data = unwrapBroadcast<TimerUpdatedPayload>(raw as BroadcastEnvelope<TimerUpdatedPayload>);
       if (!data) return;
-
       if (!data.time_limit_seconds || !data.published_at) {
-        // Timer removed — switch to no-limit mode
         setTimerEndTime(null);
         timerEndTimeRef.current = null;
         setTimerTotalSeconds(null);
@@ -318,13 +428,10 @@ export function useStudentSession(lessonId: string) {
         timerExpiredRef.current = false;
         return;
       }
-
       const newEndTime = new Date(data.published_at).getTime() + data.time_limit_seconds * 1000;
       setTimerEndTime(newEndTime);
       timerEndTimeRef.current = newEndTime;
       setTimerTotalSeconds(data.time_limit_seconds);
-
-      // If the new end time is in the future, the timer is no longer expired
       if (newEndTime > Date.now()) {
         setTimerExpired(false);
         timerExpiredRef.current = false;
@@ -339,60 +446,69 @@ export function useStudentSession(lessonId: string) {
     };
   }, [channel, submittedDiscussionsKey]);
 
-  // 3) Submit response
-  // responseTextOverride: for MC questions, the page passes the formatted option string directly so we don't race against the setState for responseText.
-  const submitResponse = async (responseTextOverride?: string, selectedOptionOverride?: string, isCorrectOverride?: boolean) => {
-    if (!activeDiscussion?.id) return;
-    if (view !== 'active') return;
+  // 3) Auto-submit on timer expiry
+  useEffect(() => {
+    if (!timerEndTime) return;
 
-    const text = (responseTextOverride ?? responseText).trim();
-    if (!text) return;
+    const performAutoSubmit = () => {
+      if (viewRef.current !== 'active' || submitting) return;
+      const disc = activeDiscussionRef.current;
+      if (!disc) return;
 
-    setSubmitting(true);
-    setErrorMessage(null);
+      const isMC = disc.prompt_type === 'multiple_choice';
+      const hasDraft = isMC ? Boolean(selectedOption) : responseText.trim().length > 0;
+      if (!hasDraft) return;
 
-    const { data, error } = await submitStudentResponseApi(
-      activeDiscussion.id,
-      text,
-      selectedOptionOverride ?? null,
-      isCorrectOverride ?? null,
-      studentSessionId,
-    );
+      // We need to pass the values directly because closure captures old state
+      const text = responseText.trim();
+      const opt = selectedOption;
+      if (isMC && opt) {
+        const optionText = disc.mc_options?.find(o => o.label === opt)?.text ?? '';
+        const isCorrect = opt === disc.correct_option;
+        submitResponse(`Option ${opt}: ${optionText}`, opt, isCorrect);
+      } else if (!isMC && text) {
+        submitResponse(text);
+      }
+    };
 
-    const newResponse = data as Response | null;
+    const id = setInterval(() => {
+      if (Date.now() >= timerEndTime && !timerExpiredRef.current) {
+        timerExpiredRef.current = true;
+        setTimerExpired(true);
+        performAutoSubmit();
+      }
+    }, 500);
+    return () => clearInterval(id);
+  }, [timerEndTime, responseText, selectedOption, submitting, submitResponse]);
 
-    if (error || !newResponse) {
-      console.error('Error submitting response to Supabase:', error);
-      setErrorMessage('Could not submit your response. Please try again.');
-      setSubmitting(false);
-      return;
+  // 4) Feedback display period for MC
+  const startedFeedbackForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      timerExpired &&
+      view === 'submitted' &&
+      activeDiscussion?.id &&
+      activeDiscussion?.prompt_type === 'multiple_choice' &&
+      activeDiscussion?.feedback_enabled &&
+      isSubmitCorrect !== null &&
+      startedFeedbackForRef.current !== activeDiscussion.id
+    ) {
+      startedFeedbackForRef.current = activeDiscussion.id;
+      // Wrap in setTimeout to avoid "setState in effect" warning if synchronous
+      const timeoutId = setTimeout(() => setFeedbackPeriodActive(true), 0);
+      
+      const hideId = setTimeout(() => setFeedbackPeriodActive(false), 7000);
+      feedbackTimerRef.current = hideId;
+      return () => {
+        clearTimeout(timeoutId);
+        clearTimeout(hideId);
+      };
     }
+  }, [timerExpired, view, activeDiscussion, isSubmitCorrect]);
 
-    // Broadcast to instructor
-    if (channel) {
-      const ch = channel as unknown as RealtimeLikeChannel;
-      await ch.send({
-        type: 'broadcast',
-        event: 'response:new',
-        payload: { response: newResponse } satisfies ResponseNewPayload,
-      });
-    }
-
-    setSubmitting(false);
-    setResponseText('');
-    const newCount = responseCount + 1;
-    setResponseCount(newCount);
-    setResponseCountInStorage(submittedDiscussionsKey, activeDiscussion.id, newCount);
-    markDiscussionSubmittedInStorage(submittedDiscussionsKey, activeDiscussion.id);
-    setView('submitted');
-  };
-
-  // Allow the student to go back to the active view to submit another response
   const submitAnotherResponse = () => {
-    if (!activeDiscussion) return;
-    if (!activeDiscussion.allow_multiple_responses) return;
+    if (!activeDiscussion?.allow_multiple_responses) return;
     if (activeDiscussion.prompt_type === 'multiple_choice') return;
-    // Check response limit
     if (activeDiscussion.response_limit && responseCount >= activeDiscussion.response_limit) return;
     setResponseText('');
     setView('active');
@@ -405,44 +521,12 @@ export function useStudentSession(lessonId: string) {
     (!activeDiscussion?.response_limit || responseCount < activeDiscussion.response_limit)
   );
 
-  useEffect(() => {
-    if (view !== 'submitted') return;
-  }, [view]);
-
-  // Detect timer expiry on student side
-  useEffect(() => {
-    if (!timerEndTime) return;
-
-    const id = setInterval(() => {
-      if (Date.now() >= timerEndTime && !timerExpiredRef.current) {
-        timerExpiredRef.current = true;
-        setTimerExpired(true);
-      }
-    }, 500);
-
-    return () => clearInterval(id);
-  }, [timerEndTime]);
-
   return {
-    lesson,
-    activeDiscussion,
-    responseText,
-    setResponseText,
-    submitting,
-    isConnected,
-
-    view,
-    endedMessage,
-    errorMessage,
-
-    timerEndTime,
-    timerTotalSeconds,
-    timerExpired,
-
-    canSubmit,
-    submitResponse,
-    submitAnotherResponse,
-    canSubmitAnother,
-    responseCount,
+    lesson, activeDiscussion, responseText, setResponseText, selectedOption, setSelectedOption,
+    isSubmitCorrect, setIsSubmitCorrect, submittedAnswerText, setSubmittedAnswerText,
+    submitting, isConnected, view, endedMessage, errorMessage,
+    timerEndTime, timerTotalSeconds, timerExpired, canSubmit,
+    submitResponse, submitAnotherResponse, canSubmitAnother, responseCount,
+    feedbackPeriodActive, setFeedbackPeriodActive,
   };
 }

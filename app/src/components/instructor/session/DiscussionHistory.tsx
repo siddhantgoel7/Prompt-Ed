@@ -6,7 +6,7 @@ import * as React from 'react';
 import type { DiscussionWithResponseCount } from '@/types/discussion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { formatTime, truncateText } from '@/lib/utils';
+import { formatTime } from '@/lib/utils';
 
 
 /** Renders a reverse-chronological list of discussion cards, highlighting the currently active one. */
@@ -71,8 +71,8 @@ export function DiscussionHistory({
                                     )}
                                 </div>
 
-                                <p className="text-sm mb-2 leading-relaxed text-content-primary">
-                                    {truncateText(d.prompt_text)}
+                                <p className="text-sm mb-2 leading-relaxed text-content-primary line-clamp-3 break-words [overflow-wrap:anywhere] [word-break:break-word]">
+                                    {d.prompt_text}
                                 </p>
 
                                 <div className="flex items-center gap-2 text-xs text-content-muted">

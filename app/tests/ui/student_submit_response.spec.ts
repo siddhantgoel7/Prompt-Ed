@@ -42,7 +42,7 @@ test.describe('Student Submit Response', () => {
       await page.getByRole('button', { name: 'Submit response' }).click();
       // After MC submit with feedback enabled, shows feedback banner immediately
       await expect(
-        page.getByText('Good Job! 🎉').or(page.getByText('Oops! 😔')).or(page.getByText('Response submitted'))
+        page.getByText('Great job!').or(page.getByText('Not quite!')).or(page.getByText('Response submitted'))
       ).toBeVisible({ timeout: 8000 });
     } else {
       // Text response: fill textarea and submit

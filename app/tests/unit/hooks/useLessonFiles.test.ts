@@ -50,7 +50,7 @@ describe('useLessonFiles', () => {
   });
 
   it('uploadFile: adds optimistic entry, then replaces with fetched files', async () => {
-    (uploadFileApi as jest.Mock).mockResolvedValue(undefined);
+    (uploadFileApi as jest.Mock).mockResolvedValue(mockFiles[0]);
     const { result } = renderHook(() => useLessonFiles('l1'));
 
     await act(async () => { await result.current.uploadFile(makeFile()); });
@@ -61,19 +61,19 @@ describe('useLessonFiles', () => {
   });
 
   it('uploadFile: sets isUploading=true during upload, false after', async () => {
-    let resolveUpload!: () => void;
-    (uploadFileApi as jest.Mock).mockReturnValue(new Promise<void>((r) => { resolveUpload = r; }));
+    let resolveUpload!: (f: any) => void;
+    (uploadFileApi as jest.Mock).mockReturnValue(new Promise<any>((r) => { resolveUpload = r; }));
     const { result } = renderHook(() => useLessonFiles('l1'));
 
     act(() => { void result.current.uploadFile(makeFile()); });
     expect(result.current.isUploading).toBe(true);
 
-    await act(async () => { resolveUpload(); });
+    await act(async () => { resolveUpload(mockFiles[0]); });
     expect(result.current.isUploading).toBe(false);
   });
 
   it('uploadFile: detects pdf vs pptx from filename', async () => {
-    (uploadFileApi as jest.Mock).mockResolvedValue(undefined);
+    (uploadFileApi as jest.Mock).mockResolvedValue(mockFiles[0]);
     const { result } = renderHook(() => useLessonFiles('l1'));
 
     await act(async () => {

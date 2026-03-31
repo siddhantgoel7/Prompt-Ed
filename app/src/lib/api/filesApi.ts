@@ -9,7 +9,7 @@ export async function fetchFilesApi(lessonId: string): Promise<LessonFile[]> {
 }
 
 /** Uploads a PDF or PPTX file for a lesson and triggers background parsing/embedding. */
-export async function uploadFileApi(lessonId: string, file: File): Promise<void> {
+export async function uploadFileApi(lessonId: string, file: File): Promise<LessonFile> {
     const formData = new FormData();
     formData.append('file', file);
     const res = await fetch(`/api/lessons/${lessonId}/upload`, {
@@ -20,6 +20,7 @@ export async function uploadFileApi(lessonId: string, file: File): Promise<void>
         const err = await res.json() as { error?: string };
         throw new Error(err.error ?? 'Upload failed');
     }
+    return res.json() as Promise<LessonFile>;
 }
 
 /** Deletes a lesson file and its associated chunks from the database and storage. */

@@ -96,22 +96,22 @@ describe('SplitView', () => {
   it('renders the Split View header badge and Back to Session button', () => {
     renderSplitView();
     expect(screen.getByText('Split View')).toBeInTheDocument();
-    expect(screen.getByText('Back to Session')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Back to Session/i })).toBeInTheDocument();
     expect(screen.getByTestId('app-logo')).toBeInTheDocument();
   });
 
   it('calls onBack when "Back to Session" is clicked', () => {
     const { onBack } = renderSplitView();
-    fireEvent.click(screen.getByText('Back to Session'));
+    fireEvent.click(screen.getByRole('button', { name: /Back to Session/i }));
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
   it('applies hover styles on "Back to Session" button mouseEnter/Leave', () => {
     renderSplitView();
-    const btn = screen.getByText('Back to Session');
+    const btn = screen.getByRole('button', { name: /Back to Session/i });
     fireEvent.mouseEnter(btn);
     expect(btn.style.borderColor).toBe('var(--color-primary-400)');
-    expect(btn.style.color).toBe('var(--color-primary-500)');
+    expect(btn.style.color).toBe('var(--color-primary-600)');
     fireEvent.mouseLeave(btn);
     expect(btn.style.borderColor).toBe('var(--border-default)');
     expect(btn.style.color).toBe('var(--text-secondary)');
@@ -267,11 +267,12 @@ describe('SplitView', () => {
     const btns = screen.getAllByText('Back Hover Q').map((el) => el.closest('button')!);
     await act(async () => { fireEvent.click(btns[0]); });
 
-    const backBtn = screen.getAllByText('Back')[0];
-    fireEvent.mouseEnter(backBtn);
-    expect(backBtn.style.color).toBe('var(--color-primary-500)');
-    fireEvent.mouseLeave(backBtn);
-    expect(backBtn.style.color).toBe('var(--text-muted)');
+    // The detail back button is inside a div with class px-4 (the detail view header)
+    const detailBackBtn = screen.getAllByText('Back').find(el => el.closest('div.px-4'))!.closest('button')!;
+    fireEvent.mouseEnter(detailBackBtn);
+    expect(detailBackBtn.style.color).toBe('var(--color-primary-600)');
+    fireEvent.mouseLeave(detailBackBtn);
+    expect(detailBackBtn.style.color).toBe('var(--text-muted)');
   });
 
   // ── DiscussionDetail — Active/Closed status badge ────────────────────────

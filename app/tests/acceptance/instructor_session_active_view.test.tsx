@@ -143,10 +143,10 @@ describe('SessionActiveView (Acceptance)', () => {
     const vm = makeVM();
     render(<SessionActiveView vm={vm} />);
 
-    fireEvent.change(screen.getByLabelText('Prompt'), { target: { value: 'My prompt' } });
+    fireEvent.change(screen.getAllByLabelText('Prompt')[0], { target: { value: 'My prompt' } });
     expect(vm.setPromptInput).toHaveBeenCalledWith('My prompt');
 
-    fireEvent.click(screen.getByRole('button', { name: /Publish/i }));
+    fireEvent.click(screen.getAllByRole('button', { name: /Publish/i })[0]);
     expect(vm.handlePublishDiscussion).toHaveBeenCalled();
   });
 
@@ -155,7 +155,7 @@ describe('SessionActiveView (Acceptance)', () => {
     const vm = makeVM();
     render(<SessionActiveView vm={vm} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Close/i }));
+    fireEvent.click(screen.getAllByRole('button', { name: /Close/i })[0]);
     expect(vm.handleCloseDiscussion).toHaveBeenCalled();
   });
 

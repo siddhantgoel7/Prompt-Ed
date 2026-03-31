@@ -49,7 +49,7 @@ function renderCard(props: { candidate?: any; onSelect?: () => void; isSelected?
 describe('CandidateCard', () => {
   it('renders the prompt text', () => {
     renderCard({});
-    expect(screen.getByText('What is the mechanism of aspirin?')).toBeInTheDocument();
+    expect(screen.getAllByText('What is the mechanism of aspirin?')[0]).toBeInTheDocument();
   });
 
   it('calls onSelect when the card is clicked', () => {

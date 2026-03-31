@@ -16,15 +16,15 @@ import { ResponseCard } from '@/components/instructor/ResponseCard';
 import { ExpandableCard } from '@/components/instructor/ExpandableCard';
 import { FlaggedFilterToggle } from '@/components/instructor/FlaggedFilterToggle';
 import { ResponseStatusBar } from '@/components/instructor/ResponseStatusBar';
+import { ConnectionStatus } from '@/components/instructor/session/ConnectionStatus';
 
 /** Isolated response list — owns its own selection state so clicks don't re-render the whole page. */
-function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag, isConnected }: Readonly<{
+function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestoreResponse, canFlag }: Readonly<{
   responses: Response[];
   flaggedResponses: Response[];
   onRemoveResponse: (id: string) => void;
   onRestoreResponse: (id: string) => Promise<void>;
   canFlag: boolean;
-  isConnected: boolean;
 }>) {
   const {
     selectedIds, flaggingId, showHighlightedOnly,
@@ -69,10 +69,9 @@ function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestore
   };
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 min-w-0 w-full">
       {/* Status bar: realtime connection + total count + inline highlight filter */}
       <ResponseStatusBar
-        isConnected={isConnected}
         selectedCount={showFlagged ? 0 : selectedIds.length}
         showHighlightedOnly={showHighlightedOnly}
         onToggleHighlight={() => setShowHighlightedOnly(prev => !prev)}
@@ -120,7 +119,6 @@ function ResponseList({ responses, flaggedResponses, onRemoveResponse, onRestore
     </div>
   );
 }
-
 
 interface DiscussionClientProps {
   lessonId: string;
@@ -242,7 +240,7 @@ export function DiscussionPage({
     <div
       className="min-h-screen bg-surface-base"
     >
-      <div className="w-2/3 mx-auto p-4 md:p-8">
+      <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
         {/* Back navigation */}
         <div className="mb-6">
           <Link
@@ -284,15 +282,15 @@ export function DiscussionPage({
           </div>
 
           {/* RIGHT COLUMN: Question and Responses */}
-          <div className="flex-1 w-full min-w-0">
+          <div className="flex-1 w-full min-w-0 flex flex-col overflow-hidden">
             {/* Header */}
             <div
-              className="flex flex-col gap-4 mb-6 pb-6 border-b border-line-default"
+              className="flex flex-col gap-4 mb-6 pb-6 border-b border-line-default min-w-0 w-full"
             >
-              <div className="flex justify-between items-start gap-4">
-                <div className="space-y-1 flex-1">
+              <div className="flex justify-between items-start gap-4 min-w-0 w-full">
+                <div className="space-y-1 flex-1 min-w-0 w-full overflow-hidden">
                   <h1
-                    className="text-2xl font-bold leading-tight text-content-primary"
+                    className="text-2xl font-bold leading-tight break-all break-words text-content-primary max-w-full"
                   >
                     {initialDiscussion.prompt_text}
                   </h1>
@@ -421,10 +419,10 @@ export function DiscussionPage({
 
             {/* Responses List — hidden for MC since distribution is shown in the options section above */}
             {!isMC && (
-              <div className="space-y-4">
+              <div className="space-y-4 min-w-0 w-full overflow-hidden">
                 {responses.length === 0 && flaggedResponses.length === 0 ? (
                   <>
-                    <ResponseStatusBar isConnected={isConnected} />
+                    <ResponseStatusBar />
                     <div
                       className="text-center p-12 rounded-2xl bg-surface-raised text-content-muted"
                       style={{ border: '2px dashed var(--border-default)' }}
@@ -439,7 +437,6 @@ export function DiscussionPage({
                     onRemoveResponse={handleRemoveResponse}
                     onRestoreResponse={handleRestoreResponse}
                     canFlag={true}
-                    isConnected={isConnected}
                   />
                 )}
               </div>
@@ -447,11 +444,12 @@ export function DiscussionPage({
 
             {/* MC: realtime status only (no individual response cards — distribution shown above) */}
             {isMC && (
-              <ResponseStatusBar isConnected={isConnected} />
+              <ResponseStatusBar />
             )}
           </div>
         </div>
       </div>
+      <ConnectionStatus isConnected={isConnected} onReconnect={isConnected ? undefined : () => globalThis.location.reload()} />
     </div>
   );
 }

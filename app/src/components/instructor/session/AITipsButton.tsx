@@ -317,28 +317,34 @@ export function AITipsButton({ lessonId }: Readonly<{ lessonId: string }>) {
   const [targetRect, setTargetRect] = React.useState<DOMRect | null>(null);
   const btnRef = React.useRef<HTMLButtonElement>(null);
 
-  // Capture the button's position once after first paint.
-  React.useLayoutEffect(() => {
-    if (!hasSeenTips && btnRef.current) {
-      setTargetRect(btnRef.current.getBoundingClientRect());
+  // Capture/update the button's position.
+  const updateRect = React.useCallback(() => {
+    if (btnRef.current && !hasSeenTips) {
+      const rect = btnRef.current.getBoundingClientRect();
+      if (rect.width > 0) {
+        setTargetRect(rect);
+      }
     }
   }, [hasSeenTips]);
 
+  // Initial measure and periodic check until measured validly.
+  React.useEffect(() => {
+    if (hasSeenTips) return;
+    updateRect();
+    const timer = setInterval(updateRect, 1000); // Retry every second until valid or seen.
+    return () => clearInterval(timer);
+  }, [hasSeenTips, updateRect]);
+
   // Keep the rect fresh on scroll / resize while the spotlight is visible.
   React.useEffect(() => {
-    if (hasSeenTips || !btnRef.current) return;
-
-    const update = () => {
-      if (btnRef.current) setTargetRect(btnRef.current.getBoundingClientRect());
-    };
-
-    window.addEventListener('resize', update, { passive: true });
-    window.addEventListener('scroll', update, { passive: true, capture: true });
+    if (hasSeenTips) return;
+    window.addEventListener('resize', updateRect, { passive: true });
+    window.addEventListener('scroll', updateRect, { passive: true, capture: true });
     return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', updateRect);
+      window.removeEventListener('scroll', updateRect, true);
     };
-  }, [hasSeenTips]);
+  }, [hasSeenTips, updateRect]);
 
   const markSeen = React.useCallback(() => {
     setHasSeenTips(true);
@@ -375,8 +381,8 @@ export function AITipsButton({ lessonId }: Readonly<{ lessonId: string }>) {
         </svg>
       </button>
 
-      {/* Spotlight overlay — only shown until dismissed for this session. */}
-      {!hasSeenTips && targetRect && (
+      {/* Spotlight overlay — only shown until dismissed for this session. Added width check to prevent mispositioning at top-left. */}
+      {!hasSeenTips && targetRect && targetRect.width > 0 && (
         <SpotlightOverlay targetRect={targetRect} onDismiss={markSeen} />
       )}
 

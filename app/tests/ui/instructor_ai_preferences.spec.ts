@@ -164,11 +164,12 @@ test.describe('[US 1.22] Instructor AI Preferences', () => {
         });
 
         // Generate Prompt
-        const contextBox = page.locator('textarea[placeholder*="Spoken content"]');
+        const desktop = page.getByTestId('desktop-layout');
+        const contextBox = desktop.locator('textarea[placeholder*="Spoken content"]');
         await contextBox.fill('This is a test context for AI.');
-        await page.getByRole('button', { name: /Generate Prompts/i }).click();
+        await desktop.getByTestId('generate-prompts-button').first().click();
 
-        await expect(page.getByText('MOCKED FACTUAL BRIEF PROMPT')).toBeVisible();
+        await expect(page.getByText('MOCKED FACTUAL BRIEF PROMPT').filter({ visible: true }).first()).toBeVisible();
 
         // In a true E2E test, the backend reads preferences from the DB.
         // For this UI test, we verify the mock generated the configured factual/brief prompt.
