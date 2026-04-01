@@ -31,7 +31,7 @@ export function ConnectionStatus(props: Readonly<{
   if (isConnected) {
     return (
       <div
-        className={`fixed bottom-20 lg:bottom-4 right-4 z-40 flex items-center gap-2 px-3 py-2 rounded-full ${props.className || ''}`}
+        className={`hidden md:flex fixed bottom-20 lg:bottom-4 right-4 z-40 items-center gap-2 px-3 py-2 rounded-full ${props.className || ''}`}
         style={{
           background: 'var(--surface-glass)',
           backdropFilter: 'blur(8px)',
@@ -52,7 +52,7 @@ export function ConnectionStatus(props: Readonly<{
 
   return (
     <div
-      className={`fixed bottom-20 lg:bottom-4 right-4 z-40 flex items-center gap-2 px-3 py-2 rounded-full ${props.className || ''}`}
+      className={`hidden md:flex fixed bottom-20 lg:bottom-4 right-4 z-40 items-center gap-2 px-3 py-2 rounded-full ${props.className || ''}`}
       style={{
         background: 'var(--color-error-alpha-08)',
         backdropFilter: 'blur(8px)',
