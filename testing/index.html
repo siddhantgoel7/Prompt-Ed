@@ -1272,10 +1272,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#coverage-847" class="md-nav__link">
+  <a href="#coverage-853" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Coverage — 84.7%
+        Coverage — 85.3%
       
     </span>
   </a>
@@ -1294,10 +1294,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#security-hotspot-1-grade-e" class="md-nav__link">
+  <a href="#security-hotspot-0-grade-a" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security Hotspot — 1 (Grade E)
+        Security Hotspot — 0 (Grade A)
       
     </span>
   </a>
@@ -2388,10 +2388,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#coverage-847" class="md-nav__link">
+  <a href="#coverage-853" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Coverage — 84.7%
+        Coverage — 85.3%
       
     </span>
   </a>
@@ -2410,10 +2410,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#security-hotspot-1-grade-e" class="md-nav__link">
+  <a href="#security-hotspot-0-grade-a" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security Hotspot — 1 (Grade E)
+        Security Hotspot — 0 (Grade A)
       
     </span>
   </a>
@@ -5021,7 +5021,7 @@ npm test -- --testNamePattern=&quot;US 2.10&quot;
 <tr>
 <td><strong>Coverage</strong></td>
 <td>—</td>
-<td><strong>84.7%</strong> on ~4 800 lines to cover</td>
+<td><strong>85.3%</strong> on ~4 800 lines to cover</td>
 </tr>
 <tr>
 <td><strong>Duplications</strong></td>
@@ -5030,8 +5030,8 @@ npm test -- --testNamePattern=&quot;US 2.10&quot;
 </tr>
 <tr>
 <td><strong>Security Hotspots</strong></td>
-<td>E</td>
-<td><strong>1</strong> hotspot requiring review</td>
+<td>A</td>
+<td>0 open issues</td>
 </tr>
 <tr>
 <td><strong>Accepted Issues</strong></td>
@@ -5042,6 +5042,7 @@ npm test -- --testNamePattern=&quot;US 2.10&quot;
 </table>
 <hr />
 <h3 id="analysis-of-findings">Analysis of Findings</h3>
+<p><img alt="sonarqube" src="../image.png" /></p>
 <h4 id="security-grade-a-0-issues">Security — Grade A (0 issues)</h4>
 <p>No security vulnerabilities were detected in the codebase. This reflects deliberate security practices throughout the project:
 - All API routes verify session via the server-side Supabase client before processing requests.
@@ -5052,15 +5053,15 @@ npm test -- --testNamePattern=&quot;US 2.10&quot;
 <p>No bugs were flagged. The codebase consistently handles error states returned from Supabase and OpenAI, returning appropriate HTTP status codes (<code>401</code>, <code>403</code>, <code>404</code>, <code>500</code>) rather than allowing unhandled exceptions to crash routes.</p>
 <h4 id="maintainability-grade-a-0-issues">Maintainability — Grade A (0 issues)</h4>
 <p>No code smells were reported. The codebase is well-structured with a clear separation between UI components, service functions, API routes, and the AI pipeline. TypeScript strict typing throughout eliminates an entire class of runtime issues that SonarQube would otherwise flag as smells.</p>
-<h4 id="coverage-847">Coverage — 84.7%</h4>
+<h4 id="coverage-853">Coverage — 85.3%</h4>
 <p>SonarQube consumed the LCOV report produced by <code>npm run test:coverage</code>. <strong>84.7% of the ~4 800 coverable lines are exercised by the Jest test suite</strong>. The remaining uncovered lines are primarily:
 - Background fire-and-forget processing paths inside the file upload and transcript routes (these are hard to test synchronously).
 - Edge-case error branches in the AI pipeline that require mocking specific OpenAI failure modes.
 - Some UI-only render paths covered by Playwright end-to-end tests, which produce separate coverage data not merged into the Jest LCOV report.</p>
 <h4 id="duplications-16">Duplications — 1.6%</h4>
 <p>Only 1.6% of the ~19 000 analysed lines are duplicated. The small amount of duplication that exists is deliberate: the ownership verification pattern (checking lesson → course → instructor chain) is intentionally repeated inline across API routes rather than extracted into a shared helper, because each route has slightly different error-handling requirements and premature abstraction was avoided per the project's coding principles.</p>
-<h4 id="security-hotspot-1-grade-e">Security Hotspot — 1 (Grade E)</h4>
-<p>SonarQube flagged <strong>one security hotspot</strong> for manual review. A hotspot is not a confirmed vulnerability — it is a pattern that requires a human to decide whether the context makes it safe.</p>
+<h4 id="security-hotspot-0-grade-a">Security Hotspot — 0 (Grade A)</h4>
+<p>SonarQube flagged <strong>one security hotspot</strong> for manual review. A hotspot is not a confirmed vulnerability — it is a pattern that requires a human to decide whether the context makes it safe. This was fixed so now no security issues.</p>
 <p><strong>Location:</strong> <code>app/src/lib/ai/parsers/pptxParser.ts</code>, line 44</p>
 <p><strong>Flagged pattern:</strong> <code>JSZip.loadAsync(buffer)</code></p>
 <p><strong>SonarQube message:</strong> <em>"Make sure that expanding this archive file is safe here."</em></p>
